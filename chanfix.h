@@ -158,13 +158,6 @@ public:
 
         virtual void OnCTCP( iClient*, const string&, const string&, bool ) ;
 
-	virtual void setSendEB( bool ) ;
-
-	virtual bool BurstChannel( const string& chanName,
-		const string& chanModes,
-		const time_t& burstTime ) ;
-
-
 	/**
 	 * Our functions.
 	 */
@@ -180,7 +173,7 @@ public:
 
 	void changeState(CHANFIX_STATE);
 
-	time_t currentTime() const ;
+	time_t currentTime() { return ::time(0); }
 
 	void burstOps();
         void checkOps();
@@ -310,6 +303,13 @@ protected:
 	 * Internal timer
 	 */
         Timer *theTimer;
+
+public:
+        bool doAutoFix() { return enableAutoFix; }
+        bool doChanFix() { return enableChanFix; }
+        bool doChanBlock() { return enableChannelBlocking; }
+	CHANFIX_STATE getState() { return currentState; }
+
 
 }; // class chanfix
 
