@@ -1,10 +1,10 @@
 /**
- * functor.h
+ * chanfix_misc.h
  *
  * 17/12/2003 - Matthias Crauwels <ultimate_@wol.be>
  * Initial Version
  *
- * Special functions
+ * Miscellaneous functions
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,8 +24,8 @@
  * $Id$
  */
 
-#ifndef __FUNCTOR_H
-#define __FUNCTOR_H "$Id$"
+#ifndef __CHANFIX_MISC_H
+#define __CHANFIX_MISC_H "$Id$"
 
 #include "match.h"
 #include "ELog.h"
@@ -57,4 +57,4 @@ bool compare_points(sqlChanOp* a, sqlChanOp* b)
 
 } //namespace gnuworld
 
-#endif // __FUNCTOR_H
+#endif // __CHANFIX_MISC_H

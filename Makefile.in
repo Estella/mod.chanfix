@@ -182,7 +182,7 @@ EXTRA_DIST = \
 	chanfix.h \
 	chanfixCommands.h \
 	chanfix_config.h \
-	functor.h \
+	chanfix_misc.h \
 	levels.h \
 	sqlChanOp.h \
 	sqlUser.h \
