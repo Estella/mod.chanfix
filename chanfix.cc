@@ -145,6 +145,9 @@ RegisterCommand(new RELOADCommand(this, "RELOAD", ""));
 /* Preload the ChanOps cache */
 preloadChanOpsCache();
 
+/* Preload the Channels cache */
+preloadChannelCache();
+
 /* Set up our timer. */
 theTimer = new Timer();
 
@@ -192,8 +195,8 @@ MyUplink->RegisterChannelEvent( xServer::CHANNEL_ALL, this );
 
 /* Set up delays */
 // TODO: move this to chanfix_config.h
-checkOpsDelay = 300; 
-updateDelay = 3600;
+checkOpsDelay = 300; // check every 5 minutes
+updateDelay = 3600; // update the DB every hour (we can loose at most 11pts)
 
 /* Start timers */
 tidCheckOps = MyUplink->RegisterTimer(time(NULL) + checkOpsDelay, this, NULL);
@@ -407,7 +410,7 @@ void chanfix::preloadChanOpsCache()
         theQuery        << "SELECT channel,userhost,last_seen_as,points,account FROM chanOps"
                                 << ends;
 
-        elog            << "*** [chanfix::preloadChanOpsCache]: Loading chanOps and their points" 
+        elog            << "*** [chanfix::preloadChanOpsCache]: Loading chanOps and their points ..." 
                                 << endl;
 
         ExecStatusType status = SQLDb->Exec(theQuery.str().c_str()) ;
@@ -427,11 +430,46 @@ void chanfix::preloadChanOpsCache()
 		elog << "[chanfix::preloadChanOpsCache] Something went wrong: "
         	        << SQLDb->ErrorMessage()
                 	<< endl;
+		exit(0);
 	}
 
         elog    << "*** [chanfix::preloadChanOpsCache]: Done. Loaded "
                         << SQLDb->Tuples()
                         << " chanops."
+                        << endl;
+}
+
+void chanfix::preloadChannelCache()
+{
+        stringstream theQuery;
+        theQuery        << "SELECT channel, fixed, opped FROM channels"
+                                << ends;
+
+        elog            << "*** [chanfix::preloadChannelCache]: Loading channels ..."
+                                << endl;
+
+        ExecStatusType status = SQLDb->Exec(theQuery.str().c_str()) ;
+
+        if( PGRES_TUPLES_OK == status )
+        {
+                for (int i = 0 ; i < SQLDb->Tuples(); i++)
+                        {
+                                sqlChannel* newChan = new (std::nothrow) sqlChannel(SQLDb);
+                                assert( newChan != 0 ) ;
+
+                                newChan->setAllMembers(i);
+                                sqlChanCache.insert(sqlChannelCacheType::value_type(newChan->getChannel(), newChan));
+                        }
+        } else  {
+                elog << "[chanfix::preloadChannelCache] Something went wrong: "
+                        << SQLDb->ErrorMessage()
+                        << endl;
+		exit(0);
+        }
+
+        elog    << "*** [chanfix::preloadChannelCache]: Done. Loaded "
+                        << SQLDb->Tuples()
+                        << " channels."
                         << endl;
 }
 
@@ -714,7 +752,7 @@ for(xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->c
 		if(opLess && !hasService)
 			{
 			elog << "DEBUG: Autofix " << thisChan->getName() << "!" << endl;
-			//autoFixChan(thisChan);
+			fixChan(thisChan, true);
 			}
 		}
 	}
@@ -748,6 +786,167 @@ elog << "DEBUG: Updating SQL ..." << endl;
 
 for(sqlChanOpsType::iterator ptr = sqlChanOps.begin(); ptr != sqlChanOps.end(); ptr++)
 	ptr->second->Update();
+}
+
+void chanfix::fixChan(Channel* theChan, bool autofix)
+{
+unsigned int ops = countOps(theChan);
+if((ops >= AUTOFIX_NUM_OPPED && autofix) ||
+	(ops >= CHANFIX_NUM_OPPED && !autofix))
+	{
+	elog << "DEBUG: Enough clients opped on " << theChan->getName() << endl;
+	return;
+	} 
+
+sqlChannel* sqlChan = findCacheChannel(theChan);
+if(!sqlChan) sqlChan = newChannel(theChan);
+
+sqlChan->addFixAttempt();
+
+if((sqlChan->getFixAttempts() >= MAXAUTOFIX && autofix) ||
+	(sqlChan->getFixAttempts() >= MAXMANUALFIX && !autofix)) 
+	{
+	elog << "DEBUG: Skipping fix on " << theChan->getName() << " after to many tries" << endl;
+	return;
+	}
+
+elog << "DEBUG: Fixing " << theChan->getName() << ". (Attempt " << sqlChan->getFixAttempts() << ") ..." << endl;
+
+chanOpsType myOps;
+for(sqlChanOpsType::iterator ptr = sqlChanOps.begin(); ptr != sqlChanOps.end(); ptr++)
+	{
+	if(ptr->second->getChannel() == theChan->getName())
+		myOps.push_back(ptr->second);
+	}
+myOps.sort(compare_points);
+
+if(myOps.begin() != myOps.end())
+	sqlChan->setMaxScore((*myOps.begin())->getPoints());
+
+int time_passed = (AUTOFIX_INTERVAL * (sqlChan->getFixAttempts() - 1) / AUTOFIX_MAXIMUM);
+
+float abs_min_score = 4032 * (FIX_MIN_ABS_SCORE_BEGIN - 
+	(FIX_MIN_ABS_SCORE_BEGIN - FIX_MIN_ABS_SCORE_END) * time_passed);
+float rel_min_score = sqlChan->getMaxScore() * (FIX_MIN_REL_SCORE_BEGIN - 
+	(FIX_MIN_REL_SCORE_BEGIN - FIX_MIN_REL_SCORE_END) * time_passed);
+
+float end_abs_min_score = FIX_MIN_ABS_SCORE_END * 4032;
+float end_rel_min_score = FIX_MIN_REL_SCORE_END * sqlChan->getMaxScore();
+
+if(sqlChan->getMaxScore() < end_abs_min_score) 
+	{
+	elog << "DEBUG: Channel " << theChan->getName() << " scored to little and will be ignored cause of this ..."
+		<< endl;
+	return;
+	}
+
+iClient* curClient = 0;
+sqlChanOp* curOp = 0;
+for(chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end(); opPtr++)
+	{
+	curOp = *opPtr;
+	if( curOp->getPoints() > abs_min_score && curOp->getPoints() > rel_min_score
+		&& curOp->getPoints() > end_abs_min_score && curOp->getPoints() > end_rel_min_score)
+		{
+		curClient = findAccount(curOp->getAccount(), theChan);
+		if(curClient && !theChan->findUser(curClient)->isModeO())
+			{
+			elog << "DEBUG: Decided to op: " << curClient->getNickName() << " on " << theChan->getName()
+				<< ". Client has " << curOp->getPoints() << " points. ABS_MIN = " 
+				<< abs_min_score << " and REL_MIN = " << rel_min_score << endl;
+			opQ.push_back(opQueueType::value_type(theChan, curClient));
+			}
+		}
+	}
+
+ops = countOps(theChan);
+if( ((ops < AUTOFIX_NUM_OPPED && autofix) ||
+        (ops < CHANFIX_NUM_OPPED && !autofix)) &&
+	(ops < theChan->size()) )
+	{
+	elog << "DEBUG: Channel " << theChan->getName() << " needs more ops and will therefor be added in my fixQ ..."
+		<< endl;
+	return;
+	}
+
+sqlChan->addSuccesFix();
+sqlChan->setFixAttempts(0);
+sqlChan->Update();
+
+elog << "DEBUG: My fixing job is completed successfully on " << theChan->getName() << ". Thank you for flying with me!"
+	<< endl;
+return;
+}
+
+
+iClient* chanfix::findAccount(const string& Account, Channel* theChan)
+{
+// TODO: Accounts are not unique! Make this return a vector in case the 
+//       same account occurs more then once on this chan (N/A on Undernet)
+
+for(Channel::userIterator ptr = theChan->userList_begin(); ptr != theChan->userList_end(); ptr++)
+	{
+	if(Account == ptr->second->getClient()->getAccount())
+		{
+		return ptr->second->getClient();
+		}
+	}
+return 0;
+}
+
+sqlChannel* chanfix::findCacheChannel(const string& Channel)
+{
+sqlChannelCacheType::iterator ptr = sqlChanCache.find(Channel);
+if(ptr != sqlChanCache.end())
+	{
+	elog << "DEBUG: cached channel " << Channel << " found" << endl;
+	return ptr->second;
+	}
+return 0;
+}
+
+sqlChannel* chanfix::findCacheChannel(Channel* theChan)
+{
+return findCacheChannel(theChan->getName());
+}
+
+sqlChannel* chanfix::newChannel(const string& Channel)
+{
+sqlChannel* newChan = new (std::nothrow) sqlChannel(SQLDb);
+assert( newChan != 0 ) ;
+
+newChan->setChannel(Channel);
+newChan->setSuccessFixes(0);
+newChan->Insert();
+
+sqlChanCache.insert(sqlChannelCacheType::value_type(Channel, newChan));
+elog << "DEBUG: Added new channel: " << Channel << endl;
+
+return newChan;
+}
+
+sqlChannel* chanfix::newChannel(Channel* theChan)
+{
+return newChannel(theChan->getName());
+}
+
+unsigned int chanfix::countOps(const string& channel)
+{
+Channel* netChan = Network->findChannel(channel);
+if(netChan) return countOps(netChan);
+
+return 0;
+}
+
+unsigned int chanfix::countOps(Channel* theChan)
+{
+unsigned int ops = 0;
+for(Channel::userIterator ptr = theChan->userList_begin(); ptr != theChan->userList_end(); ptr++)
+	{
+	if(ptr->second->isModeO()) ops++;
+	}
+
+return ops;
 }
 
 void Command::Usage( iClient* theClient )

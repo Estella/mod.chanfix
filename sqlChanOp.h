@@ -34,7 +34,7 @@ public:
         inline const string&      getAccount() const
                 { return account ; }
 
-	inline const unsigned long& getPoints() const
+	inline const unsigned int& getPoints() const
 		{ return points ; }
 
 	inline const string&	  getLastSeenAs() const
@@ -56,7 +56,7 @@ public:
         inline void setAccount(string _account)
                 { account = _account ; }
 
-        inline void setPoints(unsigned long _points)
+        inline void setPoints(unsigned int _points)
                 { points = _points ; }
 
 	inline void addPoint()
@@ -78,7 +78,7 @@ private:
 	string		channel;
 	string		nickUserHost;
 	string		account;
-	unsigned long	points;
+	unsigned int	points;
 	time_t		ts_opped;
 
         PgDatabase*     SQLDb;

@@ -27,6 +27,7 @@
 #include	"client.h"
 
 #include	"sqlChanOp.h"
+#include	"sqlChannel.h"
 #include	"chanfixCommands.h"
 #include        "EConfig.h"
 #include	"Timer.h"
@@ -160,6 +161,7 @@ public:
 	sqlChanOp* findChanOp(iClient*, Channel*);
 
 	void preloadChanOpsCache();
+	void preloadChannelCache();
 
 	void changeState(CHANFIX_STATE);
 
@@ -180,6 +182,19 @@ public:
 
 	void UpdateOps();
 
+	void fixChan(Channel*, bool);
+
+	iClient* findAccount(const string&, Channel*);
+
+	sqlChannel* findCacheChannel(const string&);
+	sqlChannel* findCacheChannel(Channel*);
+
+	sqlChannel* newChannel(const string&);
+	sqlChannel* newChannel(Channel*);
+
+	unsigned int countOps(Channel*);
+	unsigned int countOps(const string&);
+
         /**
          * PostgreSQL Database
          */
@@ -191,8 +206,23 @@ public:
         typedef map< pair<string, string>, sqlChanOp*> sqlChanOpsType;
 	sqlChanOpsType 	sqlChanOps;
 
+	typedef map <string, sqlChannel*> sqlChannelCacheType;
+	sqlChannelCacheType sqlChanCache;
+
 	typedef list< pair< string, string> > lastOpsType;
 	lastOpsType  lastOps;
+
+	typedef list< sqlChanOp* > chanOpsType;
+
+	/**
+	 * Queues to process ...
+	 */
+	typedef list< Channel* > fixQueueType;
+	fixQueueType manFixQ;
+        fixQueueType autoFixQ;
+
+	typedef list< pair <Channel*, iClient*> > opQueueType;
+	opQueueType opQ;
 
         string          consoleChan;
         string          operChan;

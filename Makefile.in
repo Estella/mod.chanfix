@@ -169,7 +169,8 @@ libchanfix_la_SOURCES = \
 	QUOTECommand.cc \
 	RELOADCommand.cc \
 	SHUTDOWNCommand.cc \
-	sqlChanOp.cc
+	sqlChanOp.cc \
+	sqlChannel.cc
 
 
 libchanfix_la_CXXFLAGS = -I${top_srcdir}/include \
@@ -185,6 +186,7 @@ EXTRA_DIST = \
 	levels.h \
 	sqlChanOp.h \
 	sqlUser.h \
+	sqlChannel.h \
 	Timer.h
 
 subdir = mod.chanfix
@@ -197,7 +199,7 @@ libchanfix_la_LIBADD =
 am_libchanfix_la_OBJECTS = libchanfix_la-chanfix.lo \
 	libchanfix_la-INVITECommand.lo libchanfix_la-QUOTECommand.lo \
 	libchanfix_la-RELOADCommand.lo libchanfix_la-SHUTDOWNCommand.lo \
-	libchanfix_la-sqlChanOp.lo
+	libchanfix_la-sqlChanOp.lo libchanfix_la-sqlChannel.lo
 libchanfix_la_OBJECTS = $(am_libchanfix_la_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)/include
@@ -208,7 +210,8 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-RELOADCommand.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-SHUTDOWNCommand.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-chanfix.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-sqlChanOp.Plo
+@AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-sqlChanOp.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-sqlChannel.Plo
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
@@ -265,6 +268,7 @@ libchanfix_la-QUOTECommand.lo: QUOTECommand.cc
 libchanfix_la-RELOADCommand.lo: RELOADCommand.cc
 libchanfix_la-SHUTDOWNCommand.lo: SHUTDOWNCommand.cc
 libchanfix_la-sqlChanOp.lo: sqlChanOp.cc
+libchanfix_la-sqlChannel.lo: sqlChannel.cc
 libchanfix.la: $(libchanfix_la_OBJECTS) $(libchanfix_la_DEPENDENCIES) 
 	$(CXXLINK) -rpath $(libdir) $(libchanfix_la_LDFLAGS) $(libchanfix_la_OBJECTS) $(libchanfix_la_LIBADD) $(LIBS)
 
@@ -280,6 +284,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SHUTDOWNCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-chanfix.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-sqlChanOp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-sqlChannel.Plo@am__quote@
 
 distclean-depend:
 	-rm -rf ./$(DEPDIR)
@@ -514,6 +519,39 @@ libchanfix_la-sqlChanOp.lo: sqlChanOp.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/libchanfix_la-sqlChanOp.Plo' tmpdepfile='$(DEPDIR)/libchanfix_la-sqlChanOp.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-sqlChanOp.lo `test -f 'sqlChanOp.cc' || echo '$(srcdir)/'`sqlChanOp.cc
+
+libchanfix_la-sqlChannel.o: sqlChannel.cc
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-sqlChannel.o -MD -MP -MF "$(DEPDIR)/libchanfix_la-sqlChannel.Tpo" \
+@am__fastdepCXX_TRUE@	  -c -o libchanfix_la-sqlChannel.o `test -f 'sqlChannel.cc' || echo '$(srcdir)/'`sqlChannel.cc; \
+@am__fastdepCXX_TRUE@	then mv "$(DEPDIR)/libchanfix_la-sqlChannel.Tpo" "$(DEPDIR)/libchanfix_la-sqlChannel.Po"; \
+@am__fastdepCXX_TRUE@	else rm -f "$(DEPDIR)/libchanfix_la-sqlChannel.Tpo"; exit 1; \
+@am__fastdepCXX_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='sqlChannel.cc' object='libchanfix_la-sqlChannel.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/libchanfix_la-sqlChannel.Po' tmpdepfile='$(DEPDIR)/libchanfix_la-sqlChannel.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-sqlChannel.o `test -f 'sqlChannel.cc' || echo '$(srcdir)/'`sqlChannel.cc
+
+libchanfix_la-sqlChannel.obj: sqlChannel.cc
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-sqlChannel.obj -MD -MP -MF "$(DEPDIR)/libchanfix_la-sqlChannel.Tpo" \
+@am__fastdepCXX_TRUE@	  -c -o libchanfix_la-sqlChannel.obj `if test -f 'sqlChannel.cc'; then $(CYGPATH_W) 'sqlChannel.cc'; else $(CYGPATH_W) '$(srcdir)/sqlChannel.cc'`; \
+@am__fastdepCXX_TRUE@	then mv "$(DEPDIR)/libchanfix_la-sqlChannel.Tpo" "$(DEPDIR)/libchanfix_la-sqlChannel.Po"; \
+@am__fastdepCXX_TRUE@	else rm -f "$(DEPDIR)/libchanfix_la-sqlChannel.Tpo"; exit 1; \
+@am__fastdepCXX_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='sqlChannel.cc' object='libchanfix_la-sqlChannel.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/libchanfix_la-sqlChannel.Po' tmpdepfile='$(DEPDIR)/libchanfix_la-sqlChannel.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-sqlChannel.obj `if test -f 'sqlChannel.cc'; then $(CYGPATH_W) 'sqlChannel.cc'; else $(CYGPATH_W) '$(srcdir)/sqlChannel.cc'`
+
+libchanfix_la-sqlChannel.lo: sqlChannel.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-sqlChannel.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-sqlChannel.Tpo" \
+@am__fastdepCXX_TRUE@	  -c -o libchanfix_la-sqlChannel.lo `test -f 'sqlChannel.cc' || echo '$(srcdir)/'`sqlChannel.cc; \
+@am__fastdepCXX_TRUE@	then mv "$(DEPDIR)/libchanfix_la-sqlChannel.Tpo" "$(DEPDIR)/libchanfix_la-sqlChannel.Plo"; \
+@am__fastdepCXX_TRUE@	else rm -f "$(DEPDIR)/libchanfix_la-sqlChannel.Tpo"; exit 1; \
+@am__fastdepCXX_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='sqlChannel.cc' object='libchanfix_la-sqlChannel.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/libchanfix_la-sqlChannel.Plo' tmpdepfile='$(DEPDIR)/libchanfix_la-sqlChannel.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-sqlChannel.lo `test -f 'sqlChannel.cc' || echo '$(srcdir)/'`sqlChannel.cc
 
 mostlyclean-libtool:
 	-rm -f *.lo

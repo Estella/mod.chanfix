@@ -74,9 +74,9 @@
 
 /**
  * Minimum absolute score required for chanfix to op, relative to
- * the maximum score possible (default: 0.20 * 4032).
+ * the maximum score possible (default: 0.40 * 4032).
  */
-#define FIX_MIN_ABS_SCORE_BEGIN	0.20
+#define FIX_MIN_ABS_SCORE_BEGIN	0.40
 
 /**
  * Minimum score required for chanfix to op, relative to the maximum

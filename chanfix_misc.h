@@ -50,6 +50,11 @@ if(str == "y" || str == "true" || str == "yes") return true;
 return false;
 }
 
+bool compare_points(sqlChanOp* a, sqlChanOp* b)
+        {
+        return a->getPoints() > b->getPoints();
+        }
+
 } //namespace gnuworld
 
 #endif // __FUNCTOR_H

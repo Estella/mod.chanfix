@@ -45,6 +45,8 @@ void SHUTDOWNCommand::Exec(iClient* theClient, const string& Message)
 
 StringTokenizer st(Message);
 
+bot->UpdateOps();
+
 if (st.size() < 2) {
   server->Shutdown();
 } else {

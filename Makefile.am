@@ -8,7 +8,8 @@ libchanfix_la_SOURCES = \
 	QUOTECommand.cc \
 	RELOADCommand.cc \
 	SHUTDOWNCommand.cc \
-	sqlChanOp.cc
+	sqlChanOp.cc \
+	sqlChannel.cc
 
 libchanfix_la_CXXFLAGS = -I${top_srcdir}/include \
 	-I${top_srcdir}/libgnuworld
@@ -22,4 +23,5 @@ EXTRA_DIST = \
 	levels.h \
 	sqlChanOp.h \
 	sqlUser.h \
+	sqlChannel.h \
 	Timer.h
