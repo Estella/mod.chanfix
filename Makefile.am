@@ -9,6 +9,7 @@ libchanfix_la_SOURCES = \
 	QUOTECommand.cc \
 	RELOADCommand.cc \
 	SHUTDOWNCommand.cc \
+	STATUSCommand.cc \
 	sqlChannel.cc \
 	sqlChanOp.cc
 

@@ -170,6 +170,7 @@ libchanfix_la_SOURCES = \
 	QUOTECommand.cc \
 	RELOADCommand.cc \
 	SHUTDOWNCommand.cc \
+	STATUSCommand.cc \
 	sqlChannel.cc \
 	sqlChanOp.cc
 
@@ -200,8 +201,8 @@ libchanfix_la_LIBADD =
 am_libchanfix_la_OBJECTS = libchanfix_la-chanfix.lo \
 	libchanfix_la-CHANFIXCommand.lo libchanfix_la-INVITECommand.lo \
 	libchanfix_la-QUOTECommand.lo libchanfix_la-RELOADCommand.lo \
-	libchanfix_la-SHUTDOWNCommand.lo libchanfix_la-sqlChannel.lo \
-	libchanfix_la-sqlChanOp.lo
+	libchanfix_la-SHUTDOWNCommand.lo libchanfix_la-STATUSCommand.lo \
+	libchanfix_la-sqlChannel.lo libchanfix_la-sqlChanOp.lo
 libchanfix_la_OBJECTS = $(am_libchanfix_la_OBJECTS)
 
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)/include
@@ -212,6 +213,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-QUOTECommand.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-RELOADCommand.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-SHUTDOWNCommand.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-STATUSCommand.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-chanfix.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-sqlChanOp.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-sqlChannel.Plo
@@ -271,6 +273,7 @@ libchanfix_la-INVITECommand.lo: INVITECommand.cc
 libchanfix_la-QUOTECommand.lo: QUOTECommand.cc
 libchanfix_la-RELOADCommand.lo: RELOADCommand.cc
 libchanfix_la-SHUTDOWNCommand.lo: SHUTDOWNCommand.cc
+libchanfix_la-STATUSCommand.lo: STATUSCommand.cc
 libchanfix_la-sqlChannel.lo: sqlChannel.cc
 libchanfix_la-sqlChanOp.lo: sqlChanOp.cc
 libchanfix.la: $(libchanfix_la_OBJECTS) $(libchanfix_la_DEPENDENCIES) 
@@ -287,6 +290,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-QUOTECommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-RELOADCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SHUTDOWNCommand.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-STATUSCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-chanfix.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-sqlChanOp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-sqlChannel.Plo@am__quote@
@@ -524,6 +528,39 @@ libchanfix_la-SHUTDOWNCommand.lo: SHUTDOWNCommand.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/libchanfix_la-SHUTDOWNCommand.Plo' tmpdepfile='$(DEPDIR)/libchanfix_la-SHUTDOWNCommand.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-SHUTDOWNCommand.lo `test -f 'SHUTDOWNCommand.cc' || echo '$(srcdir)/'`SHUTDOWNCommand.cc
+
+libchanfix_la-STATUSCommand.o: STATUSCommand.cc
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-STATUSCommand.o -MD -MP -MF "$(DEPDIR)/libchanfix_la-STATUSCommand.Tpo" \
+@am__fastdepCXX_TRUE@	  -c -o libchanfix_la-STATUSCommand.o `test -f 'STATUSCommand.cc' || echo '$(srcdir)/'`STATUSCommand.cc; \
+@am__fastdepCXX_TRUE@	then mv "$(DEPDIR)/libchanfix_la-STATUSCommand.Tpo" "$(DEPDIR)/libchanfix_la-STATUSCommand.Po"; \
+@am__fastdepCXX_TRUE@	else rm -f "$(DEPDIR)/libchanfix_la-STATUSCommand.Tpo"; exit 1; \
+@am__fastdepCXX_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='STATUSCommand.cc' object='libchanfix_la-STATUSCommand.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/libchanfix_la-STATUSCommand.Po' tmpdepfile='$(DEPDIR)/libchanfix_la-STATUSCommand.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-STATUSCommand.o `test -f 'STATUSCommand.cc' || echo '$(srcdir)/'`STATUSCommand.cc
+
+libchanfix_la-STATUSCommand.obj: STATUSCommand.cc
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-STATUSCommand.obj -MD -MP -MF "$(DEPDIR)/libchanfix_la-STATUSCommand.Tpo" \
+@am__fastdepCXX_TRUE@	  -c -o libchanfix_la-STATUSCommand.obj `if test -f 'STATUSCommand.cc'; then $(CYGPATH_W) 'STATUSCommand.cc'; else $(CYGPATH_W) '$(srcdir)/STATUSCommand.cc'`; \
+@am__fastdepCXX_TRUE@	then mv "$(DEPDIR)/libchanfix_la-STATUSCommand.Tpo" "$(DEPDIR)/libchanfix_la-STATUSCommand.Po"; \
+@am__fastdepCXX_TRUE@	else rm -f "$(DEPDIR)/libchanfix_la-STATUSCommand.Tpo"; exit 1; \
+@am__fastdepCXX_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='STATUSCommand.cc' object='libchanfix_la-STATUSCommand.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/libchanfix_la-STATUSCommand.Po' tmpdepfile='$(DEPDIR)/libchanfix_la-STATUSCommand.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-STATUSCommand.obj `if test -f 'STATUSCommand.cc'; then $(CYGPATH_W) 'STATUSCommand.cc'; else $(CYGPATH_W) '$(srcdir)/STATUSCommand.cc'`
+
+libchanfix_la-STATUSCommand.lo: STATUSCommand.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-STATUSCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-STATUSCommand.Tpo" \
+@am__fastdepCXX_TRUE@	  -c -o libchanfix_la-STATUSCommand.lo `test -f 'STATUSCommand.cc' || echo '$(srcdir)/'`STATUSCommand.cc; \
+@am__fastdepCXX_TRUE@	then mv "$(DEPDIR)/libchanfix_la-STATUSCommand.Tpo" "$(DEPDIR)/libchanfix_la-STATUSCommand.Plo"; \
+@am__fastdepCXX_TRUE@	else rm -f "$(DEPDIR)/libchanfix_la-STATUSCommand.Tpo"; exit 1; \
+@am__fastdepCXX_TRUE@	fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='STATUSCommand.cc' object='libchanfix_la-STATUSCommand.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/libchanfix_la-STATUSCommand.Plo' tmpdepfile='$(DEPDIR)/libchanfix_la-STATUSCommand.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-STATUSCommand.lo `test -f 'STATUSCommand.cc' || echo '$(srcdir)/'`STATUSCommand.cc
 
 libchanfix_la-sqlChannel.o: sqlChannel.cc
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-sqlChannel.o -MD -MP -MF "$(DEPDIR)/libchanfix_la-sqlChannel.Tpo" \

@@ -146,6 +146,7 @@ RegisterCommand(new INVITECommand(this, "INVITE", ""));
 RegisterCommand(new QUOTECommand(this, "QUOTE", "<text>"));
 RegisterCommand(new RELOADCommand(this, "RELOAD", ""));
 RegisterCommand(new SHUTDOWNCommand(this, "SHUTDOWN", "[reason]"));
+RegisterCommand(new STATUSCommand(this, "STATUS", ""));
 
 /* Preload the ChanOps cache */
 preloadChanOpsCache();
@@ -352,7 +353,8 @@ if (Command == "DCC") {
 } else if (Command == "PING" || Command == "ECHO") {
   DoCTCP(theClient, CTCP, Message);
 } else if (Command == "VERSION") {
-  DoCTCP(theClient, CTCP, "evilnet development - GNUWorld chanfix v1.0.0");
+  DoCTCP(theClient, CTCP, "evilnet development - GNUWorld chanfix v%s",
+	 VERSION);
 }
 
 xClient::OnCTCP(theClient, CTCP, Message, Secure);
@@ -1192,6 +1194,30 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ptr++) 
 }
 
 return false;
+}
+
+const string chanfix::prettyDuration( int duration ) const
+{
+
+// Pretty format a 'duration' in seconds to
+// x day(s), xx:xx:xx.
+
+char tmpBuf[ 64 ] = {0};
+
+int	res = currentTime() - duration,
+	secs = res % 60,
+	mins = (res / 60) % 60,
+	hours = (res / 3600) % 24,
+	days = (res / 86400) ;
+
+sprintf(tmpBuf, "%i day%s, %02d:%02d:%02d",
+	days,
+	(days == 1 ? "" : "s"),
+	hours,
+	mins,
+	secs );
+
+return string( tmpBuf ) ;
 }
 
 void Command::Usage( iClient* theClient )

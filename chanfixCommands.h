@@ -72,6 +72,7 @@ class commandName##Command : public Command \
 
 /* Oper commands */
 DECLARE_COMMAND( CHANFIX )
+DECLARE_COMMAND( STATUS )
 
 /* Coder commands */
 DECLARE_COMMAND( INVITE )

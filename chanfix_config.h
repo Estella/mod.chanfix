@@ -23,6 +23,11 @@
 #define __CHANFIX_CONFIG_H "$Id$"
 
 /**
+ * Version information
+ */
+#define VERSION "1.0.0"
+
+/**
  * Defines that deal with fixing channels, both manually and
  * automatically. All the below times are in seconds.
  */

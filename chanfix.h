@@ -237,6 +237,8 @@ public:
 
 	bool removeFromAutoQ(Channel*);
 	bool removeFromManQ(Channel*);
+
+	const string prettyDuration( int ) const ;
 	
 	/**
 	 * PostgreSQL Database
@@ -330,6 +332,10 @@ public:
 	bool doChanFix() { return enableChanFix; }
 	bool doChanBlocking() { return enableChannelBlocking; }
 	CHANFIX_STATE getState() { return currentState; }
+	unsigned int getNumServers() { return numServers; }
+	unsigned int getMinServersPresent() { return minServersPresent; }
+	unsigned int getNumTopScores() { return numTopScores; }
+	unsigned int getMinClients() { return minClients; }
 
 }; // class chanfix
 

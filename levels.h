@@ -26,6 +26,10 @@ namespace gnuworld {
 
  namespace level {
 
+  /* Oper commands */
+  const unsigned short chanfix	= 300;
+  const unsigned short chanfix	= 300;
+
   /* Coder commands */
   const unsigned short invite	= 900;
   const unsigned short reload	= 900;
