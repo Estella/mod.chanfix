@@ -31,7 +31,9 @@
 #include        "EConfig.h"
 
 using std::string;
+
 class PgDatabase;
+class Timer;
 
 namespace gnuworld
 {
@@ -174,9 +176,6 @@ public:
 	 */
         typedef map< pair<string, string>, sqlChanOp*> sqlChanOpsType;
 	sqlChanOpsType 	sqlChanOps;
-
-        /* TimerID for checking on the database connection. */
-        xServer::timerID checkOps_timerID;
 
         string          consoleChan;
         string          operChan;
