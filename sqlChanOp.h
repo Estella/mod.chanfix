@@ -59,8 +59,8 @@ public:
         inline void setPoints(unsigned long _points)
                 { points = _points ; }
 
-	inline void addPoints(unsigned long _points)
-		{ points += _points ; }
+	inline void addPoint()
+		{ points++ ; }
 
         inline void setLastSeenAs(string _nickUserHost)
 		{ nickUserHost = _nickUserHost ; }

@@ -40,19 +40,20 @@ namespace gnuworld
 using std::string;
 using namespace level;
 
-bool SHUTDOWNCommand::Exec(iClient* theClient, const string& Message)
+void SHUTDOWNCommand::Exec(iClient* theClient, const string& Message)
 {
 
 StringTokenizer st(Message);
 
 if(st.size() < 2) {
   Usage(theClient);
-  return true;
+  return;
 }
 
-server->Shutdown( st.assemble(1) );
+//server->Shutdown( st.assemble(1) );
+server->Shutdown();
 
-return true;
+return;
 }
 
 } // namespace gnuworld

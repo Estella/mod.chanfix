@@ -40,22 +40,24 @@ namespace gnuworld
 using std::string;
 using namespace level;
 
-bool RELOADCommand::Exec(iClient* theClient, const string& Message)
+void RELOADCommand::Exec(iClient* theClient, const string& Message)
 {
 
 StringTokenizer st(Message);
 
-Notice(theClient, "Reloading client...see you on the flip side");
+bot->Notice(theClient, "Reloading client...see you on the flip side");
 
 if (st.size() < 2) {
-  MyUplink->UnloadClient(this, "Reloading...");
+  server->UnloadClient(bot, "Reloading...");
 } else {
-  MyUplink->UnloadClient(this, st.assemble(1));
+  server->UnloadClient(bot, st.assemble(1));
 }
 
-MyUplink->LoadClient("libchanfix", getConfigFileName());
+//server->LoadClient("libchanfix", getConfigFileName());
+// TODO: fix fix fix
+server->LoadClient("libchanfix", "chanfix.example.conf");
 
-return true;
+return;
 }
 
 } // namespace gnuworld

@@ -26,7 +26,10 @@
 
 #include	"client.h"
 
-#include	"functor.h"
+//#include	"functor.h"
+#include	"sqlChanOp.h"
+#include	"chanfixCommands.h"
+#include        "EConfig.h"
 
 using std::string;
 class PgDatabase;
@@ -61,6 +64,8 @@ public:
 	 * Destructor does normal stuff.
 	 */
 	virtual ~chanfix() ;
+
+	virtual void OnTimer(xServer::timerID, void*);
 
 	/**
 	 * This method is called when a network client sends
@@ -141,18 +146,18 @@ public:
 
         virtual void OnCTCP( iClient*, const string&, const string&, bool ) ;
 
+	sqlChanOp* newChanOp(const string&, const string&);
+        sqlChanOp* newChanOp(iClient*, Channel*);
+
 	sqlChanOp* findChanOp(const string&, const string&);
 	sqlChanOp* findChanOp(iClient*, Channel*);
 
 	void preloadChanOpsCache();
 	void BurstOps();
+        void CheckOps();
 
-	void OnChannelModeO( Channel*, ChannelUser*, const xServer::opVectorType&);
-
-	const string getClientUserHost(iClient*);
-
-	void givePoints(iClient*, Channel*);
-        void givePoints(sqlChanOp*);
+	void givePoint(iClient*, Channel*);
+        void givePoint(sqlChanOp*);
 
 	void gotOpped(iClient*, Channel*);
 
@@ -164,18 +169,29 @@ public:
 	/**
 	 * Channel-op map
 	 */
-        typedef map< pair<string, string>, sqlChanOp*, MatchPair> sqlChanOpsType;
+        typedef map< pair<string, string>, sqlChanOp*> sqlChanOpsType;
 	sqlChanOpsType 	sqlChanOps;
 
 
-protected:
-	string		chanfixConfig;
+        /* TimerID for checking on the database connection. */
+        xServer::timerID checkOps_timerID;
 
-	string		consoleChan;
+        string          consoleChan;
+        string          operChan;
+        string          supportChan;
+
+
+protected:
+        /**
+         * Commands map
+         */
+        typedef map< string, Command*, noCaseCompare> commandMapType;
+        commandMapType commandMap;
+
+	EConfig*	chanfixConfig;
+
 	string		consoleChanModes;
-	string		operChan;
 	string		operChanModes;
-	string		supportChan;
 	string		supportChanModes;
 	bool		enableAutoFix;
 	bool		enableChanFix;
@@ -192,6 +208,8 @@ protected:
 	string          sqlUser;
 	string          sqlPass;
 	string          sqlDB;
+
+	int		checkOpsDelay;
 
 }; // class chanfix
 

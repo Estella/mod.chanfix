@@ -1,7 +1,7 @@
 /*
  * (c) 2003 Matthias Crauwels
  *
- * Special functor to match pairs
+ * Special functions 
  */
 
 #include "match.h"
@@ -19,5 +19,11 @@ inline bool operator()( pair<string, string> lhs, pair<string, string> rhs ) con
 	return (match( lhs.first, rhs.first ) < 0 && match ( lhs.second, rhs.second ) < 0) ;
 	}
 } ;
+
+bool atob( string str )
+{
+if(str == "y" || str == "true" || str == "yes") return true;
+return false;
+}
 
 } //namespace gnuworld

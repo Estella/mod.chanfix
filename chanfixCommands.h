@@ -25,7 +25,6 @@
 namespace gnuworld {
 
 class chanfix;
-class sqlUser;
 
 class Command {
 public:
@@ -35,7 +34,7 @@ public:
 
 	virtual ~Command() { }
 	
-	virtual void Exec(const iClient*, const string&, const sqlUser*) = 0;
+	virtual void Exec(iClient*, const string&) = 0;
 	
 	void setServer(xServer *_server)
 		{ server = _server; }
@@ -43,7 +42,7 @@ public:
 	virtual inline string getInfo() const
 		{ return commandName + ' ' + help; }
 	
-	virtual void Usage(const iClient*);
+	virtual void Usage(iClient*);
 	
 	inline const string& getName() const
 		{ return commandName; }
@@ -68,14 +67,14 @@ class commandName##Command : public Command \
       const string& _help) : \
         Command(_bot, _commandName, _help) {} \
     virtual ~commandName##Command() {} \
-    virtual void Exec(const iClient*, const string&, const sqlUser*); \
+    virtual void Exec(iClient*, const string&); \
 };
 
 /* Coder commands */
-DECLARE_COMMAND( INVITE )
-DECLARE_COMMAND( QUOTE )
-DECLARE_COMMAND( RELOAD )
-DECLARE_COMMAND( SHUTDOWN )
+DECLARE_COMMAND( INVITE );
+DECLARE_COMMAND( QUOTE );
+DECLARE_COMMAND( RELOAD );
+DECLARE_COMMAND( SHUTDOWN );
 
 } // namespace gnuworld
 

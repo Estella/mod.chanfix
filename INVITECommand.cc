@@ -37,31 +37,31 @@ namespace gnuworld
 
 using std::string;
 
-bool INVITECommand::Exec(iClient* theClient, const string& Message)
+void INVITECommand::Exec(iClient* theClient, const string&)
 {
 
 Channel* theChannel = Network->findChannel(bot->consoleChan);
 
 if(!theChannel) {
   bot->Notice(theClient, "Could not find the console channel on the network.");
-  return true;
+  return;
 }
 
 ChannelUser* theBot = theChannel->findUser(bot->getInstance());
 if(!theBot) {
   bot->Notice(theClient, "I am not in the console channel.");
-  return true;
+  return;
 }
 
 ChannelUser* theChannelUser = theChannel->findUser(theClient);
 if(theChannelUser) {
   bot->Notice(theClient, "You are already in the console channel!");
-  return true;
+  return;
 }
 
 bot->Invite(theClient, theChannel);
 
-return true;
+return;
 }
 
 } // namespace gnuworld

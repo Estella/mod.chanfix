@@ -40,19 +40,19 @@ namespace gnuworld
 using std::string ;
 using namespace level;
 
-bool QUOTECommand::Exec(iClient* theClient, const string& Message)
+void QUOTECommand::Exec(iClient* theClient, const string& Message)
 {
 
 StringTokenizer st(Message);
 
 if(st.size() < 1) {
   Usage(theClient);
-  return true;
+  return;
 }
 
 bot->Write( st.assemble(1) );
 
-return true;
+return;
 }
 
 } // namespace gnuworld
