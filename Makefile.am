@@ -4,12 +4,13 @@
 lib_LTLIBRARIES = libchanfix.la
 libchanfix_la_SOURCES = \
 	chanfix.cc \
+	CHANFIXCommand.cc \
 	INVITECommand.cc \
 	QUOTECommand.cc \
 	RELOADCommand.cc \
 	SHUTDOWNCommand.cc \
-	sqlChanOp.cc \
-	sqlChannel.cc
+	sqlChannel.cc \
+	sqlChanOp.cc
 
 libchanfix_la_CXXFLAGS = -I${top_srcdir}/include \
 	-I${top_srcdir}/libgnuworld
@@ -21,7 +22,7 @@ EXTRA_DIST = \
 	chanfix_config.h \
 	functor.h \
 	levels.h \
+	sqlChannel.h \
 	sqlChanOp.h \
 	sqlUser.h \
-	sqlChannel.h \
 	Timer.h

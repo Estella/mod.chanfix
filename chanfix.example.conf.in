@@ -10,7 +10,7 @@ nickname = C
 username = chanfix
 
 # Hostname of bot
-hostname = chan.fix
+hostname = evilnet.development
 
 # Real name (info) of bot
 userdescription = Channel Fixer

@@ -6,8 +6,8 @@ echo
 
 AC_REVISION($Revision$)
 AC_INIT
-AC_CONFIG_SRCDIR([uworld.cc])
-AM_INIT_AUTOMAKE(uworld,2.2)
+AC_CONFIG_SRCDIR([chanfix.cc])
+AM_INIT_AUTOMAKE(chanfix,1.0)
 AM_CONFIG_HEADER(defs.h)
 
 AC_PROG_INSTALL

@@ -6,11 +6,13 @@
 #include        <sstream>
 #include        <string>
 #include        <iostream>
-
 #include        <cstring>
+
+#include	"libpq++.h"
 
 #include        "ELog.h"
 #include        "misc.h"
+
 #include        "sqlChannel.h"
 #include	"chanfix.h"
 
@@ -22,6 +24,7 @@ using std::endl ;
 using std::ends ;
 using std::stringstream ;
 
+const sqlChannel::flagType sqlChannel::F_BLOCKED	= 0x00000001 ;
 
 sqlChannel::sqlChannel(PgDatabase* _SQLDb)
 : channel(""),

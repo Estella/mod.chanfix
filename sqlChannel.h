@@ -42,12 +42,22 @@ public:
 	sqlChannel(PgDatabase*);
 	virtual ~sqlChannel();
 
+	typedef unsigned int	flagType ;
+
+	static const flagType	F_BLOCKED;
+
         /*
          *  Methods to get data atrributes.
          */
 
         inline const string&	getChannel() const
                 { return channel ; }
+
+	inline const flagType&	getFlags() const
+		{ return flags ; }
+
+	inline bool  getFlag( const flagType& whichFlag ) const
+		{ return (flags & whichFlag) ; }
 
         inline unsigned int	getSuccessFixes() const
                 { return successFixes ; }
@@ -77,7 +87,7 @@ public:
 	inline void	setFixStart(time_t _start)
                 { start = _start ; }
 
-	inline void	addSuccesFix()
+	inline void	addSuccessFix()
 		{ successFixes++ ; }
 
 	inline void	setMaxScore(unsigned int _maxScore)
@@ -90,10 +100,10 @@ public:
 protected:
 
 	string		channel;
+	flagType	flags;
 	time_t		last;
 	time_t		start;
 	unsigned int	successFixes;
-
         unsigned int    maxScore;
         PgDatabase*     SQLDb;
 

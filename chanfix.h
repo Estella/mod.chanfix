@@ -28,13 +28,13 @@
 #include	<list>
 
 #include	"client.h"
+#include	"EConfig.h"
 
-#include	"sqlChanOp.h"
-#include	"sqlChannel.h"
 #include	"chanfixCommands.h"
-#include        "EConfig.h"
-#include	"Timer.h"
 #include	"chanfix_config.h"
+#include	"sqlChannel.h"
+#include	"sqlChanOp.h"
+#include	"Timer.h"
 
 using std::string;
 
@@ -158,6 +158,12 @@ public:
 
         virtual void OnCTCP( iClient*, const string&, const string&, bool ) ;
 
+	virtual void setSendEB( bool ) ;
+
+	virtual bool BurstChannel( const string& chanName,
+		const string& chanModes,
+		const time_t& burstTime ) ;
+
 	/**
 	 * Our functions.
 	 */
@@ -173,8 +179,10 @@ public:
 
 	void changeState(CHANFIX_STATE);
 
-	void BurstOps();
-        void CheckOps();
+	time_t currentTime() const ;
+
+	void burstOps();
+        void checkOps();
 
 	void givePoint(iClient*, Channel*);
         void givePoint(sqlChanOp*);
@@ -183,29 +191,30 @@ public:
 
         bool wasOpped(iClient*, Channel*);
 
-	void CheckNet();
+	void checkNetwork();
 
-	void AutoFix();
-	void ManFix(Channel*);
+	void autoFix();
+	void manualFix(Channel*);
 
-	void UpdateOps();
+	void updateOps();
 
-	void fixChan(Channel*, bool);
+	bool fixChan(Channel*, bool);
 
 	iClient* findAccount(const string&, Channel*);
 
-	sqlChannel* findCacheChannel(const string&);
-	sqlChannel* findCacheChannel(Channel*);
+	sqlChannel* getChannelRecord(const string&);
+	sqlChannel* getChannelRecord(Channel*);
 
-	sqlChannel* newChannel(const string&);
-	sqlChannel* newChannel(Channel*);
+	sqlChannel* newChannelRecord(const string&);
+	sqlChannel* newChannelRecord(Channel*);
 
-	unsigned int countOps(Channel*);
-	unsigned int countOps(const string&);
+	static size_t countChanOps(const Channel*);
 
-	bool clearChan( Channel* );
+	void processQueue();
 
-	void procesQueue();
+	bool isBeingFixed(Channel*);
+	bool isBeingAutoFixed(Channel*);
+	bool isBeingChanFixed(Channel*);
 
         /**
          * PostgreSQL Database
@@ -225,6 +234,7 @@ public:
 	lastOpsType  lastOps;
 
 	typedef list< sqlChanOp* > chanOpsType;
+	chanOpsType getMyOps(Channel*);
 
 	/**
 	 * Queues to process ...
@@ -264,7 +274,7 @@ protected:
 	bool		enableChannelBlocking;
 	unsigned int	numServers;
 	unsigned int	minServersPresent;
-	string		numTopScores;
+	unsigned int	numTopScores;
 	unsigned int	minClients;
 	bool		clientNeedsIdent;
 	bool		clientNeedsReverse;

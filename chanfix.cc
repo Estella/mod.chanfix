@@ -26,17 +26,20 @@
 
 #include        <new>
 
+#include	"libpq++.h"
+
 #include	"config.h"
 #include	"client.h"
 #include	"EConfig.h"
 #include	"Network.h"
 #include	"server.h"
-#include        "StringTokenizer.h"
+#include	"StringTokenizer.h"
 
 #include	"chanfix.h"
 #include	"chanfixCommands.h"
 #include	"functor.h"
 #include	"levels.h"
+#include	"sqlChannel.h"
 #include	"sqlChanOp.h"
 #include	"sqlUser.h"
 #include	"Timer.h"
@@ -137,10 +140,11 @@ else
         }
 
 /* Register the commands we want to use */
-RegisterCommand(new QUOTECommand(this, "QUOTE", "<text>"));
-RegisterCommand(new SHUTDOWNCommand(this, "SHUTDOWN", "[reason]"));
+RegisterCommand(new CHANFIXCommand(this, "CHANFIX", "<#channel> [override]"));
 RegisterCommand(new INVITECommand(this, "INVITE", ""));
+RegisterCommand(new QUOTECommand(this, "QUOTE", "<text>"));
 RegisterCommand(new RELOADCommand(this, "RELOAD", ""));
+RegisterCommand(new SHUTDOWNCommand(this, "SHUTDOWN", "[reason]"));
 
 /* Preload the ChanOps cache */
 preloadChanOpsCache();
@@ -179,33 +183,50 @@ return true ;
 /* OnAttach */
 void chanfix::OnAttach()
 {
+/**
+ * Don't send END_OF_BURST (EB) so we can stay in burst mode 
+ * indefinitely in order to be able to do TS-1.
+ */
+setSendEB(false);
+
+/**
+ * Set our uplink as our main server for our commands.
+ */
 for (commandMapType::iterator ptr = commandMap.begin(); ptr != commandMap.end(); ++ptr) {
   ptr->second->setServer(MyUplink);
 }
 
-/* Register for global network events */
+/**
+ * Register for global network events
+ */
 MyUplink->RegisterEvent( EVT_KILL, this );
 MyUplink->RegisterEvent( EVT_QUIT, this );
 MyUplink->RegisterEvent( EVT_BURST_ACK, this );
 MyUplink->RegisterEvent( EVT_NETJOIN, this );
 MyUplink->RegisterEvent( EVT_NETBREAK, this );
 
-/* Register for all channel events */
+/**
+ * Register for all channel events
+ */
 MyUplink->RegisterChannelEvent( xServer::CHANNEL_ALL, this );
 
-/* Set up delays */
-// TODO: move this to chanfix_config.h
-checkOpsDelay = 300; // check every 5 minutes
-updateDelay = 3600; // update the DB every hour (we can loose at most 11pts)
+/**
+ * Set up delays
+ */
+checkOpsDelay = 300; // check ops every 5 minutes
 fixDelay = 30; // try finding channels to fix every 30 sec's
 
-/* Start timers */
+/**
+ * Start timers
+ */
 tidCheckOps = MyUplink->RegisterTimer(time(NULL) + checkOpsDelay, this, NULL);
 tidAutoFix = MyUplink->RegisterTimer(time(NULL) + AUTOFIX_INTERVAL, this, NULL);
-tidUpdateDB = MyUplink->RegisterTimer(time(NULL) + updateDelay, this, NULL);
+tidUpdateDB = MyUplink->RegisterTimer(time(NULL) + DATABASE_UPDATE_TIME, this, NULL);
 tidFixQ = MyUplink->RegisterTimer(time(NULL) + fixDelay, this, NULL);
 
-/* When attached state should be RUN */
+/**
+ * After attaching, change state to RUN
+ */
 changeState(RUN);
 
 xClient::OnAttach() ;
@@ -214,6 +235,9 @@ xClient::OnAttach() ;
 /* OnDetach */
 void chanfix::OnDetach( const string& reason )
 {
+/* Update our op DB */
+updateOps();
+
 /* Delete our config */
 delete chanfixConfig; chanfixConfig = 0;
 
@@ -250,28 +274,28 @@ void chanfix::OnTimer(xServer::timerID theTimer, void*)
 time_t theTime;
 
 if (theTimer == tidCheckOps) {
-  CheckOps();
+  checkOps();
 
   /* Refresh Timer */
   theTime = time(NULL) + checkOpsDelay;
   tidCheckOps = MyUplink->RegisterTimer(theTime, this, NULL);
   }
 else if (theTimer == tidAutoFix) {
-  AutoFix();
+  autoFix();
 
   /* Refresh Timer */
   theTime = time(NULL) + AUTOFIX_INTERVAL;
   tidAutoFix = MyUplink->RegisterTimer(theTime, this, NULL);
   }
 else if (theTimer == tidUpdateDB) {
-  UpdateOps();
+  updateOps();
 
   /* Refresh Timer */
-  theTime = time(NULL) + updateDelay;
+  theTime = time(NULL) + DATABASE_UPDATE_TIME;
   tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
   }
 else if (theTimer == tidFixQ) {
-  procesQueue();
+  processQueue();
 
   /* Refresh Timer */
   theTime = time(NULL) + fixDelay;
@@ -287,7 +311,7 @@ if (!theClient->isOper()) {
   return;
 }
 
-if( currentState == BURST ) {
+if (currentState == BURST) {
   Notice(theClient, "I'm in BURST-mode! Please try again later!");
   return;
 }
@@ -299,32 +323,19 @@ if ( st.empty() ) {
 
 const string Command = string_upper(st[0]);
 
-/*
- *  Just quickly, abort if someone tries to LOGIN or NEWPASS
- *  unsecurely.
+/**
+ * Just quickly, abort if someone tries to LOGIN or NEWPASS
+ * unsecurely.
  */
 if (!secure && ((Command == "LOGIN") || (Command == "NEWPASS"))) {
   Notice(theClient, "To use %s, you must /msg %s@%s",
 	 Command.c_str(), nickName.c_str(), getUplinkName().c_str());
-  return ;
-}
-
-if (Command == "CLEARMODE" && st.size() >= 2) {
-  Channel* netChan = Network->findChannel(st[1]);
-  if(netChan) clearChan(netChan);
   return;
 }
-
-if (Command == "DEBUGFIX" && st.size() >= 2) {
-  Channel* netChan = Network->findChannel(st[1]);
-  if(netChan) ManFix(netChan);
-  return;
-}
-
 
 commandMapType::iterator commHandler = commandMap.find(Command);
-if(commHandler == commandMap.end()) {
-  return ;
+if (commHandler == commandMap.end()) {
+  return;
 }
 
 commHandler->second->Exec(theClient, Message);
@@ -419,7 +430,7 @@ switch(whichEvent)
 	case EVT_NETJOIN:
 	case EVT_NETBREAK:
 		{
-		CheckNet();
+		checkNetwork();
 		break;
 		}
 
@@ -537,14 +548,14 @@ switch( currentState ) {
 	{
 	elog	<< "chanfix::changeState> Entering state BURST"
 		<< endl;
-	BurstOps();
+	burstOps();
 	break;
 	}
 	case RUN:
 	{
 	elog	<< "chanfix::changeState> Entering state RUN"
 		<< endl;
-	CheckOps();
+	checkOps();
 	break;
 	}
         case SPLIT:
@@ -607,6 +618,19 @@ sqlChanOp* chanfix::newChanOp(iClient* theClient, Channel* theChan)
 return newChanOp(theClient->getAccount(), theChan->getName());
 }
 
+chanfix::chanOpsType chanfix::getMyOps(Channel* theChan)
+{
+chanOpsType myOps;
+for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
+     ptr != sqlChanOps.end(); ptr++) {
+  if (ptr->second->getChannel() == theChan->getName())
+    myOps.push_back(ptr->second);
+}
+myOps.sort(compare_points);
+
+return myOps;
+}
+
 const string gnuworld::escapeSQLChars(const string& theString)
 {
 string retMe ;
@@ -630,7 +654,7 @@ for( string::const_iterator ptr = theString.begin() ;
 return retMe ;
 }
 
-void chanfix::BurstOps()
+void chanfix::burstOps()
 {
 if(currentState != BURST) return;
 elog << "DEBUG: Bursting Ops ..." << endl;
@@ -652,7 +676,7 @@ for(xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->c
 
 }
 
-void chanfix::CheckOps()
+void chanfix::checkOps()
 {
 if(currentState != RUN) return;
 elog << "DEBUG: Checking Ops ..." << endl;
@@ -737,7 +761,7 @@ elog << "DEBUG: " << thisClient->getAccount() << " was not opped on " << thisCha
 return false;
 }
 
-void chanfix::CheckNet()
+void chanfix::checkNetwork()
 {
 if(100 * Network->serverList_size() < numServers * minServersPresent)
 	{
@@ -755,10 +779,15 @@ if(currentState == SPLIT)
 	}
 }
 
-void chanfix::AutoFix()
+void chanfix::autoFix()
 {
-if( currentState != RUN ) {
-  elog << "DEBUG: skipping autofix!" << endl;
+if (!enableAutoFix) {
+  elog << "chanfix::autoFix> DEBUG: AutoFix not enabled." << endl;
+  return;
+}
+
+if (currentState != RUN) {
+  elog << "chanfix::autoFix> DEBUG: currentState != RUN" << endl;
   return;
 }
 
@@ -784,14 +813,14 @@ for(xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->c
 	}
 }
 
-void chanfix::ManFix(Channel* thisChan)
+void chanfix::manualFix(Channel* thisChan)
 {
 elog << "DEBUG: Manual fix " << thisChan->getName() << "!" << endl;
-clearChan(thisChan);
+ClearMode(thisChan, "ovpsmikbl", true);
 manFixQ.push_back(fixQueueType::value_type(thisChan, ::time(0) + CHANFIX_DELAY));
 }
 
-void chanfix::UpdateOps()
+void chanfix::updateOps()
 {
 elog << "DEBUG: Updating SQL ..." << endl;
 
@@ -799,104 +828,126 @@ for(sqlChanOpsType::iterator ptr = sqlChanOps.begin(); ptr != sqlChanOps.end(); 
 	ptr->second->Update();
 }
 
-void chanfix::fixChan(Channel* theChan, bool autofix)
+bool chanfix::fixChan(Channel* theChan, bool autofix)
 {
-unsigned int ops = countOps(theChan);
-if(ops >= (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED))
-	{
-	elog << "DEBUG: Enough clients opped on " << theChan->getName() << endl;
-	return;
-	} 
+sqlChannel* sqlChan = getChannelRecord(theChan);
+if(!sqlChan) sqlChan = newChannelRecord(theChan);
 
-sqlChannel* sqlChan = findCacheChannel(theChan);
-if(!sqlChan) sqlChan = newChannel(theChan);
+/* First update the time of the previous attempt to now. */
+if (sqlChan->getFixStart() == 0) sqlChan->setFixStart(currentTime());
+sqlChan->setLastAttempt(currentTime());
 
-if(sqlChan->getFixStart() == 0) sqlChan->setFixStart(::time(0));
-int time_passed = ::time(0) - sqlChan->getFixStart();
-
-if(time_passed > (autofix ? AUTOFIX_MAXIMUM : CHANFIX_MAXIMUM))
-	{
-	elog << "DEBUG: Skipping fix on " << theChan->getName() << " after time has passed" << endl;
-	return;
-	}
-
-elog << "DEBUG: Fixing " << theChan->getName() << " ..." << endl;
+/* If the channel doesn't exist (anymore), the fix is successful. */
+Channel* netChan = Network->findChannel(theChan->getName());
+if (!netChan) return true;
 
 chanOpsType myOps;
-for(sqlChanOpsType::iterator ptr = sqlChanOps.begin(); ptr != sqlChanOps.end(); ptr++)
-	{
-	if(ptr->second->getChannel() == theChan->getName())
-		myOps.push_back(ptr->second);
-	}
+for (sqlChanOpsType::iterator ptr = sqlChanOps.begin(); 
+     ptr != sqlChanOps.end(); ptr++) {
+  if (ptr->second->getChannel() == theChan->getName())
+    myOps.push_back(ptr->second);
+}
 myOps.sort(compare_points);
 
-if(myOps.begin() != myOps.end())
-	sqlChan->setMaxScore((*myOps.begin())->getPoints());
+if (myOps.begin() != myOps.end())
+  sqlChan->setMaxScore((*myOps.begin())->getPoints());
 
-int maxChanScore = sqlChan->getMaxScore();
-int maxScore = 4032;
+int maxScore = sqlChan->getMaxScore();
 
-float abs_min_score = (FIX_MIN_ABS_SCORE_BEGIN - (
-		(FIX_MIN_ABS_SCORE_BEGIN - FIX_MIN_ABS_SCORE_END) / 
-                (((autofix ? AUTOFIX_MAXIMUM : CHANFIX_MAXIMUM) / (autofix ? AUTOFIX_INTERVAL : CHANFIX_INTERVAL)) - 1)
-	) * (time_passed / (autofix ? AUTOFIX_INTERVAL : CHANFIX_INTERVAL)) ) * maxScore;
+/* If the max score of the channel is lower than the absolute minimum
+ * score required, don't even bother trying. */
+if (maxScore <= FIX_MIN_ABS_SCORE_END * MAX_SCORE)
+  return false;
 
-float rel_min_score = (FIX_MIN_REL_SCORE_BEGIN - (
-		(FIX_MIN_REL_SCORE_BEGIN - FIX_MIN_REL_SCORE_END) /
-		(((autofix ? AUTOFIX_MAXIMUM : CHANFIX_MAXIMUM) / (autofix ? AUTOFIX_INTERVAL : CHANFIX_INTERVAL)) - 1)
-	) * (time_passed / (autofix ? AUTOFIX_INTERVAL : CHANFIX_INTERVAL)) ) * maxChanScore;
+/* If the channel has enough ops, abort & return. */
+unsigned int currentOps = countChanOps(netChan);
+if (currentOps >= (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED)) {
+  elog << "DEBUG: Enough clients opped on " << theChan->getName() << endl;
+  return true;
+} 
 
-float end_abs_min_score = FIX_MIN_ABS_SCORE_END * maxScore;
-float end_rel_min_score = FIX_MIN_REL_SCORE_END * maxChanScore;
+int time_passed = currentTime() - sqlChan->getFixStart();
 
-if(sqlChan->getMaxScore() < end_abs_min_score) 
-	{
-	elog << "DEBUG: Channel " << theChan->getName() << " scored to little and will be ignored cause of this ..."
-		<< endl;
-	return;
-	}
+/* Determine minimum score required for this time. */
 
+/* Linear interpolation of (0, fraction_abs_max * max_score) ->
+ * (max_time, fraction_abs_min * max_score)
+ * at time t between 0 and max_time. */
+unsigned int min_score_abs = (MAX_SCORE * FIX_MIN_ABS_SCORE_BEGIN) -
+		 (float)time_passed / (autofix ? AUTOFIX_MAXIMUM : CHANFIX_MAXIMUM) *
+		 (MAX_SCORE * FIX_MIN_ABS_SCORE_BEGIN - FIX_MIN_ABS_SCORE_END * MAX_SCORE);
+
+elog << "chanfix::fixChan> [" << theChan->getName() << "] max MAX_SCORE" \
+	" begin FIX_MIN_ABS_SCORE_BEGIN end FIX_MIN_ABS_SCORE_END time " \
+	<< time_passed << " maxtime " << (autofix ? AUTOFIX_MAXIMUM : \
+	CHANFIX_MAXIMUM) << endl;
+
+/* Linear interpolation of (0, fraction_rel_max * max_score_channel) ->
+ * (max_time, fraction_rel_min * max_score_channel)
+ * at time t between 0 and max_time. */
+unsigned int min_score_rel = (maxScore * FIX_MIN_REL_SCORE_BEGIN) -
+                (float)time_passed / (autofix ? AUTOFIX_MAXIMUM : CHANFIX_MAXIMUM) *
+                (maxScore * FIX_MIN_REL_SCORE_BEGIN - FIX_MIN_REL_SCORE_END * maxScore);
+
+/* The minimum score needed for ops is the HIGHER of these two
+ * scores. */
+unsigned int min_score = min_score_abs;
+if (min_score_rel > min_score)
+  min_score = min_score_rel;
+
+elog << "chanfix::fixChan> [" << theChan->getName() << "] start " << \
+	sqlChan->getFixStart() << ", delta " << time_passed << ", max " \
+	<< maxScore << ", minabs " << min_score_abs << ", minrel " << \
+	min_score_rel << "." << endl;
+
+/* Get the scores of the accounts of the non-opped clients. */
 iClient* curClient = 0;
 sqlChanOp* curOp = 0;
+int num_clients_to_be_opped = 0;
 vector< iClient* > opVec;
 for(chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end(); opPtr++)
 	{
 	curOp = *opPtr;
-	if( curOp->getPoints() > abs_min_score && curOp->getPoints() > rel_min_score
-		&& curOp->getPoints() > end_abs_min_score && curOp->getPoints() > end_rel_min_score)
+	if( curOp->getPoints() > min_score_abs && curOp->getPoints() > min_score_rel)
 		{
 		curClient = findAccount(curOp->getAccount(), theChan);
 		if(curClient && !theChan->findUser(curClient)->isModeO())
 			{
 			elog << "DEBUG: Decided to op: " << curClient->getNickName() << " on " << theChan->getName()
 				<< ". Client has " << curOp->getPoints() << " points. ABS_MIN = " 
-				<< abs_min_score << " and REL_MIN = " << rel_min_score << endl;
+				<< min_score_abs << " and REL_MIN = " << min_score_rel << endl;
 			opVec.push_back(curClient);
 			}
 		}
 	}
 Op(theChan, opVec);
 
-ops = countOps(theChan);
-if(( ops < (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED)) && (ops < theChan->size()) )
-	{
+currentOps = countChanOps(theChan);
+if ((currentOps < (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED)) 
+    && (currentOps < netChan->size())) {
 	elog << "DEBUG: Channel " << theChan->getName() << " needs more ops and will therefor be added in my fixQ ..."
 		<< endl;
 	if(autofix)
 		autoFixQ.push_back(fixQueueType::value_type(theChan, ::time(0) + AUTOFIX_INTERVAL));
 	else
 		manFixQ.push_back(fixQueueType::value_type(theChan, ::time(0) + CHANFIX_INTERVAL));
-	return;
-	}
+	return false;
+}
 
-sqlChan->addSuccesFix();
+sqlChan->addSuccessFix();
 sqlChan->setLastAttempt(::time(0));
 sqlChan->setFixStart(0);
 sqlChan->Update();
 
 elog << "DEBUG: My fixing job is completed successfully on " << theChan->getName() << ". Thank you for flying with me!"
 	<< endl;
-return;
+
+/* Now see if there are enough ops; if so, the fix is complete. */
+if (num_clients_to_be_opped + currentOps >= netChan->size() ||
+    num_clients_to_be_opped + currentOps >= (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED))
+  return true;
+
+return false;
 }
 
 
@@ -915,7 +966,7 @@ for(Channel::userIterator ptr = theChan->userList_begin(); ptr != theChan->userL
 return 0;
 }
 
-sqlChannel* chanfix::findCacheChannel(const string& Channel)
+sqlChannel* chanfix::getChannelRecord(const string& Channel)
 {
 sqlChannelCacheType::iterator ptr = sqlChanCache.find(Channel);
 if(ptr != sqlChanCache.end())
@@ -926,12 +977,12 @@ if(ptr != sqlChanCache.end())
 return 0;
 }
 
-sqlChannel* chanfix::findCacheChannel(Channel* theChan)
+sqlChannel* chanfix::getChannelRecord(Channel* theChan)
 {
-return findCacheChannel(theChan->getName());
+return getChannelRecord(theChan->getName());
 }
 
-sqlChannel* chanfix::newChannel(const string& Channel)
+sqlChannel* chanfix::newChannelRecord(const string& Channel)
 {
 sqlChannel* newChan = new (std::nothrow) sqlChannel(SQLDb);
 assert( newChan != 0 ) ;
@@ -946,47 +997,36 @@ elog << "DEBUG: Added new channel: " << Channel << endl;
 return newChan;
 }
 
-sqlChannel* chanfix::newChannel(Channel* theChan)
+sqlChannel* chanfix::newChannelRecord(Channel* theChan)
 {
-return newChannel(theChan->getName());
+return newChannelRecord(theChan->getName());
 }
 
-unsigned int chanfix::countOps(const string& channel)
+size_t chanfix::countChanOps(const Channel* theChan)
 {
-Channel* netChan = Network->findChannel(channel);
-if(netChan) return countOps(netChan);
-
-return 0;
+if (!theChan) {
+  /* Don't try this on a null channel. */
+  return 0;
 }
 
-unsigned int chanfix::countOps(Channel* theChan)
-{
-unsigned int ops = 0;
-for(Channel::userIterator ptr = theChan->userList_begin(); ptr != theChan->userList_end(); ptr++)
-	{
-	if(ptr->second->isModeO()) ops++;
-	}
+size_t chanOps = 0;
 
-return ops;
+for (Channel::const_userIterator ptr = theChan->userList_begin();
+     ptr != theChan->userList_end(); ++ptr) {
+   if (ptr->second->isModeO()) {
+     chanOps++;
+   } // If opped.
 }
 
-bool chanfix::clearChan(Channel* theChan)
-{
-//Join(theChan->getName(),"+",0,true);
-
-ClearMode(theChan, "ovpsmikbl", true);
-
-//Part(theChan->getName());
-return true;
-
+return chanOps;
 }
 
-void chanfix::procesQueue()
+void chanfix::processQueue()
 {
 
 for(fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ptr++) 
 	{
-	if(ptr->second <= ::time(0)) 
+	if(ptr->second <= currentTime()) 
 		{
                 autoFixQ.pop_front();
 		fixChan(ptr->first, true);
@@ -995,7 +1035,7 @@ for(fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ptr++)
 
 for(fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ptr++)
         {
-        if(ptr->second <= ::time(0)) 
+        if(ptr->second <= currentTime()) 
                 {
                 manFixQ.pop_front();
                 fixChan(ptr->first, false);
@@ -1005,10 +1045,24 @@ for(fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ptr++)
 return;
 }
 
+bool chanfix::isBeingFixed(Channel* theChan)
+{
+return (isBeingAutoFixed(theChan) || isBeingChanFixed(theChan));
+}
+
+bool chanfix::isBeingAutoFixed(Channel* theChan)
+{
+return false;
+}
+
+bool chanfix::isBeingChanFixed(Channel* theChan)
+{
+return false;
+}
+
 void Command::Usage( iClient* theClient )
 {
 bot->Notice( theClient, string( "SYNTAX: " ) + getInfo() ) ;
 }
 
 } // namespace gnuworld
-

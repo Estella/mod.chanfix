@@ -8,8 +8,9 @@
 #include        <sstream>
 #include        <string>
 #include        <iostream>
-
 #include        <cstring>
+
+#include	"libpq++.h"
 
 #include        "ELog.h"
 #include        "misc.h"

@@ -70,11 +70,14 @@ class commandName##Command : public Command \
     virtual void Exec(iClient*, const string&); \
 };
 
+/* Oper commands */
+DECLARE_COMMAND( CHANFIX )
+
 /* Coder commands */
-DECLARE_COMMAND( INVITE );
-DECLARE_COMMAND( QUOTE );
-DECLARE_COMMAND( RELOAD );
-DECLARE_COMMAND( SHUTDOWN );
+DECLARE_COMMAND( INVITE )
+DECLARE_COMMAND( QUOTE )
+DECLARE_COMMAND( RELOAD )
+DECLARE_COMMAND( SHUTDOWN )
 
 } // namespace gnuworld
 

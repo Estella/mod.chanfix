@@ -47,8 +47,6 @@ StringTokenizer st(Message);
 
 bot->Notice(theClient, "Reloading client...see you on the flip side");
 
-bot->UpdateOps();
-
 if (st.size() < 2) {
   server->UnloadClient(bot, "Reloading...");
 } else {

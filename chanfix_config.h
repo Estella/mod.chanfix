@@ -30,7 +30,7 @@
 /**
  * The time between consecutive attempts to fix an opless channel
  */
-#define AUTOFIX_INTERVAL        600
+#define AUTOFIX_INTERVAL	600
 
 /**
  * The maximum time to try to fix an opless channel
@@ -74,34 +74,44 @@
 
 /**
  * Minimum absolute score required for chanfix to op, relative to
- * the maximum score possible (default: 0.40 * 4032).
+ * the maximum score possible (default: 0.20 * 4032).
  */
-#define FIX_MIN_ABS_SCORE_BEGIN	0.40
+#define FIX_MIN_ABS_SCORE_BEGIN	0.20f
 
 /**
  * Minimum score required for chanfix to op, relative to the maximum
  * score for this channel in the database, at the beginning of the
  * fix.
  */
-#define FIX_MIN_REL_SCORE_BEGIN	0.90
+#define FIX_MIN_REL_SCORE_BEGIN	0.90f
 
 /**
  * Minimum absolute score required for chanfix to op, relative to
  * the maximum score possible (default: 0.04 * 4032).
  */
-#define FIX_MIN_ABS_SCORE_END	0.04
+#define FIX_MIN_ABS_SCORE_END	0.04f
 
 /**
  * Minimum score required for chanfix to op, relative to the maximum
  * score for this channel in the database. So, if you have less than
  * 30% of the maximum score, chanfix will never op you.
  */
-#define FIX_MIN_REL_SCORE_END	0.30
+#define FIX_MIN_REL_SCORE_END	0.30f
 
 
 /**
  * Other various settings that really should not be changed.
  */
+
+/**
+ * Interval between two consecutive database updates.
+ */
+#define DATABASE_UPDATE_TIME	300
+
+/**
+ * Maximum score a client can obtain.
+ */
+#define MAX_SCORE	((int)(DAYSAMPLES) * 86400 / DATABASE_UPDATE_TIME)
 
 /**
  * The maximum number of days to keep track of per channel -1,
