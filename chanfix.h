@@ -29,6 +29,8 @@
 #include	"sqlChanOp.h"
 #include	"chanfixCommands.h"
 #include        "EConfig.h"
+#include	"Timer.h"
+#include	"chanfix_config.h"
 
 using std::string;
 
@@ -40,7 +42,9 @@ namespace gnuworld
 
 enum CHANFIX_STATE {
 	BURST,
-	RUN
+	RUN,
+	SPLIT,
+	INIT
 };
 
 class cmDatabase : public PgDatabase
@@ -159,12 +163,22 @@ public:
 
 	void changeState(CHANFIX_STATE);
 
+	void BurstOps();
         void CheckOps();
 
 	void givePoint(iClient*, Channel*);
         void givePoint(sqlChanOp*);
 
 	void gotOpped(iClient*, Channel*);
+
+        bool wasOpped(iClient*, Channel*);
+
+	void CheckNet();
+
+	void AutoFix();
+	void ManFix(Channel*);
+
+	void UpdateOps();
 
         /**
          * PostgreSQL Database
@@ -176,6 +190,9 @@ public:
 	 */
         typedef map< pair<string, string>, sqlChanOp*> sqlChanOpsType;
 	sqlChanOpsType 	sqlChanOps;
+
+	typedef list< pair< string, string> > lastOpsType;
+	lastOpsType  lastOps;
 
         string          consoleChan;
         string          operChan;
@@ -203,10 +220,10 @@ protected:
 	bool		enableAutoFix;
 	bool		enableChanFix;
 	bool		enableChannelBlocking;
-	string		numServers;
-	string		minServersPresent;
+	unsigned int	numServers;
+	unsigned int	minServersPresent;
 	string		numTopScores;
-	string		minClients;
+	unsigned int	minClients;
 	bool		clientNeedsIdent;
 	bool		clientNeedsReverse;
 	string          sqlHost;
@@ -221,10 +238,17 @@ protected:
 	CHANFIX_STATE	currentState;
 
         /**
-	 * How often to check ops
+	 * Delay declarations
 	 */
 	unsigned int	checkOpsDelay;
+	unsigned int	updateDelay;
+
+	/**
+	 * Timer declarations
+	 */
 	xServer::timerID tidCheckOps;
+        xServer::timerID tidAutoFix;
+        xServer::timerID tidUpdateDB;
 
 	/**
 	 * Internal timer

@@ -30,7 +30,7 @@
 /**
  * The time between consecutive attempts to fix an opless channel
  */
-#define AUTOFIX_INTERVAL	600
+#define AUTOFIX_INTERVAL        600
 
 /**
  * The maximum time to try to fix an opless channel

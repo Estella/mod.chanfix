@@ -180,9 +180,12 @@ libchanfix_la_LDFLAGS = -module -export-dynamic -L@PGSQL_LIB@ -lpq++
 EXTRA_DIST = \
 	chanfix.h \
 	chanfixCommands.h \
+	chanfix_config.h \
 	functor.h \
 	levels.h \
-	sqlChanOp.h
+	sqlChanOp.h \
+	sqlUser.h \
+	Timer.h
 
 subdir = mod.chanfix
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
