@@ -512,7 +512,7 @@ void chanfix::changeState(CHANFIX_STATE newState)
 {
 if (currentState == newState) return;
 
-/* Start our own timer just for ourself */
+/* Start our timer. */
 Timer stateTimer;
 stateTimer.Start();
 
@@ -797,19 +797,19 @@ if (currentState != RUN) {
   return;
 }
 
-/* Start a timer for ourselves */
+/* Start our timer. */
 Timer autoFixTimer;
 autoFixTimer.Start();
 
 /* Now walk through all channels to find the opless ones. */
 Channel* thisChan;
 ChannelUser* curUser;
+int numOpLess = 0;
 for (xNetwork::channelIterator ptr = Network->channels_begin();
      ptr != Network->channels_end(); ptr++) {
    thisChan = ptr->second;
    bool opLess = true;
    bool hasService = false;
-   int numOpLess = 0;
    if (thisChan->size() > minClients) {
      for (Channel::userIterator ptr = thisChan->userList_begin();
 	  ptr != thisChan->userList_end(); ptr++) {
@@ -828,7 +828,7 @@ for (xNetwork::channelIterator ptr = Network->channels_begin();
 	 sqlChan->setMaxScore((*myOps.begin())->getPoints());
 
        if ((sqlChan->getMaxScore() > 
-	   static_cast<int>(static_cast<float>(FIX_MIN_ABS_SCORE_END) * 
+	   static_cast<int>(static_cast<float>(FIX_MIN_ABS_SCORE_END)
 	   * MAX_SCORE)) && !sqlChan->getFlag(sqlChannel::F_BLOCKED)
 	   && !isBeingFixed(thisChan)) {
 	 elog << "chanfix::autoFix> DEBUG: " << thisChan->getName() << " is opless, fixing." << endl;
@@ -962,23 +962,25 @@ return false;
 iClient* curClient = 0;
 sqlChanOp* curOp = 0;
 vector< iClient* > opVec;
-for(chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end(); opPtr++)
-	{
-	curOp = *opPtr;
-	if (curOp->getPoints() > min_score)
-		{
-		curClient = findAccount(curOp->getAccount(), theChan);
-		if(curClient && !theChan->findUser(curClient)->isModeO())
-			{
-			elog << "chanfix::fixChan> DEBUG: Decided to op: " << curClient->getNickName() << " on " 
-				<< theChan->getName() << ". Client has " 
-				<< curOp->getPoints() << " points. ABS_MIN = " 
-				<< min_score_abs << " and REL_MIN = " << min_score_rel << endl;
-			opVec.push_back(curClient);
-			}
-		}
-	}
-Op(theChan, opVec);
+for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
+     opPtr++) {
+   curOp = *opPtr;
+   if (curOp->getPoints() > min_score) {
+     curClient = findAccount(curOp->getAccount(), theChan);
+     if (curClient && !theChan->findUser(curClient)->isModeO()) {
+       elog << "chanfix::fixChan> DEBUG: Decided to op: " \
+	    << curClient->getNickName() << " on " \
+	    << theChan->getName() << ". Client has " \
+	    << curOp->getPoints() << " points. ABS_MIN = " \
+	    << min_score_abs << " and REL_MIN = " << min_score_rel \
+	    << endl;
+       opVec.push_back(curClient);
+     }
+   }
+}
+
+if (!opVec.empty())
+  Op(theChan, opVec);
 
 if (opVec.size() == 1)
   Message(theChan, "1 client should have been opped.");

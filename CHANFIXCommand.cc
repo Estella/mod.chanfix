@@ -76,7 +76,7 @@ if (!netChan) {
 chanfix::chanOpsType myOps = bot->getMyOps(netChan);
 if (myOps.empty()) {
   bot->Notice(theClient, "There are no scores in the database for %s.",
-	      netChan->getName());
+	      netChan->getName().c_str());
   return;
 }
 
