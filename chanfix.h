@@ -307,7 +307,7 @@ protected:
 public:
         bool doAutoFix() { return enableAutoFix; }
         bool doChanFix() { return enableChanFix; }
-        bool doChanBlock() { return enableChannelBlocking; }
+        bool doChanBlocking() { return enableChannelBlocking; }
 	CHANFIX_STATE getState() { return currentState; }
 
 

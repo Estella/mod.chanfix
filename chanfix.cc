@@ -785,36 +785,63 @@ if(currentState == SPLIT)
 
 void chanfix::autoFix()
 {
+/* If autofixing has been disabled, well, forget it. */
 if (!enableAutoFix) {
   elog << "chanfix::autoFix> DEBUG: AutoFix not enabled." << endl;
   return;
 }
 
+/* If there are too many servers split, don't autofix. */
 if (currentState != RUN) {
   elog << "chanfix::autoFix> DEBUG: currentState != RUN" << endl;
   return;
 }
 
+/* Start a timer for ourselves */
+Timer autoFixTimer;
+autoFixTimer.Start();
+
+/* Now walk through all channels to find the opless ones. */
 Channel* thisChan;
 ChannelUser* curUser;
-for(xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->channels_end(); ptr++) {
-        thisChan = ptr->second;
-	bool opLess = true;
-	bool hasService = false;
-        if (thisChan->size() > minClients)
-		{
-                for(Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
-                        curUser = ptr->second;
-                        if(curUser->isModeO()) opLess = false;
-			if(curUser->getClient()->getMode(iClient::MODE_SERVICES)) hasService = true;
-			}
-		if(opLess && !hasService)
-			{
-			elog << "chanfix::autoFix> DEBUG: Autofix " << thisChan->getName() << "!" << endl;
-			autoFixQ.push_back(fixQueueType::value_type(thisChan, currentTime()));
-			}
-		}
-	}
+for (xNetwork::channelIterator ptr = Network->channels_begin();
+     ptr != Network->channels_end(); ptr++) {
+   thisChan = ptr->second;
+   bool opLess = true;
+   bool hasService = false;
+   int numOpLess = 0;
+   if (thisChan->size() > minClients) {
+     for (Channel::userIterator ptr = thisChan->userList_begin();
+	  ptr != thisChan->userList_end(); ptr++) {
+	curUser = ptr->second;
+	if (curUser->isModeO())
+	  opLess = false;
+	if (curUser->getClient()->getMode(iClient::MODE_SERVICES))
+	  hasService = true;
+     }
+     if (opLess && !hasService) {
+       sqlChannel* sqlChan = getChannelRecord(thisChan);
+       if (!sqlChan) sqlChan = newChannelRecord(thisChan);
+
+       chanOpsType myOps = getMyOps(thisChan);
+       if (myOps.begin() != myOps.end())
+	 sqlChan->setMaxScore((*myOps.begin())->getPoints());
+
+       if ((sqlChan->getMaxScore() > 
+	   static_cast<int>(static_cast<float>(FIX_MIN_ABS_SCORE_END) * 
+	   * MAX_SCORE)) && !sqlChan->getFlag(sqlChannel::F_BLOCKED)
+	   && !isBeingFixed(thisChan)) {
+	 elog << "chanfix::autoFix> DEBUG: " << thisChan->getName() << " is opless, fixing." << endl;
+	 autoFixQ.push_back(fixQueueType::value_type(thisChan, currentTime()));
+	 numOpLess++;
+       }
+     }
+   }
+}
+
+elog << "chanfix::autoFix> DEBUG: Found " << numOpLess << " of " \
+	<< Network->channelList_size() << " channels in " \
+	<< autoFixTimer.stopTimeMS() << " ms." << endl;
 }
 
 void chanfix::manualFix(Channel* thisChan)
@@ -938,7 +965,7 @@ vector< iClient* > opVec;
 for(chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end(); opPtr++)
 	{
 	curOp = *opPtr;
-	if( curOp->getPoints() > min_score_abs && curOp->getPoints() > min_score_rel)
+	if (curOp->getPoints() > min_score)
 		{
 		curClient = findAccount(curOp->getAccount(), theChan);
 		if(curClient && !theChan->findUser(curClient)->isModeO())
@@ -952,6 +979,11 @@ for(chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end(); opPtr++)
 		}
 	}
 Op(theChan, opVec);
+
+if (opVec.size() == 1)
+  Message(theChan, "1 client should have been opped.");
+else
+  Message(theChan, "%d clients should have been opped.", opVec.size());
 
 sqlChan->Update();
 

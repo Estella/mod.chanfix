@@ -50,15 +50,9 @@ bool override = false;
 
 if (st.size() > 2) {
   const string flag = string_upper(st[2]);
-  if ((flag == "OVERRIDE") || (flag == "NOW") || (st[1][0] == '!'))
+  if ((flag == "OVERRIDE") || (flag == "NOW") || (flag == '!'))
     override = true;
 }
-
-/* ??
- * if (st[1][0] == '!') {
- *  st[1]++;
- * }
- */
 
 /* Check if manual chanfix has been disabled in the config. */
 if (!bot->doChanFix()) {
@@ -82,7 +76,7 @@ if (!netChan) {
 chanfix::chanOpsType myOps = bot->getMyOps(netChan);
 if (myOps.empty()) {
   bot->Notice(theClient, "There are no scores in the database for %s.",
-	      st[1].c_str());
+	      netChan->getName());
   return;
 }
 
@@ -100,11 +94,14 @@ if (bot->isBeingChanFixed(netChan)) {
 if (myOps.begin() != myOps.end())
   theChan->setMaxScore((*myOps.begin())->getPoints());
 
-if (theChan->getMaxScore() <= (int)(FIX_MIN_ABS_SCORE_END * MAX_SCORE)) {
+if (theChan->getMaxScore() <= 
+    static_cast<int>(static_cast<float>(FIX_MIN_ABS_SCORE_END) * MAX_SCORE)) 
+{
   bot->Notice(theClient, "The highscore in channel %s is %d which is lower than the minimum score required (%.3f * %d = %d).",
 	      theChan->getChannel().c_str(), theChan->getMaxScore(),
 	      FIX_MIN_ABS_SCORE_END, MAX_SCORE,
-	      (int)(FIX_MIN_ABS_SCORE_END * MAX_SCORE));
+	      static_cast<int>(<static_cast<float>(FIX_MIN_ABS_SCORE_END) 
+	      * MAX_SCORE));
   return;
 }
 
@@ -117,7 +114,7 @@ if (bot->isBeingAutoFixed(netChan)) {
   } else {
     /* We're going to manually fix this instead of autofixing it,
      * so remove this channel from the autofix queue. */
-    /* ... */
+    /* TODO: REMOVE CHAN FROM AUTOFIX QUEUE HERE */
   }
 }
 
