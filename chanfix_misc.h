@@ -27,33 +27,22 @@
 #ifndef __CHANFIX_MISC_H
 #define __CHANFIX_MISC_H "$Id$"
 
-#include "match.h"
-#include "ELog.h"
+//#include "sqlChanOp.h"
 
 namespace gnuworld
 {
 
 using std::endl;
 
-struct MatchPair
-{
-inline bool operator()( std::pair<string, string> lhs, std::pair<string, string> rhs ) const
-	{
-	elog << "DEBUG: Match called!!" << endl;
-	return (match( lhs.first, rhs.first ) < 0 && match ( lhs.second, rhs.second ) < 0) ;
-	}
-} ;
+bool compare_points(gnuworld::sqlChanOp* a, gnuworld::sqlChanOp* b) {
+  return a->getPoints() > b->getPoints();
+}
 
-bool atob( string str )
+bool atob( std::string str )
 {
 if(str == "y" || str == "true" || str == "yes") return true;
 return false;
 }
-
-bool compare_points(sqlChanOp* a, sqlChanOp* b)
-        {
-        return a->getPoints() > b->getPoints();
-        }
 
 } //namespace gnuworld
 

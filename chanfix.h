@@ -29,6 +29,7 @@
 
 #include	"client.h"
 #include	"EConfig.h"
+#include	"ELog.h"
 
 #include	"chanfixCommands.h"
 #include	"chanfix_config.h"
@@ -55,6 +56,30 @@ enum CHANFIX_STATE {
 	SPLIT,
 	INIT
 };
+
+/**
+ * Case insensitive comparison struct for use by STL structures/algorithms.
+ */
+struct noCaseComparePair
+{
+inline bool operator()( const std::pair<string, string>& lhs, const std::pair<string, string>& rhs) const
+{
+	elog << "gnuworld::noCaseComparePair> DEBUG:"
+		<< "[lfirst=" << lhs.first
+                << " lsecond=" << lhs.second
+		<< "] [rfirst=" << rhs.first
+		<< " rsecond=" << rhs.second << "]"
+		<< std::endl;
+        if (!strcasecmp(lhs.first, rhs.first) && !strcasecmp(lhs.second, rhs.second)) {
+		elog << "gnuworld::noCaseComparePair> DEBUG: This is a match!" << std::endl;
+		return true;
+	} else {
+                elog << "gnuworld::noCaseComparePair> DEBUG: This is not a match!" << std::endl;
+                return false;
+	}
+}
+} ;
+
 
 class cmDatabase : public PgDatabase
 {
@@ -221,11 +246,12 @@ public:
 	/**
 	 * ChannelOp map
 	 */
-	typedef map< std::pair<string, string>, sqlChanOp*> sqlChanOpsType;
-	sqlChanOpsType	sqlChanOps;
+//        typedef map< std::pair<string, string>, sqlChanOp*, noCaseComparePair> sqlChanOpsType;
+        typedef map< std::pair<string, string>, sqlChanOp*> sqlChanOpsType;
+	sqlChanOpsType sqlChanOps;
 
-	typedef map <string, sqlChannel*> sqlChannelCacheType;
-	sqlChannelCacheType	sqlChanCache;
+	typedef map <string, sqlChannel*, noCaseCompare> sqlChannelCacheType;
+	sqlChannelCacheType sqlChanCache;
 
 	typedef list< std::pair< string, string> > lastOpsType;
 	lastOpsType	lastOps;

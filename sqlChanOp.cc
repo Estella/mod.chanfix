@@ -87,9 +87,9 @@ static const char* queryHeader =    "UPDATE chanOps ";
 stringstream queryString;
 queryString     << queryHeader << "SET last_seen_as = "<< "'"
                 << escapeSQLChars(nickUserHost) << "', points = "
-                << points << " WHERE channel = '"
-                << channel << "' AND account = '"
-                << account << "'"
+                << points << " WHERE lower(channel) = '"
+                << string_lower(channel) << "' AND lower(account) = '"
+                << string_lower(account) << "'"
                 << ends;
 
 //#ifdef LOG_SQL

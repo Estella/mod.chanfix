@@ -420,6 +420,7 @@ switch(whichEvent)
 	case EVT_BURST_ACK:
 		{
 		changeState(RUN);
+		burstOps();
 		break;
 		}
 	case EVT_NETJOIN:
@@ -577,11 +578,12 @@ elog	<< "Changed state in: "
 sqlChanOp* chanfix::findChanOp(const string& account, const string& channel)
 {
 
-elog << "chanfix::findChanOp> DEBUG: Searching ..." << endl;
+elog << "chanfix::findChanOp> DEBUG: Searching for " << account << " on " << channel << "..." << endl;
 sqlChanOpsType::iterator ptr = sqlChanOps.find(std::pair<string,string>(account, channel));
 if(ptr != sqlChanOps.end())
 	{
-	elog << "chanfix::findChanOp> DEBUG: We've got a winner: " << account << " on " << channel << "!!" << endl;
+	elog << "chanfix::findChanOp> DEBUG: We've got a winner: " 
+		<< ptr->second->getAccount() << " on " << ptr->second->getChannel() << "!!" << endl;
         return ptr->second ;
 	}
 
@@ -593,14 +595,17 @@ sqlChanOp* chanfix::newChanOp(const string& account, const string& channel)
 sqlChanOp* newOp = new (std::nothrow) sqlChanOp(SQLDb);
 assert( newOp != 0 ) ;
 
+
 sqlChanOps.insert(sqlChanOpsType::value_type(std::pair<string,string>(account, channel), newOp));
 elog << "chanfix::newChanOp> DEBUG: Added new operator: " << account << " on " << channel << "!!" << endl;
 
 newOp->setAccount(account);
 newOp->setChannel(channel);
-newOp->Insert();
 
-return newOp;
+if(newOp->Insert())
+  return newOp;
+else
+  return 0;
 }
 
 sqlChanOp* chanfix::findChanOp(iClient* theClient, Channel* theChan) 
@@ -729,9 +734,14 @@ elog << "chanfix::givePoint> DEBUG: Gave " << thisOp->getAccount()
 
 void chanfix::gotOpped(iClient* thisClient, Channel* thisChan)
 {
+elog << "chanfix::gotOpped> DEBUG: " << thisClient->getAccount()
+        << " got opped on " << thisChan->getName()
+        << " since my last check..."
+        << endl;
 
 sqlChanOp* thisOp = findChanOp(thisClient, thisChan);
 if(!thisOp) thisOp = newChanOp(thisClient, thisChan);
+if(!thisOp) return;
 
 thisOp->setTimeOpped(currentTime());
 thisOp->setLastSeenAs(thisClient->getNickUserHost());
@@ -742,11 +752,17 @@ bool chanfix::wasOpped(iClient* thisClient, Channel* thisChan)
 if(thisClient->getMode(iClient::MODE_SERVICES)) return false;
 if(thisClient->getAccount() == "") return false;
 
+elog << "chanfix::wasOpped> DEBUG: Looking for Acc = " << thisClient->getAccount() << " (nick: " 
+	<< thisClient->getNickName() << ") && Chan = " << thisChan->getName() << endl;
+
 std::pair<string, string> curPair; 
 for(lastOpsType::iterator ptr = lastOps.begin(); ptr != lastOps.end(); ptr++)
 	{
-	curPair = *ptr;
-	if(curPair.first == thisClient->getAccount() && curPair.second == thisChan->getName())
+        curPair = *ptr;
+	elog << "chanfix::wasOpped> DEBUG: curAcc = " << curPair.first 
+		<< " && curChan = " << curPair.second << endl;
+	if(!strcasecmp(curPair.first, thisClient->getAccount()) && 
+			!strcasecmp(curPair.second, thisChan->getName()))
 		{
 		elog << "chanfix::wasOpped> DEBUG: " << thisClient->getAccount() << " was opped on " 
 			<< thisChan->getName() 
