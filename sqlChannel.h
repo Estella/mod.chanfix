@@ -50,7 +50,7 @@ public:
          *  Methods to get data atrributes.
          */
 
-        inline const string&	getChannel() const
+        inline const std::string&	getChannel() const
                 { return channel ; }
 
 	inline const flagType&	getFlags() const

@@ -39,7 +39,7 @@ public:
 	void setServer(xServer *_server)
 		{ server = _server; }
 	
-	virtual inline string getInfo() const
+	virtual inline std::string getInfo() const
 		{ return commandName + ' ' + help; }
 	
 	virtual void Usage(iClient*);
@@ -53,8 +53,8 @@ public:
 protected:
 	chanfix		*bot;
 	xServer		*server;
-	string		commandName;
-	string		help;
+	std::string		commandName;
+	std::string		help;
 
 };
 

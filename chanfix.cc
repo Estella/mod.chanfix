@@ -673,7 +673,7 @@ myOps.sort(compare_points);
 return myOps;
 }
 
-const std::string gnuworld::escapeSQLChars(const \std::string& theString)
+const std::string gnuworld::escapeSQLChars(const std::string& theString)
 {
 string retMe ;
 

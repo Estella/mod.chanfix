@@ -84,7 +84,7 @@ inline bool operator()( const std::pair<string, string>& lhs, const std::pair<st
 class cmDatabase : public PgDatabase
 {
 public:
-	cmDatabase(const string& conninfo)
+	cmDatabase(const std::string& conninfo)
 	 : PgDatabase(conninfo.c_str()) {}
 	virtual ~cmDatabase() {}
 
@@ -96,7 +96,7 @@ public:
 	/**
 	 * Constructor receives a configuration file name.
 	 */
-	chanfix( const string& ) ;
+	chanfix( const std::string& ) ;
 
 	/**
 	 * Destructor does normal stuff.
@@ -112,7 +112,7 @@ public:
 	 * and the second argument is the actual message (minus
 	 * all of the server command stuff).
 	 */
-	virtual void OnPrivateMessage( iClient*, const string&,
+	virtual void OnPrivateMessage( iClient*, const std::string&,
 		bool secure = false ) ;
 
 	/**
@@ -136,7 +136,7 @@ public:
          * deallocating timers, closing connections, closing log files,
          * and deallocating private data stored in iClients.
          */
-        virtual void OnDetach( const string& =
+        virtual void OnDetach( const std::string& =
 			string( "Shutting down" ) ) ;
 
         /**
@@ -164,7 +164,7 @@ public:
          * of the given command name, deallocating the object from the
          * heap as well.
          */
-	virtual bool UnRegisterCommand( const string& ) ;
+	virtual bool UnRegisterCommand( const std::string& ) ;
 
         /**
          * This method is invoked each time a channel event occurs
@@ -191,16 +191,16 @@ public:
                 void* data1 = 0, void* data2 = 0,
                 void* data3 = 0, void* data4 = 0 ) ;
 
-        virtual void OnCTCP( iClient*, const string&, const string&, bool ) ;
+        virtual void OnCTCP( iClient*, const std::string&, const std::string&, bool ) ;
 
 	/**
 	 * Our functions.
 	 */
 
-	sqlChanOp* newChanOp(const string&, const string&);
+	sqlChanOp* newChanOp(const std::string&, const std::string&);
 	sqlChanOp* newChanOp(iClient*, Channel*);
 
-	sqlChanOp* findChanOp(const string&, const string&);
+	sqlChanOp* findChanOp(const std::string&, const std::string&);
 	sqlChanOp* findChanOp(iClient*, Channel*);
 
 	void preloadChanOpsCache();
@@ -225,12 +225,12 @@ public:
 
 	bool fixChan(Channel*, bool);
 
-	iClient* findAccount(const string&, Channel*);
+	iClient* findAccount(const std::string&, Channel*);
 
-	sqlChannel* getChannelRecord(const string&);
+	sqlChannel* getChannelRecord(const std::string&);
 	sqlChannel* getChannelRecord(Channel*);
 
-	sqlChannel* newChannelRecord(const string&);
+	sqlChannel* newChannelRecord(const std::string&);
 	sqlChannel* newChannelRecord(Channel*);
 
 	static size_t countChanOps(const Channel*);
@@ -345,7 +345,7 @@ public:
 
 }; // class chanfix
 
-const string escapeSQLChars(const string& theString);
+const string escapeSQLChars(const std::string& theString);
 
 } // namespace gnuworld
 

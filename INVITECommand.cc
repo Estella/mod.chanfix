@@ -24,7 +24,7 @@
  * $Id$
  */
 
-#include "config.h"
+#include "gnuworld_config.h"
 #include "Network.h"
 #include "StringTokenizer.h"
 
@@ -38,7 +38,7 @@ namespace gnuworld
 
 using std::string;
 
-void INVITECommand::Exec(iClient* theClient, const string& Message)
+void INVITECommand::Exec(iClient* theClient, const std::string& Message)
 {
 
 StringTokenizer st(Message);

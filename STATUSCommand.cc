@@ -26,7 +26,7 @@
 
 #include	<string>
 
-#include	"config.h"
+#include	"gnuworld_config.h"
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
@@ -41,7 +41,7 @@ namespace gnuworld
 using std::string;
 using namespace level;
 
-void STATUSCommand::Exec(iClient* theClient, const string&)
+void STATUSCommand::Exec(iClient* theClient, const std::string&)
 {
 
 bot->Notice(theClient, "[evilnet development's GNUWorld chanfix version %s]",

@@ -27,19 +27,19 @@ public:
          *  Methods to get data atrributes.
          */
 
-        inline const string&	getChannel() const
+        inline const std::string&	getChannel() const
                 { return channel ; }
 
-        inline const string&	getUserHost() const
+        inline const std::string&	getUserHost() const
                 { return userHost ; }
 
-        inline const string&	getAccount() const
+        inline const std::string&	getAccount() const
                 { return account ; }
 
 	inline const int&	getPoints() const
 		{ return points ; }
 
-	inline const string&	getLastSeenAs() const
+	inline const std::string&	getLastSeenAs() const
                 { return nickUserHost ; }
 
         inline const time_t	getTimeOpped() const

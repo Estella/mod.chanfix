@@ -26,7 +26,7 @@
 
 #include	<string>
 
-#include	"config.h"
+#include	"gnuworld_config.h"
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
@@ -40,7 +40,7 @@ namespace gnuworld
 using std::string ;
 using namespace level;
 
-void QUOTECommand::Exec(iClient* theClient, const string& Message)
+void QUOTECommand::Exec(iClient* theClient, const std::string& Message)
 {
 
 StringTokenizer st(Message);
