@@ -72,6 +72,17 @@ if (!netChan) {
   return;
 }
 
+/* Only allow chanfixes for unregistered channels. */
+ChannelUser* curUser;
+for (Channel::userIterator ptr = netChan->userList_begin(); ptr != netChan->userList_end(); ptr++) {
+   curUser = ptr->second;
+   if (curUser->getClient()->getMode(iClient::MODE_SERVICES)) {
+     bot->Notice(theClient, "%s is a registered channel.", 
+		 netChan->getName().c_str());
+     return;
+   }
+}
+
 /* Only allow chanfixes for channels that are in the database. */
 chanfix::chanOpsType myOps = bot->getMyOps(netChan);
 if (myOps.empty()) {
@@ -97,7 +108,7 @@ if (myOps.begin() != myOps.end())
 if (theChan->getMaxScore() <= 
     static_cast<int>(static_cast<float>(FIX_MIN_ABS_SCORE_END) * MAX_SCORE)) 
 {
-  bot->Notice(theClient, "The highscore in channel %s is %d which is lower than the minimum score required (%.3f * %d = %d).",
+  bot->Notice(theClient, "The highscore in channel %s is %d which is lower than the minimum score required (%.2f * %d = %d).",
 	      theChan->getChannel().c_str(), theChan->getMaxScore(),
 	      FIX_MIN_ABS_SCORE_END, MAX_SCORE,
 	      static_cast<int>(static_cast<float>(FIX_MIN_ABS_SCORE_END) 

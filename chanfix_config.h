@@ -104,19 +104,29 @@
  */
 
 /**
- * Interval between two consecutive database updates.
+ * Interval between two consecutive points updates.
  */
-#define DATABASE_UPDATE_TIME 300
+#define POINTS_UPDATE_TIME	300
 
 /**
- * Interval between two consecutive sql updates.
+ * Interval between two consecutive SQL updates.
  */
-#define SQL_UPDATE_TIME	3600
+#define SQL_UPDATE_TIME		3600
+
+/**
+ * Interval between two consecutive checks for opless channels.
+ */
+#define CHECK_CHANS_TIME	600
+
+/**
+ * Interval between two consecutive processing of the queues.
+ */
+#define PROCESS_QUEUE_TIME	300
 
 /**
  * Maximum score a client can obtain.
  */
-#define MAX_SCORE	(static_cast<int>(DAYSAMPLES) * 86400 / DATABASE_UPDATE_TIME)
+#define MAX_SCORE	(static_cast<int>(DAYSAMPLES) * 86400 / POINTS_UPDATE_TIME)
 
 /**
  * The maximum number of days to keep track of per channel -1,

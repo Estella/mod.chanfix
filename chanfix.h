@@ -23,8 +23,8 @@
 #define __CHANFIX_H "$Id$"
 
 #include	<string>
-#include        <vector>
-#include        <map>
+#include	<vector>
+#include	<map>
 #include	<list>
 
 #include	"client.h"
@@ -59,9 +59,9 @@ enum CHANFIX_STATE {
 class cmDatabase : public PgDatabase
 {
 public:
-        cmDatabase(const string& conninfo)
-         : PgDatabase(conninfo.c_str()) {}
-        virtual ~cmDatabase() {}
+	cmDatabase(const string& conninfo)
+	 : PgDatabase(conninfo.c_str()) {}
+	virtual ~cmDatabase() {}
 
 };
 
@@ -163,7 +163,7 @@ public:
 	 */
 
 	sqlChanOp* newChanOp(const string&, const string&);
-        sqlChanOp* newChanOp(iClient*, Channel*);
+	sqlChanOp* newChanOp(iClient*, Channel*);
 
 	sqlChanOp* findChanOp(const string&, const string&);
 	sqlChanOp* findChanOp(iClient*, Channel*);
@@ -176,14 +176,14 @@ public:
 	time_t currentTime() { return ::time(0); }
 
 	void burstOps();
-        void checkOps();
+	void checkOps();
 
 	void givePoint(iClient*, Channel*);
-        void givePoint(sqlChanOp*);
+	void givePoint(sqlChanOp*);
 
 	void gotOpped(iClient*, Channel*);
 
-        bool wasOpped(iClient*, Channel*);
+	bool wasOpped(iClient*, Channel*);
 
 	void checkNetwork();
 
@@ -211,49 +211,48 @@ public:
 	bool isBeingChanFixed(Channel*);
 
 	bool removeFromAutoQ(Channel*);
-        bool removeFromManQ(Channel*);
+	bool removeFromManQ(Channel*);
 	
-        /**
-         * PostgreSQL Database
-         */
-        cmDatabase* SQLDb;
+	/**
+	 * PostgreSQL Database
+	 */
+	cmDatabase* SQLDb;
 
 	/**
 	 * ChannelOp map
 	 */
-        typedef map< std::pair<string, string>, sqlChanOp*> sqlChanOpsType;
-	sqlChanOpsType 	sqlChanOps;
+	typedef map< std::pair<string, string>, sqlChanOp*> sqlChanOpsType;
+	sqlChanOpsType	sqlChanOps;
 
 	typedef map <string, sqlChannel*> sqlChannelCacheType;
-	sqlChannelCacheType sqlChanCache;
+	sqlChannelCacheType	sqlChanCache;
 
 	typedef list< std::pair< string, string> > lastOpsType;
-	lastOpsType  lastOps;
+	lastOpsType	lastOps;
 
 	typedef list< sqlChanOp* > chanOpsType;
-	chanOpsType getMyOps(Channel*);
+	chanOpsType	getMyOps(Channel*);
 
 	/**
-	 * Queues to process ...
+	 * Queues to process.
 	 */
 	typedef list< std::pair<Channel*, time_t> > fixQueueType;
-	fixQueueType manFixQ;
-        fixQueueType autoFixQ;
+	fixQueueType	autoFixQ;
+	fixQueueType	manFixQ;
 
 	typedef list< std::pair <Channel*, iClient*> > opQueueType;
-	opQueueType opQ;
+	opQueueType	opQ;
 
-        string          consoleChan;
-        string          operChan;
-        string          supportChan;
-
+	string          consoleChan;
+	string          operChan;
+	string          supportChan;
 
 protected:
-        /**
-         * Commands map
-         */
-        typedef map< string, Command*, noCaseCompare> commandMapType;
-        commandMapType commandMap;
+	/**
+	 * Commands map
+	 */
+	typedef map< string, Command*, noCaseCompare> commandMapType;
+	commandMapType commandMap;
 
 	/**
 	 * Configuration file.
@@ -287,32 +286,24 @@ protected:
 	 */
 	CHANFIX_STATE	currentState;
 
-        /**
-	 * Delay declarations
-	 */
-	unsigned int	checkOpsDelay;
-	unsigned int	updateDelay;
-	unsigned int	fixDelay;
-
 	/**
 	 * Timer declarations
 	 */
 	xServer::timerID tidCheckOps;
-        xServer::timerID tidAutoFix;
-        xServer::timerID tidUpdateDB;
+	xServer::timerID tidAutoFix;
+	xServer::timerID tidUpdateDB;
 	xServer::timerID tidFixQ;
 
 	/**
 	 * Internal timer
 	 */
-        Timer *theTimer;
+	Timer *theTimer;
 
 public:
-        bool doAutoFix() { return enableAutoFix; }
-        bool doChanFix() { return enableChanFix; }
-        bool doChanBlocking() { return enableChannelBlocking; }
+	bool doAutoFix() { return enableAutoFix; }
+	bool doChanFix() { return enableChanFix; }
+	bool doChanBlocking() { return enableChannelBlocking; }
 	CHANFIX_STATE getState() { return currentState; }
-
 
 }; // class chanfix
 

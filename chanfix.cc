@@ -212,17 +212,12 @@ MyUplink->RegisterEvent( EVT_NETBREAK, this );
 MyUplink->RegisterChannelEvent( xServer::CHANNEL_ALL, this );
 
 /**
- * Set up delays
- */
-fixDelay = 30; // try finding channels to fix every 30 sec's
-
-/**
  * Start timers
  */
-tidCheckOps = MyUplink->RegisterTimer(time(NULL) + DATABASE_UPDATE_TIME, this, NULL);
-tidAutoFix = MyUplink->RegisterTimer(time(NULL) + AUTOFIX_INTERVAL, this, NULL);
+tidCheckOps = MyUplink->RegisterTimer(time(NULL) + POINTS_UPDATE_TIME, this, NULL);
+tidAutoFix = MyUplink->RegisterTimer(time(NULL) + CHECK_CHANS_TIME, this, NULL);
 tidUpdateDB = MyUplink->RegisterTimer(time(NULL) + SQL_UPDATE_TIME, this, NULL);
-tidFixQ = MyUplink->RegisterTimer(time(NULL) + fixDelay, this, NULL);
+tidFixQ = MyUplink->RegisterTimer(time(NULL) + PROCESS_QUEUE_TIME, this, NULL);
 
 /**
  * After attaching, change state to RUN
@@ -277,14 +272,14 @@ if (theTimer == tidCheckOps) {
   checkOps();
 
   /* Refresh Timer */
-  theTime = time(NULL) + DATABASE_UPDATE_TIME;
+  theTime = time(NULL) + POINTS_UPDATE_TIME;
   tidCheckOps = MyUplink->RegisterTimer(theTime, this, NULL);
   }
 else if (theTimer == tidAutoFix) {
   autoFix();
 
   /* Refresh Timer */
-  theTime = time(NULL) + AUTOFIX_INTERVAL;
+  theTime = time(NULL) + CHECK_CHANS_TIME;
   tidAutoFix = MyUplink->RegisterTimer(theTime, this, NULL);
   }
 else if (theTimer == tidUpdateDB) {
@@ -298,7 +293,7 @@ else if (theTimer == tidFixQ) {
   processQueue();
 
   /* Refresh Timer */
-  theTime = time(NULL) + fixDelay;
+  theTime = time(NULL) + PROCESS_QUEUE_TIME;
   tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
   }
 
@@ -312,7 +307,7 @@ if (!theClient->isOper()) {
 }
 
 if (currentState == BURST) {
-  Notice(theClient, "I'm in BURST-mode! Please try again later!");
+  Notice(theClient, "Sorry, I do not accept commands during a burst.");
   return;
 }
 
@@ -357,7 +352,7 @@ if (Command == "DCC") {
 } else if (Command == "PING" || Command == "ECHO") {
   DoCTCP(theClient, CTCP, Message);
 } else if (Command == "VERSION") {
-  DoCTCP(theClient, CTCP, "evilnet development - chanfix v1.0.0");
+  DoCTCP(theClient, CTCP, "evilnet development - GNUWorld chanfix v1.0.0");
 }
 
 xClient::OnCTCP(theClient, CTCP, Message, Secure);
@@ -738,7 +733,7 @@ void chanfix::gotOpped(iClient* thisClient, Channel* thisChan)
 sqlChanOp* thisOp = findChanOp(thisClient, thisChan);
 if(!thisOp) thisOp = newChanOp(thisClient, thisChan);
 
-thisOp->setTimeOpped(::time(0));
+thisOp->setTimeOpped(currentTime());
 thisOp->setLastSeenAs(thisClient->getNickUserHost());
 }
 
@@ -808,7 +803,7 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
    thisChan = ptr->second;
    bool opLess = true;
    bool hasService = false;
-   if (thisChan->size() > minClients && !isBeingAutoFixed(thisChan) && !isBeingChanFixed(thisChan)) {
+   if (thisChan->size() > minClients && !isBeingFixed(thisChan)) {
      for (Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
 	curUser = ptr->second;
 	if (curUser->isModeO())
@@ -826,8 +821,7 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
 
        if ((sqlChan->getMaxScore() > 
 	   static_cast<int>(static_cast<float>(FIX_MIN_ABS_SCORE_END)
-	   * MAX_SCORE)) && !sqlChan->getFlag(sqlChannel::F_BLOCKED)
-	   && !isBeingFixed(thisChan)) {
+	   * MAX_SCORE)) && !sqlChan->getFlag(sqlChannel::F_BLOCKED)) {
 	 elog << "chanfix::autoFix> DEBUG: " << thisChan->getName() << " is opless, fixing." << endl;
 	 autoFixQ.push_back(fixQueueType::value_type(thisChan, currentTime()));
 	 numOpLess++;
@@ -917,9 +911,10 @@ int min_score_abs = static_cast<int>((MAX_SCORE *
 		(MAX_SCORE * static_cast<float>(FIX_MIN_ABS_SCORE_BEGIN)
 		 - static_cast<float>(FIX_MIN_ABS_SCORE_END) * MAX_SCORE));
 
-elog << "chanfix::fixChan> [" << theChan->getName() << "] max MAX_SCORE" \
-	" begin FIX_MIN_ABS_SCORE_BEGIN end FIX_MIN_ABS_SCORE_END time " \
-	<< time_passed << " maxtime " << max_time << endl;
+elog << "chanfix::fixChan> [" << theChan->getName() << "] max "
+	<< MAX_SCORE << ", begin " << FIX_MIN_ABS_SCORE_BEGIN
+	<< ", end " << FIX_MIN_ABS_SCORE_END << ", time "
+	<< time_passed << ", maxtime " << max_time << "." << endl;
 
 /* Linear interpolation of (0, fraction_rel_max * max_score_channel) ->
  * (max_time, fraction_rel_min * max_score_channel)
@@ -936,25 +931,14 @@ int min_score = min_score_abs;
 if (min_score_rel > min_score)
   min_score = min_score_rel;
 
-elog << "chanfix::fixChan> [" << theChan->getName() << "] start " << \
-	sqlChan->getFixStart() << ", delta " << time_passed << ", max " \
-	<< maxScore << ", minabs " << min_score_abs << ", minrel " << \
-	min_score_rel << "." << endl;
-
-/* If no scores are high enough, return. */
-if (myOps.empty() || maxScore < min_score) {
-  if (autofix && !sqlChan->getModesRemoved()) {
-    ClearMode(theChan, "ovpsmikbl", true);
-    sqlChan->setModesRemoved(true);
-    Message(theChan, "Channel modes have been removed.");
-  }
-return false;
-}
+elog << "chanfix::fixChan> [" << theChan->getName() << "] start "
+	<< sqlChan->getFixStart() << ", delta " << time_passed
+	<< ", max " << maxScore << ", minabs " << min_score_abs
+	<< ", minrel " << min_score_rel << "." << endl;
 
 /**
  * Get the scores of the accounts of the non-opped clients.
  * Find out which clients need to be opped.
- * If we need to op at least one client, op him/her.
  */
 iClient* curClient = 0;
 sqlChanOp* curOp = 0;
@@ -976,6 +960,18 @@ for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
    }
 }
 
+/* If no scores are high enough, return. */
+/* This code is wrong. TODO: fix and put in correct spot */
+/* if (opVec.empty() || maxScore < min_score) {
+  if (autofix && !sqlChan->getModesRemoved()) {
+    ClearMode(theChan, "ovpsmikbl", true);
+    sqlChan->setModesRemoved(true);
+    Message(theChan, "Channel modes have been removed.");
+  }
+return false;
+} */
+
+/* If we need to op at least one client, op him/her. */
 if (!opVec.empty()) {
   Op(theChan, opVec);
 
