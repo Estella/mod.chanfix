@@ -26,6 +26,7 @@
 
 #include "config.h"
 #include "Network.h"
+#include "StringTokenizer.h"
 
 #include "chanfix.h"
 #include "levels.h" 
@@ -37,25 +38,33 @@ namespace gnuworld
 
 using std::string;
 
-void INVITECommand::Exec(iClient* theClient, const string&)
+void INVITECommand::Exec(iClient* theClient, const string& Message)
 {
 
-Channel* theChannel = Network->findChannel(bot->consoleChan);
+StringTokenizer st(Message);
+Channel* theChannel = 0;
+if (st.size() == 1)
+  theChannel = Network->findChannel(bot->consoleChan);
+else
+  theChannel = Network->findChannel(st[1]);
 
-if(!theChannel) {
-  bot->Notice(theClient, "Could not find the console channel on the network.");
+if (!theChannel) {
+  bot->Notice(theClient, "Could not find channel %s on the network.", 
+	      st[1].c_str());
   return;
 }
 
 ChannelUser* theBot = theChannel->findUser(bot->getInstance());
-if(!theBot) {
-  bot->Notice(theClient, "I am not in the console channel.");
+if (!theBot) {
+  bot->Notice(theClient, "I am not in %s.", 
+	      theChannel->getName().c_str());
   return;
 }
 
 ChannelUser* theChannelUser = theChannel->findUser(theClient);
-if(theChannelUser) {
-  bot->Notice(theClient, "You are already in the console channel!");
+if (theChannelUser) {
+  bot->Notice(theClient, "You are already in %s!", 
+	      theChannel->getName().c_str());
   return;
 }
 

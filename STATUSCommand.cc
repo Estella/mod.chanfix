@@ -45,16 +45,16 @@ void STATUSCommand::Exec(iClient* theClient, const string&)
 {
 
 bot->Notice(theClient, "[evilnet development's GNUWorld chanfix version %s]",
-	    VERSION);
+	    CF_VERSION);
 bot->Notice(theClient, "Uptime: \002%s\002",
 	    bot->prettyDuration(bot->getUplink()->getStartTime()).c_str());
 bot->Notice(theClient, "Automatic fixing is: \002%s\002",
 	    bot->doAutoFix() ? "ON" : "OFF");
 bot->Notice(theClient, "Manual fixing is: \002%s\002",
 	    bot->doChanFix() ? "ON" : "OFF");
-bot->Notice(theClient, "Channel blocking is \002%s\002",
+bot->Notice(theClient, "Channel blocking is: \002%s\002",
 	    bot->doChanBlocking() ? "ON" : "OFF");
-bot->Notice(theClient, "Required amount of servers linked is %u percent of %u, which is a minimum of %u servers.",
+bot->Notice(theClient, "Required amount of servers linked is %u%% of %u, which is a minimum of %u servers.",
 	    bot->getMinServersPresent(), bot->getNumServers(),
 	    ((bot->getMinServersPresent() * bot->getNumServers()) / 100 + 1));
 if (bot->getState() == gnuworld::SPLIT) {

@@ -8,7 +8,7 @@
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundatieon; either version 2
+ * as published by the Free Software Foundation; either version 2
  * of the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -189,7 +189,7 @@ void chanfix::OnAttach()
  * Don't send END_OF_BURST (EB) so we can stay in burst mode 
  * indefinitely in order to be able to do TS-1.
  */
-//setSendEB(false);
+MyUplink->setSendEB(false);
 
 /**
  * Set our uplink as our main server for our commands.
@@ -203,7 +203,7 @@ for (commandMapType::iterator ptr = commandMap.begin(); ptr != commandMap.end();
  */
 MyUplink->RegisterEvent( EVT_KILL, this );
 MyUplink->RegisterEvent( EVT_QUIT, this );
-MyUplink->RegisterEvent( EVT_BURST_ACK, this );
+MyUplink->RegisterEvent( EVT_BURST_CMPLT, this );
 MyUplink->RegisterEvent( EVT_NETJOIN, this );
 MyUplink->RegisterEvent( EVT_NETBREAK, this );
 
@@ -218,12 +218,6 @@ MyUplink->RegisterChannelEvent( xServer::CHANNEL_ALL, this );
 tidAutoFix = MyUplink->RegisterTimer(time(NULL) + CHECK_CHANS_TIME, this, NULL);
 tidUpdateDB = MyUplink->RegisterTimer(time(NULL) + SQL_UPDATE_TIME, this, NULL);
 tidFixQ = MyUplink->RegisterTimer(time(NULL) + PROCESS_QUEUE_TIME, this, NULL);
-
-/**
- * After attaching, change state to RUN
- */
-//changeState(RUN);
-// bean pointed out that this might not be good idea
 
 xClient::OnAttach() ;
 }
@@ -437,7 +431,7 @@ void chanfix::OnEvent( const eventType& whichEvent,
 {
 switch(whichEvent)
 	{
-	case EVT_BURST_ACK:
+	case EVT_BURST_CMPLT:
 		{
 		changeState(RUN);
 		break;
@@ -450,21 +444,21 @@ switch(whichEvent)
 		}
 	case EVT_KILL:
 	case EVT_QUIT:
-                {
-                iClient* theClient = (whichEvent == EVT_QUIT) ?
-                        static_cast< iClient* >( data1 ) :
-                        static_cast< iClient* >( data2 ) ;
+		{
+		iClient* theClient = static_cast< iClient* >
+			((whichEvent == EVT_QUIT) ?
+				 data1 :
+				 data2 );
 
 		clientOpsType* myOps = findMyOps(theClient);
 		for(clientOpsType::iterator ptr = myOps->begin(); ptr != myOps->end(); ptr++) {
-                  givePoints(theClient, ptr->second);
+		  givePoints(theClient, ptr->second);
 		  lostOps(theClient, ptr->second);
-                }
-                break ;
-                }
-
-
+		}
+                break;
+		}
 	}
+
 xClient::OnEvent( whichEvent, data1, data2, data3, data4 ) ;
 }
 
@@ -775,7 +769,6 @@ if(currentState == SPLIT)
         elog << "chanfix::checkNetwork> DEBUG: Enough servers linked! Going to BURST-state" << endl;
         changeState(BURST);
         return;
-
 	}
 }
 
@@ -842,9 +835,8 @@ void chanfix::manualFix(Channel* thisChan)
 elog << "chanfix::manualFix> DEBUG: Manual fix " << thisChan->getName() << "!" << endl;
 
 if (thisChan->getCreationTime() > 1) {
-//  BurstChannel(thisChan->getName(), defaultChannelModes,
-//	       thisChan->getCreationTime() - 1);
-  ClearMode(thisChan, "ovpsmikbl", true);
+  MyUplink->BurstChannel(thisChan->getName(), defaultChannelModes,
+			 thisChan->getCreationTime() - 1);
 } else {
   ClearMode(thisChan, "ovpsmikbl", true);
 }
