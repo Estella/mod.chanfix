@@ -8,7 +8,7 @@
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
+ * as published by the Free Software Foundatieon; either version 2
  * of the License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -215,7 +215,6 @@ MyUplink->RegisterChannelEvent( xServer::CHANNEL_ALL, this );
 /**
  * Start timers
  */
-tidCheckOps = MyUplink->RegisterTimer(time(NULL) + POINTS_UPDATE_TIME, this, NULL);
 tidAutoFix = MyUplink->RegisterTimer(time(NULL) + CHECK_CHANS_TIME, this, NULL);
 tidUpdateDB = MyUplink->RegisterTimer(time(NULL) + SQL_UPDATE_TIME, this, NULL);
 tidFixQ = MyUplink->RegisterTimer(time(NULL) + PROCESS_QUEUE_TIME, this, NULL);
@@ -267,14 +266,7 @@ void chanfix::OnTimer(xServer::timerID theTimer, void*)
 {
 time_t theTime;
 
-if (theTimer == tidCheckOps) {
-//  checkOps();
-
-  /* Refresh Timer */
-  theTime = time(NULL) + POINTS_UPDATE_TIME;
-  tidCheckOps = MyUplink->RegisterTimer(theTime, this, NULL);
-  }
-else if (theTimer == tidAutoFix) {
+if (theTimer == tidAutoFix) {
   autoFix();
 
   /* Refresh Timer */
@@ -282,6 +274,8 @@ else if (theTimer == tidAutoFix) {
   tidAutoFix = MyUplink->RegisterTimer(theTime, this, NULL);
   }
 else if (theTimer == tidUpdateDB) {
+  updatePoints();
+
   /* Refresh Timer */
   theTime = time(NULL) + SQL_UPDATE_TIME;
   tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
@@ -362,8 +356,6 @@ Join(consoleChan, consoleChanModes, 0, true);
 Join(operChan, operChanModes, 0, true);
 Join(supportChan, supportChanModes, 0, true);
 
-burstOps();
-
 return xClient::BurstChannels();
 }
 
@@ -393,12 +385,14 @@ switch( whichEvent )
                         }
                 break ;
 		}
+	case EVT_KICK:
 	case EVT_PART:
 		{
                 theClient = static_cast< iClient* >( data1 ) ;
 		sqlChanOp* theOp = wasOpped(theClient, theChan);
 		if(theOp){
 		  givePoints(theOp);
+		  lostOps(theOp);
 		}
 		break ;
 		}
@@ -433,6 +427,7 @@ for( xServer::opVectorType::const_iterator ptr = theTargets.begin() ;
           curOp = wasOpped(tmpUser->getClient(), theChan);
 	  if(curOp)
 	    givePoints(curOp);
+	    lostOps(curOp);
 	} // if
 	} // for
 }
@@ -455,6 +450,21 @@ switch(whichEvent)
 		checkNetwork();
 		break;
 		}
+	case EVT_KILL:
+	case EVT_QUIT:
+                {
+                iClient* theClient = (whichEvent == EVT_QUIT) ?
+                        static_cast< iClient* >( data1 ) :
+                        static_cast< iClient* >( data2 ) ;
+
+		chanOpsType myOps = findMyOps(theClient);
+		for(chanOpsType::iterator ptr = myOps.begin(); ptr != myOps.end(); ptr++) {
+                  givePoints(*ptr);
+		  lostOps(*ptr);
+                }
+                break ;
+                }
+
 
 	}
 xClient::OnEvent( whichEvent, data1, data2, data3, data4 ) ;
@@ -694,33 +704,6 @@ for( string::const_iterator ptr = theString.begin() ;
 return retMe ;
 }
 
-void chanfix::burstOps()
-{
-/** 
- * warranty void if comment broken 
- *
- * if(currentState != BURST) return;
- * elog << "chanfix::burstOps> DEBUG: Bursting Ops ..." << endl;
- *
- * int start = currentTime();
- * 
- * Channel* thisChan;
- * ChannelUser* curUser;
- * for(xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->channels_end(); ptr++) {
- *  thisChan = ptr->second;
- *  if (thisChan->size() > minClients) {
- *    for(Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
- *      curUser = ptr->second;
- *      if(curUser->isModeO() && !curUser->getClient()->getMode(iClient::MODE_SERVICES) && 
- *  	    curUser->getClient()->getAccount() != "") gotOpped(curUser->getClient(), thisChan);
- *    }
- *  }
- * }
- *
- * elog << "chanfix::burstOps> DEBUG: Done in " << currentTime() - start << " seconds ..." << endl; 
- */
-}
-
 void chanfix::givePoints(sqlChanOp* thisOp)
 {
 int points = (currentTime() - thisOp->getTimeOpped()) / POINTS_UPDATE_TIME;
@@ -776,6 +759,16 @@ for(chanOpsType::iterator ptr = opList.begin(); ptr != opList.end(); ptr++) {
   }
 } // for
 return 0;
+}
+
+void chanfix::lostOps(sqlChanOp* thisOp)
+{
+chanOpsType::iterator ptr = opList.begin();
+while(ptr != opList.end())
+if(!strcasecmp((*ptr)->getAccount(), thisOp->getAccount()) && !strcasecmp((*ptr)->getChannel(), thisOp->getChannel()))
+  ptr = opList.erase(ptr);
+else
+  ptr++;
 }
 
 void chanfix::checkNetwork()
@@ -1209,6 +1202,31 @@ sprintf(tmpBuf, "%i day%s, %02d:%02d:%02d",
 	secs );
 
 return string( tmpBuf ) ;
+}
+
+chanfix::chanOpsType chanfix::findMyOps(iClient* theClient)
+{
+chanOpsType myChanOps;
+sqlChanOp* curOp;
+
+for(chanOpsType::iterator ptr = opList.begin(); ptr != opList.end(); ptr++) {
+  curOp = *ptr;
+  if(!strcasecmp(curOp->getAccount(), theClient->getAccount()))
+    myChanOps.push_back(curOp);
+}
+
+return myChanOps;
+}
+
+void chanfix::updatePoints()
+{
+sqlChanOp* curOp;
+
+for(chanOpsType::iterator ptr = opList.begin(); ptr != opList.end(); ptr++) {
+  curOp = *ptr;
+  givePoints(curOp);
+}
+
 }
 
 void Command::Usage( iClient* theClient )

@@ -210,11 +210,12 @@ public:
 
 	time_t currentTime() { return ::time(0); }
 
-	void burstOps();
+	void updatePoints();
 
 	void givePoints(sqlChanOp*);
 
 	void gotOpped(iClient*, Channel*);
+	void lostOps(sqlChanOp*);
 
 	sqlChanOp* wasOpped(iClient*, Channel*);
         sqlChanOp* wasOpped(sqlChanOp*);
@@ -266,6 +267,7 @@ public:
 	chanOpsType opList;	
 
 	chanOpsType	getMyOps(Channel*);
+	chanOpsType	findMyOps(iClient*);
 
 	/**
 	 * Queues to process.
