@@ -979,13 +979,14 @@ for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
    }
 }
 
-if (!opVec.empty())
+if (!opVec.empty()) {
   Op(theChan, opVec);
 
-if (opVec.size() == 1)
-  Message(theChan, "1 client should have been opped.");
-else
-  Message(theChan, "%d clients should have been opped.", opVec.size());
+  if (opVec.size() == 1)
+    Message(theChan, "1 client should have been opped.");
+  else
+    Message(theChan, "%d clients should have been opped.", opVec.size());
+}
 
 sqlChan->Update();
 
