@@ -32,6 +32,7 @@
 #include	"chanfixCommands.h"
 #include	"levels.h"
 #include	"sqlChanOp.h"
+#include	"sqlUser.h"
 
 RCSTAG("$Id$");
 

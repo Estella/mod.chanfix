@@ -19,16 +19,16 @@
  * $Id$
  */
 
-#ifndef __chanfix_H
-#define __chanfix_H "$Id$"
+#ifndef __CHANFIX_H
+#define __CHANFIX_H "$Id$"
 
 #include	<string>
 
 #include	"client.h"
-#include	"functor.h"
-#include	"sqlChanOp.h"
 
-using std::string ;
+#include	"functor.h"
+
+using std::string;
 class PgDatabase;
 
 namespace gnuworld
