@@ -31,6 +31,7 @@
 
 #include	"chanfix.h"
 #include	"levels.h"
+#include	"Network.h"
 
 RCSTAG("$Id$");
 

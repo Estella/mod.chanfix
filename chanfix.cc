@@ -223,7 +223,8 @@ tidFixQ = MyUplink->RegisterTimer(time(NULL) + PROCESS_QUEUE_TIME, this, NULL);
 /**
  * After attaching, change state to RUN
  */
-changeState(RUN);
+//changeState(RUN);
+// bean pointed out that this might not be good idea
 
 xClient::OnAttach() ;
 }
