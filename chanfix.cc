@@ -1,5 +1,10 @@
 /**
  * chanfix.cc
+ * 
+ * Copyright (C) 2003	Reed Loden <reed@reedloden.com>
+ *			Matthias Crauwels <ultimate_@wol.be>
+ *
+ * Automatically and manually fix opless and taken over channels
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -23,17 +28,18 @@
 
 #include	"config.h"
 #include	"client.h"
-#include	"server.h"
 #include	"EConfig.h"
 #include	"Network.h"
+#include	"server.h"
 #include        "StringTokenizer.h"
-#include	"functor.h"
 
 #include	"chanfix.h"
 #include	"chanfixCommands.h"
+#include	"functor.h"
 #include	"levels.h"
 #include	"sqlChanOp.h"
 #include	"sqlUser.h"
+#include	"Timer.h"
 
 RCSTAG("$Id$");
 
@@ -88,6 +94,9 @@ numTopScores = atoi((chanfixConfig->Require("numTopScores")->second).c_str()) ;
 minClients = atoi((chanfixConfig->Require("minClients")->second).c_str()) ;
 clientNeedsIdent = atob(chanfixConfig->Require("clientNeedsIdent")->second) ;
 clientNeedsReverse = atob(chanfixConfig->Require("clientNeedsReverse")->second) ;
+
+/* Initial state */
+currentState = BURST;
 
 /* Database processing */
 sqlHost = chanfixConfig->Require("sqlHost")->second;
@@ -165,7 +174,7 @@ return true ;
 void chanfix::OnAttach()
 {
 
-// Start the Db checker timer rolling.
+/* Start the Op checker timer rolling */
 checkOpsDelay = 30; // TODO: move this to config
 time_t theTime = time(NULL) + checkOpsDelay; 
 checkOps_timerID = MyUplink->RegisterTimer(theTime, this, NULL);
@@ -297,7 +306,13 @@ void chanfix::OnChannelEvent( const channelEventType& whichEvent,
         Channel* theChan,
         void* data1, void* data2, void* data3, void* data4 )
 {
-iClient* theClient = 0 ;
+iClient* theClient = 0;
+
+/* If we are bursting, we don't want to be giving points. */
+if (currentState == BURST) return;
+
+/* If this channel is too small, don't worry about it. */
+if (theChannel->size() < minClients) return;
 
 switch( whichEvent )
         {
@@ -336,7 +351,12 @@ switch(whichEvent)
 	{
 	case EVT_BURST_ACK:
 		{
-		BurstOps();
+		changeState(RUN);
+		break;
+		}
+	case EVT_NETJOIN:
+		{
+		changeState(BURST);
 		break;
 		}
 	}
@@ -375,6 +395,53 @@ void chanfix::preloadChanOpsCache()
                         << SQLDb->Tuples()
                         << " chanops."
                         << endl;
+}
+
+void chanfix::changeState(CHANFIX_STATE newState)
+{
+if (currentState == newState) return;
+
+/* Start our own timer just for ourself */
+Timer stateTimer;
+stateTimer.Start();
+
+/* First, do what we need to exit our current state */
+switch( currentState ) {
+	case BURST:
+	{
+	elog	<< "chanfix::changeState> Exiting state BURST"
+		<< endl;
+	break;
+	}
+	case RUN:
+	{
+	elog	<< "chanfix::changeState> Exiting state RUN"
+		<< endl;
+	}
+}
+
+currentState = newState;
+
+switch( currentState ) {
+	case BURST:
+	{
+	elog	<< "chanfix::changeState> Entering state BURST"
+		<< endl;
+	break;
+	}
+	case RUN:
+	{
+	elog	<< "chanfix::changeState> Entering state RUN"
+		<< endl;
+	checkOps();
+	break;
+	}
+}
+
+elog	<< "Changed state in: "
+	<< stateTimer.stopTimeMS()
+	<< "ms"
+	<< endl;
 }
 
 sqlChanOp* chanfix::findChanOp(const string& account, const string& channel)
@@ -439,48 +506,29 @@ for( string::const_iterator ptr = theString.begin() ;
 return retMe ;
 }
 
-void chanfix::BurstOps()
-{
-elog << "DEBUG: Bursting Ops ..." << endl;
-
-Channel* thisChan;
-ChannelUser* curUser;
-for(xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->channels_end(); ptr++) {
-        thisChan = ptr->second;
-	for(Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
-		curUser = ptr->second;
-		if(curUser->isModeO() && !curUser->getClient()->getMode(iClient::MODE_SERVICES) && 
-			curUser->getClient()->getAccount() != "")
-			{
-			gotOpped(curUser->getClient(), thisChan);
-			}
-		}
-        }
-
-}
-
 void chanfix::CheckOps()
 {
 elog << "DEBUG: Checking Ops ..." << endl;
 
 Channel* thisChan;
 ChannelUser* curUser;
-for(xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->channels_end(); ptr++) {
-        thisChan = ptr->second;
-        for(Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
-                curUser = ptr->second;
-                if(curUser->isModeO() && !curUser->getClient()->getMode(iClient::MODE_SERVICES) &&
-                        curUser->getClient()->getAccount() != "")
-                        {
-			sqlChanOp* theOp = findChanOp(curUser->getClient(), thisChan);
-			if(theOp) givePoint(theOp);
-			else gotOpped(curUser->getClient(), thisChan);
-                        }
-                }
-        }
-
+for (xNetwork::channelIterator ptr = Network->channels_begin();
+     ptr != Network->channels_end(); ptr++) {
+   thisChan = ptr->second;
+   for (Channel::userIterator ptr = thisChan->userList_begin();
+	ptr != thisChan->userList_end(); ptr++) {
+      curUser = ptr->second;
+      if (curUser->isModeO() &&
+	  !curUser->getClient()->getMode(iClient::MODE_SERVICES) &&
+	  curUser->getClient()->getAccount() != "") {
+	sqlChanOp* theOp = findChanOp(curUser->getClient(), thisChan);
+	if (theOp) givePoint(theOp);
+	else gotOpped(curUser->getClient(), thisChan);
+      }
+   }
 }
 
+}
 
 void chanfix::givePoint(iClient* thisClient, Channel* thisChan)
 {

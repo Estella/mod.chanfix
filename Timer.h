@@ -1,10 +1,5 @@
 /**
- * RELOADCommand.cc
- *
- * 18/12/2003 - Reed Loden <reed@reedloden.com>
- * Initial Version
- *
- * Unloads the bot's module and reloads it
+ * Timer.h
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -24,38 +19,28 @@
  * $Id$
  */
 
-#include	<string>
+#ifndef __TIMER_H
+#define __TIMER_H "$Id$"
 
-#include	"config.h"
-#include	"StringTokenizer.h"
+#include <sys/time.h>
 
-#include	"chanfix.h"
-#include	"levels.h"
+namespace gnuworld {
 
-RCSTAG("$Id$");
-
-namespace gnuworld
-{
-
-using std::string;
-using namespace level;
-
-void RELOADCommand::Exec(iClient* theClient, const string& Message)
-{
-
-StringTokenizer st(Message);
-
-bot->Notice(theClient, "Reloading client...see you on the flip side");
-
-if (st.size() < 2) {
-  server->UnloadClient(bot, "Reloading...");
-} else {
-  server->UnloadClient(bot, st.assemble(1));
-}
-
-server->LoadClient("libchanfix", bot->getConfigFileName());
-
-return;
-}
+class Timer {
+public:
+	inline void Start()
+		{ gettimeofday(&startTime, 0); }
+	inline void Stop()
+		{ gettimeofday(&stopTime, 0); }
+	inline unsigned int getTimeMS()
+		{ return	(stopTime.tv_sec - startTime.tv_sec) * 1000 +
+				(stopTime.tv_usec - startTime.tv_usec) / 1000; }
+	inline unsigned int stopTimeMS()
+		{ Stop(); return getTimeMS(); }
+protected:
+	struct timeval startTime, stopTime;
+}; // class Timer
 
 } // namespace gnuworld
+
+#endif // __TIMER_H

@@ -26,7 +26,6 @@
 
 #include	"client.h"
 
-//#include	"functor.h"
 #include	"sqlChanOp.h"
 #include	"chanfixCommands.h"
 #include        "EConfig.h"
@@ -37,6 +36,11 @@ class PgDatabase;
 namespace gnuworld
 {
 
+enum CHANFIX_STATE {
+	BURST,
+	RUN
+};
+
 class cmDatabase : public PgDatabase
 {
 public:
@@ -46,14 +50,7 @@ public:
 
 };
 
-
-/**
- * A dummy xClient.  This is just a skeleton from which developers
- * may create new services clients.
- */
-class chanfix : public xClient
-{
-
+class chanfix : public xClient {
 public:
 	/**
 	 * Constructor receives a configuration file name.
@@ -146,6 +143,10 @@ public:
 
         virtual void OnCTCP( iClient*, const string&, const string&, bool ) ;
 
+	/**
+	 * Our functions.
+	 */
+
 	sqlChanOp* newChanOp(const string&, const string&);
         sqlChanOp* newChanOp(iClient*, Channel*);
 
@@ -153,7 +154,9 @@ public:
 	sqlChanOp* findChanOp(iClient*, Channel*);
 
 	void preloadChanOpsCache();
-	void BurstOps();
+
+	void changeState(CHANFIX_STATE);
+
         void CheckOps();
 
 	void givePoint(iClient*, Channel*);
@@ -167,11 +170,10 @@ public:
         cmDatabase* SQLDb;
 
 	/**
-	 * Channel-op map
+	 * ChannelOp map
 	 */
         typedef map< pair<string, string>, sqlChanOp*> sqlChanOpsType;
 	sqlChanOpsType 	sqlChanOps;
-
 
         /* TimerID for checking on the database connection. */
         xServer::timerID checkOps_timerID;
@@ -188,8 +190,14 @@ protected:
         typedef map< string, Command*, noCaseCompare> commandMapType;
         commandMapType commandMap;
 
+	/**
+	 * Configuration file.
+	 */
 	EConfig*	chanfixConfig;
 
+	/**
+	 * Configuration variables
+	 */
 	string		consoleChanModes;
 	string		operChanModes;
 	string		supportChanModes;
@@ -202,12 +210,16 @@ protected:
 	string		minClients;
 	bool		clientNeedsIdent;
 	bool		clientNeedsReverse;
-
 	string          sqlHost;
 	string          sqlPort;
 	string          sqlUser;
 	string          sqlPass;
 	string          sqlDB;
+
+	/**
+	 * State variable
+	 */
+	CHANFIX_STATE	currentState;
 
 	int		checkOpsDelay;
 

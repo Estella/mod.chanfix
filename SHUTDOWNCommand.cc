@@ -45,13 +45,11 @@ void SHUTDOWNCommand::Exec(iClient* theClient, const string& Message)
 
 StringTokenizer st(Message);
 
-if(st.size() < 2) {
-  Usage(theClient);
-  return;
+if (st.size() < 2) {
+  server->Shutdown();
+} else {
+  server->Shutdown( st.assemble(1) );
 }
-
-//server->Shutdown( st.assemble(1) );
-server->Shutdown();
 
 return;
 }
