@@ -120,7 +120,7 @@ public:
 	 * is established.  The purpose of this method is to inform
 	 * the xServer of the channels this client wishes to burst.
 	 */
-	virtual bool BurstChannels() ;
+	virtual void BurstChannels() ;
 
         /**
          * This method is invoked when this module is first loaded.

@@ -346,11 +346,11 @@ xClient::OnCTCP(theClient, CTCP, Message, Secure);
 // Burst any channels.
 bool chanfix::BurstChannels()
 {
+xClient::BurstChannels();
+
 Join(consoleChan, consoleChanModes, 0, true);
 Join(operChan, operChanModes, 0, true);
 Join(supportChan, supportChanModes, 0, true);
-
-return xClient::BurstChannels();
 }
 
 /* OnChannelEvent */
