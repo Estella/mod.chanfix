@@ -197,11 +197,13 @@ MyUplink->RegisterChannelEvent( xServer::CHANNEL_ALL, this );
 // TODO: move this to chanfix_config.h
 checkOpsDelay = 300; // check every 5 minutes
 updateDelay = 3600; // update the DB every hour (we can loose at most 11pts)
+fixDelay = 30; // try finding channels to fix every 30 sec's
 
 /* Start timers */
 tidCheckOps = MyUplink->RegisterTimer(time(NULL) + checkOpsDelay, this, NULL);
 tidAutoFix = MyUplink->RegisterTimer(time(NULL) + AUTOFIX_INTERVAL, this, NULL);
 tidUpdateDB = MyUplink->RegisterTimer(time(NULL) + updateDelay, this, NULL);
+tidFixQ = MyUplink->RegisterTimer(time(NULL) + fixDelay, this, NULL);
 
 /* When attached state should be RUN */
 changeState(RUN);
@@ -268,6 +270,14 @@ else if (theTimer == tidUpdateDB) {
   theTime = time(NULL) + updateDelay;
   tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
   }
+else if (theTimer == tidFixQ) {
+  procesQueue();
+
+  /* Refresh Timer */
+  theTime = time(NULL) + fixDelay;
+  tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
+  }
+
 }
 
 void chanfix::OnPrivateMessage( iClient* theClient,
@@ -298,6 +308,19 @@ if (!secure && ((Command == "LOGIN") || (Command == "NEWPASS"))) {
 	 Command.c_str(), nickName.c_str(), getUplinkName().c_str());
   return ;
 }
+
+if (Command == "CLEARMODE" && st.size() >= 2) {
+  Channel* netChan = Network->findChannel(st[1]);
+  if(netChan) clearChan(netChan);
+  return;
+}
+
+if (Command == "DEBUGFIX" && st.size() >= 2) {
+  Channel* netChan = Network->findChannel(st[1]);
+  if(netChan) ManFix(netChan);
+  return;
+}
+
 
 commandMapType::iterator commHandler = commandMap.find(Command);
 if(commHandler == commandMap.end()) {
@@ -423,7 +446,7 @@ void chanfix::preloadChanOpsCache()
                                 assert( newOp != 0 ) ;
 
                                 newOp->setAllMembers(i);
-				pair<string, string> thePair (newOp->getAccount(), newOp->getChannel());
+				std::pair<string, string> thePair (newOp->getAccount(), newOp->getChannel());
                                 sqlChanOps.insert(sqlChanOpsType::value_type(thePair, newOp));
                         }
         } else	{
@@ -442,7 +465,7 @@ void chanfix::preloadChanOpsCache()
 void chanfix::preloadChannelCache()
 {
         stringstream theQuery;
-        theQuery        << "SELECT channel, fixed, opped FROM channels"
+        theQuery        << "SELECT channel, fixed, lastfix FROM channels"
                                 << ends;
 
         elog            << "*** [chanfix::preloadChannelCache]: Loading channels ..."
@@ -549,7 +572,7 @@ sqlChanOp* chanfix::findChanOp(const string& account, const string& channel)
 {
 
 elog << "DEBUG: Searching ..." << endl;
-sqlChanOpsType::iterator ptr = sqlChanOps.find(pair<string,string>(account, channel));
+sqlChanOpsType::iterator ptr = sqlChanOps.find(std::pair<string,string>(account, channel));
 if(ptr != sqlChanOps.end())
 	{
 	elog << "DEBUG: We've got a winner: " << account << " on " << channel << "!!" << endl;
@@ -564,7 +587,7 @@ sqlChanOp* chanfix::newChanOp(const string& account, const string& channel)
 sqlChanOp* newOp = new (std::nothrow) sqlChanOp(SQLDb);
 assert( newOp != 0 ) ;
 
-sqlChanOps.insert(sqlChanOpsType::value_type(pair<string,string>(account, channel), newOp));
+sqlChanOps.insert(sqlChanOpsType::value_type(std::pair<string,string>(account, channel), newOp));
 elog << "DEBUG: Added new operator: " << account << " on " << channel << "!!" << endl;
 
 newOp->setAccount(account);
@@ -621,7 +644,7 @@ for(xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->c
 		if(curUser->isModeO() && !curUser->getClient()->getMode(iClient::MODE_SERVICES) && 
 			curUser->getClient()->getAccount() != "")
 			{
-			lastOps.push_back(pair<string, string>(curUser->getClient()->getAccount(), thisChan->getName()));
+			lastOps.push_back(std::pair<string, string>(curUser->getClient()->getAccount(), thisChan->getName()));
 			gotOpped(curUser->getClient(), thisChan);
 			}
 		}
@@ -647,7 +670,7 @@ for(xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->c
                 	if(curUser->isModeO() && !curUser->getClient()->getMode(iClient::MODE_SERVICES) &&
                         	curUser->getClient()->getAccount() != "")
 	                        {
-				curOps.push_back(pair<string, string>(curUser->getClient()->getAccount(), thisChan->getName()));
+				curOps.push_back(std::pair<string, string>(curUser->getClient()->getAccount(), thisChan->getName()));
 				if(wasOpped(curUser->getClient(), thisChan))
 					 givePoint(curUser->getClient(), thisChan);
 				else gotOpped(curUser->getClient(), thisChan);
@@ -697,7 +720,10 @@ thisOp->setLastSeenAs(thisClient->getNickUserHost());
 
 bool chanfix::wasOpped(iClient* thisClient, Channel* thisChan)
 {
-pair<string, string> curPair; 
+if(thisClient->getMode(iClient::MODE_SERVICES)) return false;
+if(thisClient->getAccount() == "") return false;
+
+std::pair<string, string> curPair; 
 for(lastOpsType::iterator ptr = lastOps.begin(); ptr != lastOps.end(); ptr++)
 	{
 	curPair = *ptr;
@@ -752,7 +778,7 @@ for(xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->c
 		if(opLess && !hasService)
 			{
 			elog << "DEBUG: Autofix " << thisChan->getName() << "!" << endl;
-			fixChan(thisChan, true);
+			autoFixQ.push_back(fixQueueType::value_type(thisChan, ::time(0)));
 			}
 		}
 	}
@@ -760,24 +786,9 @@ for(xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->c
 
 void chanfix::ManFix(Channel* thisChan)
 {
-ChannelUser* curUser;
-bool opLess = true;
-bool hasService = false;
-
-if(thisChan->size() > minClients)
-	{
-	for(Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
-		curUser = ptr->second;
-		if(curUser->isModeO()) opLess = false;
-		if(curUser->getClient()->getMode(iClient::MODE_SERVICES)) hasService = true;
-		}
-	if(opLess && !hasService)
-                {
-                elog << "DEBUG: Manual fix " << thisChan->getName() << "!" << endl;
-                //manFixChan(thisChan);
-                }
-	}
-
+elog << "DEBUG: Manual fix " << thisChan->getName() << "!" << endl;
+clearChan(thisChan);
+manFixQ.push_back(fixQueueType::value_type(thisChan, ::time(0) + CHANFIX_DELAY));
 }
 
 void chanfix::UpdateOps()
@@ -791,8 +802,7 @@ for(sqlChanOpsType::iterator ptr = sqlChanOps.begin(); ptr != sqlChanOps.end(); 
 void chanfix::fixChan(Channel* theChan, bool autofix)
 {
 unsigned int ops = countOps(theChan);
-if((ops >= AUTOFIX_NUM_OPPED && autofix) ||
-	(ops >= CHANFIX_NUM_OPPED && !autofix))
+if(ops >= (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED))
 	{
 	elog << "DEBUG: Enough clients opped on " << theChan->getName() << endl;
 	return;
@@ -801,16 +811,16 @@ if((ops >= AUTOFIX_NUM_OPPED && autofix) ||
 sqlChannel* sqlChan = findCacheChannel(theChan);
 if(!sqlChan) sqlChan = newChannel(theChan);
 
-sqlChan->addFixAttempt();
+if(sqlChan->getFixStart() == 0) sqlChan->setFixStart(::time(0));
+int time_passed = ::time(0) - sqlChan->getFixStart();
 
-if((sqlChan->getFixAttempts() >= MAXAUTOFIX && autofix) ||
-	(sqlChan->getFixAttempts() >= MAXMANUALFIX && !autofix)) 
+if(time_passed > (autofix ? AUTOFIX_MAXIMUM : CHANFIX_MAXIMUM))
 	{
-	elog << "DEBUG: Skipping fix on " << theChan->getName() << " after to many tries" << endl;
+	elog << "DEBUG: Skipping fix on " << theChan->getName() << " after time has passed" << endl;
 	return;
 	}
 
-elog << "DEBUG: Fixing " << theChan->getName() << ". (Attempt " << sqlChan->getFixAttempts() << ") ..." << endl;
+elog << "DEBUG: Fixing " << theChan->getName() << " ..." << endl;
 
 chanOpsType myOps;
 for(sqlChanOpsType::iterator ptr = sqlChanOps.begin(); ptr != sqlChanOps.end(); ptr++)
@@ -823,15 +833,21 @@ myOps.sort(compare_points);
 if(myOps.begin() != myOps.end())
 	sqlChan->setMaxScore((*myOps.begin())->getPoints());
 
-int time_passed = (AUTOFIX_INTERVAL * (sqlChan->getFixAttempts() - 1) / AUTOFIX_MAXIMUM);
+int maxChanScore = sqlChan->getMaxScore();
+int maxScore = 4032;
 
-float abs_min_score = 4032 * (FIX_MIN_ABS_SCORE_BEGIN - 
-	(FIX_MIN_ABS_SCORE_BEGIN - FIX_MIN_ABS_SCORE_END) * time_passed);
-float rel_min_score = sqlChan->getMaxScore() * (FIX_MIN_REL_SCORE_BEGIN - 
-	(FIX_MIN_REL_SCORE_BEGIN - FIX_MIN_REL_SCORE_END) * time_passed);
+float abs_min_score = (FIX_MIN_ABS_SCORE_BEGIN - (
+		(FIX_MIN_ABS_SCORE_BEGIN - FIX_MIN_ABS_SCORE_END) / 
+                (((autofix ? AUTOFIX_MAXIMUM : CHANFIX_MAXIMUM) / (autofix ? AUTOFIX_INTERVAL : CHANFIX_INTERVAL)) - 1)
+	) * (time_passed / (autofix ? AUTOFIX_INTERVAL : CHANFIX_INTERVAL)) ) * maxScore;
 
-float end_abs_min_score = FIX_MIN_ABS_SCORE_END * 4032;
-float end_rel_min_score = FIX_MIN_REL_SCORE_END * sqlChan->getMaxScore();
+float rel_min_score = (FIX_MIN_REL_SCORE_BEGIN - (
+		(FIX_MIN_REL_SCORE_BEGIN - FIX_MIN_REL_SCORE_END) /
+		(((autofix ? AUTOFIX_MAXIMUM : CHANFIX_MAXIMUM) / (autofix ? AUTOFIX_INTERVAL : CHANFIX_INTERVAL)) - 1)
+	) * (time_passed / (autofix ? AUTOFIX_INTERVAL : CHANFIX_INTERVAL)) ) * maxChanScore;
+
+float end_abs_min_score = FIX_MIN_ABS_SCORE_END * maxScore;
+float end_rel_min_score = FIX_MIN_REL_SCORE_END * maxChanScore;
 
 if(sqlChan->getMaxScore() < end_abs_min_score) 
 	{
@@ -842,6 +858,7 @@ if(sqlChan->getMaxScore() < end_abs_min_score)
 
 iClient* curClient = 0;
 sqlChanOp* curOp = 0;
+vector< iClient* > opVec;
 for(chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end(); opPtr++)
 	{
 	curOp = *opPtr;
@@ -854,23 +871,27 @@ for(chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end(); opPtr++)
 			elog << "DEBUG: Decided to op: " << curClient->getNickName() << " on " << theChan->getName()
 				<< ". Client has " << curOp->getPoints() << " points. ABS_MIN = " 
 				<< abs_min_score << " and REL_MIN = " << rel_min_score << endl;
-			opQ.push_back(opQueueType::value_type(theChan, curClient));
+			opVec.push_back(curClient);
 			}
 		}
 	}
+Op(theChan, opVec);
 
 ops = countOps(theChan);
-if( ((ops < AUTOFIX_NUM_OPPED && autofix) ||
-        (ops < CHANFIX_NUM_OPPED && !autofix)) &&
-	(ops < theChan->size()) )
+if(( ops < (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED)) && (ops < theChan->size()) )
 	{
 	elog << "DEBUG: Channel " << theChan->getName() << " needs more ops and will therefor be added in my fixQ ..."
 		<< endl;
+	if(autofix)
+		autoFixQ.push_back(fixQueueType::value_type(theChan, ::time(0) + AUTOFIX_INTERVAL));
+	else
+		manFixQ.push_back(fixQueueType::value_type(theChan, ::time(0) + CHANFIX_INTERVAL));
 	return;
 	}
 
 sqlChan->addSuccesFix();
-sqlChan->setFixAttempts(0);
+sqlChan->setLastAttempt(::time(0));
+sqlChan->setFixStart(0);
 sqlChan->Update();
 
 elog << "DEBUG: My fixing job is completed successfully on " << theChan->getName() << ". Thank you for flying with me!"
@@ -947,6 +968,41 @@ for(Channel::userIterator ptr = theChan->userList_begin(); ptr != theChan->userL
 	}
 
 return ops;
+}
+
+bool chanfix::clearChan(Channel* theChan)
+{
+//Join(theChan->getName(),"+",0,true);
+
+ClearMode(theChan, "ovpsmikbl", true);
+
+//Part(theChan->getName());
+return true;
+
+}
+
+void chanfix::procesQueue()
+{
+
+for(fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ptr++) 
+	{
+	if(ptr->second <= ::time(0)) 
+		{
+                autoFixQ.pop_front();
+		fixChan(ptr->first, true);
+		}
+	}
+
+for(fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ptr++)
+        {
+        if(ptr->second <= ::time(0)) 
+                {
+                manFixQ.pop_front();
+                fixChan(ptr->first, false);
+                }
+        }
+
+return;
 }
 
 void Command::Usage( iClient* theClient )

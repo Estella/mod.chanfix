@@ -23,6 +23,9 @@
 #define __CHANFIX_H "$Id$"
 
 #include	<string>
+#include        <vector>
+#include        <map>
+#include	<list>
 
 #include	"client.h"
 
@@ -40,6 +43,11 @@ class Timer;
 
 namespace gnuworld
 {
+
+using std::string ;
+using std::vector ;
+using std::map ;
+using std::list ;
 
 enum CHANFIX_STATE {
 	BURST,
@@ -195,6 +203,10 @@ public:
 	unsigned int countOps(Channel*);
 	unsigned int countOps(const string&);
 
+	bool clearChan( Channel* );
+
+	void procesQueue();
+
         /**
          * PostgreSQL Database
          */
@@ -203,13 +215,13 @@ public:
 	/**
 	 * ChannelOp map
 	 */
-        typedef map< pair<string, string>, sqlChanOp*> sqlChanOpsType;
+        typedef map< std::pair<string, string>, sqlChanOp*> sqlChanOpsType;
 	sqlChanOpsType 	sqlChanOps;
 
 	typedef map <string, sqlChannel*> sqlChannelCacheType;
 	sqlChannelCacheType sqlChanCache;
 
-	typedef list< pair< string, string> > lastOpsType;
+	typedef list< std::pair< string, string> > lastOpsType;
 	lastOpsType  lastOps;
 
 	typedef list< sqlChanOp* > chanOpsType;
@@ -217,11 +229,11 @@ public:
 	/**
 	 * Queues to process ...
 	 */
-	typedef list< Channel* > fixQueueType;
+	typedef list< std::pair<Channel*, time_t> > fixQueueType;
 	fixQueueType manFixQ;
         fixQueueType autoFixQ;
 
-	typedef list< pair <Channel*, iClient*> > opQueueType;
+	typedef list< std::pair <Channel*, iClient*> > opQueueType;
 	opQueueType opQ;
 
         string          consoleChan;
@@ -272,6 +284,7 @@ protected:
 	 */
 	unsigned int	checkOpsDelay;
 	unsigned int	updateDelay;
+	unsigned int	fixDelay;
 
 	/**
 	 * Timer declarations
@@ -279,6 +292,7 @@ protected:
 	xServer::timerID tidCheckOps;
         xServer::timerID tidAutoFix;
         xServer::timerID tidUpdateDB;
+	xServer::timerID tidFixQ;
 
 	/**
 	 * Internal timer

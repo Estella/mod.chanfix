@@ -48,8 +48,10 @@ StringTokenizer st(Message);
 bot->UpdateOps();
 
 if (st.size() < 2) {
+  server->UnloadClient(bot, "Quit.");
   server->Shutdown();
 } else {
+  server->UnloadClient(bot, st.assemble(1) );
   server->Shutdown( st.assemble(1) );
 }
 

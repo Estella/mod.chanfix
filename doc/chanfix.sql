@@ -13,6 +13,6 @@ CREATE TABLE chanOps (
 CREATE TABLE channels (
 	channel VARCHAR(32) NOT NULL,
 	fixed INT4 DEFAULT 0,
-	opped INT4 DEFAULT 0,
+	lastfix INT4 DEFAULT 0,
 	PRIMARY KEY (channel)
 );

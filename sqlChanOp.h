@@ -13,6 +13,8 @@
 
 namespace gnuworld
 {
+using std::string ;
+
 
 class sqlChanOp {
 

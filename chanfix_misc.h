@@ -37,7 +37,7 @@ using std::endl;
 
 struct MatchPair
 {
-inline bool operator()( pair<string, string> lhs, pair<string, string> rhs ) const
+inline bool operator()( std::pair<string, string> lhs, std::pair<string, string> rhs ) const
 	{
 	elog << "DEBUG: Match called!!" << endl;
 	return (match( lhs.first, rhs.first ) < 0 && match ( lhs.second, rhs.second ) < 0) ;

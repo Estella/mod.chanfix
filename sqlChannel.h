@@ -52,8 +52,11 @@ public:
         inline unsigned int	getSuccessFixes() const
                 { return successFixes ; }
 
-        inline unsigned int     getFixAttempts() const
-                { return fixAttempts ; }
+        inline time_t		getLastAttempt() const
+                { return last ; }
+
+        inline time_t		getFixStart() const
+                { return start ; }
 
 	inline unsigned int	getMaxScore() const
 		{ return maxScore ; }
@@ -68,11 +71,11 @@ public:
         inline void     setSuccessFixes (unsigned int _successFixes)
                 { successFixes = _successFixes ; }
 
-        inline void     setFixAttempts (unsigned int _fixAttempts)
-                { fixAttempts = _fixAttempts ; }
+        inline void     setLastAttempt (time_t _last)
+                { last = _last ; }
 
-        inline void     addFixAttempt()
-                { fixAttempts++ ; }
+	inline void	setFixStart(time_t _start)
+                { start = _start ; }
 
 	inline void	addSuccesFix()
 		{ successFixes++ ; }
@@ -87,7 +90,8 @@ public:
 protected:
 
 	string		channel;
-	unsigned int	fixAttempts;
+	time_t		last;
+	time_t		start;
 	unsigned int	successFixes;
 
         unsigned int    maxScore;

@@ -25,7 +25,8 @@ using std::stringstream ;
 
 sqlChannel::sqlChannel(PgDatabase* _SQLDb)
 : channel(""),
-  fixAttempts(0),
+  last(0),
+  start(0),
   successFixes(0),
   maxScore(0),
   SQLDb(_SQLDb)
@@ -35,16 +36,18 @@ void sqlChannel::setAllMembers(int row)
 {
 channel = SQLDb->GetValue(row, 0);
 successFixes = atoi(SQLDb->GetValue(row, 1));
+last = atoi(SQLDb->GetValue(row, 2));
 };
 
 bool sqlChannel::Insert()
 {
-static const char* queryHeader = "INSERT INTO channels (channel, fixed) VALUES (";
+static const char* queryHeader = "INSERT INTO channels (channel, fixed, lastfix) VALUES (";
 
 stringstream queryString;
 queryString     << queryHeader << "'"
 		<< channel << "',"
-		<< successFixes << ")"
+		<< successFixes << "," 
+		<< last << ")"
                 << ends;
 
 //#ifdef LOG_SQL
@@ -76,7 +79,8 @@ static const char* queryHeader =    "UPDATE channels ";
 
 stringstream queryString;
 queryString     << queryHeader << "SET fixed = "
-                << successFixes << " WHERE channel = '"
+                << successFixes << ", lastfix = "
+		<< last << " WHERE channel = '"
                 << channel << "'"
                 << ends;
 
