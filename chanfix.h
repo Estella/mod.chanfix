@@ -221,7 +221,16 @@ protected:
 	 */
 	CHANFIX_STATE	currentState;
 
-	int		checkOpsDelay;
+        /**
+	 * How often to check ops
+	 */
+	unsigned int	checkOpsDelay;
+	xServer::timerID tidCheckOps;
+
+	/**
+	 * Internal timer
+	 */
+        Timer *theTimer;
 
 }; // class chanfix
 
@@ -229,4 +238,4 @@ const string escapeSQLChars(const string& theString);
 
 } // namespace gnuworld
 
-#endif // __chanfix_H
+#endif // __CHANFIX_H

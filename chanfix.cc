@@ -145,6 +145,9 @@ RegisterCommand(new RELOADCommand(this, "RELOAD", ""));
 /* Preload the ChanOps cache */
 preloadChanOpsCache();
 
+/* Set up our timer. */
+theTimer = new Timer();
+
 }
 
 chanfix::~chanfix()
@@ -173,12 +176,6 @@ return true ;
 /* OnAttach */
 void chanfix::OnAttach()
 {
-
-/* Start the Op checker timer rolling */
-checkOpsDelay = 30; // TODO: move this to config
-time_t theTime = time(NULL) + checkOpsDelay; 
-checkOps_timerID = MyUplink->RegisterTimer(theTime, this, NULL);
-
 for (commandMapType::iterator ptr = commandMap.begin(); ptr != commandMap.end(); ++ptr) {
   ptr->second->setServer(MyUplink);
 }
@@ -190,6 +187,11 @@ MyUplink->RegisterEvent( EVT_BURST_ACK, this );
 
 /* Register for all channel events */
 MyUplink->RegisterChannelEvent( xServer::CHANNEL_ALL, this );
+
+/* Set up checking ops */
+checkOpsDelay = 30; // TODO: move this to chanfix_config.h
+time_t theTime = time(NULL) + checkOpsDelay;
+tidCheckOps = MyUplink->RegisterTimer(theTime, this, NULL);
 
 xClient::OnAttach() ;
 }
@@ -203,7 +205,10 @@ delete chanfixConfig; chanfixConfig = 0;
 /* Delete our connection to the database */
 delete SQLDb; SQLDb = 0;
 
-/* Delete commands */
+/* Delete our timer */
+delete theTimer; theTimer = 0;
+
+/* Delete our commands */
 for(commandMapType::iterator ptr = commandMap.begin() ;
     ptr != commandMap.end() ; ++ptr) {
         delete ptr->second;
@@ -225,16 +230,17 @@ void chanfix::OnDisconnect()
 xClient::OnDisconnect() ;
 }
 
-void chanfix::OnTimer(xServer::timerID timer_id, void*)
+void chanfix::OnTimer(xServer::timerID theTimer, void*)
 {
-if (timer_id == checkOps_timerID)
-	{
-	CheckOps();
+time_t theTime;
 
-        /* Refresh Timers */
-        time_t theTime = time(NULL) + checkOpsDelay;
-        checkOps_timerID = MyUplink->RegisterTimer(theTime, this, NULL);
-	}
+if (theTimer == tidCheckOps) {
+  CheckOps();
+
+  /* Refresh Timers */
+  theTime = time(NULL) + checkOpsDelay;
+  tidCheckOps = MyUplink->RegisterTimer(theTime, this, NULL);
+}
 }
 
 void chanfix::OnPrivateMessage( iClient* theClient,
@@ -312,7 +318,7 @@ iClient* theClient = 0;
 if (currentState == BURST) return;
 
 /* If this channel is too small, don't worry about it. */
-if (theChannel->size() < minClients) return;
+if (theChan->size() < minClients) return;
 
 switch( whichEvent )
         {
@@ -433,7 +439,7 @@ switch( currentState ) {
 	{
 	elog	<< "chanfix::changeState> Entering state RUN"
 		<< endl;
-	checkOps();
+	CheckOps();
 	break;
 	}
 }

@@ -2,7 +2,7 @@
  * QUOTECommand.cc
  *
  * 18/12/2003 - Reed Loden <reed@reedloden.com>
- * Initial Version.
+ * Initial Version
  *
  * Sends raw P10 code to the server
  *

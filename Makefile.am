@@ -17,7 +17,9 @@ libchanfix_la_LDFLAGS = -module -export-dynamic -L@PGSQL_LIB@ -lpq++
 EXTRA_DIST = \
 	chanfix.h \
 	chanfixCommands.h \
+	chanfix_config.h \
 	functor.h \
 	levels.h \
 	sqlChanOp.h \
-	sqlUser.h
+	sqlUser.h \
+	Timer.h
