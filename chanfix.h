@@ -212,13 +212,11 @@ public:
 
 	void updatePoints();
 
-	void givePoints(sqlChanOp*);
-
+	void givePoints(iClient*, Channel*);
 	void gotOpped(iClient*, Channel*);
-	void lostOps(sqlChanOp*);
+	void lostOps(iClient*, Channel*);
 
-	sqlChanOp* wasOpped(iClient*, Channel*);
-        sqlChanOp* wasOpped(sqlChanOp*);
+	bool wasOpped(iClient*, Channel*);
 
 	void checkNetwork();
 
@@ -263,11 +261,11 @@ public:
 	typedef map <string, sqlChannel*, noCaseCompare> sqlChannelCacheType;
 	sqlChannelCacheType sqlChanCache;
 
-	typedef list< sqlChanOp* > chanOpsType;
-	chanOpsType opList;	
+	typedef map <string, Channel*, noCaseCompare> clientOpsType;
+        clientOpsType*  findMyOps(iClient*);
 
+	typedef list< sqlChanOp* > chanOpsType;
 	chanOpsType	getMyOps(Channel*);
-	chanOpsType	findMyOps(iClient*);
 
 	/**
 	 * Queues to process.

@@ -389,10 +389,9 @@ switch( whichEvent )
 	case EVT_PART:
 		{
                 theClient = static_cast< iClient* >( data1 ) ;
-		sqlChanOp* theOp = wasOpped(theClient, theChan);
-		if(theOp){
-		  givePoints(theOp);
-		  lostOps(theOp);
+		if( wasOpped(theClient, theChan) ){
+		  givePoints(theClient, theChan);
+		  lostOps(theClient, theChan);
 		}
 		break ;
 		}
@@ -412,7 +411,6 @@ void chanfix::OnChannelModeO( Channel* theChan, ChannelUser*,
 
 if (theChan->size() < minClients) return;
 
-sqlChanOp* curOp;
 for( xServer::opVectorType::const_iterator ptr = theTargets.begin() ;
         ptr != theTargets.end() ; ++ptr )
         {
@@ -424,10 +422,10 @@ for( xServer::opVectorType::const_iterator ptr = theTargets.begin() ;
 	  gotOpped(tmpUser->getClient(), theChan);
 	} else {
 	  // Someone is deopped
-          curOp = wasOpped(tmpUser->getClient(), theChan);
-	  if(curOp)
-	    givePoints(curOp);
-	    lostOps(curOp);
+          if(wasOpped(tmpUser->getClient(), theChan)) {
+	    givePoints(tmpUser->getClient(), theChan);
+	    lostOps(tmpUser->getClient(), theChan);
+	  }
 	} // if
 	} // for
 }
@@ -457,10 +455,10 @@ switch(whichEvent)
                         static_cast< iClient* >( data1 ) :
                         static_cast< iClient* >( data2 ) ;
 
-		chanOpsType myOps = findMyOps(theClient);
-		for(chanOpsType::iterator ptr = myOps.begin(); ptr != myOps.end(); ptr++) {
-                  givePoints(*ptr);
-		  lostOps(*ptr);
+		clientOpsType* myOps = findMyOps(theClient);
+		for(clientOpsType::iterator ptr = myOps->begin(); ptr != myOps->end(); ptr++) {
+                  givePoints(theClient, ptr->second);
+		  lostOps(theClient, ptr->second);
                 }
                 break ;
                 }
@@ -704,8 +702,11 @@ for( string::const_iterator ptr = theString.begin() ;
 return retMe ;
 }
 
-void chanfix::givePoints(sqlChanOp* thisOp)
+void chanfix::givePoints(iClient* theClient, Channel* theChan)
 {
+sqlChanOp* thisOp = findChanOp(theClient, theChan);
+if(!thisOp) thisOp = newChanOp(theClient, theChan);
+
 int points = (currentTime() - thisOp->getTimeOpped()) / POINTS_UPDATE_TIME;
 
 points += thisOp->getPoints();
@@ -729,46 +730,35 @@ if(thisClient->getAccount() != "" && !thisClient->getMode(iClient::MODE_SERVICES
   sqlChanOp* thisOp = findChanOp(thisClient, thisChan);
   if(!thisOp) thisOp = newChanOp(thisClient, thisChan);
 
-  if(wasOpped(thisOp)) return;
+  if(wasOpped(thisClient, thisChan)) return;
   
+  clientOpsType* myOps = findMyOps(thisClient);
   thisOp->setLastSeenAs(thisClient->getNickUserHost());
   thisOp->setTimeOpped(currentTime());
-  opList.push_back(thisOp);
-}
+  myOps->insert(clientOpsType::value_type(thisChan->getName(), thisChan));
+  thisClient->setCustomData(this, static_cast< void*>(myOps));
+} //if
 
 }
-sqlChanOp* chanfix::wasOpped(iClient* theClient, Channel* theChan)
+
+bool chanfix::wasOpped(iClient* theClient, Channel* theChan)
 {
-sqlChanOp* thisOp = findChanOp(theClient, theChan);
-if(thisOp)
-  return wasOpped(thisOp);
-else
-  return 0;
+clientOpsType* myOps = findMyOps(theClient);
+if(!myOps || myOps->empty()) return false;
+clientOpsType::iterator ptr = myOps->find(theChan->getName());
+
+if(ptr != myOps->end()) return true;
+return false;
 }
 
-sqlChanOp* chanfix::wasOpped(sqlChanOp* theOp)
+void chanfix::lostOps(iClient* theClient, Channel* theChan)
 {
-sqlChanOp* curOp;
-for(chanOpsType::iterator ptr = opList.begin(); ptr != opList.end(); ptr++) {
-  curOp = *ptr;
-  if(!strcasecmp(curOp->getAccount(), theOp->getAccount()) &&
-	!strcasecmp(curOp->getChannel(), theOp->getChannel())) {
-    // This account was allready opped on this chan! Might be a duplicate!
-    // No more 3000 Vek's
-    return curOp;
-  }
-} // for
-return 0;
-}
+clientOpsType* myOps = findMyOps(theClient);
+if(!myOps || myOps->empty()) return;
+clientOpsType::iterator ptr = myOps->find(theChan->getName());
 
-void chanfix::lostOps(sqlChanOp* thisOp)
-{
-chanOpsType::iterator ptr = opList.begin();
-while(ptr != opList.end())
-if(!strcasecmp((*ptr)->getAccount(), thisOp->getAccount()) && !strcasecmp((*ptr)->getChannel(), thisOp->getChannel()))
-  ptr = opList.erase(ptr);
-else
-  ptr++;
+if(ptr != myOps->end()) myOps->erase(theChan->getName());
+theClient->setCustomData(this, static_cast< void*>(myOps));
 }
 
 void chanfix::checkNetwork()
@@ -1204,29 +1194,25 @@ sprintf(tmpBuf, "%i day%s, %02d:%02d:%02d",
 return string( tmpBuf ) ;
 }
 
-chanfix::chanOpsType chanfix::findMyOps(iClient* theClient)
+chanfix::clientOpsType* chanfix::findMyOps(iClient* theClient)
 {
-chanOpsType myChanOps;
-sqlChanOp* curOp;
+clientOpsType* myOps = static_cast< clientOpsType* >(theClient->getCustomData(this) );
 
-for(chanOpsType::iterator ptr = opList.begin(); ptr != opList.end(); ptr++) {
-  curOp = *ptr;
-  if(!strcasecmp(curOp->getAccount(), theClient->getAccount()))
-    myChanOps.push_back(curOp);
-}
+if(!myOps) myOps = new clientOpsType;
 
-return myChanOps;
+return myOps;
 }
 
 void chanfix::updatePoints()
 {
+/*
 sqlChanOp* curOp;
 
 for(chanOpsType::iterator ptr = opList.begin(); ptr != opList.end(); ptr++) {
   curOp = *ptr;
   givePoints(curOp);
 }
-
+*/
 }
 
 void Command::Usage( iClient* theClient )
