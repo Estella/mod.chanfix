@@ -872,8 +872,10 @@ void chanfix::updateOps()
 {
 elog << "chanfix::updateOps> DEBUG: Updating SQL ..." << endl;
 
-for(sqlChanOpsType::iterator ptr = sqlChanOps.begin(); ptr != sqlChanOps.end(); ptr++)
-	ptr->second->Update();
+for(sqlChanOpsType::iterator ptr = sqlChanOps.begin(); ptr != sqlChanOps.end(); ptr++) {
+	if(ptr->second->getPoints() > 0)
+		ptr->second->Update();
+} // for
 }
 
 bool chanfix::fixChan(Channel* theChan, bool autofix)
