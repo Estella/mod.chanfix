@@ -344,7 +344,7 @@ xClient::OnCTCP(theClient, CTCP, Message, Secure);
 }
 
 // Burst any channels.
-bool chanfix::BurstChannels()
+void chanfix::BurstChannels()
 {
 xClient::BurstChannels();
 
