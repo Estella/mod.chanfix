@@ -49,7 +49,7 @@ static const char* queryHeader = "INSERT INTO channels (channel, fixed, lastfix)
 
 stringstream queryString;
 queryString     << queryHeader << "'"
-		<< channel << "',"
+		<< escapeSQLChars(channel) << "',"
 		<< successFixes << "," 
 		<< last << ")"
                 << ends;
@@ -85,7 +85,7 @@ stringstream queryString;
 queryString     << queryHeader << "SET fixed = "
                 << successFixes << ", lastfix = "
 		<< last << " WHERE channel = '"
-                << channel << "'"
+                << escapeSQLChars(channel) << "'"
                 << ends;
 
 //#ifdef LOG_SQL

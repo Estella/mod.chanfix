@@ -91,6 +91,7 @@ public:
 };
 
 class chanfix : public xClient {
+
 public:
 	/**
 	 * Constructor receives a configuration file name.
@@ -175,6 +176,15 @@ public:
                 void* data3 = 0, void* data4 = 0 ) ;
 
         /**
+         * This method is invoked when a user sets or removes
+         * one or more channel mode (o).  Keep in mind that the
+         * source ChannelUser may be NULL if a server is
+         * setting the mode.
+         */
+        virtual void OnChannelModeO( Channel*, ChannelUser*,
+                        const xServer::opVectorType& ) ;
+
+        /**
          * This method is invoked each time a network event occurs.
          */
         virtual void    OnEvent( const eventType& theEvent,
@@ -201,21 +211,18 @@ public:
 	time_t currentTime() { return ::time(0); }
 
 	void burstOps();
-	void checkOps();
 
-	void givePoint(iClient*, Channel*);
-	void givePoint(sqlChanOp*);
+	void givePoints(sqlChanOp*);
 
 	void gotOpped(iClient*, Channel*);
 
-	bool wasOpped(iClient*, Channel*);
+	sqlChanOp* wasOpped(iClient*, Channel*);
+        sqlChanOp* wasOpped(sqlChanOp*);
 
 	void checkNetwork();
 
 	void autoFix();
 	void manualFix(Channel*);
-
-	void updateOps();
 
 	bool fixChan(Channel*, bool);
 
@@ -238,7 +245,7 @@ public:
 	bool removeFromAutoQ(Channel*);
 	bool removeFromManQ(Channel*);
 
-	const string prettyDuration( int ) const ;
+	const string prettyDuration( int );
 	
 	/**
 	 * PostgreSQL Database
@@ -255,10 +262,9 @@ public:
 	typedef map <string, sqlChannel*, noCaseCompare> sqlChannelCacheType;
 	sqlChannelCacheType sqlChanCache;
 
-	typedef list< std::pair< string, string> > lastOpsType;
-	lastOpsType	lastOps;
-
 	typedef list< sqlChanOp* > chanOpsType;
+	chanOpsType opList;	
+
 	chanOpsType	getMyOps(Channel*);
 
 	/**

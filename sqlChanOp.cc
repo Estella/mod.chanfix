@@ -50,18 +50,18 @@ static const char* queryHeader = "INSERT INTO chanOps (channel, userHost, accoun
 
 stringstream queryString;
 queryString     << queryHeader << "'"
-		<< channel << "','"
-                << userHost << "','"
-		<< account << "','"
-		<< nickUserHost << "',"
+		<< escapeSQLChars(channel) << "','"
+                << escapeSQLChars(userHost) << "','"
+		<< escapeSQLChars(account) << "','"
+		<< escapeSQLChars(nickUserHost) << "',"
 		<< points << ")"
                 << ends;
 
-//#ifdef LOG_SQL
+#ifdef LOG_SQL
         elog    << "sqlChanOp::Insert> "
                 << queryString.str().c_str()
                 << endl;
-//#endif
+#endif
 
 ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
 
@@ -84,12 +84,14 @@ bool sqlChanOp::Update()
 {
 static const char* queryHeader =    "UPDATE chanOps ";
 
+elog    << "sqlChanOp::update> " << account << " && " << channel << endl;
+
 stringstream queryString;
 queryString     << queryHeader << "SET last_seen_as = "<< "'"
                 << escapeSQLChars(nickUserHost) << "', points = "
                 << points << " WHERE lower(channel) = '"
-                << string_lower(channel) << "' AND lower(account) = '"
-                << string_lower(account) << "'"
+                << string_lower(escapeSQLChars(channel)) << "' AND lower(account) = '"
+                << string_lower(escapeSQLChars(account)) << "'"
                 << ends;
 
 //#ifdef LOG_SQL

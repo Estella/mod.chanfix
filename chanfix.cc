@@ -231,9 +231,6 @@ xClient::OnAttach() ;
 /* OnDetach */
 void chanfix::OnDetach( const string& reason )
 {
-/* Update our op DB */
-updateOps();
-
 /* Delete our config */
 delete chanfixConfig; chanfixConfig = 0;
 
@@ -270,7 +267,7 @@ void chanfix::OnTimer(xServer::timerID theTimer, void*)
 time_t theTime;
 
 if (theTimer == tidCheckOps) {
-  checkOps();
+//  checkOps();
 
   /* Refresh Timer */
   theTime = time(NULL) + POINTS_UPDATE_TIME;
@@ -284,8 +281,6 @@ else if (theTimer == tidAutoFix) {
   tidAutoFix = MyUplink->RegisterTimer(theTime, this, NULL);
   }
 else if (theTimer == tidUpdateDB) {
-  updateOps();
-
   /* Refresh Timer */
   theTime = time(NULL) + SQL_UPDATE_TIME;
   tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
@@ -353,8 +348,7 @@ if (Command == "DCC") {
 } else if (Command == "PING" || Command == "ECHO") {
   DoCTCP(theClient, CTCP, Message);
 } else if (Command == "VERSION") {
-  DoCTCP(theClient, CTCP, "evilnet development - GNUWorld chanfix v%s",
-	 VERSION);
+  DoCTCP(theClient, CTCP, "evilnet development - GNUWorld chanfix v" CF_VERSION);
 }
 
 xClient::OnCTCP(theClient, CTCP, Message, Secure);
@@ -366,6 +360,8 @@ bool chanfix::BurstChannels()
 Join(consoleChan, consoleChanModes, 0, true);
 Join(operChan, operChanModes, 0, true);
 Join(supportChan, supportChanModes, 0, true);
+
+burstOps();
 
 return xClient::BurstChannels();
 }
@@ -399,10 +395,10 @@ switch( whichEvent )
 	case EVT_PART:
 		{
                 theClient = static_cast< iClient* >( data1 ) ;
-		if(wasOpped(theClient, theChan))
-			{
-			givePoint(theClient, theChan);
-			}
+		sqlChanOp* theOp = wasOpped(theClient, theChan);
+		if(theOp){
+		  givePoints(theOp);
+		}
 		break ;
 		}
         default:
@@ -413,6 +409,34 @@ xClient::OnChannelEvent( whichEvent, theChan,
         data1, data2, data3, data4 ) ;
 }
 
+void chanfix::OnChannelModeO( Channel* theChan, ChannelUser*,
+                        const xServer::opVectorType& theTargets)
+{
+
+/* if(currentState != RUN) return; */
+
+if (theChan->size() < minClients) return;
+
+sqlChanOp* curOp;
+for( xServer::opVectorType::const_iterator ptr = theTargets.begin() ;
+        ptr != theTargets.end() ; ++ptr )
+        {
+        ChannelUser* tmpUser = ptr->second;
+        bool polarity = ptr->first;
+
+        if (polarity) {
+	  // Someone is opped
+	  gotOpped(tmpUser->getClient(), theChan);
+	} else {
+	  // Someone is deopped
+          curOp = wasOpped(tmpUser->getClient(), theChan);
+	  if(curOp)
+	    givePoints(curOp);
+	} // if
+	} // for
+}
+
+
 /* OnEvent */
 void chanfix::OnEvent( const eventType& whichEvent,
         void* data1, void* data2, void* data3, void* data4 )
@@ -422,7 +446,6 @@ switch(whichEvent)
 	case EVT_BURST_ACK:
 		{
 		changeState(RUN);
-		burstOps();
 		break;
 		}
 	case EVT_NETJOIN:
@@ -546,14 +569,12 @@ switch( currentState ) {
 	{
 	elog	<< "chanfix::changeState> Entering state BURST"
 		<< endl;
-	burstOps();
 	break;
 	}
 	case RUN:
 	{
 	elog	<< "chanfix::changeState> Entering state RUN"
 		<< endl;
-	checkOps();
 	break;
 	}
         case SPLIT:
@@ -580,17 +601,34 @@ elog	<< "Changed state in: "
 sqlChanOp* chanfix::findChanOp(const string& account, const string& channel)
 {
 
-elog << "chanfix::findChanOp> DEBUG: Searching for " << account << " on " << channel << "..." << endl;
 sqlChanOpsType::iterator ptr = sqlChanOps.find(std::pair<string,string>(account, channel));
 if(ptr != sqlChanOps.end())
-	{
-	elog << "chanfix::findChanOp> DEBUG: We've got a winner: " 
-		<< ptr->second->getAccount() << " on " << ptr->second->getChannel() << "!!" << endl;
+        {
+//        elog << "chanfix::findChanOp> DEBUG: We've got a winner: "
+//                << ptr->second->getAccount() << " on " << ptr->second->getChannel() << "!!" << endl;
         return ptr->second ;
-	}
+        }
 
 return 0;
 }
+
+/*
+ * sqlChanOp* chanfix::findChanOp(const string& account, const string& channel)
+ * {
+ * std::pair<string,string> curPair;
+ *
+ * for(sqlChanOpsType::iterator ptr = sqlChanOps.begin(); ptr != sqlChanOps.end(); ptr++) {
+ *   curPair = ptr->first;
+ *   if(!strcasecmp(curPair.first, account) && !strcasecmp(curPair.second, channel)) {
+ * //    elog << "chanfix::findChanOp> DEBUG: We've got a winner: " 
+ * //         << ptr->second->getAccount() << " on " << ptr->second->getChannel() << "!!" << endl;
+ *    return ptr->second ;
+ *  }
+ * }
+ *
+ * return 0;
+ * }
+ */
 
 sqlChanOp* chanfix::newChanOp(const string& account, const string& channel)
 {
@@ -599,15 +637,14 @@ assert( newOp != 0 ) ;
 
 
 sqlChanOps.insert(sqlChanOpsType::value_type(std::pair<string,string>(account, channel), newOp));
-elog << "chanfix::newChanOp> DEBUG: Added new operator: " << account << " on " << channel << "!!" << endl;
+
+//elog << "chanfix::newChanOp> DEBUG: Added new operator: " << account << " on " << channel << "!!" << endl;
 
 newOp->setAccount(account);
 newOp->setChannel(channel);
+newOp->Insert();
 
-if(newOp->Insert())
-  return newOp;
-else
-  return 0;
+return newOp;
 }
 
 sqlChanOp* chanfix::findChanOp(iClient* theClient, Channel* theChan) 
@@ -658,123 +695,86 @@ return retMe ;
 
 void chanfix::burstOps()
 {
-if(currentState != BURST) return;
-elog << "chanfix::burstOps> DEBUG: Bursting Ops ..." << endl;
-
-Channel* thisChan;
-ChannelUser* curUser;
-for(xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->channels_end(); ptr++) {
-        thisChan = ptr->second;
-	for(Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
-		curUser = ptr->second;
-		if(curUser->isModeO() && !curUser->getClient()->getMode(iClient::MODE_SERVICES) && 
-			curUser->getClient()->getAccount() != "")
-			{
-			lastOps.push_back(std::pair<string, string>(curUser->getClient()->getAccount(), thisChan->getName()));
-			gotOpped(curUser->getClient(), thisChan);
-			}
-		}
-        }
-
+/** 
+ * warranty void if comment broken 
+ *
+ * if(currentState != BURST) return;
+ * elog << "chanfix::burstOps> DEBUG: Bursting Ops ..." << endl;
+ *
+ * int start = currentTime();
+ * 
+ * Channel* thisChan;
+ * ChannelUser* curUser;
+ * for(xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->channels_end(); ptr++) {
+ *  thisChan = ptr->second;
+ *  if (thisChan->size() > minClients) {
+ *    for(Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
+ *      curUser = ptr->second;
+ *      if(curUser->isModeO() && !curUser->getClient()->getMode(iClient::MODE_SERVICES) && 
+ *  	    curUser->getClient()->getAccount() != "") gotOpped(curUser->getClient(), thisChan);
+ *    }
+ *  }
+ * }
+ *
+ * elog << "chanfix::burstOps> DEBUG: Done in " << currentTime() - start << " seconds ..." << endl; 
+ */
 }
 
-void chanfix::checkOps()
+void chanfix::givePoints(sqlChanOp* thisOp)
 {
-if(currentState != RUN) return;
-elog << "chanfix::checkOps> DEBUG: Checking Ops ..." << endl;
+int points = (currentTime() - thisOp->getTimeOpped()) / POINTS_UPDATE_TIME;
 
-Channel* thisChan;
-ChannelUser* curUser;
-lastOpsType curOps;
+points += thisOp->getPoints();
 
-for(xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->channels_end(); ptr++) {
-        thisChan = ptr->second;
-	if(thisChan->size() > minClients) 
-		{
-	        for(Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
-        	        curUser = ptr->second;
-                	if(curUser->isModeO() && !curUser->getClient()->getMode(iClient::MODE_SERVICES) &&
-                        	curUser->getClient()->getAccount() != "")
-	                        {
-				curOps.push_back(std::pair<string, string>(curUser->getClient()->getAccount(), thisChan->getName()));
-				if(wasOpped(curUser->getClient(), thisChan))
-					 givePoint(curUser->getClient(), thisChan);
-				else gotOpped(curUser->getClient(), thisChan);
-        	                }
-			}
-                }
-        }
-lastOps = curOps;
-}
+thisOp->setPoints(points); 
+thisOp->Update();
 
-void chanfix::givePoint(iClient* thisClient, Channel* thisChan)
-{
-sqlChanOp* thisOp = findChanOp(thisClient, thisChan);
-
-thisOp->addPoint(); 
-thisOp->setLastSeenAs(thisClient->getNickUserHost()); 
-//thisOp->Update();
-
-elog << "chanfix::givePoint> DEBUG: Gave " << thisOp->getAccount() 
-	<< " on " << thisOp->getChannel() 
-	<< " a point" 
-	<< endl;
-
-}
-
-void chanfix::givePoint(sqlChanOp* thisOp)
-{
-
-thisOp->addPoint(); 
-//thisOp->Update();
-
-elog << "chanfix::givePoint> DEBUG: Gave " << thisOp->getAccount()
-        << " on " << thisOp->getChannel()
-        << " a point"
-        << endl;
+//elog << "chanfix::givePoints> DEBUG: Gave " << thisOp->getAccount()
+//        << " on " << thisOp->getChannel() << " "
+//        << (currentTime() - thisOp->getTimeOpped()) / POINTS_UPDATE_TIME << " points"
+//        << endl;
 }
 
 void chanfix::gotOpped(iClient* thisClient, Channel* thisChan)
 {
-elog << "chanfix::gotOpped> DEBUG: " << thisClient->getAccount()
-        << " got opped on " << thisChan->getName()
-        << " since my last check..."
-        << endl;
+if(thisClient->getAccount() != "" && !thisClient->getMode(iClient::MODE_SERVICES)) {
+//    elog << "chanfix::gotOpped> DEBUG: " << thisClient->getAccount()
+//          << " got opped on " << thisChan->getName()
+//          << endl;
 
-sqlChanOp* thisOp = findChanOp(thisClient, thisChan);
-if(!thisOp) thisOp = newChanOp(thisClient, thisChan);
-if(!thisOp) return;
+  sqlChanOp* thisOp = findChanOp(thisClient, thisChan);
+  if(!thisOp) thisOp = newChanOp(thisClient, thisChan);
 
-thisOp->setTimeOpped(currentTime());
-thisOp->setLastSeenAs(thisClient->getNickUserHost());
+  if(wasOpped(thisOp)) return;
+  
+  thisOp->setLastSeenAs(thisClient->getNickUserHost());
+  thisOp->setTimeOpped(currentTime());
+  opList.push_back(thisOp);
 }
 
-bool chanfix::wasOpped(iClient* thisClient, Channel* thisChan)
+}
+sqlChanOp* chanfix::wasOpped(iClient* theClient, Channel* theChan)
 {
-if(thisClient->getMode(iClient::MODE_SERVICES)) return false;
-if(thisClient->getAccount() == "") return false;
+sqlChanOp* thisOp = findChanOp(theClient, theChan);
+if(thisOp)
+  return wasOpped(thisOp);
+else
+  return 0;
+}
 
-elog << "chanfix::wasOpped> DEBUG: Looking for Acc = " << thisClient->getAccount() << " (nick: " 
-	<< thisClient->getNickName() << ") && Chan = " << thisChan->getName() << endl;
-
-std::pair<string, string> curPair; 
-for(lastOpsType::iterator ptr = lastOps.begin(); ptr != lastOps.end(); ptr++)
-	{
-        curPair = *ptr;
-	elog << "chanfix::wasOpped> DEBUG: curAcc = " << curPair.first 
-		<< " && curChan = " << curPair.second << endl;
-	if(!strcasecmp(curPair.first, thisClient->getAccount()) && 
-			!strcasecmp(curPair.second, thisChan->getName()))
-		{
-		elog << "chanfix::wasOpped> DEBUG: " << thisClient->getAccount() << " was opped on " 
-			<< thisChan->getName() 
-			<< endl;
-		return true;
-		}
-	}
-elog << "chanfix::wasOpped> DEBUG: " << thisClient->getAccount() << " was not opped on " << thisChan->getName() 
-	<< endl;
-return false;
+sqlChanOp* chanfix::wasOpped(sqlChanOp* theOp)
+{
+sqlChanOp* curOp;
+for(chanOpsType::iterator ptr = opList.begin(); ptr != opList.end(); ptr++) {
+  curOp = *ptr;
+  if(!strcasecmp(curOp->getAccount(), theOp->getAccount()) &&
+	!strcasecmp(curOp->getChannel(), theOp->getChannel())) {
+    // This account was allready opped on this chan! Might be a duplicate!
+    // No more 3000 Vek's
+    return curOp;
+  }
+} // for
+return 0;
 }
 
 void chanfix::checkNetwork()
@@ -868,16 +868,6 @@ if (thisChan->getCreationTime() > 1) {
 Message(thisChan, "Channel fix in progress, please stand by.");
 
 manFixQ.push_back(fixQueueType::value_type(thisChan, currentTime() + CHANFIX_DELAY));
-}
-
-void chanfix::updateOps()
-{
-elog << "chanfix::updateOps> DEBUG: Updating SQL ..." << endl;
-
-for(sqlChanOpsType::iterator ptr = sqlChanOps.begin(); ptr != sqlChanOps.end(); ptr++) {
-	if(ptr->second->getPoints() > 0)
-		ptr->second->Update();
-} // for
 }
 
 bool chanfix::fixChan(Channel* theChan, bool autofix)
@@ -1032,7 +1022,7 @@ sqlChannel* chanfix::getChannelRecord(const string& Channel)
 sqlChannelCacheType::iterator ptr = sqlChanCache.find(Channel);
 if(ptr != sqlChanCache.end())
 	{
-	elog << "chanfix::getChannelRecord> DEBUG: cached channel " << Channel << " found" << endl;
+//	elog << "chanfix::getChannelRecord> DEBUG: cached channel " << Channel << " found" << endl;
 	return ptr->second;
 	}
 return 0;
@@ -1055,7 +1045,7 @@ newChan->setLastAttempt(0);
 newChan->Insert();
 
 sqlChanCache.insert(sqlChannelCacheType::value_type(Channel, newChan));
-elog << "chanfix::getChannelRecord> DEBUG: Added new channel: " << Channel << endl;
+//elog << "chanfix::getChannelRecord> DEBUG: Added new channel: " << Channel << endl;
 
 return newChan;
 }
@@ -1196,7 +1186,7 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ptr++) 
 return false;
 }
 
-const string chanfix::prettyDuration( int duration ) const
+const string chanfix::prettyDuration( int duration )
 {
 
 // Pretty format a 'duration' in seconds to

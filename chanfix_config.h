@@ -25,7 +25,7 @@
 /**
  * Version information
  */
-#define VERSION "1.0.0"
+#define CF_VERSION "1.0.0"
 
 /**
  * Defines that deal with fixing channels, both manually and
