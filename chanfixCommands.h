@@ -28,13 +28,13 @@ class chanfix;
 
 class Command {
 public:
-	Command( chanfix* _bot, const string& _commandName, const string& _help ) :
+	Command( chanfix* _bot, const std::string& _commandName, const std::string& _help ) :
 		bot(_bot), server(0), commandName(_commandName), help(_help)
 		{ }
 
 	virtual ~Command() { }
 	
-	virtual void Exec(iClient*, const string&) = 0;
+	virtual void Exec(iClient*, const std::string&) = 0;
 	
 	void setServer(xServer *_server)
 		{ server = _server; }
@@ -44,10 +44,10 @@ public:
 	
 	virtual void Usage(iClient*);
 	
-	inline const string& getName() const
+	inline const std::string& getName() const
 		{ return commandName; }
 	
-	inline const string& getHelp() const
+	inline const std::string& getHelp() const
 		{ return help; }
 	
 protected:
@@ -63,11 +63,11 @@ class commandName##Command : public Command \
 { \
   public: \
     commandName##Command(chanfix* _bot, \
-      const string& _commandName, \
-      const string& _help) : \
+      const std::string& _commandName, \
+      const std::string& _help) : \
         Command(_bot, _commandName, _help) {} \
     virtual ~commandName##Command() {} \
-    virtual void Exec(iClient*, const string&); \
+    virtual void Exec(iClient*, const std::string&); \
 };
 
 /* Oper commands */

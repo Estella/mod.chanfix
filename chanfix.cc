@@ -28,7 +28,7 @@
 
 #include	"libpq++.h"
 
-#include	"config.h"
+#include	"gnuworld_config.h"
 #include	"client.h"
 #include	"EConfig.h"
 #include	"Network.h"
@@ -61,7 +61,7 @@ using std::ends;
 
 extern "C"
 {
-  xClient* _gnuwinit(const string& args)
+  xClient* _gnuwinit(const std::string& args)
   { 
     return new chanfix( args );
   }
@@ -74,7 +74,7 @@ extern "C"
  * basic client info (nick/user/host/etc).
  * Any additional processing must be done here.
  */
-chanfix::chanfix( const string& configFileName )
+chanfix::chanfix( const std::string& configFileName )
  : xClient( configFileName )
 {
 /* Load the config file */
@@ -112,7 +112,7 @@ sqlPass = chanfixConfig->Require("sqlPass")->second;
 elog    << "chanfix::chanfix::> Configuration loaded!"
         << endl;
 
-string Query = "host=" + sqlHost + " dbname=" + sqlDB + " port=" + sqlPort + " user=" + sqlUser;
+std::string Query = "host=" + sqlHost + " dbname=" + sqlDB + " port=" + sqlPort + " user=" + sqlUser;
 
 elog    << "chanfix::chanfix> Attempting to connect to "
         << sqlHost << " at port " << sqlPort
@@ -171,7 +171,7 @@ return commandMap.insert( commandMapType::value_type(theCommand->getName(), theC
 }
 
 /* UnRegister a command */
-bool chanfix::UnRegisterCommand( const string& commName )
+bool chanfix::UnRegisterCommand( const std::string& commName )
 {
 commandMapType::iterator ptr = commandMap.find( commName ) ;
 if ( ptr == commandMap.end() ) {
@@ -223,7 +223,7 @@ xClient::OnAttach() ;
 }
 
 /* OnDetach */
-void chanfix::OnDetach( const string& reason )
+void chanfix::OnDetach( const std::string& reason )
 {
 /* Delete our config */
 delete chanfixConfig; chanfixConfig = 0;
@@ -285,7 +285,7 @@ else if (theTimer == tidFixQ) {
 }
 
 void chanfix::OnPrivateMessage( iClient* theClient,
-	const string& Message, bool secure)
+	const std::string& Message, bool secure)
 {
 if (!theClient->isOper()) {
   return;
@@ -301,7 +301,7 @@ if ( st.empty() ) {
   return;
 }
 
-const string Command = string_upper(st[0]);
+const std::string Command = string_upper(st[0]);
 
 /**
  * Just quickly, abort if someone tries to LOGIN or NEWPASS
@@ -323,14 +323,14 @@ commHandler->second->Exec(theClient, Message);
 xClient::OnPrivateMessage(theClient, Message);
 }
 
-void chanfix::OnCTCP( iClient* theClient, const string& CTCP,
-		const string& Message, bool Secure )
+void chanfix::OnCTCP( iClient* theClient, const std::string& CTCP,
+		const std::string& Message, bool Secure )
 {
 StringTokenizer st(CTCP);
 
 if(st.empty()) return;
 
-const string Command = string_upper(st[0]);
+const std::string Command = string_upper(st[0]);
 
 if (Command == "DCC") {
   DoCTCP(theClient, CTCP, "REJECT");
@@ -464,7 +464,7 @@ xClient::OnEvent( whichEvent, data1, data2, data3, data4 ) ;
 
 void chanfix::preloadChanOpsCache()
 {
-        stringstream theQuery;
+        std::stringstream theQuery;
         theQuery        << "SELECT channel,userhost,last_seen_as,points,account FROM chanOps"
                                 << ends;
 
@@ -499,7 +499,7 @@ void chanfix::preloadChanOpsCache()
 
 void chanfix::preloadChannelCache()
 {
-        stringstream theQuery;
+        std::stringstream theQuery;
         theQuery        << "SELECT channel, fixed, lastfix FROM channels"
                                 << ends;
 
@@ -601,7 +601,7 @@ elog	<< "Changed state in: "
 	<< endl;
 }
 
-sqlChanOp* chanfix::findChanOp(const string& account, const string& channel)
+sqlChanOp* chanfix::findChanOp(const std::string& account, const std::string& channel)
 {
 
 sqlChanOpsType::iterator ptr = sqlChanOps.find(std::pair<string,string>(account, channel));
@@ -616,7 +616,7 @@ return 0;
 }
 
 /*
- * sqlChanOp* chanfix::findChanOp(const string& account, const string& channel)
+ * sqlChanOp* chanfix::findChanOp(const std::string& account, const std::string& channel)
  * {
  * std::pair<string,string> curPair;
  *
@@ -633,7 +633,7 @@ return 0;
  * }
  */
 
-sqlChanOp* chanfix::newChanOp(const string& account, const string& channel)
+sqlChanOp* chanfix::newChanOp(const std::string& account, const std::string& channel)
 {
 sqlChanOp* newOp = new (std::nothrow) sqlChanOp(SQLDb);
 assert( newOp != 0 ) ;
@@ -673,11 +673,11 @@ myOps.sort(compare_points);
 return myOps;
 }
 
-const string gnuworld::escapeSQLChars(const string& theString)
+const std::string gnuworld::escapeSQLChars(const \std::string& theString)
 {
 string retMe ;
 
-for( string::const_iterator ptr = theString.begin() ;
+for( std::string::const_iterator ptr = theString.begin() ;
         ptr != theString.end() ; ++ptr )
         {
         if( *ptr == '\'' )
@@ -978,7 +978,7 @@ return false;
 }
 
 
-iClient* chanfix::findAccount(const string& Account, Channel* theChan)
+iClient* chanfix::findAccount(const std::string& Account, Channel* theChan)
 {
 // TODO: Accounts are not unique! Make this return a vector in case the 
 //       same account occurs more then once on this chan (N/A on Undernet)
@@ -993,7 +993,7 @@ for(Channel::userIterator ptr = theChan->userList_begin(); ptr != theChan->userL
 return 0;
 }
 
-sqlChannel* chanfix::getChannelRecord(const string& Channel)
+sqlChannel* chanfix::getChannelRecord(const std::string& Channel)
 {
 sqlChannelCacheType::iterator ptr = sqlChanCache.find(Channel);
 if(ptr != sqlChanCache.end())
@@ -1009,7 +1009,7 @@ sqlChannel* chanfix::getChannelRecord(Channel* theChan)
 return getChannelRecord(theChan->getName());
 }
 
-sqlChannel* chanfix::newChannelRecord(const string& Channel)
+sqlChannel* chanfix::newChannelRecord(const std::string& Channel)
 {
 sqlChannel* newChan = new (std::nothrow) sqlChannel(SQLDb);
 assert( newChan != 0 ) ;
@@ -1162,7 +1162,7 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ptr++) 
 return false;
 }
 
-const string chanfix::prettyDuration( int duration )
+const std::string chanfix::prettyDuration( int duration )
 {
 
 // Pretty format a 'duration' in seconds to
