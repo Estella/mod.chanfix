@@ -1,28 +1,92 @@
 # $Id$
-# conf file for testClient
+# chanfix configuration file
 
-# database specifications
-sql_host = 127.0.0.1
-sql_port = 5432
+# ---------------------------------------------------------------------
 
-# sql_db = Name of the database. 
-
-sql_db = chanfix
-
-#if you dont need user/pass just leave it with ''
-sql_user = evilnet
-sql_pass = ""
-
-# The following fields are required
-username = chanfix
+# Nickname of bot
 nickname = C
+
+# Username of bot
+username = chanfix
+
+# Hostname of bot
 hostname = chan.fix
+
+# Real name (info) of bot
 userdescription = Channel Fixer
-mode = +idk
 
-coderchan = #coder-com
-debugchan = #debug
-operchan = #opers
-relaychan = #relay
-chanmodes = +snt
+# User modes bot should set
+mode = +iodk
 
+# ---------------------------------------------------------------------
+# Database specifications
+
+# Host and port of database
+sqlHost = 127.0.0.1
+sqlPort = 5432
+# Name of database
+sqlDB   = chanfix
+# If you don't need user/pass just put "" for option(s) below
+sqlUser = evilnet
+sqlPass = ""
+
+# ---------------------------------------------------------------------
+# Channels the bot should join
+
+# Console channel name and initial modes
+consoleChan = #coder-com
+consoleChanModes = +nst
+
+# Oper channel name and initial modes
+operChan = #staff
+operChanModes = +inst
+
+# Support channel name and initial modes
+supportChan = #chanfix
+supportChanModes = +nt
+
+# ---------------------------------------------------------------------
+# Fixing settings
+
+# Should chanfix automatically fix opless channels?
+enableAutoFix = true
+
+# Should chanfix be able to manually fix channels?
+enableChanFix = true
+
+# Can channels be blocked by admins?
+enableChannelBlocking = true
+
+# ---------------------------------------------------------------------
+# Network settings
+
+# Total number of servers on the network
+numServers = 10
+
+# The minimum percentage of servers that need to be linked;
+# if there are fewer servers linked, chanfix will not fix
+# any channels, be it automatic or manual.
+minServersPresent = 75
+
+# ---------------------------------------------------------------------
+# Interface settings
+
+# The amount of scores to report when issuing the SCORE #channel
+# command. Do not set this to a higher value than 10.
+numTopScores = 10
+
+# ---------------------------------------------------------------------
+# Database settings
+
+# Minimum clients needed in a channel for it to be scored
+minClients = 4
+
+# Which clients score a point if they are opped?
+# Client needs to be idented (no ~ before username)
+clientNeedsIdent = true
+
+# Client needs to have a reversed hostname
+clientNeedsReverse = false
+
+# End of config file.
+# ---------------------------------------------------------------------

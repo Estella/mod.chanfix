@@ -25,8 +25,8 @@
 #include	<string>
 
 #include	"client.h"
-#include	"sqlChanOp.h"
 #include	"functor.h"
+#include	"sqlChanOp.h"
 
 using std::string ;
 class PgDatabase;
@@ -79,23 +79,49 @@ public:
 	 */
 	virtual bool BurstChannels() ;
 
+        /**
+         * This method is invoked when this module is first loaded.
+         * This is a good place to setup timers, connect to DB, etc.
+         * At this point, the server may not yet be connected to the
+         * network, so please do not issue join/nick requests.
+         */
         virtual void OnAttach() ;
 
+        /**
+         * This method is called when this module is being unloaded from
+         * the server.  This is a good place to cleanup, including
+         * deallocating timers, closing connections, closing log files,
+         * and deallocating private data stored in iClients.
+         */
         virtual void OnDetach( const string& =
-                        string( "Server Shutdown" ) ) ;
+			string( "Shutting down" ) ) ;
 
+        /**
+         * This method is called when the server connects to the network.
+         * Note that if this module is attached while already connected
+         * to a network, this method is still invoked.
+         */
         virtual void OnConnect() ;
 
+        /**
+         * This method is invoked when the server disconnects from
+         * its uplink.
+         */
         virtual void OnDisconnect() ;
 
-//        virtual bool RegisterCommand( Command* ) ;
+        /**
+         * This method will register a given command handler, removing
+         * (and deallocating) the existing handler for this command,
+         * should one exist.
+         */
+	virtual bool RegisterCommand( Command* ) ;
 
         /**
          * This method will unregister the command handler for the command
          * of the given command name, deallocating the object from the
          * heap as well.
          */
-//        virtual bool UnRegisterCommand( const string& ) ;
+	virtual bool UnRegisterCommand( const string& ) ;
 
         /**
          * This method is invoked each time a channel event occurs
@@ -118,7 +144,7 @@ public:
 	sqlChanOp* findChanOp(const string&, const string&);
 	sqlChanOp* findChanOp(iClient*, Channel*);
 
-	void preCacheChanOps();
+	void preloadChanOpsCache();
 	void BurstOps();
 
 	void OnChannelModeO( Channel*, ChannelUser*, const xServer::opVectorType&);
@@ -143,19 +169,31 @@ public:
 
 
 protected:
-        string          coderChan;
-        string          debugChan;
-        string          operChan;
-        string          relayChan;
-        string          chanModes;
+	string		chanfixConfig;
 
-        string          sqlHost;
-        string          sqlPort;
-        string          sqlUser;
-        string          sqlPass;
-        string          sqlDb;
+	string		consoleChan;
+	string		consoleChanModes;
+	string		operChan;
+	string		operChanModes;
+	string		supportChan;
+	string		supportChanModes;
+	bool		enableAutoFix;
+	bool		enableChanFix;
+	bool		enableChannelBlocking;
+	string		numServers;
+	string		minServersPresent;
+	string		numTopScores;
+	string		minClients;
+	bool		clientNeedsIdent;
+	bool		clientNeedsReverse;
 
-} ;
+	string          sqlHost;
+	string          sqlPort;
+	string          sqlUser;
+	string          sqlPass;
+	string          sqlDB;
+
+}; // class chanfix
 
 const string escapeSQLChars(const string& theString);
 

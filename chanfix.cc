@@ -21,19 +21,26 @@
 
 #include        <new>
 
+#include	"config.h"
 #include	"client.h"
-#include	"chanfix.h"
 #include	"server.h"
 #include	"EConfig.h"
 #include	"Network.h"
 #include        "StringTokenizer.h"
 
+#include	"chanfix.h"
+#include	"chanfixCommands.h"
+#include	"levels.h"
+#include	"sqlChanOp.h"
+
+RCSTAG("$Id$");
+
 namespace gnuworld
 {
 
-using std::endl ;
-using std::stringstream ;
-using std::ends ;
+using std::endl;
+using std::stringstream;
+using std::ends;
 
 
 /*
@@ -45,9 +52,6 @@ extern "C"
 {
   xClient* _gnuwinit(const string& args)
   { 
-	elog << "Starting chanfix module! Please stand by!"
-        	<< endl;
-
     return new chanfix( args );
   }
 
@@ -62,32 +66,43 @@ extern "C"
 chanfix::chanfix( const string& configFileName )
  : xClient( configFileName )
 {
-elog << "Starting chanfix module! Please stand by!"
-	<< endl;
+/* Load the config file */
+chanfixConfig = new (std::nothrow) EConfig(configFileName);
+assert(chanfixConfig != 0);
 
-EConfig conf( configFileName ) ;
-coderChan = conf.Require( "coderchan" )->second ;
-debugChan = conf.Require( "debugchan" )->second ;
-operChan = conf.Require( "operchan" )->second ;
-relayChan = conf.Require( "relaychan" )->second ;
-chanModes = conf.Require( "chanmodes" )->second ;
+/* Config file processing */
+consoleChan = chanfixConfig->Require("consoleChan")->second ;
+consoleChanModes = chanfixConfig->Require("consoleChanModes")->second ;
+operChan = chanfixConfig->Require("operChan")->second ;
+operChanModes = chanfixConfig->Require("operChanModes")->second ;
+supportChan = chanfixConfig->Require("supportChan")->second ;
+supportChanModes = chanfixConfig->Require("supportChanModes")->second ;
+enableAutoFix = chanfixConfig->Require("enableAutoFix")->second ;
+enableChanFix = chanfixConfig->Require("enableChanFix")->second ;
+enableChanFixBlocking = chanfixConfig->Require("enableChanFixBlocking")->second ;
+numServers = atoi((chanfixConfig->Require("numServers")->second).c_str()) ;
+minServersPresent = atoi((chanfixConfig->Require("minServersPresent")->second).c_str()) ;
+numTopScores = atoi((chanfixConfig->Require("numTopScores")->second).c_str()) ;
+minClients = atoi((chanfixConfig->Require("minClients")->second).c_str()) ;
+clientNeedsIdent = chanfixConfig->Require("clientNeedsIdent")->second ;
+clientNeedsReverse = chanfixConfig->Require("clientNeedsReverse")->second ;
 
-/* database variables */
-sqlHost = conf.Require("sql_host" )->second;
-sqlDb = conf.Require( "sql_db" )->second;
-sqlPort = conf.Require( "sql_port" )->second;
-sqlUser = conf.Require( "sql_user")->second;
-sqlPass = conf.Require( "sql_pass")->second;
+/* Database processing */
+sqlHost = chanfixConfig->Require("sqlHost")->second;
+sqlPort = chanfixConfig->Require("sqlPort")->second;
+sqlDB = chanfixConfig->Require("sqlDB")->second;
+sqlUser = chanfixConfig->Require("sqlUser")->second;
+sqlPass = chanfixConfig->Require("sqlPass")->second;
 
-elog    << "Configfile done!"
+elog    << "chanfix::chanfix::> Configuration loaded!"
         << endl;
 
-string Query = "host=" + sqlHost + " dbname=" + sqlDb + " port=" + sqlPort + " user=" + sqlUser;
+string Query = "host=" + sqlHost + " dbname=" + sqlDB + " port=" + sqlPort + " user=" + sqlUser;
 
 elog    << "chanfix::chanfix> Attempting to connect to "
         << sqlHost << " at port " << sqlPort
         << " as User " << sqlUser << " to database: "
-        << sqlDb
+        << sqlDB
         << endl;
 
 SQLDb = new (std::nothrow) cmDatabase( Query.c_str() ) ;
@@ -110,21 +125,54 @@ else
                 << endl ;
         }
 
-preCacheChanOps();
+/* Register the commands we want to use */
+RegisterCommand(new QUOTECommand(this, "QUOTE", "<text>"));
+RegisterCommand(new SHUTDOWNCommand(this, "SHUTDOWN", "[reason]"));
+RegisterCommand(new INVITECommand(this, "INVITE", ""));
+RegisterCommand(new RELOADCommand(this, "RELOAD", ""));
+
+/* Preload the ChanOps cache */
+preloadChanOpsCache();
 
 }
 
 chanfix::~chanfix()
 {
-/* No heap space allocated */
+}
+
+/* Register a new command */
+bool chanfix::RegisterCommand( Command *theCommand )
+{
+UnRegisterCommand( newComm->getName() ) ;
+return commandMap.insert( commandPairType(theCommand->getName(), theCommand)).second;
+}
+
+/* UnRegister a command */
+bool chanfix::UnRegisterCommand( const string& commName )
+{
+commandMapType::iterator ptr = commandMap.find( commName ) ;
+if ( ptr == commandMap.end() ) {
+  return false ;
+}
+delete ptr->second ;
+commandMap.erase( ptr ) ;
+return true ;
 }
 
 /* OnAttach */
 void chanfix::OnAttach()
 {
+for (commandMapType::iterator ptr = commandMap.begin(); ptr != commandMap.end(); ++ptr) {
+  ptr->second->setServer(MyUplink);
+}
+
+/* Register for global network events */
 MyUplink->RegisterEvent( EVT_KILL, this );
 MyUplink->RegisterEvent( EVT_QUIT, this );
 MyUplink->RegisterEvent( EVT_BURST_ACK, this );
+
+/* Register for all channel events */
+MyUplink->RegisterChannelEvent( xServer::CHANNEL_ALL, this );
 
 xClient::OnAttach() ;
 }
@@ -132,6 +180,19 @@ xClient::OnAttach() ;
 /* OnDetach */
 void chanfix::OnDetach( const string& reason )
 {
+/* Delete our config */
+delete chanfixConfig; chanfixConfig = 0;
+
+/* Delete our connection to the database */
+delete SQLDb; SQLDb = 0;
+
+/* Delete commands */
+for(commandMapType::iterator ptr = commandMap.begin() ;
+    ptr != commandMap.end() ; ++ptr) {
+        delete ptr->second;
+}
+commandMap.clear();
+
 xClient::OnDetach( reason ) ;
 }
 
@@ -150,53 +211,63 @@ xClient::OnDisconnect() ;
 void chanfix::OnPrivateMessage( iClient* theClient,
 	const string& Message, bool )
 {
-StringTokenizer st(Message) ;
-if( st.empty() )
-        {
-        return;
-        }
-const string Command = string_upper(st[0]);
-
-if(theClient->isOper())	
-	{
-	if(Command == "QUOTE") Write( st.assemble(1) );
-	Notice( theClient, "Howdy :)" );
-	}
-else Notice ( theClient, "Who do you think you are? Superman??");
-
+if (!theClient->isOper()) {
+  return;
 }
 
-void chanfix::OnCTCP( iClient* theClient, const string& CTCP
-                , const string& Message ,bool )
-{
-StringTokenizer st( CTCP ) ;
-if( st.empty() )
-        {
-        return;
-        }
+StringTokenizer st(Message) ;
+if ( st.empty() ) {
+  return;
+}
+
 const string Command = string_upper(st[0]);
 
-if(Command == "PING" || Command=="ECHO")
-        {
-        xClient::DoCTCP(theClient, CTCP, Message);
-        }
+/*
+ *  Just quickly, abort if someone tries to LOGIN or NEWPASS
+ *  unsecurely.
+ */
+if (!secure && ((Command == "LOGIN") || (Command == "NEWPASS"))) {
+  Notice(theClient, "To use %s, you must /msg %s@%s",
+	 Command.c_str(), nickName.c_str(), getUplinkName().c_str());
+  return ;
+}
 
+commandMapType::iterator commHandler = commandMap.find(Command);
+if(commHandler == commandMap.end()) {
+  return ;
+}
+
+commHandler->second->Exec(theClient, Message);
+
+xClient::OnPrivateMessage(theClient, Message);
+}
+
+void chanfix::OnCTCP( iClient* theClient, const string& CTCP,
+		const string& Message, bool Secure )
+{
+StringTokenizer st(CTCP);
+
+if(st.empty()) return;
+
+const string Command = string_upper(st[0]);
+
+if (Command == "DCC") {
+  DoCTCP(theClient, CTCP, "REJECT");
+} else if (Command == "PING" || Command == "ECHO") {
+  DoCTCP(theClient, CTCP, Message);
+} else if (Command == "VERSION") {
+  DoCTCP(theClient, CTCP, "evilnet development - chanfix v1.0.0");
+}
+
+xClient::OnCTCP(theClient, CTCP, Message, Secure);
 }
 
 // Burst any channels.
 bool chanfix::BurstChannels()
 {
-Join( "#chanfix", chanModes, 0, true);
-Join( coderChan, chanModes, 0, true);
-Join( debugChan, chanModes, 0, true);
-Join( operChan, chanModes, 0, true);
-Join( relayChan, chanModes, 0, true);
-
-Channel* thisChan;
-for(xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->channels_end(); ptr++) {
-        thisChan = ptr->second;
-        MyUplink->RegisterChannelEvent( thisChan->getName(), this ) ;
-	}
+Join(consoleChan, consoleChanModes, 0, true);
+Join(operChan, operChanModes, 0, true);
+Join(supportChan, supportChanModes, 0, true);
 
 return xClient::BurstChannels();
 }
@@ -259,13 +330,13 @@ switch(whichEvent)
 xClient::OnEvent( whichEvent, data1, data2, data3, data4 ) ;
 }
 
-void chanfix::preCacheChanOps()
+void chanfix::preloadChanOpsCache()
 {
         stringstream theQuery;
         theQuery        << "SELECT channel,userhost,last_seen_as,points,account FROM chanOps"
                                 << ends;
 
-        elog            << "*** [chanfix::preCacheChanOps]: Loading chanOps and their points" 
+        elog            << "*** [chanfix::preloadChanOpsCache]: Loading chanOps and their points" 
                                 << endl;
 
         ExecStatusType status = SQLDb->Exec(theQuery.str().c_str()) ;
@@ -282,12 +353,12 @@ void chanfix::preCacheChanOps()
                                 sqlChanOps.insert(sqlChanOpsType::value_type(thePair, newOp));
                         }
         } else	{
-		elog << "[chanfix::preCacheChanOps] Something went wrong: "
+		elog << "[chanfix::preloadChanOpsCache] Something went wrong: "
         	        << SQLDb->ErrorMessage()
                 	<< endl;
 	}
 
-        elog    << "*** [chanfix::preCacheChanOps]: Done. Loaded "
+        elog    << "*** [chanfix::preloadChanOpsCache]: Done. Loaded "
                         << SQLDb->Tuples()
                         << " chanops."
                         << endl;
