@@ -32,6 +32,7 @@ sqlChannel::sqlChannel(PgDatabase* _SQLDb)
   start(0),
   successFixes(0),
   maxScore(0),
+  modesRemoved(false),
   SQLDb(_SQLDb)
 {};
 

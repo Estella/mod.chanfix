@@ -164,6 +164,7 @@ public:
 		const string& chanModes,
 		const time_t& burstTime ) ;
 
+
 	/**
 	 * Our functions.
 	 */
@@ -272,6 +273,7 @@ protected:
 	bool		enableAutoFix;
 	bool		enableChanFix;
 	bool		enableChannelBlocking;
+	string		defaultChannelModes;
 	unsigned int	numServers;
 	unsigned int	minServersPresent;
 	unsigned int	numTopScores;

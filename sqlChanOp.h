@@ -27,47 +27,47 @@ public:
          *  Methods to get data atrributes.
          */
 
-        inline const string&      getChannel() const
+        inline const string&	getChannel() const
                 { return channel ; }
 
-        inline const string&      getUserHost() const
+        inline const string&	getUserHost() const
                 { return userHost ; }
 
-        inline const string&      getAccount() const
+        inline const string&	getAccount() const
                 { return account ; }
 
-	inline const unsigned int& getPoints() const
+	inline const int&	getPoints() const
 		{ return points ; }
 
-	inline const string&	  getLastSeenAs() const
+	inline const string&	getLastSeenAs() const
                 { return nickUserHost ; }
 
-        inline const time_t	  getTimeOpped() const
+        inline const time_t	getTimeOpped() const
                 { return ts_opped ; }
 
         /*
          *  Methods to set data atrributes.
          */
 
-        inline void setChannel(string _channel)
+        inline void	setChannel(string _channel)
                 { channel = _channel ; }
 
-        inline void setUserHost(string _userHost)
+        inline void	setUserHost(string _userHost)
                 { userHost = _userHost ; }
 
-        inline void setAccount(string _account)
+        inline void	setAccount(string _account)
                 { account = _account ; }
 
-        inline void setPoints(unsigned int _points)
+        inline void	setPoints(int _points)
                 { points = _points ; }
 
-	inline void addPoint()
+	inline void	addPoint()
 		{ points++ ; }
 
-        inline void setLastSeenAs(string _nickUserHost)
+        inline void	setLastSeenAs(string _nickUserHost)
 		{ nickUserHost = _nickUserHost ; }
 
-        inline void setTimeOpped(time_t _ts_opped)
+        inline void	setTimeOpped(time_t _ts_opped)
                 { ts_opped = _ts_opped ; }
 
 	bool Insert();
@@ -80,7 +80,7 @@ private:
 	string		channel;
 	string		nickUserHost;
 	string		account;
-	unsigned int	points;
+	int		points;
 	time_t		ts_opped;
 
         PgDatabase*     SQLDb;

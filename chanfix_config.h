@@ -76,27 +76,27 @@
  * Minimum absolute score required for chanfix to op, relative to
  * the maximum score possible (default: 0.20 * 4032).
  */
-static const double FIX_MIN_ABS_SCORE_BEGIN = 0.20;
+#define FIX_MIN_ABS_SCORE_BEGIN	0.20
 
 /**
  * Minimum score required for chanfix to op, relative to the maximum
  * score for this channel in the database, at the beginning of the
  * fix.
  */
-static const double FIX_MIN_REL_SCORE_BEGIN = 0.90;
+#define FIX_MIN_REL_SCORE_BEGIN	0.90
 
 /**
  * Minimum absolute score required for chanfix to op, relative to
  * the maximum score possible (default: 0.04 * 4032).
  */
-static const double FIX_MIN_ABS_SCORE_END = 0.04;
+#define FIX_MIN_ABS_SCORE_END	0.04
 
 /**
  * Minimum score required for chanfix to op, relative to the maximum
  * score for this channel in the database. So, if you have less than
  * 30% of the maximum score, chanfix will never op you.
  */
-static const double FIX_MIN_REL_SCORE_END = 0.30;
+#define FIX_MIN_REL_SCORE_END	0.30
 
 
 /**

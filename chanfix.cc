@@ -91,6 +91,7 @@ supportChanModes = chanfixConfig->Require("supportChanModes")->second ;
 enableAutoFix = atob(chanfixConfig->Require("enableAutoFix")->second) ;
 enableChanFix = atob(chanfixConfig->Require("enableChanFix")->second) ;
 enableChannelBlocking = atob(chanfixConfig->Require("enableChannelBlocking")->second) ;
+defaultChannelModes = chanfixConfig->Require("defaultChannelModes")->second ;
 numServers = atoi((chanfixConfig->Require("numServers")->second).c_str()) ;
 minServersPresent = atoi((chanfixConfig->Require("minServersPresent")->second).c_str()) ;
 numTopScores = atoi((chanfixConfig->Require("numTopScores")->second).c_str()) ;
@@ -818,7 +819,8 @@ void chanfix::manualFix(Channel* thisChan)
 elog << "DEBUG: Manual fix " << thisChan->getName() << "!" << endl;
 
 if (thisChan->getCreationTime() > 1) {
-  BurstChannel(thisChan->getName(), "+nt", thisChan->getCreationTime() - 1);
+  BurstChannel(thisChan->getName(), defaultChannelModes,
+	       thisChan->getCreationTime() - 1);
 } else {
   ClearMode(thisChan, "ovpsmikbl", true);
 }
@@ -839,7 +841,7 @@ for(sqlChanOpsType::iterator ptr = sqlChanOps.begin(); ptr != sqlChanOps.end(); 
 bool chanfix::fixChan(Channel* theChan, bool autofix)
 {
 sqlChannel* sqlChan = getChannelRecord(theChan);
-if(!sqlChan) sqlChan = newChannelRecord(theChan);
+if (!sqlChan) sqlChan = newChannelRecord(theChan);
 
 /* First update the time of the previous attempt to now. */
 if (sqlChan->getFixStart() == 0) sqlChan->setFixStart(currentTime());
@@ -849,13 +851,7 @@ sqlChan->setLastAttempt(currentTime());
 Channel* netChan = Network->findChannel(theChan->getName());
 if (!netChan) return true;
 
-chanOpsType myOps;
-for (sqlChanOpsType::iterator ptr = sqlChanOps.begin(); 
-     ptr != sqlChanOps.end(); ptr++) {
-  if (ptr->second->getChannel() == theChan->getName())
-    myOps.push_back(ptr->second);
-}
-myOps.sort(compare_points);
+chanOpsType myOps = getMyOps(theChan);
 
 if (myOps.begin() != myOps.end())
   sqlChan->setMaxScore((*myOps.begin())->getPoints());
@@ -874,32 +870,37 @@ if (currentOps >= (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED)) {
   return true;
 } 
 
-int time_passed = currentTime() - sqlChan->getFixStart();
+int time_passed;
+if (autofix)
+  time_passed = currentTime() - sqlChan->getFixStart();
+else
+  time_passed = currentTime() - (sqlChan->getFixStart() + CHANFIX_DELAY);
+
+int max_time = (autofix ? AUTOFIX_MAXIMUM : CHANFIX_MAXIMUM);
 
 /* Determine minimum score required for this time. */
 
 /* Linear interpolation of (0, fraction_abs_max * max_score) ->
  * (max_time, fraction_abs_min * max_score)
  * at time t between 0 and max_time. */
-int min_score_abs = (MAX_SCORE * FIX_MIN_ABS_SCORE_BEGIN) -
-		static_cast<double>(time_passed) /
-		(autofix ? AUTOFIX_MAXIMUM : CHANFIX_MAXIMUM) *
-		(MAX_SCORE * FIX_MIN_ABS_SCORE_BEGIN -
-		 FIX_MIN_ABS_SCORE_END * MAX_SCORE);
+int min_score_abs = static_cast<int>((MAX_SCORE *
+		static_cast<float>(FIX_MIN_ABS_SCORE_BEGIN)) -
+		time_passed / max_time *
+		(MAX_SCORE * static_cast<float>(FIX_MIN_ABS_SCORE_BEGIN)
+		 - static_cast<float>(FIX_MIN_ABS_SCORE_END) * MAX_SCORE));
 
 elog << "chanfix::fixChan> [" << theChan->getName() << "] max MAX_SCORE" \
 	" begin FIX_MIN_ABS_SCORE_BEGIN end FIX_MIN_ABS_SCORE_END time " \
-	<< time_passed << " maxtime " << (autofix ? AUTOFIX_MAXIMUM : \
-	CHANFIX_MAXIMUM) << endl;
+	<< time_passed << " maxtime " << max_time << endl;
 
 /* Linear interpolation of (0, fraction_rel_max * max_score_channel) ->
  * (max_time, fraction_rel_min * max_score_channel)
  * at time t between 0 and max_time. */
-int min_score_rel = (maxScore * FIX_MIN_REL_SCORE_BEGIN) -
-		static_cast<double>(time_passed) /
-		(autofix ? AUTOFIX_MAXIMUM : CHANFIX_MAXIMUM) *
-		(maxScore * FIX_MIN_REL_SCORE_BEGIN -
-		 FIX_MIN_REL_SCORE_END * maxScore);
+int min_score_rel = static_cast<int>((maxScore *
+		static_cast<float>(FIX_MIN_REL_SCORE_BEGIN)) -
+		time_passed / max_time *
+		(maxScore * static_cast<float>(FIX_MIN_REL_SCORE_BEGIN)
+		 - static_cast<float>(FIX_MIN_REL_SCORE_END) * maxScore));
 
 /* The minimum score needed for ops is the HIGHER of these two
  * scores. */
@@ -912,7 +913,21 @@ elog << "chanfix::fixChan> [" << theChan->getName() << "] start " << \
 	<< maxScore << ", minabs " << min_score_abs << ", minrel " << \
 	min_score_rel << "." << endl;
 
-/* Get the scores of the accounts of the non-opped clients. */
+/* If no scores are high enough, return. */
+if (!myOps || maxScore < min_score) {
+  if (autofix && !sqlChan->getModesRemoved()) {
+    ClearMode(theChan, "ovpsmikbl", true);
+    sqlChan->setModesRemoved(true);
+    Message(theChan, "Channel modes have been removed.");
+  }
+return false;
+}
+
+/**
+ * Get the scores of the accounts of the non-opped clients.
+ * Find out which clients need to be opped.
+ * If we need to op at least one client, op him/her.
+ */
 iClient* curClient = 0;
 sqlChanOp* curOp = 0;
 int num_clients_to_be_opped = 0;
@@ -1039,6 +1054,7 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ptr++
      if (isFixed || currentTime() - sqlChan->getFixStart() > AUTOFIX_MAXIMUM) { 
        autoFixQ.pop_front();
        sqlChan->addSuccessFix();
+       sqlChan->setFixStart(0);
      } else {
        ptr->second = currentTime() + AUTOFIX_INTERVAL;
      }
@@ -1065,6 +1081,7 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ptr++) 
        /* TODO: send notice to oper saying "Manual chanfix of %s complete." */
        manFixQ.pop_front();
        sqlChan->addSuccessFix();
+       sqlChan->setFixStart(0);
      } else {
        ptr->second = currentTime() + CHANFIX_INTERVAL;
      }

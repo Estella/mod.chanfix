@@ -57,6 +57,11 @@ enableChanFix = true
 # Can channels be blocked by admins?
 enableChannelBlocking = true
 
+# Default channel modes to set after manual chanfix
+# *WARNING*: Due to an IRCu bug, if you leave this blank,
+# +l and +k modes will not be removed when resetting modes.
+defaultChannelModes = "+nt"
+
 # ---------------------------------------------------------------------
 # Network settings
 
