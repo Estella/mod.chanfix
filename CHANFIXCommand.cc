@@ -50,7 +50,7 @@ bool override = false;
 
 if (st.size() > 2) {
   const string flag = string_upper(st[2]);
-  if ((flag == "OVERRIDE") || (flag == "NOW") || (flag == '!'))
+  if ((flag == "OVERRIDE") || (flag == "NOW") || (flag == "!"))
     override = true;
 }
 
@@ -100,7 +100,7 @@ if (theChan->getMaxScore() <=
   bot->Notice(theClient, "The highscore in channel %s is %d which is lower than the minimum score required (%.3f * %d = %d).",
 	      theChan->getChannel().c_str(), theChan->getMaxScore(),
 	      FIX_MIN_ABS_SCORE_END, MAX_SCORE,
-	      static_cast<int>(<static_cast<float>(FIX_MIN_ABS_SCORE_END) 
+	      static_cast<int>(static_cast<float>(FIX_MIN_ABS_SCORE_END) 
 	      * MAX_SCORE));
   return;
 }
@@ -114,7 +114,7 @@ if (bot->isBeingAutoFixed(netChan)) {
   } else {
     /* We're going to manually fix this instead of autofixing it,
      * so remove this channel from the autofix queue. */
-    /* TODO: REMOVE CHAN FROM AUTOFIX QUEUE HERE */
+    bot->removeFromAutoQ(netChan);
   }
 }
 

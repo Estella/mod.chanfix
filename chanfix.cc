@@ -214,15 +214,14 @@ MyUplink->RegisterChannelEvent( xServer::CHANNEL_ALL, this );
 /**
  * Set up delays
  */
-checkOpsDelay = 300; // check ops every 5 minutes
 fixDelay = 30; // try finding channels to fix every 30 sec's
 
 /**
  * Start timers
  */
-tidCheckOps = MyUplink->RegisterTimer(time(NULL) + checkOpsDelay, this, NULL);
+tidCheckOps = MyUplink->RegisterTimer(time(NULL) + DATABASE_UPDATE_TIME, this, NULL);
 tidAutoFix = MyUplink->RegisterTimer(time(NULL) + AUTOFIX_INTERVAL, this, NULL);
-tidUpdateDB = MyUplink->RegisterTimer(time(NULL) + DATABASE_UPDATE_TIME, this, NULL);
+tidUpdateDB = MyUplink->RegisterTimer(time(NULL) + SQL_UPDATE_TIME, this, NULL);
 tidFixQ = MyUplink->RegisterTimer(time(NULL) + fixDelay, this, NULL);
 
 /**
@@ -278,7 +277,7 @@ if (theTimer == tidCheckOps) {
   checkOps();
 
   /* Refresh Timer */
-  theTime = time(NULL) + checkOpsDelay;
+  theTime = time(NULL) + DATABASE_UPDATE_TIME;
   tidCheckOps = MyUplink->RegisterTimer(theTime, this, NULL);
   }
 else if (theTimer == tidAutoFix) {
@@ -292,7 +291,7 @@ else if (theTimer == tidUpdateDB) {
   updateOps();
 
   /* Refresh Timer */
-  theTime = time(NULL) + DATABASE_UPDATE_TIME;
+  theTime = time(NULL) + SQL_UPDATE_TIME;
   tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
   }
 else if (theTimer == tidFixQ) {
@@ -805,14 +804,12 @@ autoFixTimer.Start();
 Channel* thisChan;
 ChannelUser* curUser;
 int numOpLess = 0;
-for (xNetwork::channelIterator ptr = Network->channels_begin();
-     ptr != Network->channels_end(); ptr++) {
+for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->channels_end(); ptr++) {
    thisChan = ptr->second;
    bool opLess = true;
    bool hasService = false;
-   if (thisChan->size() > minClients) {
-     for (Channel::userIterator ptr = thisChan->userList_begin();
-	  ptr != thisChan->userList_end(); ptr++) {
+   if (thisChan->size() > minClients && !isBeingAutoFixed(thisChan) && !isBeingChanFixed(thisChan)) {
+     for (Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
 	curUser = ptr->second;
 	if (curUser->isModeO())
 	  opLess = false;
@@ -1075,7 +1072,7 @@ void chanfix::processQueue()
 {
 
 for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
-   elog << "chanfix::processQueue> DEBUG: Processing in autoFixQ ..." << endl;
+   elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first->getName() << " in autoFixQ ..." << endl;
    if (ptr->second <= currentTime()) {
      sqlChannel* sqlChan = getChannelRecord(ptr->first);
      if (!sqlChan) sqlChan = newChannelRecord(ptr->first);
@@ -1102,11 +1099,10 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " not done yet ..." << endl;
      }
    } else ptr++;
-elog << "chanfix::processQueue> DEBUG: Moving on in Q ..." << endl;
 }
 
 for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
-   elog << "chanfix::processQueue> DEBUG: Processing in manFixQ ..." << endl;
+   elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first->getName() << " in manFixQ ..." << endl;
    if (ptr->second <= currentTime()) {
      sqlChannel* sqlChan = getChannelRecord(ptr->first);
      if (!sqlChan) sqlChan = newChannelRecord(ptr->first);
@@ -1132,7 +1128,6 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " not done yet ..." << endl;
      }
    } else ptr++;
-elog << "chanfix::processQueue> DEBUG: Moving on in Q ..." << endl;
 }
 
 return;
@@ -1156,6 +1151,30 @@ bool chanfix::isBeingChanFixed(Channel* theChan)
 {
 for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ptr++) {
   if(ptr->first->getName() == theChan->getName()) return true;
+}
+
+return false;
+}
+
+bool chanfix::removeFromAutoQ(Channel* theChan)
+{
+for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ptr++) {
+  if(ptr->first->getName() == theChan->getName()) {
+    ptr = autoFixQ.erase(ptr);
+    return true;
+  }
+}
+
+return false;
+}
+
+bool chanfix::removeFromManQ(Channel* theChan)
+{
+for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ptr++) {
+  if(ptr->first->getName() == theChan->getName()) {
+    ptr = manFixQ.erase(ptr);
+    return true;
+  }
 }
 
 return false;

@@ -210,6 +210,9 @@ public:
 	bool isBeingAutoFixed(Channel*);
 	bool isBeingChanFixed(Channel*);
 
+	bool removeFromAutoQ(Channel*);
+        bool removeFromManQ(Channel*);
+	
         /**
          * PostgreSQL Database
          */

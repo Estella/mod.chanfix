@@ -106,7 +106,12 @@
 /**
  * Interval between two consecutive database updates.
  */
-#define DATABASE_UPDATE_TIME	300
+#define DATABASE_UPDATE_TIME 300
+
+/**
+ * Interval between two consecutive sql updates.
+ */
+#define SQL_UPDATE_TIME	3600
 
 /**
  * Maximum score a client can obtain.
