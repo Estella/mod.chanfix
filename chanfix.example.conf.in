@@ -1,0 +1,28 @@
+# $Id$
+# conf file for testClient
+
+# database specifications
+sql_host = 127.0.0.1
+sql_port = 5432
+
+# sql_db = Name of the database. 
+
+sql_db = chanfix
+
+#if you dont need user/pass just leave it with ''
+sql_user = evilnet
+sql_pass = ""
+
+# The following fields are required
+username = chanfix
+nickname = C
+hostname = chan.fix
+userdescription = Channel Fixer
+mode = +idk
+
+coderchan = #coder-com
+debugchan = #debug
+operchan = #opers
+relaychan = #relay
+chanmodes = +snt
+
