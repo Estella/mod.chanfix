@@ -968,11 +968,11 @@ void chanfix::manualFix(Channel* thisChan)
 elog << "chanfix::manualFix> DEBUG: Manual fix " << thisChan->getName() << "!" << endl;
 
 if (thisChan->getCreationTime() > 1) {
-  if (version < 12) /* temporary fix until GNUWorld is fixed */
+  if (version >= 12) /* temporary fix until GNUWorld is fixed */
     MyUplink->setBursting(true);
   MyUplink->BurstChannel(thisChan->getName(), defaultChannelModes,
 			 thisChan->getCreationTime() - 1);
-  if (version < 12)
+  if (version >= 12)
     MyUplink->setBursting(false);
 } else {
   ClearMode(thisChan, "ovpsmikblr", true);
