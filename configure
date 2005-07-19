@@ -1817,7 +1817,7 @@ fi
 
 
 # Define the identity of the package.
- PACKAGE=fluffy
+ PACKAGE=chanfix
  VERSION=1.0
 
 
