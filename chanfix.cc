@@ -287,10 +287,6 @@ else if (theTimer == tidCheckDB) {
   /* Refresh Timer */
   theTime = time(NULL) + connectCheckFreq;
   tidCheckDB = MyUplink->RegisterTimer(theTime, this, NULL);
-  if (tmpChan)
-        {
-        logAdminMessage("Checking databases...");
-        }
   }
 else if (theTimer == tidFixQ) {
   processQueue();
@@ -629,7 +625,7 @@ void chanfix::preloadChanOpsCache()
 void chanfix::preloadChannelCache()
 {
         std::stringstream theQuery;
-        theQuery        << "SELECT channel, fixed, lastfix FROM channels"
+        theQuery        << "SELECT channel, fixed, lastfix, flags FROM channels"
                                 << ends;
 
         elog            << "*** [chanfix::preloadChannelCache]: Loading channels ..."
@@ -972,10 +968,14 @@ void chanfix::manualFix(Channel* thisChan)
 elog << "chanfix::manualFix> DEBUG: Manual fix " << thisChan->getName() << "!" << endl;
 
 if (thisChan->getCreationTime() > 1) {
+  if (version < 12) /* temporary fix until GNUWorld is fixed */
+    MyUplink->setBursting(true);
   MyUplink->BurstChannel(thisChan->getName(), defaultChannelModes,
 			 thisChan->getCreationTime() - 1);
+  if (version < 12)
+    MyUplink->setBursting(false);
 } else {
-  ClearMode(thisChan, "ovpsmikbl", true);
+  ClearMode(thisChan, "ovpsmikblr", true);
 }
 
 Message(thisChan, "Channel fix in progress, please stand by.");

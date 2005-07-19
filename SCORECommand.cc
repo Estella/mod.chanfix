@@ -84,7 +84,7 @@ if (myOps.empty()) {
 }
 string scUser;
 if (st.size() > 2) {
-  scUser = string_lower(st[2]);
+  scUser = st[2];
   if (st[2][0] == '*') {
      //Account
      for (chanfix::chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end(); opPtr++) {
