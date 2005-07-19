@@ -848,7 +848,9 @@ void chanfix::gotOpped(iClient* thisClient, Channel* thisChan)
 //Not enough users, forget about it.
 //if (thisChan->size() < minClients) return;
 
-if(thisClient->getAccount() != "" && !thisClient->getMode(iClient::MODE_SERVICES)) {
+if (thisClient->getAccount() != "" &&
+    !thisClient->getMode(iClient::MODE_SERVICES) && 
+    !thisChan->getMode(Channel::MODE_A)) {
     elog << "chanfix::gotOpped> DEBUG: " << thisClient->getAccount()
           << " got opped on " << thisChan->getName()
           << endl;
@@ -930,6 +932,7 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
    thisChan = ptr->second;
    bool opLess = true;
    bool hasService = false;
+   bool hasApass = thisChan->getMode(Channel::MODE_A);
    if (thisChan->size() > minClients && !isBeingFixed(thisChan)) {
      for (Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
 	curUser = ptr->second;
@@ -938,7 +941,7 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
 	if (curUser->getClient()->getMode(iClient::MODE_SERVICES))
 	  hasService = true;
      }
-     if (opLess && !hasService) {
+     if (opLess && !hasService && !hasApass) {
        sqlChannel* sqlChan = getChannelRecord(thisChan);
        if (!sqlChan) sqlChan = newChannelRecord(thisChan);
 

@@ -5,7 +5,9 @@ lib_LTLIBRARIES = libchanfix.la
 
 libchanfix_la_SOURCES = chanfix.cc \
 	CHANFIXCommand.cc \
+	CHECKCommand.cc \
 	INVITECommand.cc \
+	OPNICKSCommand.cc \
 	QUOTECommand.cc \
 	RELOADCommand.cc \
 	SCORECommand.cc \
@@ -13,7 +15,6 @@ libchanfix_la_SOURCES = chanfix.cc \
 	STATUSCommand.cc \
 	sqlChannel.cc \
 	sqlChanOp.cc 
-
 
 libchanfix_la_CXXFLAGS = -I$(PGSQL_INCLUDE) -I${top_srcdir}/include \
 	-I${top_srcdir}/libgnuworld \

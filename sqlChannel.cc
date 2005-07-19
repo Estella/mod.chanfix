@@ -25,6 +25,7 @@ using std::ends ;
 using std::stringstream ;
 
 const sqlChannel::flagType sqlChannel::F_BLOCKED	= 0x00000001 ;
+const sqlChannel::flagType sqlChannel::F_ALERT		= 0x00000002 ;
 
 sqlChannel::sqlChannel(PgDatabase* _SQLDb)
 : channel(""),
@@ -33,6 +34,7 @@ sqlChannel::sqlChannel(PgDatabase* _SQLDb)
   successFixes(0),
   maxScore(0),
   modesRemoved(false),
+  flags(0),
   SQLDb(_SQLDb)
 {};
 
@@ -41,17 +43,19 @@ void sqlChannel::setAllMembers(int row)
 channel = SQLDb->GetValue(row, 0);
 successFixes = atoi(SQLDb->GetValue(row, 1));
 last = atoi(SQLDb->GetValue(row, 2));
+flags = atoi(SQLDb->GetValue(row, 3));
 };
 
 bool sqlChannel::Insert()
 {
-static const char* queryHeader = "INSERT INTO channels (channel, fixed, lastfix) VALUES (";
+static const char* queryHeader = "INSERT INTO channels (channel, fixed, lastfix, flags) VALUES (";
 
 stringstream queryString;
 queryString     << queryHeader << "'"
 		<< escapeSQLChars(channel) << "',"
 		<< successFixes << "," 
-		<< last << ")"
+		<< last << ","
+		<< flags << ")"
                 << ends;
 
 //#ifdef LOG_SQL
@@ -84,7 +88,8 @@ static const char* queryHeader =    "UPDATE channels ";
 stringstream queryString;
 queryString     << queryHeader << "SET fixed = "
                 << successFixes << ", lastfix = "
-		<< last << " WHERE channel = '"
+		<< last << ", flags = " << flags
+		<< " WHERE channel = '"
                 << escapeSQLChars(channel) << "'"
                 << ends;
 

@@ -4,7 +4,7 @@ echo
 AC_REVISION($Revision$)
 AC_INIT
 AC_CONFIG_SRCDIR([chanfix.cc])
-AM_INIT_AUTOMAKE(fluffy,1.0)
+AM_INIT_AUTOMAKE(chanfix,1.0)
 AC_CONFIG_HEADERS(defs_chanfix.h)
 
 AC_PROG_INSTALL

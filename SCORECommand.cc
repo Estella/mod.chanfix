@@ -150,7 +150,7 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
                strScoresDB << curOp->getPoints();
                intDBCount++;
             }
-            if (netChan->findUser(curClient)->isModeO()) {
+            if (curClient && netChan->findUser(curClient)->isModeO()) {
                if (intOPCount < minScoreReply) {
                   if (intOPCount > 0) {
                      strScoresOP << ", ";

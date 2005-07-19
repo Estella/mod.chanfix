@@ -21,7 +21,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
  * USA.
  *
- * $Id:$
+ * $Id$
  */
 
 #include "gnuworld_config.h"
@@ -31,7 +31,7 @@
 #include "levels.h" 
 #include "StringTokenizer.h"
 
-RCSTAG("$Id:$");
+RCSTAG("$Id$");
 
 namespace gnuworld
 {

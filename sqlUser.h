@@ -20,7 +20,7 @@
  */
 
 #ifndef __SQLUSER_H
-#define __SQLUSER_H "$Id"
+#define __SQLUSER_H "$Id$"
 
 #include        <string>
 #include        <vector>

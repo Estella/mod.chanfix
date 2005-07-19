@@ -20,7 +20,7 @@
  */
 
 #ifndef __SQLCHANNEL_H
-#define __SQLCHANNEL_H "$Id"
+#define __SQLCHANNEL_H "$Id$"
 
 #include        <string>
 #include        <vector>
@@ -45,6 +45,7 @@ public:
 	typedef unsigned int	flagType ;
 
 	static const flagType	F_BLOCKED;
+	static const flagType	F_ALERT;
 
         /*
          *  Methods to get data atrributes.
