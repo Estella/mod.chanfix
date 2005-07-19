@@ -116,12 +116,12 @@ public:
 protected:
 
 	string		channel;
-	flagType	flags;
 	time_t		last;
 	time_t		start;
 	unsigned int	successFixes;
         unsigned int    maxScore;
 	bool		modesRemoved;
+	flagType	flags;
         PgDatabase*     SQLDb;
 
 

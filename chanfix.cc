@@ -156,12 +156,14 @@ else
 
 /* Register the commands we want to use */
 RegisterCommand(new CHANFIXCommand(this, "CHANFIX", "<#channel> [override]"));
+RegisterCommand(new CHECKCommand(this, "CHECK", "<#channel>"));
 RegisterCommand(new INVITECommand(this, "INVITE", ""));
+RegisterCommand(new OPNICKSCommand(this, "OPNICKS", "<#channel>"));
 RegisterCommand(new QUOTECommand(this, "QUOTE", "<text>"));
 RegisterCommand(new RELOADCommand(this, "RELOAD", ""));
+RegisterCommand(new SCORECommand(this, "SCORE", "<#channel> [nick|*account]"));
 RegisterCommand(new SHUTDOWNCommand(this, "SHUTDOWN", "[reason]"));
 RegisterCommand(new STATUSCommand(this, "STATUS", ""));
-RegisterCommand(new SCORECommand(this, "SCORE", "<#channel> [nick|*account]"));
 
 /* Preload the ChanOps cache */
 preloadChanOpsCache();

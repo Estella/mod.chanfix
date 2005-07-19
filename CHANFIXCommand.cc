@@ -73,6 +73,12 @@ if (!netChan) {
 }
 
 /* Only allow chanfixes for unregistered channels. */
+if (netChan->getMode(Channel::MODE_A)) {
+  bot->Notice(theClient, "%s uses oplevels (+A/+U).", 
+	      netChan->getName().c_str());
+  return;
+}
+
 ChannelUser* curUser;
 for (Channel::userIterator ptr = netChan->userList_begin(); ptr != netChan->userList_end(); ptr++) {
    curUser = ptr->second;

@@ -7,6 +7,9 @@ AC_CONFIG_SRCDIR([chanfix.cc])
 AM_INIT_AUTOMAKE(chanfix,1.0)
 AC_CONFIG_HEADERS(defs_chanfix.h)
 
+AC_DISABLE_STATIC
+AC_ENABLE_SHARED
+
 AC_PROG_INSTALL
 
 dnl Substitute INCLTDL and LIBLTDL in the Makefiles

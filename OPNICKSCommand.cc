@@ -64,7 +64,7 @@ for (Channel::userIterator ptr = netChan->userList_begin(); ptr != netChan->user
    if (curUser->isModeO()) {
      if (numOppedUsers++)
        oppedUsers += " ";
-     oppedUsers += curUser->getName();
+     oppedUsers += curUser->getNickName();
    }
 }
 
