@@ -60,10 +60,14 @@ enableChannelBlocking = true
 # Default channel modes to set after manual chanfix
 # *WARNING*: Due to an IRCu bug, if you leave this blank,
 # +l and +k modes will not be removed when resetting modes.
-defaultChannelModes = "+nt"
+defaultChannelModes = +nt
 
 # ---------------------------------------------------------------------
 # Network settings
+
+# Version of IRCu used on the network (11 or 12)
+# Use 11 for u2.10.11 and 12 for u2.10.12
+version = 12
 
 # Total number of servers on the network
 numServers = 10
@@ -92,6 +96,12 @@ clientNeedsIdent = true
 
 # Client needs to have a reversed hostname
 clientNeedsReverse = false
+
+# ---------------------------------------------------------------------
+# Miscellaneous settings
+
+# Frequency (in seconds) between database connection status checks
+connectCheckFreq = 10
 
 # End of config file.
 # ---------------------------------------------------------------------
