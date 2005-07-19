@@ -99,7 +99,9 @@ queryString     << queryHeader << "SET last_seen_as = "<< "'"
                 << queryString.str().c_str()
                 << endl;
 //#endif
-
+if (points <= 0) {
+   return true;
+}
 ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
 
 if( PGRES_COMMAND_OK != status )

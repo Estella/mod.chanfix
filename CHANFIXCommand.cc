@@ -130,7 +130,7 @@ if (bot->isBeingAutoFixed(netChan)) {
 }
 
 /* Don't fix a blocked channel. */
-if (theChan->getFlag(sqlChannel::F_BLOCKED)) {
+if ((theChan->getFlag(sqlChannel::F_BLOCKED)) && (bot->doChanBlocking())) {
   bot->Notice(theClient, "The channel %s is BLOCKED.", 
 	      theChan->getChannel().c_str());
   return;

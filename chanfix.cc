@@ -24,7 +24,19 @@
  * $Id$
  */
 
-#include        <new>
+#include	<new>
+#include	<map>
+#include	<vector>
+#include	<iostream>
+#include	<sstream>
+#include	<string>
+#include	<iomanip>
+#include	<utility>
+
+#include	<ctime>
+#include	<cstdlib>
+#include	<cstring>
+#include	<cstdarg>
 
 #include	"libpq++.h"
 
@@ -42,7 +54,7 @@
 #include	"sqlChannel.h"
 #include	"sqlChanOp.h"
 #include	"sqlUser.h"
-#include	"Timer.h"
+//#include	"Timer.h"
 
 RCSTAG("$Id$");
 
@@ -149,6 +161,7 @@ RegisterCommand(new QUOTECommand(this, "QUOTE", "<text>"));
 RegisterCommand(new RELOADCommand(this, "RELOAD", ""));
 RegisterCommand(new SHUTDOWNCommand(this, "SHUTDOWN", "[reason]"));
 RegisterCommand(new STATUSCommand(this, "STATUS", ""));
+RegisterCommand(new SCORECommand(this, "SCORE", "<#channel> [nick|*account]"));
 
 /* Preload the ChanOps cache */
 preloadChanOpsCache();
@@ -218,12 +231,78 @@ MyUplink->RegisterChannelEvent( xServer::CHANNEL_ALL, this );
 /**
  * Start timers
  */
-tidAutoFix = MyUplink->RegisterTimer(time(NULL) + CHECK_CHANS_TIME, this, NULL);
-tidUpdateDB = MyUplink->RegisterTimer(time(NULL) + SQL_UPDATE_TIME, this, NULL);
-tidFixQ = MyUplink->RegisterTimer(time(NULL) + PROCESS_QUEUE_TIME, this, NULL);
+time_t theTime = time(NULL) + CHECK_CHANS_TIME;
 tidCheckDB = MyUplink->RegisterTimer(time(NULL) + connectCheckFreq, this, NULL);
+tidAutoFix = MyUplink->RegisterTimer(theTime, this, NULL);
+theTime = time(NULL) + SQL_UPDATE_TIME;
+tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
+theTime = time(NULL) + PROCESS_QUEUE_TIME;
+tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
+theTime = time(NULL) + POINTS_UPDATE_TIME;
+tidGivePoints = MyUplink->RegisterTimer(theTime, this, NULL);
 
 xClient::OnAttach() ;
+}
+
+/* onTimer */
+void chanfix::OnTimer(const gnuworld::xServer::timerID& theTimer, void*)
+{
+time_t theTime;
+Channel* tmpChan = Network->findChannel(operChan);
+if (theTimer == tidGivePoints) {
+  /* 5 min timer, loop through channels and give all ops a point! */
+  theTime = time(NULL) + POINTS_UPDATE_TIME;
+  tidGivePoints = MyUplink->RegisterTimer(theTime, this, NULL);
+  giveAllOpsPoints();
+  logAdminMessage("Giving all channel ops a point.");
+}
+if (theTimer == tidAutoFix) {
+  autoFix();
+  /* Refresh Timer */
+  theTime = time(NULL) + CHECK_CHANS_TIME;
+  tidAutoFix = MyUplink->RegisterTimer(theTime, this, NULL);
+  if (tmpChan)
+	{
+	logAdminMessage("Autofixing channels...");
+	elog    << "chanfix::chanfix::> Autofixing channels."
+            << endl;
+	}
+  }
+else if (theTimer == tidUpdateDB) {
+  updatePoints();
+
+  /* Refresh Timer */
+  theTime = time(NULL) + SQL_UPDATE_TIME;
+  tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
+  if (tmpChan)
+	{
+	logAdminMessage("Updating databases...");
+	}
+  }
+else if (theTimer == tidCheckDB) {
+  /*checkDBConnection();*/
+
+  /* Refresh Timer */
+  theTime = time(NULL) + connectCheckFreq;
+  tidCheckDB = MyUplink->RegisterTimer(theTime, this, NULL);
+  if (tmpChan)
+        {
+        logAdminMessage("Checking databases...");
+        }
+  }
+else if (theTimer == tidFixQ) {
+  processQueue();
+
+  /* Refresh Timer */
+  theTime = time(NULL) + PROCESS_QUEUE_TIME;
+  tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
+  if (tmpChan)
+	{
+	logAdminMessage("Processing fix queue...");
+	elog    << "chanfix::chanfix::> Processing fix queue."
+            << endl;
+	}
+}
 }
 
 /* OnDetach */
@@ -264,38 +343,64 @@ void chanfix::OnDisconnect()
 xClient::OnDisconnect() ;
 }
 
-void chanfix::OnTimer(xServer::timerID theTimer, void*)
+bool chanfix::serverNotice( Channel* theChannel, const char* format, ... )
 {
-time_t theTime;
+char buf[ 1024 ] = { 0 } ;
+va_list _list ;
+va_start( _list, format ) ;
+vsnprintf( buf, 1024, format, _list ) ;
+va_end( _list ) ;
 
-if (theTimer == tidAutoFix) {
-  autoFix();
+stringstream s;
+s	<< MyUplink->getCharYY()
+	<< " O "
+	<< theChannel->getName()
+	<< " :"
+	<< buf
+	<< ends;
 
-  /* Refresh Timer */
-  theTime = time(NULL) + CHECK_CHANS_TIME;
-  tidAutoFix = MyUplink->RegisterTimer(theTime, this, NULL);
-  }
-else if (theTimer == tidUpdateDB) {
-  updatePoints();
+Write( s );
 
-  /* Refresh Timer */
-  theTime = time(NULL) + SQL_UPDATE_TIME;
-  tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
-  }
-else if (theTimer == tidFixQ) {
-  processQueue();
+return false;
+}
 
-  /* Refresh Timer */
-  theTime = time(NULL) + PROCESS_QUEUE_TIME;
-  tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
-  }
-else if (theTimer == tidCheckDB) {
-  /*checkDBConnection();*/
+/**
+ * Send a notice to a channel from the server.
+ * TODO: Move this method to xServer.
+ */
+bool chanfix::serverNotice( Channel* theChannel, const string& Message)
+{
+stringstream s;
+s	<< MyUplink->getCharYY()
+	<< " O "
+	<< theChannel->getName()
+	<< " :"
+	<< Message
+	<< ends;
 
-  /* Refresh Timer */
-  theTime = time(NULL) + connectCheckFreq;
-  tidCheckDB = MyUplink->RegisterTimer(theTime, this, NULL);
-  }
+Write( s );
+return false;
+}
+
+bool chanfix::logAdminMessage(const char* format, ... )
+{
+char buf[ 1024 ] = { 0 } ;
+va_list _list ;
+va_start( _list, format ) ;
+vsnprintf( buf, 1024, format, _list ) ;
+va_end( _list ) ;
+
+// Try and locate the relay channel.
+//Channel* tmpChan = Network->findChannel(getConfigVar("CMASTER.RELAY_CHAN")->asString());
+Channel* tmpChan = Network->findChannel(operChan);
+if (!tmpChan)
+	{
+	return false;
+	}
+
+string message = string( "[" ) + nickName + "] " + buf ;
+serverNotice(tmpChan, message);
+return true;
 }
 
 void chanfix::OnPrivateMessage( iClient* theClient,
@@ -474,7 +579,16 @@ switch(whichEvent)
 
 xClient::OnEvent( whichEvent, data1, data2, data3, data4 ) ;
 }
-
+void chanfix::doSqlError(const string& theQuery, const string& theError)
+{
+	/* First, log it to error out */
+	elog	<< "SQL> Whilst executing: "
+		<< theQuery
+		<< std::endl;
+	elog	<< "SQL> "
+		<< theError
+		<< std::endl;
+}
 void chanfix::preloadChanOpsCache()
 {
         std::stringstream theQuery;
@@ -714,9 +828,11 @@ void chanfix::givePoints(iClient* theClient, Channel* theChan)
 sqlChanOp* thisOp = findChanOp(theClient, theChan);
 if(!thisOp) thisOp = newChanOp(theClient, theChan);
 
-int points = (currentTime() - thisOp->getTimeOpped()) / POINTS_UPDATE_TIME;
+//int points = (currentTime() - thisOp->getTimeOpped()) / POINTS_UPDATE_TIME;
 
-points += thisOp->getPoints();
+//points += thisOp->getPoints();
+
+int points = thisOp->getPoints() + 1;
 
 thisOp->setPoints(points); 
 thisOp->Update();
@@ -729,6 +845,9 @@ elog << "chanfix::givePoints> DEBUG: Gave " << thisOp->getAccount()
 
 void chanfix::gotOpped(iClient* thisClient, Channel* thisChan)
 {
+//Not enough users, forget about it.
+//if (thisChan->size() < minClients) return;
+
 if(thisClient->getAccount() != "" && !thisClient->getMode(iClient::MODE_SERVICES)) {
     elog << "chanfix::gotOpped> DEBUG: " << thisClient->getAccount()
           << " got opped on " << thisChan->getName()
@@ -1207,7 +1326,34 @@ if(!myOps) myOps = new clientOpsType;
 
 return myOps;
 }
-
+void chanfix::giveAllOpsPoints()
+{
+     Channel* thisChan;
+     bool hasService = false;
+     for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->channels_end(); ptr++) {
+         thisChan = ptr->second;
+         if (thisChan->size() > minClients && !isBeingFixed(thisChan)) {
+            for (Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
+                ChannelUser* curUser = ptr->second;
+                if (curUser->getClient()->getMode(iClient::MODE_SERVICES)) {
+                   hasService = true;
+                   break; //Exit the loop fully, and go to the next chan
+                }
+            }
+            if (hasService == false) {
+               for (Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
+                  ChannelUser* curUser = ptr->second;
+                  if (curUser->isModeO() && curUser->getClient()->getAccount() != "") {
+                     //Ok hes an op
+                     //Grab an iClient for curUser
+                     givePoints(curUser->getClient(), thisChan);
+                  }
+               }
+            }
+         }
+     }           
+                   
+} //giveAllOpsPoints
 void chanfix::updatePoints()
 {
 /*

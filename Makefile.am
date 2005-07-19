@@ -8,10 +8,12 @@ libchanfix_la_SOURCES = chanfix.cc \
 	INVITECommand.cc \
 	QUOTECommand.cc \
 	RELOADCommand.cc \
+	SCORECommand.cc \
 	SHUTDOWNCommand.cc \
 	STATUSCommand.cc \
 	sqlChannel.cc \
-	sqlChanOp.cc
+	sqlChanOp.cc 
+
 
 libchanfix_la_CXXFLAGS = -I$(PGSQL_INCLUDE) -I${top_srcdir}/include \
 	-I${top_srcdir}/libgnuworld \

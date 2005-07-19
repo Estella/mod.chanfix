@@ -41,7 +41,6 @@ using std::string;
 
 class PgDatabase;
 class Timer;
-
 namespace gnuworld
 {
 
@@ -107,7 +106,7 @@ public:
 	 */
 	virtual ~chanfix() ;
 
-	virtual void OnTimer(xServer::timerID, void*);
+	virtual void OnTimer(const gnuworld::xServer::timerID&, void*) ;
 
 	/**
 	 * This method is called when a network client sends
@@ -223,6 +222,7 @@ public:
 	bool wasOpped(iClient*, Channel*);
 
 	void checkNetwork();
+	void chanfix::giveAllOpsPoints();
 
 	void autoFix();
 	void manualFix(Channel*);
@@ -250,6 +250,13 @@ public:
 
 	const string prettyDuration( int );
 	
+	/* Server notices */
+	bool serverNotice( Channel*, const char*, ... );
+	bool serverNotice( Channel*, const string& );
+	
+	/* Admin message logs */
+	bool logAdminMessage(const char*, ... );
+	
 	/**
 	 * PostgreSQL Database
 	 */
@@ -261,7 +268,7 @@ public:
 //        typedef map< std::pair<string, string>, sqlChanOp*, noCaseComparePair> sqlChanOpsType;
         typedef map< std::pair<string, string>, sqlChanOp*> sqlChanOpsType;
 	sqlChanOpsType sqlChanOps;
-
+	
 	typedef map <string, sqlChannel*, noCaseCompare> sqlChannelCacheType;
 	sqlChannelCacheType sqlChanCache;
 
@@ -270,7 +277,7 @@ public:
 
 	typedef list< sqlChanOp* > chanOpsType;
 	chanOpsType	getMyOps(Channel*);
-
+	
 	/**
 	 * Queues to process.
 	 */
@@ -280,18 +287,20 @@ public:
 
 	typedef list< std::pair <Channel*, iClient*> > opQueueType;
 	opQueueType	opQ;
-
+    void doSqlError(const std::string&, const std::string&);
 	string          consoleChan;
 	string          operChan;
 	string          supportChan;
-
 protected:
 	/**
 	 * Commands map
 	 */
 	typedef map< string, Command*, noCaseCompare> commandMapType;
 	commandMapType commandMap;
-
+    /**
+     *  Time of the last cache
+    */
+    std::map < std::string , time_t > lastUpdated;
 	/**
 	 * Configuration file.
 	 */
@@ -334,6 +343,7 @@ protected:
 	xServer::timerID tidUpdateDB;
 	xServer::timerID tidFixQ;
 	xServer::timerID tidCheckDB;
+	xServer::timerID tidGivePoints;
 
 	/**
 	 * Internal timer
