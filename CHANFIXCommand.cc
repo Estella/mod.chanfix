@@ -50,7 +50,7 @@ bool override = false;
 
 if (st.size() > 2) {
   const string flag = string_upper(st[2]);
-  if ((flag == "OVERRIDE") || (flag == "NOW") || (flag == "!"))
+  if ((flag == "OVERRIDE") || (flag == "NOW") || (flag == "YES") || (flag == "!"))
     override = true;
 }
 
@@ -61,7 +61,7 @@ if (!bot->doChanFix()) {
 }
 
 /* If not enough servers are currently linked, bail out. */
-if (bot->getState() != gnuworld::RUN) {
+if (bot->getState() != chanfix::RUN) {
   bot->Notice(theClient, "Sorry, chanfix is currently disabled because not enough servers are linked.");
   return;
 }

@@ -50,13 +50,6 @@ using std::vector ;
 using std::map ;
 using std::list ;
 
-enum CHANFIX_STATE {
-	BURST,
-	RUN,
-	SPLIT,
-	INIT
-};
-
 /**
  * Case insensitive comparison struct for use by STL structures/algorithms.
  */
@@ -93,6 +86,17 @@ public:
 class chanfix : public xClient {
 
 public:
+
+	/**
+	 * Current network state.
+	 */
+	enum STATE {
+	        BURST,
+		RUN,
+		SPLIT,
+		INIT
+	};
+
 	/**
 	 * Constructor receives a configuration file name.
 	 */
@@ -206,7 +210,7 @@ public:
 	void preloadChanOpsCache();
 	void preloadChannelCache();
 
-	void changeState(CHANFIX_STATE);
+	void changeState(STATE);
 
 	time_t currentTime() { return ::time(0); }
 
@@ -303,12 +307,14 @@ protected:
 	bool		enableChanFix;
 	bool		enableChannelBlocking;
 	string		defaultChannelModes;
+	unsigned int	version;
 	unsigned int	numServers;
 	unsigned int	minServersPresent;
 	unsigned int	numTopScores;
 	unsigned int	minClients;
 	bool		clientNeedsIdent;
 	bool		clientNeedsReverse;
+	unsigned int	connectCheckFreq;
 	string          sqlHost;
 	string          sqlPort;
 	string          sqlUser;
@@ -318,7 +324,7 @@ protected:
 	/**
 	 * State variable
 	 */
-	CHANFIX_STATE	currentState;
+	STATE		currentState;
 
 	/**
 	 * Timer declarations
@@ -327,6 +333,7 @@ protected:
 	xServer::timerID tidAutoFix;
 	xServer::timerID tidUpdateDB;
 	xServer::timerID tidFixQ;
+	xServer::timerID tidCheckDB;
 
 	/**
 	 * Internal timer
@@ -337,7 +344,7 @@ public:
 	bool doAutoFix() { return enableAutoFix; }
 	bool doChanFix() { return enableChanFix; }
 	bool doChanBlocking() { return enableChannelBlocking; }
-	CHANFIX_STATE getState() { return currentState; }
+	STATE getState() { return currentState; }
 	unsigned int getNumServers() { return numServers; }
 	unsigned int getMinServersPresent() { return minServersPresent; }
 	unsigned int getNumTopScores() { return numTopScores; }

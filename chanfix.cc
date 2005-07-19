@@ -92,12 +92,14 @@ enableAutoFix = atob(chanfixConfig->Require("enableAutoFix")->second) ;
 enableChanFix = atob(chanfixConfig->Require("enableChanFix")->second) ;
 enableChannelBlocking = atob(chanfixConfig->Require("enableChannelBlocking")->second) ;
 defaultChannelModes = chanfixConfig->Require("defaultChannelModes")->second ;
+version = atoi((chanfixConfig->Require("version")->second).c_str()) ;
 numServers = atoi((chanfixConfig->Require("numServers")->second).c_str()) ;
 minServersPresent = atoi((chanfixConfig->Require("minServersPresent")->second).c_str()) ;
 numTopScores = atoi((chanfixConfig->Require("numTopScores")->second).c_str()) ;
 minClients = atoi((chanfixConfig->Require("minClients")->second).c_str()) ;
 clientNeedsIdent = atob(chanfixConfig->Require("clientNeedsIdent")->second) ;
 clientNeedsReverse = atob(chanfixConfig->Require("clientNeedsReverse")->second) ;
+connectCheckFreq = atoi((chanfixConfig->Require("connectCheckFreq")->second).c_str()) ;
 
 /* Initial state */
 currentState = INIT;
@@ -189,7 +191,8 @@ void chanfix::OnAttach()
  * Don't send END_OF_BURST (EB) so we can stay in burst mode 
  * indefinitely in order to be able to do TS-1.
  */
-MyUplink->setSendEB(false);
+if (version < 12) /* Not needed for u2.10.12+ */
+  MyUplink->setSendEB(false);
 
 /**
  * Set our uplink as our main server for our commands.
@@ -218,6 +221,7 @@ MyUplink->RegisterChannelEvent( xServer::CHANNEL_ALL, this );
 tidAutoFix = MyUplink->RegisterTimer(time(NULL) + CHECK_CHANS_TIME, this, NULL);
 tidUpdateDB = MyUplink->RegisterTimer(time(NULL) + SQL_UPDATE_TIME, this, NULL);
 tidFixQ = MyUplink->RegisterTimer(time(NULL) + PROCESS_QUEUE_TIME, this, NULL);
+tidCheckDB = MyUplink->RegisterTimer(time(NULL) + connectCheckFreq, this, NULL);
 
 xClient::OnAttach() ;
 }
@@ -247,6 +251,10 @@ xClient::OnDetach( reason ) ;
 /* OnConnect */
 void chanfix::OnConnect()
 {
+/* If we have just reloaded, we won't be in BURST. */
+if (currentState == INIT)
+  changeState(RUN);
+
 xClient::OnConnect() ;
 }
 
@@ -281,7 +289,13 @@ else if (theTimer == tidFixQ) {
   theTime = time(NULL) + PROCESS_QUEUE_TIME;
   tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
   }
+else if (theTimer == tidCheckDB) {
+  /*checkDBConnection();*/
 
+  /* Refresh Timer */
+  theTime = time(NULL) + connectCheckFreq;
+  tidCheckDB = MyUplink->RegisterTimer(theTime, this, NULL);
+  }
 }
 
 void chanfix::OnPrivateMessage( iClient* theClient,
@@ -297,9 +311,8 @@ if (currentState == BURST) {
 }
 
 StringTokenizer st(Message) ;
-if ( st.empty() ) {
+if ( st.empty() )
   return;
-}
 
 const std::string Command = string_upper(st[0]);
 
@@ -364,7 +377,7 @@ iClient* theClient = 0;
 if (currentState != RUN) return;
 
 /* If this channel is too small, don't worry about it. */
-if (theChan->size() < minClients) return;
+if (theChan->size() < minClients)  return;
 
 switch( whichEvent )
         {
@@ -383,7 +396,7 @@ switch( whichEvent )
 	case EVT_PART:
 		{
                 theClient = static_cast< iClient* >( data1 ) ;
-		if( wasOpped(theClient, theChan) ){
+		if (wasOpped(theClient, theChan)) {
 		  givePoints(theClient, theChan);
 		  lostOps(theClient, theChan);
 		}
@@ -401,7 +414,7 @@ void chanfix::OnChannelModeO( Channel* theChan, ChannelUser*,
                         const xServer::opVectorType& theTargets)
 {
 
-/* if(currentState != RUN) return; */
+/* if (currentState != RUN) return; */
 
 if (theChan->size() < minClients) return;
 
@@ -531,7 +544,7 @@ void chanfix::preloadChannelCache()
                         << endl;
 }
 
-void chanfix::changeState(CHANFIX_STATE newState)
+void chanfix::changeState(STATE newState)
 {
 if (currentState == newState) return;
 
@@ -607,8 +620,8 @@ sqlChanOp* chanfix::findChanOp(const std::string& account, const std::string& ch
 sqlChanOpsType::iterator ptr = sqlChanOps.find(std::pair<string,string>(account, channel));
 if(ptr != sqlChanOps.end())
         {
-//        elog << "chanfix::findChanOp> DEBUG: We've got a winner: "
-//                << ptr->second->getAccount() << " on " << ptr->second->getChannel() << "!!" << endl;
+        elog << "chanfix::findChanOp> DEBUG: We've got a winner: "
+                << ptr->second->getAccount() << " on " << ptr->second->getChannel() << "!!" << endl;
         return ptr->second ;
         }
 
@@ -641,7 +654,7 @@ assert( newOp != 0 ) ;
 
 sqlChanOps.insert(sqlChanOpsType::value_type(std::pair<string,string>(account, channel), newOp));
 
-//elog << "chanfix::newChanOp> DEBUG: Added new operator: " << account << " on " << channel << "!!" << endl;
+elog << "chanfix::newChanOp> DEBUG: Added new operator: " << account << " on " << channel << "!!" << endl;
 
 newOp->setAccount(account);
 newOp->setChannel(channel);
@@ -708,18 +721,18 @@ points += thisOp->getPoints();
 thisOp->setPoints(points); 
 thisOp->Update();
 
-//elog << "chanfix::givePoints> DEBUG: Gave " << thisOp->getAccount()
-//        << " on " << thisOp->getChannel() << " "
-//        << (currentTime() - thisOp->getTimeOpped()) / POINTS_UPDATE_TIME << " points"
-//        << endl;
+elog << "chanfix::givePoints> DEBUG: Gave " << thisOp->getAccount()
+        << " on " << thisOp->getChannel() << " "
+        << (currentTime() - thisOp->getTimeOpped()) / POINTS_UPDATE_TIME << " points"
+        << endl;
 }
 
 void chanfix::gotOpped(iClient* thisClient, Channel* thisChan)
 {
 if(thisClient->getAccount() != "" && !thisClient->getMode(iClient::MODE_SERVICES)) {
-//    elog << "chanfix::gotOpped> DEBUG: " << thisClient->getAccount()
-//          << " got opped on " << thisChan->getName()
-//          << endl;
+    elog << "chanfix::gotOpped> DEBUG: " << thisClient->getAccount()
+          << " got opped on " << thisChan->getName()
+          << endl;
 
   sqlChanOp* thisOp = findChanOp(thisClient, thisChan);
   if(!thisOp) thisOp = newChanOp(thisClient, thisChan);
@@ -998,7 +1011,7 @@ sqlChannel* chanfix::getChannelRecord(const std::string& Channel)
 sqlChannelCacheType::iterator ptr = sqlChanCache.find(Channel);
 if(ptr != sqlChanCache.end())
 	{
-//	elog << "chanfix::getChannelRecord> DEBUG: cached channel " << Channel << " found" << endl;
+	elog << "chanfix::getChannelRecord> DEBUG: cached channel " << Channel << " found" << endl;
 	return ptr->second;
 	}
 return 0;
@@ -1021,7 +1034,7 @@ newChan->setLastAttempt(0);
 newChan->Insert();
 
 sqlChanCache.insert(sqlChannelCacheType::value_type(Channel, newChan));
-//elog << "chanfix::getChannelRecord> DEBUG: Added new channel: " << Channel << endl;
+elog << "chanfix::getChannelRecord> DEBUG: Added new channel: " << Channel << endl;
 
 return newChan;
 }
@@ -1206,6 +1219,73 @@ for(chanOpsType::iterator ptr = opList.begin(); ptr != opList.end(); ptr++) {
 }
 */
 }
+
+/*void chanfix::checkDBConnection()
+{
+if (SQLDb->Status() == CONNECTION_BAD) { //Check if the connection has died
+  delete(SQLDb);
+  dbConnected = false;
+  updateSqldb(NULL);
+  MsgChanLog("PANIC! - The Connection With The Db Was Lost\n");
+  MsgChanLog("Attempting to reconnect, Attempt %d out of %d\n",
+	     connectCount+1,connectRetry+1);
+  string Query = "host=" + sqlHost + " dbname=" + sqlDb + " port=" + sqlPort;
+  if (strcasecmp(sqlUser,"''"))
+    Query += (" user=" + sqlUser);
+  if (strcasecmp(sqlPass,"''"))
+    Query += (" password=" + sqlPass);
+  SQLDb = new (std::nothrow) cmDatabase(Query.c_str());
+  assert(SQLDb != NULL);
+
+  if (SQLDb->ConnectionBad()) {
+    ++connectCount;
+    if (connectCount > connectRetry) {
+      MsgChanLog("Cant connect to the database, quiting\n");
+      ::exit(1);
+    } else {
+      MsgChanLog("Attempt failed\n");
+    }
+  } else {
+    dbConnected = true;
+    MsgChanLog("The PANIC is over, db connection restored\n");
+    updateSqldb(SQLDb);
+    connectCount = 0;
+  }
+}
+
+}
+
+void chanfix::updateSQLDb(PgDatabase* _SQLDb)
+{
+
+for(glineIterator ptr = glineList.begin();ptr != glineList.end();++ptr)
+        {
+        (ptr->second)->setSqldb(_SQLDb);
+        }
+
+for(glineIterator ptr = rnGlineList.begin();ptr != 
+rnGlineList.end();++ptr)
+        {
+        (ptr->second)->setSqldb(_SQLDb);
+        }
+
+for(exceptionIterator ptr = exception_begin();ptr != 
+exception_end();++ptr)
+        {
+        (*ptr)->setSqldb(_SQLDb);
+        }
+
+for(usersIterator ptr = usersMap.begin();ptr != usersMap.end();++ptr)
+        {
+        ptr->second->setSqldb(_SQLDb);
+        }
+
+for(serversIterator ptr = serversMap.begin();ptr != 
+serversMap.end();++ptr)
+        {
+        ptr->second->setSqldb(_SQLDb);
+        }
+}*/
 
 void Command::Usage( iClient* theClient )
 {
