@@ -155,6 +155,8 @@ else
         }
 
 /* Register the commands we want to use */
+RegisterCommand(new ALERTCommand(this, "ALERT", "<#channel>"));
+RegisterCommand(new BLOCKCommand(this, "BLOCK", "<#channel> <reason>"));
 RegisterCommand(new CHANFIXCommand(this, "CHANFIX", "<#channel> [override]"));
 RegisterCommand(new CHECKCommand(this, "CHECK", "<#channel>"));
 RegisterCommand(new INVITECommand(this, "INVITE", ""));
@@ -164,6 +166,8 @@ RegisterCommand(new RELOADCommand(this, "RELOAD", ""));
 RegisterCommand(new SCORECommand(this, "SCORE", "<#channel> [nick|*account]"));
 RegisterCommand(new SHUTDOWNCommand(this, "SHUTDOWN", "[reason]"));
 RegisterCommand(new STATUSCommand(this, "STATUS", ""));
+RegisterCommand(new UNALERTCommand(this, "UNALERT", "<#channel>"));
+RegisterCommand(new UNBLOCKCommand(this, "UNBLOCK", "<#channel>"));
 
 /* Preload the ChanOps cache */
 preloadChanOpsCache();
@@ -833,7 +837,7 @@ if(!thisOp) thisOp = newChanOp(theClient, theChan);
 int points = thisOp->getPoints() + 1;
 
 thisOp->setPoints(points); 
-thisOp->Update();
+thisOp->commit();
 
 elog << "chanfix::givePoints> DEBUG: Gave " << thisOp->getAccount()
         << " on " << thisOp->getChannel() << " "
@@ -1104,7 +1108,7 @@ if (!opVec.empty()) {
     Message(theChan, "%d clients should have been opped.", opVec.size());
 }
 
-sqlChan->Update();
+sqlChan->commit();
 
 /* Now see if there are enough ops; if so, the fix is complete. */
 if (opVec.size() + currentOps >= netChan->size() ||

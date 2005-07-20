@@ -71,7 +71,7 @@ public:
                 { ts_opped = _ts_opped ; }
 
 	bool Insert();
-	bool Update();
+	bool commit();
 	void setAllMembers(int);
 
 private:

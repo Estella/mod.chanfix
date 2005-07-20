@@ -80,11 +80,11 @@ return true;
 };
 
 
-bool sqlChanOp::Update()
+bool sqlChanOp::commit()
 {
 static const char* queryHeader =    "UPDATE chanOps ";
 
-elog    << "sqlChanOp::update> " << account << " && " << channel << endl;
+elog    << "chanfix::sqlChanOp::commit> " << account << " && " << channel << endl;
 
 stringstream queryString;
 queryString     << queryHeader << "SET last_seen_as = "<< "'"
@@ -95,7 +95,7 @@ queryString     << queryHeader << "SET last_seen_as = "<< "'"
                 << ends;
 
 //#ifdef LOG_SQL
-        elog    << "sqlChanOp::update> "
+        elog    << "chanfix::sqlChanOp::commit> "
                 << queryString.str().c_str()
                 << endl;
 //#endif
@@ -107,7 +107,7 @@ ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
 if( PGRES_COMMAND_OK != status )
         {
         // TODO: Log to msgchan here.
-        elog    << "sqlChanOp::update> Something went wrong: "
+        elog    << "chanfix::sqlChanOp::commit> Something went wrong: "
                 << SQLDb->ErrorMessage()
                 << endl;
 

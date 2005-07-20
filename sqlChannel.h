@@ -110,7 +110,7 @@ public:
 		{ modesRemoved = _modesRemoved; }
 
 	bool Insert();
-	bool Update();
+	bool commit();
         void setAllMembers(int);
 
 protected:

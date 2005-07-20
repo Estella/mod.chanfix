@@ -136,14 +136,21 @@ if (bot->isBeingAutoFixed(netChan)) {
 }
 
 /* Don't fix a blocked channel. */
-if ((theChan->getFlag(sqlChannel::F_BLOCKED)) && (bot->doChanBlocking())) {
+if (theChan->getFlag(sqlChannel::F_BLOCKED)) {
   bot->Notice(theClient, "The channel %s is BLOCKED.", 
 	      theChan->getChannel().c_str());
   return;
 }
 
 /* Don't fix an alerted channel without the OVERRIDE flag. */
-/* ... */
+if (theChan->getFlag(sqlChannel::F_ALERT) && !override) {
+  bot->Notice(theClient, "Alert: This channel %s has notes. Use " \
+	      "\002INFO %s\002 to read them. Append the OVERRIDE flag " \
+	      "to force a manual fix.",
+	      theChan->getChannel().c_str(),
+	      theChan->getChannel().c_str());
+  return;
+}
 
 /* Fix the channel */
 bot->manualFix(netChan);

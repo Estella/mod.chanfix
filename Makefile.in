@@ -67,11 +67,13 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libchanfix_la_LIBADD =
 am_libchanfix_la_OBJECTS = libchanfix_la-chanfix.lo \
+	libchanfix_la-ALERTCommand.lo libchanfix_la-BLOCKCommand.lo \
 	libchanfix_la-CHANFIXCommand.lo libchanfix_la-CHECKCommand.lo \
 	libchanfix_la-INVITECommand.lo libchanfix_la-OPNICKSCommand.lo \
 	libchanfix_la-QUOTECommand.lo libchanfix_la-RELOADCommand.lo \
 	libchanfix_la-SCORECommand.lo libchanfix_la-SHUTDOWNCommand.lo \
-	libchanfix_la-STATUSCommand.lo libchanfix_la-sqlChannel.lo \
+	libchanfix_la-STATUSCommand.lo libchanfix_la-UNALERTCommand.lo \
+	libchanfix_la-UNBLOCKCommand.lo libchanfix_la-sqlChannel.lo \
 	libchanfix_la-sqlChanOp.lo
 libchanfix_la_OBJECTS = $(am_libchanfix_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
@@ -208,6 +210,8 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 lib_LTLIBRARIES = libchanfix.la
 libchanfix_la_SOURCES = chanfix.cc \
+	ALERTCommand.cc \
+	BLOCKCommand.cc \
 	CHANFIXCommand.cc \
 	CHECKCommand.cc \
 	INVITECommand.cc \
@@ -217,6 +221,8 @@ libchanfix_la_SOURCES = chanfix.cc \
 	SCORECommand.cc \
 	SHUTDOWNCommand.cc \
 	STATUSCommand.cc \
+	UNALERTCommand.cc \
+	UNBLOCKCommand.cc \
 	sqlChannel.cc \
 	sqlChanOp.cc 
 
@@ -334,6 +340,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-ALERTCommand.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-BLOCKCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-CHANFIXCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-CHECKCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-INVITECommand.Plo@am__quote@
@@ -343,6 +351,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SCORECommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SHUTDOWNCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-STATUSCommand.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-UNALERTCommand.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-UNBLOCKCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-chanfix.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-sqlChanOp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-sqlChannel.Plo@am__quote@
@@ -374,6 +384,20 @@ libchanfix_la-chanfix.lo: chanfix.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='chanfix.cc' object='libchanfix_la-chanfix.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-chanfix.lo `test -f 'chanfix.cc' || echo '$(srcdir)/'`chanfix.cc
+
+libchanfix_la-ALERTCommand.lo: ALERTCommand.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-ALERTCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-ALERTCommand.Tpo" -c -o libchanfix_la-ALERTCommand.lo `test -f 'ALERTCommand.cc' || echo '$(srcdir)/'`ALERTCommand.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-ALERTCommand.Tpo" "$(DEPDIR)/libchanfix_la-ALERTCommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-ALERTCommand.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ALERTCommand.cc' object='libchanfix_la-ALERTCommand.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-ALERTCommand.lo `test -f 'ALERTCommand.cc' || echo '$(srcdir)/'`ALERTCommand.cc
+
+libchanfix_la-BLOCKCommand.lo: BLOCKCommand.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-BLOCKCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-BLOCKCommand.Tpo" -c -o libchanfix_la-BLOCKCommand.lo `test -f 'BLOCKCommand.cc' || echo '$(srcdir)/'`BLOCKCommand.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-BLOCKCommand.Tpo" "$(DEPDIR)/libchanfix_la-BLOCKCommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-BLOCKCommand.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='BLOCKCommand.cc' object='libchanfix_la-BLOCKCommand.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-BLOCKCommand.lo `test -f 'BLOCKCommand.cc' || echo '$(srcdir)/'`BLOCKCommand.cc
 
 libchanfix_la-CHANFIXCommand.lo: CHANFIXCommand.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-CHANFIXCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-CHANFIXCommand.Tpo" -c -o libchanfix_la-CHANFIXCommand.lo `test -f 'CHANFIXCommand.cc' || echo '$(srcdir)/'`CHANFIXCommand.cc; \
@@ -437,6 +461,20 @@ libchanfix_la-STATUSCommand.lo: STATUSCommand.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='STATUSCommand.cc' object='libchanfix_la-STATUSCommand.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-STATUSCommand.lo `test -f 'STATUSCommand.cc' || echo '$(srcdir)/'`STATUSCommand.cc
+
+libchanfix_la-UNALERTCommand.lo: UNALERTCommand.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-UNALERTCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-UNALERTCommand.Tpo" -c -o libchanfix_la-UNALERTCommand.lo `test -f 'UNALERTCommand.cc' || echo '$(srcdir)/'`UNALERTCommand.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-UNALERTCommand.Tpo" "$(DEPDIR)/libchanfix_la-UNALERTCommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-UNALERTCommand.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='UNALERTCommand.cc' object='libchanfix_la-UNALERTCommand.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-UNALERTCommand.lo `test -f 'UNALERTCommand.cc' || echo '$(srcdir)/'`UNALERTCommand.cc
+
+libchanfix_la-UNBLOCKCommand.lo: UNBLOCKCommand.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-UNBLOCKCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-UNBLOCKCommand.Tpo" -c -o libchanfix_la-UNBLOCKCommand.lo `test -f 'UNBLOCKCommand.cc' || echo '$(srcdir)/'`UNBLOCKCommand.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-UNBLOCKCommand.Tpo" "$(DEPDIR)/libchanfix_la-UNBLOCKCommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-UNBLOCKCommand.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='UNBLOCKCommand.cc' object='libchanfix_la-UNBLOCKCommand.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-UNBLOCKCommand.lo `test -f 'UNBLOCKCommand.cc' || echo '$(srcdir)/'`UNBLOCKCommand.cc
 
 libchanfix_la-sqlChannel.lo: sqlChannel.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-sqlChannel.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-sqlChannel.Tpo" -c -o libchanfix_la-sqlChannel.lo `test -f 'sqlChannel.cc' || echo '$(srcdir)/'`sqlChannel.cc; \

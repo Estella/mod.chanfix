@@ -81,7 +81,7 @@ return true;
 };
 
 
-bool sqlChannel::Update()
+bool sqlChannel::commit()
 {
 static const char* queryHeader =    "UPDATE channels ";
 
@@ -94,7 +94,7 @@ queryString     << queryHeader << "SET fixed = "
                 << ends;
 
 //#ifdef LOG_SQL
-        elog    << "sqlChannel::update> "
+        elog    << "chanfix::sqlChannel::commit> "
                 << queryString.str().c_str()
                 << endl;
 //#endif
@@ -104,7 +104,7 @@ ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
 if( PGRES_COMMAND_OK != status )
         {
         // TODO: Log to msgchan here.
-        elog    << "sqlChannel::update> Something went wrong: "
+        elog    << "chanfix::sqlChannel::commit> Something went wrong: "
                 << SQLDb->ErrorMessage()
                 << endl;
 

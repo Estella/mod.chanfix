@@ -4,6 +4,8 @@
 lib_LTLIBRARIES = libchanfix.la
 
 libchanfix_la_SOURCES = chanfix.cc \
+	ALERTCommand.cc \
+	BLOCKCommand.cc \
 	CHANFIXCommand.cc \
 	CHECKCommand.cc \
 	INVITECommand.cc \
@@ -13,6 +15,8 @@ libchanfix_la_SOURCES = chanfix.cc \
 	SCORECommand.cc \
 	SHUTDOWNCommand.cc \
 	STATUSCommand.cc \
+	UNALERTCommand.cc \
+	UNBLOCKCommand.cc \
 	sqlChannel.cc \
 	sqlChanOp.cc 
 
