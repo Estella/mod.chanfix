@@ -57,13 +57,12 @@ bot->Notice(theClient, "Channel blocking is: \002%s\002",
 bot->Notice(theClient, "Required amount of servers linked is %u%% of %u, which is a minimum of %u servers.",
 	    bot->getMinServersPresent(), bot->getNumServers(),
 	    ((bot->getMinServersPresent() * bot->getNumServers()) / 100 + 1));
-if (bot->getState() == chanfix::SPLIT) {
-  bot->Notice(theClient, "Chanfix is currently disabled because only %i servers are linked.", 
+if (bot->getState() == chanfix::SPLIT)
+  bot->Notice(theClient, "Splitmode enabled: only %i servers linked.", 
 	      Network->serverList_size());
-} else {
-  bot->Notice(theClient, "There are %i servers linked.",
+else
+  bot->Notice(theClient, "Splitmode disabled. There are %i servers linked.",
 	      Network->serverList_size());
-}
 
 return;
 }

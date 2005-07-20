@@ -8,6 +8,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	BLOCKCommand.cc \
 	CHANFIXCommand.cc \
 	CHECKCommand.cc \
+	INFOCommand.cc \
 	INVITECommand.cc \
 	OPNICKSCommand.cc \
 	QUOTECommand.cc \

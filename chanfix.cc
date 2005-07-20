@@ -159,6 +159,7 @@ RegisterCommand(new ALERTCommand(this, "ALERT", "<#channel>"));
 RegisterCommand(new BLOCKCommand(this, "BLOCK", "<#channel> <reason>"));
 RegisterCommand(new CHANFIXCommand(this, "CHANFIX", "<#channel> [override]"));
 RegisterCommand(new CHECKCommand(this, "CHECK", "<#channel>"));
+RegisterCommand(new INFOCommand(this, "INFO", "<#channel>"));
 RegisterCommand(new INVITECommand(this, "INVITE", ""));
 RegisterCommand(new OPNICKSCommand(this, "OPNICKS", "<#channel>"));
 RegisterCommand(new QUOTECommand(this, "QUOTE", "<text>"));
@@ -935,7 +936,7 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
    bool opLess = true;
    bool hasService = false;
    bool hasApass = thisChan->getMode(Channel::MODE_A);
-   if (thisChan->size() > minClients && !isBeingFixed(thisChan)) {
+   if (thisChan->size() >= minClients && !isBeingFixed(thisChan)) {
      for (Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
 	curUser = ptr->second;
 	if (curUser->isModeO())
@@ -1341,7 +1342,7 @@ void chanfix::giveAllOpsPoints()
      bool hasService = false;
      for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->channels_end(); ptr++) {
          thisChan = ptr->second;
-         if (thisChan->size() > minClients && !isBeingFixed(thisChan)) {
+         if (thisChan->size() >= minClients && !isBeingFixed(thisChan)) {
             for (Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
                 ChannelUser* curUser = ptr->second;
                 if (curUser->getClient()->getMode(iClient::MODE_SERVICES)) {
