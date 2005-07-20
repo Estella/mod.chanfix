@@ -1071,7 +1071,8 @@ elog << "chanfix::fixChan> [" << theChan->getName() << "] start "
  */
 iClient* curClient = 0;
 sqlChanOp* curOp = 0;
-vector< iClient* > opVec;
+string modes = "+";
+string args;
 for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
      opPtr++) {
    curOp = *opPtr;
@@ -1084,14 +1085,17 @@ for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
 	    << curOp->getPoints() << " points. ABS_MIN = " \
 	    << min_score_abs << " and REL_MIN = " << min_score_rel \
 	    << endl;
-       opVec.push_back(curClient);
+       modes += "o";
+       if (!args.empty())
+	 args += " ";
+       args += curClient->getNickName();
      }
    }
 }
 
 /* If no scores are high enough, return. */
 /* This code is wrong. TODO: fix and put in correct spot */
-/* if (opVec.empty() || maxScore < min_score) {
+/* if (args.empty() || maxScore < min_score) {
   if (autofix && !sqlChan->getModesRemoved()) {
     ClearMode(theChan, "ovpsmikbl", true);
     sqlChan->setModesRemoved(true);
@@ -1101,20 +1105,20 @@ return false;
 } */
 
 /* If we need to op at least one client, op him/her. */
-if (!opVec.empty()) {
-  Op(theChan, opVec);
+if (!args.empty()) {
+  Mode(theChan, modes, args, true);
 
-  if (opVec.size() == 1)
+  if (args.size() == 1)
     Message(theChan, "1 client should have been opped.");
   else
-    Message(theChan, "%d clients should have been opped.", opVec.size());
+    Message(theChan, "%d clients should have been opped.", args.size());
 }
 
 sqlChan->commit();
 
 /* Now see if there are enough ops; if so, the fix is complete. */
-if (opVec.size() + currentOps >= netChan->size() ||
-    opVec.size() + currentOps >= (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED))
+if (args.size() + currentOps >= netChan->size() ||
+    args.size() + currentOps >= (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED))
   return true;
 
 return false;
