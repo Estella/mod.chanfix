@@ -165,6 +165,7 @@ RegisterCommand(new OPNICKSCommand(this, "OPNICKS", "<#channel>"));
 RegisterCommand(new QUOTECommand(this, "QUOTE", "<text>"));
 RegisterCommand(new RELOADCommand(this, "RELOAD", ""));
 RegisterCommand(new SCORECommand(this, "SCORE", "<#channel> [nick|*account]"));
+RegisterCommand(new SCORECommand(this, "CSCORE", "<#channel> [nick|*account]"));
 RegisterCommand(new SHUTDOWNCommand(this, "SHUTDOWN", "[reason]"));
 RegisterCommand(new STATUSCommand(this, "STATUS", ""));
 RegisterCommand(new UNALERTCommand(this, "UNALERT", "<#channel>"));
