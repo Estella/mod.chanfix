@@ -175,7 +175,6 @@ unsigned int intNOPCount = 0; //Rank counter for current non-ops
 for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
      opPtr != myOps.end(); opPtr++) {
   curOp = *opPtr;
-  if (curOp->getPoints() < 1) continue;
   curClient = bot->findAccount(curOp->getAccount(), netChan);
   if (intDBCount < minScoreReply) {
     if (intDBCount > 0) {
