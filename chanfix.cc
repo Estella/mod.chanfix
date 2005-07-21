@@ -499,6 +499,7 @@ switch( whichEvent )
                         {
                         Op( theChan, theClient ) ;
                         }
+                 
                 break ;
 		}
 	case EVT_KICK:
@@ -829,6 +830,8 @@ return retMe ;
 
 void chanfix::givePoints(iClient* theClient, Channel* theChan)
 {
+//No points for unidented clients
+if (clientNeedsIdent && !hasIdent(theClient)) return;
 sqlChanOp* thisOp = findChanOp(theClient, theChan);
 if(!thisOp) thisOp = newChanOp(theClient, theChan);
 
@@ -851,7 +854,8 @@ void chanfix::gotOpped(iClient* thisClient, Channel* thisChan)
 {
 //Not enough users, forget about it.
 //if (thisChan->size() < minClients) return;
-
+//No tracking for unidented clients
+if (clientNeedsIdent && !hasIdent(thisClient)) return;
 if (thisClient->getAccount() != "" &&
     !thisClient->getMode(iClient::MODE_SERVICES) && 
     !thisChan->getMode(Channel::MODE_A)) {
@@ -872,7 +876,19 @@ if (thisClient->getAccount() != "" &&
 } //if
 
 }
-
+bool chanfix::hasIdent(iClient* theClient)
+{
+     string cHost;
+     cHost = theClient->getNickUserHost();
+     /* Search for the first of ~, if found,
+      * They dont have ident
+      */
+     string::size_type pos = cHost.find_first_of('~');
+     if( string::npos != pos )
+         return false;
+     else
+         return true;    
+}
 bool chanfix::wasOpped(iClient* theClient, Channel* theChan)
 {
 clientOpsType* myOps = findMyOps(theClient);

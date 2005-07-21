@@ -220,6 +220,7 @@ public:
 	void lostOps(iClient*, Channel*);
 
 	bool wasOpped(iClient*, Channel*);
+	bool hasIdent(iClient*);
 
 	void checkNetwork();
 	void chanfix::giveAllOpsPoints();
