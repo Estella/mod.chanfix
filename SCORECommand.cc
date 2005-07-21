@@ -198,6 +198,7 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
       intOPCount++;
     }
   } else {
+    if (!netChan->findUser(curClient)) continue;
     if (intNOPCount < minScoreReply) {
       if (intNOPCount > 0) {
 	if (compact)
