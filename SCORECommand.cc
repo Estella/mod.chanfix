@@ -199,10 +199,7 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
       intOPCount++;
     }
   } else {
-    /* ASSERTION ERRORS AND WE DONT KNOW WHY
-     * ChannelUser* curUser = netChan->findUser(curClient);
-     * if (!curUser) continue;
-     */
+    if (!curClient) continue;
     if (intNOPCount < minScoreReply) {
       if (intNOPCount > 0) {
 	if (compact)
