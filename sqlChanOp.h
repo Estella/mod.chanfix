@@ -44,6 +44,9 @@ public:
 
         inline const time_t	getTimeOpped() const
                 { return ts_opped ; }
+                
+        inline const time_t getTimeFirstOpped() const
+                { return ts_firstopped ; }
 
         /*
          *  Methods to set data atrributes.
@@ -69,6 +72,9 @@ public:
 
         inline void	setTimeOpped(time_t _ts_opped)
                 { ts_opped = _ts_opped ; }
+        
+        inline void setTimeFirstOpped(time_t _ts_fopped)
+                { ts_firstopped = _ts_fopped ; }
 
 	bool Insert();
 	bool commit();
@@ -82,6 +88,7 @@ private:
 	string		account;
 	int		points;
 	time_t		ts_opped;
+	time_t      ts_firstopped;
 
         PgDatabase*     SQLDb;
 

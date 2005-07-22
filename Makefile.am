@@ -10,6 +10,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	CHECKCommand.cc \
 	INFOCommand.cc \
 	INVITECommand.cc \
+	OPLISTCommand.cc \
 	OPNICKSCommand.cc \
 	QUOTECommand.cc \
 	RELOADCommand.cc \

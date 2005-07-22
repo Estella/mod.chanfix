@@ -161,6 +161,7 @@ RegisterCommand(new CHANFIXCommand(this, "CHANFIX", "<#channel> [override]"));
 RegisterCommand(new CHECKCommand(this, "CHECK", "<#channel>"));
 RegisterCommand(new INFOCommand(this, "INFO", "<#channel>"));
 RegisterCommand(new INVITECommand(this, "INVITE", ""));
+RegisterCommand(new OPLISTCommand(this, "OPLIST", "<#channel>"));
 RegisterCommand(new OPNICKSCommand(this, "OPNICKS", "<#channel>"));
 RegisterCommand(new QUOTECommand(this, "QUOTE", "<text>"));
 RegisterCommand(new RELOADCommand(this, "RELOAD", ""));
@@ -236,18 +237,7 @@ MyUplink->RegisterEvent( EVT_NETBREAK, this );
  */
 MyUplink->RegisterChannelEvent( xServer::CHANNEL_ALL, this );
 
-/**
- * Start timers
- */
-time_t theTime = time(NULL) + CHECK_CHANS_TIME;
-tidCheckDB = MyUplink->RegisterTimer(time(NULL) + connectCheckFreq, this, NULL);
-tidAutoFix = MyUplink->RegisterTimer(theTime, this, NULL);
-theTime = time(NULL) + SQL_UPDATE_TIME;
-tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
-theTime = time(NULL) + PROCESS_QUEUE_TIME;
-tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
-theTime = time(NULL) + POINTS_UPDATE_TIME;
-tidGivePoints = MyUplink->RegisterTimer(theTime, this, NULL);
+/* Old timer space */
 
 xClient::OnAttach() ;
 }
@@ -334,6 +324,7 @@ xClient::OnDetach( reason ) ;
 /* OnConnect */
 void chanfix::OnConnect()
 {
+
 /* If we have just reloaded, we won't be in BURST. */
 if (currentState == INIT)
   changeState(RUN);
@@ -556,6 +547,9 @@ switch(whichEvent)
 	{
 	case EVT_BURST_CMPLT:
 		{
+        /* Start our timers */
+        iServer* burstedServer = static_cast< iServer* >( data1);
+        if (burstedServer == MyUplink->getUplink()) startTimers();
 		changeState(RUN);
 		break;
 		}
@@ -597,7 +591,7 @@ void chanfix::doSqlError(const string& theQuery, const string& theError)
 void chanfix::preloadChanOpsCache()
 {
         std::stringstream theQuery;
-        theQuery        << "SELECT channel,userhost,last_seen_as,points,account FROM chanOps"
+        theQuery        << "SELECT channel,userhost,last_seen_as,points,account,ts_firstopped,ts_lastopped FROM chanOps"
                                 << ends;
 
         elog            << "*** [chanfix::preloadChanOpsCache]: Loading chanOps and their points ..." 
@@ -870,7 +864,8 @@ if (thisClient->getAccount() != "" &&
   
   clientOpsType* myOps = findMyOps(thisClient);
   thisOp->setLastSeenAs(thisClient->getNickUserHost());
-  thisOp->setTimeOpped(currentTime());
+  thisOp->setTimeOpped(time(NULL));
+  if (thisOp->getTimeFirstOpped() < 1) thisOp->setTimeFirstOpped(time(NULL));
   myOps->insert(clientOpsType::value_type(thisChan->getName(), thisChan));
   thisClient->setCustomData(this, static_cast< void*>(myOps));
 } //if
@@ -894,7 +889,7 @@ bool chanfix::wasOpped(iClient* theClient, Channel* theChan)
 clientOpsType* myOps = findMyOps(theClient);
 if(!myOps || myOps->empty()) return false;
 clientOpsType::iterator ptr = myOps->find(theChan->getName());
-
+theClient->setCustomData(this, static_cast< void*>(myOps));
 if(ptr != myOps->end()) return true;
 return false;
 }
@@ -1277,6 +1272,14 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
 
 return;
 }
+char *chanfix::GetSmallTime(time_t tmVar)
+{
+	static char datetimestring[24];
+	struct tm *stm;
+	stm = localtime(&tmVar);
+	strftime(datetimestring, 24, "%Y-%m-%d %H:%M:%S", stm);
+	return datetimestring;
+}
 
 bool chanfix::isBeingFixed(Channel* theChan)
 {
@@ -1356,6 +1359,23 @@ clientOpsType* myOps = static_cast< clientOpsType* >(theClient->getCustomData(th
 if(!myOps) myOps = new clientOpsType;
 
 return myOps;
+}
+void chanfix::startTimers()
+{
+    /*
+     * Start timers
+     */
+    time_t theTime = time(NULL) + CHECK_CHANS_TIME;
+    tidCheckDB = MyUplink->RegisterTimer(time(NULL) + connectCheckFreq, this, NULL);
+    tidAutoFix = MyUplink->RegisterTimer(theTime, this, NULL);
+    theTime = time(NULL) + SQL_UPDATE_TIME;
+    tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
+    theTime = time(NULL) + PROCESS_QUEUE_TIME;
+    tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
+    theTime = time(NULL) + POINTS_UPDATE_TIME;
+    tidGivePoints = MyUplink->RegisterTimer(theTime, this, NULL);
+    elog    << "chanfix::startTimers::> Started all timers."
+            << endl;
 }
 void chanfix::giveAllOpsPoints()
 {

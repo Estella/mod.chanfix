@@ -32,6 +32,8 @@ sqlChanOp::sqlChanOp(PgDatabase* _SQLDb)
   nickUserHost(""),
   account(""),
   points(0),
+  ts_firstopped(0),
+  ts_opped(0),
   SQLDb(_SQLDb)
 {};
 
@@ -42,11 +44,13 @@ userHost = SQLDb->GetValue(row, 1);
 nickUserHost = SQLDb->GetValue(row, 2);
 points = atoi(SQLDb->GetValue(row, 3));
 account = SQLDb->GetValue(row, 4);
+ts_opped = atoi(SQLDb->GetValue(row, 5));
+ts_firstopped = atoi(SQLDb->GetValue(row, 6));
 };
 
 bool sqlChanOp::Insert()
 {
-static const char* queryHeader = "INSERT INTO chanOps (channel, userHost, account, last_seen_as, points) VALUES (";
+static const char* queryHeader = "INSERT INTO chanOps (channel, userHost, account, last_seen_as, points, ts_firstopped, ts_lastopped) VALUES (";
 
 stringstream queryString;
 queryString     << queryHeader << "'"
@@ -54,7 +58,9 @@ queryString     << queryHeader << "'"
                 << escapeSQLChars(userHost) << "','"
 		<< escapeSQLChars(account) << "','"
 		<< escapeSQLChars(nickUserHost) << "',"
-		<< points << ")"
+		<< points << ","
+        << ts_firstopped << ","
+        << ts_opped << ")"
                 << ends;
 
 #ifdef LOG_SQL
@@ -89,7 +95,9 @@ elog    << "chanfix::sqlChanOp::commit> " << account << " && " << channel << end
 stringstream queryString;
 queryString     << queryHeader << "SET last_seen_as = "<< "'"
                 << escapeSQLChars(nickUserHost) << "', points = "
-                << points << " WHERE lower(channel) = '"
+                << points << ", ts_firstopped = "
+                << ts_firstopped << ", ts_lastopped = " << ts_opped
+                << " WHERE lower(channel) = '"
                 << string_lower(escapeSQLChars(channel)) << "' AND lower(account) = '"
                 << string_lower(escapeSQLChars(account)) << "'"
                 << ends;

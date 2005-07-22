@@ -70,9 +70,9 @@ am_libchanfix_la_OBJECTS = libchanfix_la-chanfix.lo \
 	libchanfix_la-ALERTCommand.lo libchanfix_la-BLOCKCommand.lo \
 	libchanfix_la-CHANFIXCommand.lo libchanfix_la-CHECKCommand.lo \
 	libchanfix_la-INFOCommand.lo libchanfix_la-INVITECommand.lo \
-	libchanfix_la-OPNICKSCommand.lo libchanfix_la-QUOTECommand.lo \
-	libchanfix_la-RELOADCommand.lo libchanfix_la-SCORECommand.lo \
-	libchanfix_la-SHUTDOWNCommand.lo \
+	libchanfix_la-OPLISTCommand.lo libchanfix_la-OPNICKSCommand.lo \
+	libchanfix_la-QUOTECommand.lo libchanfix_la-RELOADCommand.lo \
+	libchanfix_la-SCORECommand.lo libchanfix_la-SHUTDOWNCommand.lo \
 	libchanfix_la-STATUSCommand.lo libchanfix_la-UNALERTCommand.lo \
 	libchanfix_la-UNBLOCKCommand.lo libchanfix_la-sqlChannel.lo \
 	libchanfix_la-sqlChanOp.lo
@@ -217,6 +217,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	CHECKCommand.cc \
 	INFOCommand.cc \
 	INVITECommand.cc \
+	OPLISTCommand.cc \
 	OPNICKSCommand.cc \
 	QUOTECommand.cc \
 	RELOADCommand.cc \
@@ -348,6 +349,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-CHECKCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-INFOCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-INVITECommand.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-OPLISTCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-OPNICKSCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-QUOTECommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-RELOADCommand.Plo@am__quote@
@@ -429,6 +431,13 @@ libchanfix_la-INVITECommand.lo: INVITECommand.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='INVITECommand.cc' object='libchanfix_la-INVITECommand.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-INVITECommand.lo `test -f 'INVITECommand.cc' || echo '$(srcdir)/'`INVITECommand.cc
+
+libchanfix_la-OPLISTCommand.lo: OPLISTCommand.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-OPLISTCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-OPLISTCommand.Tpo" -c -o libchanfix_la-OPLISTCommand.lo `test -f 'OPLISTCommand.cc' || echo '$(srcdir)/'`OPLISTCommand.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-OPLISTCommand.Tpo" "$(DEPDIR)/libchanfix_la-OPLISTCommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-OPLISTCommand.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='OPLISTCommand.cc' object='libchanfix_la-OPLISTCommand.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-OPLISTCommand.lo `test -f 'OPLISTCommand.cc' || echo '$(srcdir)/'`OPLISTCommand.cc
 
 libchanfix_la-OPNICKSCommand.lo: OPNICKSCommand.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-OPNICKSCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-OPNICKSCommand.Tpo" -c -o libchanfix_la-OPNICKSCommand.lo `test -f 'OPNICKSCommand.cc' || echo '$(srcdir)/'`OPNICKSCommand.cc; \
