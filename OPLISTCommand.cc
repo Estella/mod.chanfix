@@ -42,9 +42,6 @@ namespace gnuworld
 {
 
 using std::string;
-using std::endl;
-using std::stringstream;
-using std::ends;
 
 void OPLISTCommand::Exec(iClient* theClient, const std::string& Message)
 {

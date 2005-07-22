@@ -8,3 +8,4 @@ config.status
 libtool
 stamp-h*
 autom4te.cache
+defs_chanfix.h

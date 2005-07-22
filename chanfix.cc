@@ -251,7 +251,6 @@ xClient::OnAttach() ;
 void chanfix::OnTimer(const gnuworld::xServer::timerID& theTimer, void*)
 {
 time_t theTime;
-Channel* tmpChan = Network->findChannel(operChan);
 if (theTimer == tidGivePoints) {
   /* 5 min timer, loop through channels and give all ops a point! */
   theTime = time(NULL) + POINTS_UPDATE_TIME;
@@ -270,8 +269,6 @@ else if (theTimer == tidUpdateDB) {
   /* Refresh Timer */
   theTime = time(NULL) + SQL_UPDATE_TIME;
   tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
-  if (tmpChan)
-    logAdminMessage("Updating databases...");
   }
 else if (theTimer == tidCheckDB) {
   /*checkDBConnection();*/
@@ -318,6 +315,9 @@ void chanfix::OnConnect()
 /* If we have just reloaded, we won't be in BURST. */
 if (currentState == INIT)
   changeState(RUN);
+
+/* Start our timers */
+startTimers();
 
 xClient::OnConnect() ;
 }
@@ -527,10 +527,6 @@ switch(whichEvent)
 	{
 	case EVT_BURST_CMPLT:
 		{
-	        /* Start our timers */
-	        iServer* burstedServer = static_cast< iServer* >( data1);
-	        if (burstedServer == MyUplink->getUplink())
-		  startTimers();
 		changeState(RUN);
 		break;
 		}
@@ -573,7 +569,7 @@ void chanfix::doSqlError(const string& theQuery, const string& theError)
 void chanfix::preloadChanOpsCache()
 {
         std::stringstream theQuery;
-        theQuery        << "SELECT channel,userhost,last_seen_as,points,account,ts_lastopped,ts_firstopped FROM chanOps"
+        theQuery        << "SELECT channel,userhost,last_seen_as,points,account,ts_firstopped,ts_lastopped FROM chanOps"
                                 << ends;
 
         elog            << "*** [chanfix::preloadChanOpsCache]: Loading chanOps and their points ..." 
