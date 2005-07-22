@@ -814,7 +814,8 @@ if(!thisOp) thisOp = newChanOp(theClient, theChan);
 
 int points = thisOp->getPoints() + 1;
 
-thisOp->setPoints(points); 
+thisOp->setPoints(points);
+thisOp->setTimeLastOpped(currentTime()); //Update the time they were last opped
 thisOp->commit();
 
 elog << "chanfix::givePoints> DEBUG: Gave " << thisOp->getAccount()
