@@ -1,10 +1,10 @@
 /**
  * OPLISTCommand.cc
  *
- * 07/15/2005 - Jimmy Lipham <music0m@alltel.net>
+ * 07/21/2005 - Jimmy Lipham <music0m@alltel.net>
  * Initial Version
  *
- * Shows the top scores or an individual score of <channel>
+ * Shows a list of accounts plus their score of the top ops of this channel
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -69,26 +69,28 @@ if (myOps.empty()) {
 }
 
 unsigned int oCnt = 0;
-for (chanfix::chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end(); opPtr++) {
+for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
+     opPtr != myOps.end(); opPtr++) {
   curOp = *opPtr;
   if (oCnt < OPCOUNT) oCnt++;
 }
 
-/* Technically if they are all 0 scores it will get to this point, dont want a notice
- * saying 0 accounts. */
+/* Technically if they are all 0 scores it will get to this point,
+ * dont want a notice saying 0 accounts. */
 if (oCnt == 0) {
   bot->Notice(theClient, "There are no scores in the database for %s.",
               netChan->getName().c_str());
   return;
 }
 
-bot->Notice(theClient, "Found %d accounts in channel %s",
-	    oCnt, netChan->getName().c_str());
+if (oCnt == OPCOUNT)
+  bot->Notice(theClient, "Top %d unique op accounts in channel %s:",
+	      OPCOUNT, netChan->getName().c_str());
+else
+  bot->Notice(theClient, "Found %d unique op accounts in channel %s:",
+	      oCnt, netChan->getName().c_str());
 
 unsigned int opCount = 0;
-
-
-
 static char sdatetimestring[24];
 static char ldatetimestring[24];
 struct tm * stms;
@@ -96,18 +98,20 @@ struct tm * stml;
 time_t tmVars;
 time_t tmVarl;
 
-for (chanfix::chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end(); opPtr++) {
+for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
+     opPtr != myOps.end(); opPtr++) {
   curOp = *opPtr;
   if (opCount < OPCOUNT) {
     opCount++;
     tmVars = curOp->getTimeFirstOpped();
-    tmVarl = curOp->getTimeOpped();
+    tmVarl = curOp->getTimeLastOpped();
     stms = localtime(&tmVars);
     strftime(sdatetimestring, 24, "%Y-%m-%d", stms);
     stml = localtime(&tmVarl);
     strftime(ldatetimestring, 24, "%Y-%m-%d %H:%M:%S", stml);
 
-    bot->Notice(theClient, "%d. %4d %s -- %s / %s", opCount, curOp->getPoints(), curOp->getAccount().c_str(),
+    bot->Notice(theClient, "%d. %4d %s -- %s / %s", opCount,
+		curOp->getPoints(), curOp->getAccount().c_str(),
 		sdatetimestring, ldatetimestring);
   }
 }

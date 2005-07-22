@@ -60,8 +60,8 @@ unsigned int currentRank;
 currentRank = 1;
 sqlChanOp* curOp = 0;
 iClient* curClient = 0;
-iClient* curClientOp = 0;
 bool compact = (string_upper(st[0]) == "CSCORE");
+
 Channel* netChan = Network->findChannel(st[1]);
 if (!netChan) {
   if (compact)
@@ -70,6 +70,7 @@ if (!netChan) {
     bot->Notice(theClient, "No such channel %s.", st[1].c_str());
   return;
 }
+
 ChannelUser* curUser;
 for (Channel::userIterator ptr = netChan->userList_begin();
      ptr != netChan->userList_end(); ptr++) {
@@ -83,6 +84,7 @@ for (Channel::userIterator ptr = netChan->userList_begin();
      return;
   }
 }
+
 chanfix::chanOpsType myOps = bot->getMyOps(netChan);
 if (myOps.empty()) {
   if (compact)
@@ -92,6 +94,7 @@ if (myOps.empty()) {
 	      netChan->getName().c_str());
   return;
 }
+
 string scUser;
 if (st.size() > 2) {
   scUser = st[2];
@@ -122,6 +125,7 @@ if (st.size() > 2) {
        bot->Notice(theClient, "No such nick %s.", st[2].c_str());
      return;
    } else {
+     iClient* curClientOp;
      for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
 	  opPtr != myOps.end(); opPtr++) {
 	curOp = *opPtr;

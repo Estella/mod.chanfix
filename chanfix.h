@@ -254,12 +254,15 @@ public:
 	bool removeFromManQ(Channel*);
 
 	const string prettyDuration( int );
+
 	/* Server notices */
 	bool serverNotice( Channel*, const char*, ... );
 	bool serverNotice( Channel*, const string& );
 	
 	/* Admin message logs */
 	bool logAdminMessage(const char*, ... );
+
+	void doSqlError(const std::string&, const std::string&);
 	
 	/**
 	 * PostgreSQL Database
@@ -291,10 +294,11 @@ public:
 
 	typedef list< std::pair <Channel*, iClient*> > opQueueType;
 	opQueueType	opQ;
-    void doSqlError(const std::string&, const std::string&);
+
 	string          consoleChan;
 	string          operChan;
 	string          supportChan;
+
 protected:
 	/**
 	 * Commands map

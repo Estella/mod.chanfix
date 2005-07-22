@@ -573,7 +573,7 @@ void chanfix::doSqlError(const string& theQuery, const string& theError)
 void chanfix::preloadChanOpsCache()
 {
         std::stringstream theQuery;
-        theQuery        << "SELECT channel,userhost,last_seen_as,points,account,ts_firstopped,ts_lastopped FROM chanOps"
+        theQuery        << "SELECT channel,userhost,last_seen_as,points,account,ts_lastopped,ts_firstopped FROM chanOps"
                                 << ends;
 
         elog            << "*** [chanfix::preloadChanOpsCache]: Loading chanOps and their points ..." 
@@ -812,7 +812,7 @@ if (clientNeedsIdent && !hasIdent(theClient))
 sqlChanOp* thisOp = findChanOp(theClient, theChan);
 if(!thisOp) thisOp = newChanOp(theClient, theChan);
 
-//int points = (currentTime() - thisOp->getTimeOpped()) / POINTS_UPDATE_TIME;
+//int points = (currentTime() - thisOp->getTimeLastOpped()) / POINTS_UPDATE_TIME;
 
 //points += thisOp->getPoints();
 
@@ -823,7 +823,7 @@ thisOp->commit();
 
 elog << "chanfix::givePoints> DEBUG: Gave " << thisOp->getAccount()
         << " on " << thisOp->getChannel() << " "
-        << (currentTime() - thisOp->getTimeOpped()) / POINTS_UPDATE_TIME << " points"
+        << (currentTime() - thisOp->getTimeLastOpped()) / POINTS_UPDATE_TIME << " points"
         << endl;
 }
 
@@ -852,10 +852,10 @@ if (thisClient->getAccount() != "" &&
   clientOpsType* myOps = findMyOps(thisClient);
   thisOp->setLastSeenAs(thisClient->getNickUserHost());
   elog << "chanfix::gotOpped> DEBUG: currentState =" << currentState << endl;
-  if ((currentState == RUN))
+  if (currentState == RUN)
     thisOp->setTimeLastOpped(currentTime());
 
-  if ((currentState == BURST) && (thisOp->getTimeOpped() < 1))
+  if ((currentState == BURST) && (thisOp->getTimeLastOpped() < 1))
     thisOp->setTimeLastOpped(currentTime());
 
   if ((currentState == BURST) || (currentState == RUN)) {

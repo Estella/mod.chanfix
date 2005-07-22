@@ -32,8 +32,8 @@ sqlChanOp::sqlChanOp(PgDatabase* _SQLDb)
   nickUserHost(""),
   account(""),
   points(0),
-  ts_firstopped(0),
   ts_lastopped(0),
+  ts_firstopped(0),
   SQLDb(_SQLDb)
 {};
 
@@ -50,7 +50,7 @@ ts_firstopped = atoi(SQLDb->GetValue(row, 6));
 
 bool sqlChanOp::Insert()
 {
-static const char* queryHeader = "INSERT INTO chanOps (channel, userHost, account, last_seen_as, points, ts_firstopped, ts_lastopped) VALUES (";
+static const char* queryHeader = "INSERT INTO chanOps (channel, userHost, account, last_seen_as, points, ts_lastopped, ts_firstopped) VALUES (";
 
 stringstream queryString;
 queryString     << queryHeader << "'"
@@ -59,8 +59,8 @@ queryString     << queryHeader << "'"
 		<< escapeSQLChars(account) << "','"
 		<< escapeSQLChars(nickUserHost) << "',"
 		<< points << ","
-		<< ts_firstopped << ","
-		 << ts_lastopped << ")"
+		<< ts_lastopped << ","
+		<< ts_firstopped << ")"
                 << ends;
 
 #ifdef LOG_SQL
@@ -93,14 +93,14 @@ static const char* queryHeader =    "UPDATE chanOps ";
 elog    << "chanfix::sqlChanOp::commit> " << account << " && " << channel << endl;
 
 stringstream queryString;
-queryString     << queryHeader << "SET last_seen_as = "<< "'"
-                << escapeSQLChars(nickUserHost) << "', points = "
-                << points << ", ts_firstopped = "
-                << ts_firstopped << ", ts_lastopped = " << ts_lastopped
-                << " WHERE lower(channel) = '"
-                << string_lower(escapeSQLChars(channel)) << "' AND lower(account) = '"
-                << string_lower(escapeSQLChars(account)) << "'"
-                << ends;
+queryString	<< queryHeader << "SET last_seen_as = "<< "'"
+		<< escapeSQLChars(nickUserHost) << "', points = "
+		<< points << ", ts_lastopped = "
+		<< ts_lastopped << ", ts_firstopped = "
+		<< ts_firstopped << " WHERE lower(channel) = '"
+		<< string_lower(escapeSQLChars(channel)) << "' AND lower(account) = '"
+		<< string_lower(escapeSQLChars(account)) << "'"
+		<< ends;
 
 //#ifdef LOG_SQL
         elog    << "chanfix::sqlChanOp::commit> "

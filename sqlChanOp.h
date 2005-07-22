@@ -42,9 +42,9 @@ public:
 	inline const std::string&	getLastSeenAs() const
                 { return nickUserHost ; }
 
-        inline const time_t	getTimeOpped() const
-                { return ts_lastopped ; }
-                
+	inline const time_t	getTimeLastOpped() const
+		{ return ts_lastopped ; }
+
 	inline const time_t	getTimeFirstOpped() const
 		{ return ts_firstopped ; }
 
@@ -87,8 +87,8 @@ private:
 	string		nickUserHost;
 	string		account;
 	int		points;
-	time_t		ts_firstopped;
 	time_t		ts_lastopped;
+	time_t		ts_firstopped;
 
         PgDatabase*     SQLDb;
 
@@ -98,4 +98,3 @@ private:
 
 
 #endif // __SQLCHANOP_H
-
