@@ -9,3 +9,4 @@ libtool
 stamp-h*
 autom4te.cache
 defs_chanfix.h
+chanfix.example.conf
