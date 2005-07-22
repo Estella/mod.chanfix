@@ -60,6 +60,7 @@ unsigned int currentRank;
 currentRank = 1;
 sqlChanOp* curOp = 0;
 iClient* curClient = 0;
+iClient* curClientOp = 0;
 bool compact = (string_upper(st[0]) == "CSCORE");
 Channel* netChan = Network->findChannel(st[1]);
 if (!netChan) {
@@ -124,8 +125,8 @@ if (st.size() > 2) {
      for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
 	  opPtr != myOps.end(); opPtr++) {
 	curOp = *opPtr;
-	iClient* curClient = bot->findAccount(curOp->getAccount(), netChan);
-	if (string_lower(curClient->getNickName()) == string_lower(scUser)) {
+	curClientOp = bot->findAccount(curOp->getAccount(), netChan);
+	if (curClientOp && (string_lower(curClientOp->getNickName()) == string_lower(scUser))) {
 	  //Score for "reed@local.host" in channel "#coder-com": 4.
 	  //Do it like they do on OCF, baby.
 	  if (compact) {
