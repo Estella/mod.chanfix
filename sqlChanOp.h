@@ -43,10 +43,10 @@ public:
                 { return nickUserHost ; }
 
         inline const time_t	getTimeOpped() const
-                { return ts_opped ; }
+                { return ts_lastopped ; }
                 
-        inline const time_t getTimeFirstOpped() const
-                { return ts_firstopped ; }
+	inline const time_t	getTimeFirstOpped() const
+		{ return ts_firstopped ; }
 
         /*
          *  Methods to set data atrributes.
@@ -70,11 +70,11 @@ public:
         inline void	setLastSeenAs(string _nickUserHost)
 		{ nickUserHost = _nickUserHost ; }
 
-        inline void	setTimeOpped(time_t _ts_opped)
-                { ts_opped = _ts_opped ; }
+        inline void	setTimeLastOpped(time_t _ts_lastopped)
+                { ts_lastopped = _ts_lastopped ; }
         
-        inline void setTimeFirstOpped(time_t _ts_fopped)
-                { ts_firstopped = _ts_fopped ; }
+	inline void	setTimeFirstOpped(time_t _ts_firstopped)
+		{ ts_firstopped = _ts_firstopped ; }
 
 	bool Insert();
 	bool commit();
@@ -87,8 +87,8 @@ private:
 	string		nickUserHost;
 	string		account;
 	int		points;
-	time_t		ts_opped;
-	time_t      ts_firstopped;
+	time_t		ts_lastopped;
+	time_t		ts_firstopped;
 
         PgDatabase*     SQLDb;
 

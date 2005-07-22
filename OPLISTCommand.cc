@@ -1,10 +1,10 @@
 /**
  * OPLISTCommand.cc
  *
- * 07/15/2005 - Jimmy Lipham <music0m@alltel.net>
+ * 07/21/2005 - Jimmy Lipham <music0m@alltel.net>
  * Initial Version
  *
- * Shows the top scores or an individual score of <channel>
+ * Shows a list of accounts plus their score of the top ops of this channel
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -66,13 +66,14 @@ if (myOps.empty()) {
 }
 
 unsigned int oCnt = 0;
-for (chanfix::chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end(); opPtr++) {
+for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
+     opPtr != myOps.end(); opPtr++) {
   curOp = *opPtr;
-  if (oCnt < 10) oCnt++;
+  if (oCnt < OPCOUNT) oCnt++;
 }
 
-/* Technically if they are all 0 scores it will get to this point, dont want a notice
- * saying 0 accounts. */
+/* Technically if they are all 0 scores it will get to this point,
+ * dont want a notice saying 0 accounts. */
 if (oCnt == 0) {
   bot->Notice(theClient, "There are no scores in the database for %s.",
               netChan->getName().c_str());
@@ -85,12 +86,13 @@ bot->Notice(theClient, "Found %d accounts in channel %s",
 unsigned int opCount = 0;
 
 //2005-07-18 / 2005-07-21 12:25:00
-for (chanfix::chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end(); opPtr++) {
+for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
+     opPtr != myOps.end(); opPtr++) {
   curOp = *opPtr;
-  if (opCount <= 10) {
+  if (opCount <= OPCOUNT) {
     opCount++;
     bot->Notice(theClient, "%d. %4d %s -- %s / %s", opCount, curOp->getPoints(), curOp->getAccount().c_str(),
-		bot->GetSmallTime(curOp->getTimeFirstOpped()), bot->GetSmallTime(curOp->getTimeOpped()));
+		bot->getSmallTime(curOp->getTimeFirstOpped()), bot->getSmallTime(curOp->getTimeOpped()));
   }
 }
 

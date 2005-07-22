@@ -64,17 +64,16 @@ bool compact = (string_upper(st[0]) == "CSCORE");
 
 Channel* netChan = Network->findChannel(st[1]);
 if (!netChan) {
-  if (compact) {
-    //No scores in DB
+  if (compact)
     bot->Notice(theClient, "~! %s", st[1].c_str());
-  } else {
+  else
     bot->Notice(theClient, "No such channel %s.", st[1].c_str());
-  }
   return;
 }
 
 ChannelUser* curUser;
-for (Channel::userIterator ptr = netChan->userList_begin(); ptr != netChan->userList_end(); ptr++) {
+for (Channel::userIterator ptr = netChan->userList_begin();
+     ptr != netChan->userList_end(); ptr++) {
   curUser = ptr->second;
   if (curUser->getClient()->getMode(iClient::MODE_SERVICES)) {
     if (compact)
@@ -177,37 +176,35 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
   curOp = *opPtr;
   curClient = bot->findAccount(curOp->getAccount(), netChan);
   if (intDBCount < minScoreReply) {
-    if (intDBCount > 0) {
+    if (intDBCount++) {
       if (compact)
 	strScoresDB << " ";
       else
 	strScoresDB << ", ";
     }
     strScoresDB << curOp->getPoints();
-    intDBCount++;
   }
   if (curClient && netChan->findUser(curClient)->isModeO()) {
     if (intOPCount < minScoreReply) {
-      if (intOPCount > 0) {
+      if (intOPCount++) {
 	if (compact)
 	  strScoresOP << " ";
 	else
 	  strScoresOP << ", ";
       }
       strScoresOP << curOp->getPoints();
-      intOPCount++;
     }
   } else {
-    if (!curClient) continue;
+    if (!curClient)
+      continue;
     if (intNOPCount < minScoreReply) {
-      if (intNOPCount > 0) {
+      if (intNOPCount++) {
 	if (compact)
 	  strScoresNOP << " ";
 	else
 	  strScoresNOP << ", ";
       }
       strScoresNOP << curOp->getPoints();
-      intNOPCount++;
     }
   }
   currentRank++;

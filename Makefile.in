@@ -71,8 +71,9 @@ am_libchanfix_la_OBJECTS = libchanfix_la-chanfix.lo \
 	libchanfix_la-CHANFIXCommand.lo libchanfix_la-CHECKCommand.lo \
 	libchanfix_la-INFOCommand.lo libchanfix_la-INVITECommand.lo \
 	libchanfix_la-OPLISTCommand.lo libchanfix_la-OPNICKSCommand.lo \
-	libchanfix_la-QUOTECommand.lo libchanfix_la-RELOADCommand.lo \
-	libchanfix_la-SCORECommand.lo libchanfix_la-SHUTDOWNCommand.lo \
+	libchanfix_la-QUOTECommand.lo libchanfix_la-REHASHCommand.lo \
+	libchanfix_la-RELOADCommand.lo libchanfix_la-SCORECommand.lo \
+	libchanfix_la-SHUTDOWNCommand.lo \
 	libchanfix_la-STATUSCommand.lo libchanfix_la-UNALERTCommand.lo \
 	libchanfix_la-UNBLOCKCommand.lo libchanfix_la-sqlChannel.lo \
 	libchanfix_la-sqlChanOp.lo
@@ -220,6 +221,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	OPLISTCommand.cc \
 	OPNICKSCommand.cc \
 	QUOTECommand.cc \
+	REHASHCommand.cc \
 	RELOADCommand.cc \
 	SCORECommand.cc \
 	SHUTDOWNCommand.cc \
@@ -352,6 +354,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-OPLISTCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-OPNICKSCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-QUOTECommand.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-REHASHCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-RELOADCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SCORECommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SHUTDOWNCommand.Plo@am__quote@
@@ -452,6 +455,13 @@ libchanfix_la-QUOTECommand.lo: QUOTECommand.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='QUOTECommand.cc' object='libchanfix_la-QUOTECommand.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-QUOTECommand.lo `test -f 'QUOTECommand.cc' || echo '$(srcdir)/'`QUOTECommand.cc
+
+libchanfix_la-REHASHCommand.lo: REHASHCommand.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-REHASHCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-REHASHCommand.Tpo" -c -o libchanfix_la-REHASHCommand.lo `test -f 'REHASHCommand.cc' || echo '$(srcdir)/'`REHASHCommand.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-REHASHCommand.Tpo" "$(DEPDIR)/libchanfix_la-REHASHCommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-REHASHCommand.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='REHASHCommand.cc' object='libchanfix_la-REHASHCommand.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-REHASHCommand.lo `test -f 'REHASHCommand.cc' || echo '$(srcdir)/'`REHASHCommand.cc
 
 libchanfix_la-RELOADCommand.lo: RELOADCommand.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-RELOADCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-RELOADCommand.Tpo" -c -o libchanfix_la-RELOADCommand.lo `test -f 'RELOADCommand.cc' || echo '$(srcdir)/'`RELOADCommand.cc; \

@@ -13,6 +13,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	OPLISTCommand.cc \
 	OPNICKSCommand.cc \
 	QUOTECommand.cc \
+	REHASHCommand.cc \
 	RELOADCommand.cc \
 	SCORECommand.cc \
 	SHUTDOWNCommand.cc \

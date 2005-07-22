@@ -200,6 +200,8 @@ public:
 	 * Our functions.
 	 */
 
+	void readConfigFile(const std::string&);
+
 	sqlChanOp* newChanOp(const std::string&, const std::string&);
 	sqlChanOp* newChanOp(iClient*, Channel*);
 
@@ -240,8 +242,10 @@ public:
 
 	static size_t countChanOps(const Channel*);
 
+	void startTimers();
+
 	void processQueue();
-    void startTimers();
+
 	bool isBeingFixed(Channel*);
 	bool isBeingAutoFixed(Channel*);
 	bool isBeingChanFixed(Channel*);
@@ -250,7 +254,7 @@ public:
 	bool removeFromManQ(Channel*);
 
 	const string prettyDuration( int );
-	char *GetSmallTime(time_t);
+	char *getSmallTime(time_t);
 	/* Server notices */
 	bool serverNotice( Channel*, const char*, ... );
 	bool serverNotice( Channel*, const string& );
@@ -298,10 +302,12 @@ protected:
 	 */
 	typedef map< string, Command*, noCaseCompare> commandMapType;
 	commandMapType commandMap;
-    /**
-     *  Time of the last cache
-    */
-    std::map < std::string , time_t > lastUpdated;
+
+	/**
+	 *  Time of the last cache
+	 */
+	std::map < std::string , time_t > lastUpdated;
+
 	/**
 	 * Configuration file.
 	 */

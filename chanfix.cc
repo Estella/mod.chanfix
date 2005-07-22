@@ -3,6 +3,7 @@
  * 
  * Copyright (C) 2003	Reed Loden <reed@reedloden.com>
  *			Matthias Crauwels <ultimate_@wol.be>
+ *			Jimmy Lipham <music0m@alltel.net>
  *
  * Automatically and manually fix opless and taken over channels
  *
@@ -54,7 +55,6 @@
 #include	"sqlChannel.h"
 #include	"sqlChanOp.h"
 #include	"sqlUser.h"
-//#include	"Timer.h"
 
 RCSTAG("$Id$");
 
@@ -90,41 +90,10 @@ chanfix::chanfix( const std::string& configFileName )
  : xClient( configFileName )
 {
 /* Load the config file */
-chanfixConfig = new (std::nothrow) EConfig(configFileName);
-assert(chanfixConfig != 0);
-
-/* Config file processing */
-consoleChan = chanfixConfig->Require("consoleChan")->second ;
-consoleChanModes = chanfixConfig->Require("consoleChanModes")->second ;
-operChan = chanfixConfig->Require("operChan")->second ;
-operChanModes = chanfixConfig->Require("operChanModes")->second ;
-supportChan = chanfixConfig->Require("supportChan")->second ;
-supportChanModes = chanfixConfig->Require("supportChanModes")->second ;
-enableAutoFix = atob(chanfixConfig->Require("enableAutoFix")->second) ;
-enableChanFix = atob(chanfixConfig->Require("enableChanFix")->second) ;
-enableChannelBlocking = atob(chanfixConfig->Require("enableChannelBlocking")->second) ;
-defaultChannelModes = chanfixConfig->Require("defaultChannelModes")->second ;
-version = atoi((chanfixConfig->Require("version")->second).c_str()) ;
-numServers = atoi((chanfixConfig->Require("numServers")->second).c_str()) ;
-minServersPresent = atoi((chanfixConfig->Require("minServersPresent")->second).c_str()) ;
-numTopScores = atoi((chanfixConfig->Require("numTopScores")->second).c_str()) ;
-minClients = atoi((chanfixConfig->Require("minClients")->second).c_str()) ;
-clientNeedsIdent = atob(chanfixConfig->Require("clientNeedsIdent")->second) ;
-clientNeedsReverse = atob(chanfixConfig->Require("clientNeedsReverse")->second) ;
-connectCheckFreq = atoi((chanfixConfig->Require("connectCheckFreq")->second).c_str()) ;
+readConfigFile(configFileName);
 
 /* Initial state */
 currentState = INIT;
-
-/* Database processing */
-sqlHost = chanfixConfig->Require("sqlHost")->second;
-sqlPort = chanfixConfig->Require("sqlPort")->second;
-sqlDB = chanfixConfig->Require("sqlDB")->second;
-sqlUser = chanfixConfig->Require("sqlUser")->second;
-sqlPass = chanfixConfig->Require("sqlPass")->second;
-
-elog    << "chanfix::chanfix::> Configuration loaded!"
-        << endl;
 
 std::string Query = "host=" + sqlHost + " dbname=" + sqlDB + " port=" + sqlPort + " user=" + sqlUser;
 
@@ -164,7 +133,8 @@ RegisterCommand(new INVITECommand(this, "INVITE", ""));
 RegisterCommand(new OPLISTCommand(this, "OPLIST", "<#channel>"));
 RegisterCommand(new OPNICKSCommand(this, "OPNICKS", "<#channel>"));
 RegisterCommand(new QUOTECommand(this, "QUOTE", "<text>"));
-RegisterCommand(new RELOADCommand(this, "RELOAD", ""));
+RegisterCommand(new REHASHCommand(this, "REHASH", ""));
+RegisterCommand(new RELOADCommand(this, "RELOAD", "[reason]"));
 RegisterCommand(new SCORECommand(this, "SCORE", "<#channel> [nick|*account]"));
 RegisterCommand(new SCORECommand(this, "CSCORE", "<#channel> [nick|*account]"));
 RegisterCommand(new SHUTDOWNCommand(this, "SHUTDOWN", "[reason]"));
@@ -185,6 +155,43 @@ theTimer = new Timer();
 
 chanfix::~chanfix()
 {
+}
+
+/* Load (or reload) the configuration file */
+void chanfix::readConfigFile(const std::string& configFileName)
+{
+chanfixConfig = new (std::nothrow) EConfig(configFileName);
+assert(chanfixConfig != 0);
+
+/* Config file processing */
+consoleChan = chanfixConfig->Require("consoleChan")->second ;
+consoleChanModes = chanfixConfig->Require("consoleChanModes")->second ;
+operChan = chanfixConfig->Require("operChan")->second ;
+operChanModes = chanfixConfig->Require("operChanModes")->second ;
+supportChan = chanfixConfig->Require("supportChan")->second ;
+supportChanModes = chanfixConfig->Require("supportChanModes")->second ;
+enableAutoFix = atob(chanfixConfig->Require("enableAutoFix")->second) ;
+enableChanFix = atob(chanfixConfig->Require("enableChanFix")->second) ;
+enableChannelBlocking = atob(chanfixConfig->Require("enableChannelBlocking")->second) ;
+defaultChannelModes = chanfixConfig->Require("defaultChannelModes")->second ;
+version = atoi((chanfixConfig->Require("version")->second).c_str()) ;
+numServers = atoi((chanfixConfig->Require("numServers")->second).c_str()) ;
+minServersPresent = atoi((chanfixConfig->Require("minServersPresent")->second).c_str()) ;
+numTopScores = atoi((chanfixConfig->Require("numTopScores")->second).c_str()) ;
+minClients = atoi((chanfixConfig->Require("minClients")->second).c_str()) ;
+clientNeedsIdent = atob(chanfixConfig->Require("clientNeedsIdent")->second) ;
+clientNeedsReverse = atob(chanfixConfig->Require("clientNeedsReverse")->second) ;
+connectCheckFreq = atoi((chanfixConfig->Require("connectCheckFreq")->second).c_str()) ;
+
+/* Database processing */
+sqlHost = chanfixConfig->Require("sqlHost")->second;
+sqlPort = chanfixConfig->Require("sqlPort")->second;
+sqlDB = chanfixConfig->Require("sqlDB")->second;
+sqlUser = chanfixConfig->Require("sqlUser")->second;
+sqlPass = chanfixConfig->Require("sqlPass")->second;
+
+elog	<< "chanfix::readConfigFile> Configuration loaded!"
+	<< endl;
 }
 
 /* Register a new command */
@@ -237,12 +244,10 @@ MyUplink->RegisterEvent( EVT_NETBREAK, this );
  */
 MyUplink->RegisterChannelEvent( xServer::CHANNEL_ALL, this );
 
-/* Old timer space */
-
 xClient::OnAttach() ;
 }
 
-/* onTimer */
+/* OnTimer */
 void chanfix::OnTimer(const gnuworld::xServer::timerID& theTimer, void*)
 {
 time_t theTime;
@@ -252,19 +257,12 @@ if (theTimer == tidGivePoints) {
   theTime = time(NULL) + POINTS_UPDATE_TIME;
   tidGivePoints = MyUplink->RegisterTimer(theTime, this, NULL);
   giveAllOpsPoints();
-  logAdminMessage("Giving all channel ops a point.");
 }
 if (theTimer == tidAutoFix) {
   autoFix();
   /* Refresh Timer */
   theTime = time(NULL) + CHECK_CHANS_TIME;
   tidAutoFix = MyUplink->RegisterTimer(theTime, this, NULL);
-  if (tmpChan)
-	{
-	logAdminMessage("Autofixing channels...");
-	elog    << "chanfix::chanfix::> Autofixing channels."
-            << endl;
-	}
   }
 else if (theTimer == tidUpdateDB) {
   updatePoints();
@@ -273,9 +271,7 @@ else if (theTimer == tidUpdateDB) {
   theTime = time(NULL) + SQL_UPDATE_TIME;
   tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
   if (tmpChan)
-	{
-	logAdminMessage("Updating databases...");
-	}
+    logAdminMessage("Updating databases...");
   }
 else if (theTimer == tidCheckDB) {
   /*checkDBConnection();*/
@@ -290,12 +286,6 @@ else if (theTimer == tidFixQ) {
   /* Refresh Timer */
   theTime = time(NULL) + PROCESS_QUEUE_TIME;
   tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
-  if (tmpChan)
-	{
-	logAdminMessage("Processing fix queue...");
-	elog    << "chanfix::chanfix::> Processing fix queue."
-            << endl;
-	}
 }
 }
 
@@ -399,7 +389,7 @@ return true;
 }
 
 void chanfix::OnPrivateMessage( iClient* theClient,
-	const std::string& Message, bool secure)
+	const std::string& Message, bool)
 {
 if (!theClient->isOper()) {
   return;
@@ -415,16 +405,6 @@ if ( st.empty() )
   return;
 
 const std::string Command = string_upper(st[0]);
-
-/**
- * Just quickly, abort if someone tries to LOGIN or NEWPASS
- * unsecurely.
- */
-if (!secure && ((Command == "LOGIN") || (Command == "NEWPASS"))) {
-  Notice(theClient, "To use %s, you must /msg %s@%s",
-	 Command.c_str(), nickName.c_str(), getUplinkName().c_str());
-  return;
-}
 
 commandMapType::iterator commHandler = commandMap.find(Command);
 if (commHandler == commandMap.end()) {
@@ -530,7 +510,7 @@ for( xServer::opVectorType::const_iterator ptr = theTargets.begin() ;
 	  gotOpped(tmpUser->getClient(), theChan);
 	} else {
 	  // Someone is deopped
-          if(wasOpped(tmpUser->getClient(), theChan)) {
+          if (wasOpped(tmpUser->getClient(), theChan)) {
 	    givePoints(tmpUser->getClient(), theChan);
 	    lostOps(tmpUser->getClient(), theChan);
 	  }
@@ -547,9 +527,10 @@ switch(whichEvent)
 	{
 	case EVT_BURST_CMPLT:
 		{
-        /* Start our timers */
-        iServer* burstedServer = static_cast< iServer* >( data1);
-        if (burstedServer == MyUplink->getUplink()) startTimers();
+	        /* Start our timers */
+	        iServer* burstedServer = static_cast< iServer* >( data1);
+	        if (burstedServer == MyUplink->getUplink())
+		  startTimers();
 		changeState(RUN);
 		break;
 		}
@@ -568,7 +549,8 @@ switch(whichEvent)
 				 data2 );
 
 		clientOpsType* myOps = findMyOps(theClient);
-		for(clientOpsType::iterator ptr = myOps->begin(); ptr != myOps->end(); ptr++) {
+		for (clientOpsType::iterator ptr = myOps->begin();
+		     ptr != myOps->end(); ptr++) {
 		  givePoints(theClient, ptr->second);
 		  lostOps(theClient, ptr->second);
 		}
@@ -825,7 +807,8 @@ return retMe ;
 void chanfix::givePoints(iClient* theClient, Channel* theChan)
 {
 //No points for unidented clients
-if (clientNeedsIdent && !hasIdent(theClient)) return;
+if (clientNeedsIdent && !hasIdent(theClient))
+  return;
 sqlChanOp* thisOp = findChanOp(theClient, theChan);
 if(!thisOp) thisOp = newChanOp(theClient, theChan);
 
@@ -848,77 +831,83 @@ void chanfix::gotOpped(iClient* thisClient, Channel* thisChan)
 {
 //Not enough users, forget about it.
 //if (thisChan->size() < minClients) return;
+
 //No tracking for unidented clients
-if (clientNeedsIdent && !hasIdent(thisClient)) return;
+if (clientNeedsIdent && !hasIdent(thisClient))
+  return;
+
 if (thisClient->getAccount() != "" &&
     !thisClient->getMode(iClient::MODE_SERVICES) && 
     !thisChan->getMode(Channel::MODE_A)) {
-    elog << "chanfix::gotOpped> DEBUG: " << thisClient->getAccount()
-          << " got opped on " << thisChan->getName()
-          << endl;
+  elog	<< "chanfix::gotOpped> DEBUG: " << thisClient->getAccount()
+	<< " got opped on " << thisChan->getName()
+	<< endl;
 
   sqlChanOp* thisOp = findChanOp(thisClient, thisChan);
-  if(!thisOp) thisOp = newChanOp(thisClient, thisChan);
+  if (!thisOp) thisOp = newChanOp(thisClient, thisChan);
 
-  if(wasOpped(thisClient, thisChan)) return;
-  
+  if (wasOpped(thisClient, thisChan))
+    return;
+
   clientOpsType* myOps = findMyOps(thisClient);
   thisOp->setLastSeenAs(thisClient->getNickUserHost());
-  thisOp->setTimeOpped(time(NULL));
-  if (thisOp->getTimeFirstOpped() < 1) thisOp->setTimeFirstOpped(time(NULL));
+  thisOp->setTimeLastOpped(time(NULL));
+  if (thisOp->getTimeFirstOpped() < 1)
+    thisOp->setTimeFirstOpped(currentTime());
+  thisOp->commit();
   myOps->insert(clientOpsType::value_type(thisChan->getName(), thisChan));
   thisClient->setCustomData(this, static_cast< void*>(myOps));
 } //if
-
+return;
 }
+
 bool chanfix::hasIdent(iClient* theClient)
 {
-     string cHost;
-     cHost = theClient->getNickUserHost();
-     /* Search for the first of ~, if found,
-      * They dont have ident
-      */
-     string::size_type pos = cHost.find_first_of('~');
-     if( string::npos != pos )
-         return false;
-     else
-         return true;    
+string userName = theClient->getUserName();
+if (userName[0] == '~')
+  return false;
+return true;
 }
+
 bool chanfix::wasOpped(iClient* theClient, Channel* theChan)
 {
 clientOpsType* myOps = findMyOps(theClient);
-if(!myOps || myOps->empty()) return false;
-clientOpsType::iterator ptr = myOps->find(theChan->getName());
+if (!myOps || myOps->empty())
+  return false;
+
 theClient->setCustomData(this, static_cast< void*>(myOps));
-if(ptr != myOps->end()) return true;
+
+clientOpsType::iterator ptr = myOps->find(theChan->getName());
+if (ptr != myOps->end())
+  return true;
 return false;
 }
 
 void chanfix::lostOps(iClient* theClient, Channel* theChan)
 {
 clientOpsType* myOps = findMyOps(theClient);
-if(!myOps || myOps->empty()) return;
-clientOpsType::iterator ptr = myOps->find(theChan->getName());
+if (!myOps || myOps->empty())
+  return;
 
-if(ptr != myOps->end()) myOps->erase(theChan->getName());
+clientOpsType::iterator ptr = myOps->find(theChan->getName());
+if (ptr != myOps->end())
+  myOps->erase(theChan->getName());
 theClient->setCustomData(this, static_cast< void*>(myOps));
 }
 
 void chanfix::checkNetwork()
 {
-if(100 * Network->serverList_size() < numServers * minServersPresent)
-	{
-	elog << "chanfix::checkNetwork> DEBUG: Not enough servers linked! Going to SPLIT-state" << endl;
-	changeState(SPLIT);
-	return;
-	}
+if (100 * Network->serverList_size() < numServers * minServersPresent) {
+  elog << "chanfix::checkNetwork> DEBUG: Not enough servers linked! Going to SPLIT-state" << endl;
+  changeState(SPLIT);
+  return;
+}
 
-if(currentState == SPLIT)
-	{
-        elog << "chanfix::checkNetwork> DEBUG: Enough servers linked! Going to BURST-state" << endl;
-        changeState(BURST);
-        return;
-	}
+if (currentState == SPLIT) {
+  elog << "chanfix::checkNetwork> DEBUG: Enough servers linked! Going to BURST-state" << endl;
+  changeState(BURST);
+  return;
+}
 }
 
 void chanfix::autoFix()
@@ -1272,14 +1261,6 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
 
 return;
 }
-char *chanfix::GetSmallTime(time_t tmVar)
-{
-	static char datetimestring[24];
-	struct tm *stm;
-	stm = localtime(&tmVar);
-	strftime(datetimestring, 24, "%Y-%m-%d %H:%M:%S", stm);
-	return datetimestring;
-}
 
 bool chanfix::isBeingFixed(Channel* theChan)
 {
@@ -1350,6 +1331,15 @@ sprintf(tmpBuf, "%i day%s, %02d:%02d:%02d",
 	secs );
 
 return string( tmpBuf ) ;
+}
+
+char *chanfix::getSmallTime(time_t tmVar)
+{
+	static char datetimestring[24];
+	struct tm *stm;
+	stm = localtime(&tmVar);
+	strftime(datetimestring, 24, "%Y-%m-%d %H:%M:%S", stm);
+	return datetimestring;
 }
 
 chanfix::clientOpsType* chanfix::findMyOps(iClient* theClient)
