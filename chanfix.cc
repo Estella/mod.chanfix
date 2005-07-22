@@ -936,16 +936,19 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
    thisChan = ptr->second;
    bool opLess = true;
    bool hasService = false;
-   bool hasApass = thisChan->getMode(Channel::MODE_A);
+   if (thisChan->getMode(Channel::MODE_A))
+     continue;
    if (thisChan->size() >= minClients && !isBeingFixed(thisChan)) {
      for (Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
 	curUser = ptr->second;
+	if (curUser->getClient()->getMode(iClient::MODE_SERVICES)) {
+	  hasService = true;
+	  break;
+	}
 	if (curUser->isModeO())
 	  opLess = false;
-	if (curUser->getClient()->getMode(iClient::MODE_SERVICES))
-	  hasService = true;
      }
-     if (opLess && !hasService && !hasApass) {
+     if (opLess && !hasService) {
        sqlChannel* sqlChan = getChannelRecord(thisChan);
        if (!sqlChan) sqlChan = newChannelRecord(thisChan);
 
@@ -1350,51 +1353,50 @@ if(!myOps) myOps = new clientOpsType;
 
 return myOps;
 }
+
+/*
+ * Start timers
+ */
 void chanfix::startTimers()
 {
-    /*
-     * Start timers
-     */
-    time_t theTime = time(NULL) + CHECK_CHANS_TIME;
-    tidCheckDB = MyUplink->RegisterTimer(time(NULL) + connectCheckFreq, this, NULL);
-    tidAutoFix = MyUplink->RegisterTimer(theTime, this, NULL);
-    theTime = time(NULL) + SQL_UPDATE_TIME;
-    tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
-    theTime = time(NULL) + PROCESS_QUEUE_TIME;
-    tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
-    theTime = time(NULL) + POINTS_UPDATE_TIME;
-    tidGivePoints = MyUplink->RegisterTimer(theTime, this, NULL);
-    elog    << "chanfix::startTimers::> Started all timers."
-            << endl;
+time_t theTime = time(NULL) + CHECK_CHANS_TIME;
+tidCheckDB = MyUplink->RegisterTimer(time(NULL) + connectCheckFreq, this, NULL);
+tidAutoFix = MyUplink->RegisterTimer(theTime, this, NULL);
+theTime = time(NULL) + SQL_UPDATE_TIME;
+tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
+theTime = time(NULL) + PROCESS_QUEUE_TIME;
+tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
+theTime = time(NULL) + POINTS_UPDATE_TIME;
+tidGivePoints = MyUplink->RegisterTimer(theTime, this, NULL);
+elog	<< "chanfix::startTimers> Started all timers."
+	<< endl;
 }
+
 void chanfix::giveAllOpsPoints()
 {
-     Channel* thisChan;
-     bool hasService = false;
-     for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->channels_end(); ptr++) {
-         thisChan = ptr->second;
-         if (thisChan->size() >= minClients && !isBeingFixed(thisChan)) {
-            for (Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
-                ChannelUser* curUser = ptr->second;
-                if (curUser->getClient()->getMode(iClient::MODE_SERVICES)) {
-                   hasService = true;
-                   break; //Exit the loop fully, and go to the next chan
-                }
-            }
-            if (hasService == false) {
-               for (Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
-                  ChannelUser* curUser = ptr->second;
-                  if (curUser->isModeO() && curUser->getClient()->getAccount() != "") {
-                     //Ok hes an op
-                     //Grab an iClient for curUser
-                     givePoints(curUser->getClient(), thisChan);
-                  }
-               }
-            }
-         }
-     }           
-                   
+Channel* thisChan;
+for (xNetwork::channelIterator ptr = Network->channels_begin();
+     ptr != Network->channels_end(); ptr++) {
+  thisChan = ptr->second;
+  if (thisChan->getMode(Channel::MODE_A))
+    continue; // Exit the loop and go to the next chan
+  if (thisChan->size() >= minClients && !isBeingFixed(thisChan)) {
+    for (Channel::userIterator ptr = thisChan->userList_begin();
+	 ptr != thisChan->userList_end(); ptr++) {
+      ChannelUser* curUser = ptr->second;
+      if (curUser->getClient()->getMode(iClient::MODE_SERVICES))
+	break; // Exit the loop fully, and go to the next chan
+      if (curUser->isModeO() && curUser->getClient()->getAccount() != "") {
+	//Ok hes an op
+	//Grab an iClient for curUser
+	givePoints(curUser->getClient(), thisChan);
+      }
+    }
+  }
+}
+return;                              
 } //giveAllOpsPoints
+
 void chanfix::updatePoints()
 {
 /*
