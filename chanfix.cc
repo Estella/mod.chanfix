@@ -837,7 +837,7 @@ if (clientNeedsIdent && !hasIdent(thisClient))
   return;
 
 if (thisClient->getAccount() != "" &&
-    !thisClient->getMode(iClient::MODE_SERVICES) && 
+    !thisClient->getMode(iClient::MODE_SERVICES) &&
     !thisChan->getMode(Channel::MODE_A)) {
   elog	<< "chanfix::gotOpped> DEBUG: " << thisClient->getAccount()
 	<< " got opped on " << thisChan->getName()
@@ -851,10 +851,20 @@ if (thisClient->getAccount() != "" &&
 
   clientOpsType* myOps = findMyOps(thisClient);
   thisOp->setLastSeenAs(thisClient->getNickUserHost());
-  thisOp->setTimeLastOpped(time(NULL));
-  if (thisOp->getTimeFirstOpped() < 1)
-    thisOp->setTimeFirstOpped(currentTime());
+  elog << "chanfix::gotOpped> DEBUG: currentState =" << currentState << endl;
+  if ((currentState == RUN))
+    thisOp->setTimeLastOpped(currentTime());
+
+  if ((currentState == BURST) && (thisOp->getTimeOpped() < 1))
+    thisOp->setTimeLastOpped(currentTime());
+
+  if ((currentState == BURST) || (currentState == RUN)) {
+    if (thisOp->getTimeFirstOpped() < 1)
+      thisOp->setTimeFirstOpped(currentTime());
+  }
+
   thisOp->commit();
+
   myOps->insert(clientOpsType::value_type(thisChan->getName(), thisChan));
   thisClient->setCustomData(this, static_cast< void*>(myOps));
 } //if
@@ -1334,15 +1344,6 @@ sprintf(tmpBuf, "%i day%s, %02d:%02d:%02d",
 	secs );
 
 return string( tmpBuf ) ;
-}
-
-char *chanfix::getSmallTime(time_t tmVar)
-{
-	static char datetimestring[24];
-	struct tm *stm;
-	stm = localtime(&tmVar);
-	strftime(datetimestring, 24, "%Y-%m-%d %H:%M:%S", stm);
-	return datetimestring;
 }
 
 chanfix::clientOpsType* chanfix::findMyOps(iClient* theClient)

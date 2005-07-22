@@ -254,7 +254,6 @@ public:
 	bool removeFromManQ(Channel*);
 
 	const string prettyDuration( int );
-	char *getSmallTime(time_t);
 	/* Server notices */
 	bool serverNotice( Channel*, const char*, ... );
 	bool serverNotice( Channel*, const string& );

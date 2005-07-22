@@ -32,8 +32,8 @@ sqlChanOp::sqlChanOp(PgDatabase* _SQLDb)
   nickUserHost(""),
   account(""),
   points(0),
-  ts_lastopped(0),
   ts_firstopped(0),
+  ts_lastopped(0),
   SQLDb(_SQLDb)
 {};
 
@@ -59,8 +59,8 @@ queryString     << queryHeader << "'"
 		<< escapeSQLChars(account) << "','"
 		<< escapeSQLChars(nickUserHost) << "',"
 		<< points << ","
-        << ts_firstopped << ","
-        << ts_lastopped << ")"
+		<< ts_firstopped << ","
+		 << ts_lastopped << ")"
                 << ends;
 
 #ifdef LOG_SQL

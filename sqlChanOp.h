@@ -72,8 +72,8 @@ public:
 
         inline void	setTimeLastOpped(time_t _ts_lastopped)
                 { ts_lastopped = _ts_lastopped ; }
-        
-	inline void	setTimeFirstOpped(time_t _ts_firstopped)
+
+	inline void     setTimeFirstOpped(time_t _ts_firstopped)
 		{ ts_firstopped = _ts_firstopped ; }
 
 	bool Insert();
@@ -87,8 +87,8 @@ private:
 	string		nickUserHost;
 	string		account;
 	int		points;
-	time_t		ts_lastopped;
 	time_t		ts_firstopped;
+	time_t		ts_lastopped;
 
         PgDatabase*     SQLDb;
 
