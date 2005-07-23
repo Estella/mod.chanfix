@@ -16,7 +16,7 @@ hostname = evilnet.development
 userdescription = Channel Fixer
 
 # User modes bot should set
-mode = +iodk
+mode = +idk
 
 # ---------------------------------------------------------------------
 # Database specifications

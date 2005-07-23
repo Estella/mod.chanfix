@@ -242,6 +242,8 @@ public:
 
 	static size_t countChanOps(const Channel*);
 
+	bool needsModesRemoved(Channel*);
+
 	void startTimers();
 
 	void processQueue();

@@ -491,7 +491,6 @@ xClient::OnChannelEvent( whichEvent, theChan,
 void chanfix::OnChannelModeO( Channel* theChan, ChannelUser*,
                         const xServer::opVectorType& theTargets)
 {
-
 /* if (currentState != RUN) return; */
 
 if (theChan->size() < minClients) return;
@@ -512,7 +511,6 @@ for( xServer::opVectorType::const_iterator ptr = theTargets.begin() ;
 	} // if
 	} // for
 }
-
 
 /* OnEvent */
 void chanfix::OnEvent( const eventType& whichEvent,
@@ -541,16 +539,15 @@ switch(whichEvent)
 
 		clientOpsType* myOps = findMyOps(theClient);
 		for (clientOpsType::iterator ptr = myOps->begin();
-		     ptr != myOps->end(); ptr++) {
-		  givePoints(theClient, ptr->second);
+		     ptr != myOps->end(); ptr++)
 		  lostOps(theClient, ptr->second);
-		}
                 break;
 		}
 	}
 
 xClient::OnEvent( whichEvent, data1, data2, data3, data4 ) ;
 }
+
 void chanfix::doSqlError(const string& theQuery, const string& theError)
 {
 	/* First, log it to error out */
@@ -561,6 +558,7 @@ void chanfix::doSqlError(const string& theQuery, const string& theError)
 		<< theError
 		<< std::endl;
 }
+
 void chanfix::preloadChanOpsCache()
 {
         std::stringstream theQuery;
@@ -799,22 +797,16 @@ void chanfix::givePoints(iClient* theClient, Channel* theChan)
 //No points for unidented clients
 if (clientNeedsIdent && !hasIdent(theClient))
   return;
+
 sqlChanOp* thisOp = findChanOp(theClient, theChan);
 if(!thisOp) thisOp = newChanOp(theClient, theChan);
 
-//int points = (currentTime() - thisOp->getTimeLastOpped()) / POINTS_UPDATE_TIME;
-
-//points += thisOp->getPoints();
-
-int points = thisOp->getPoints() + 1;
-
-thisOp->setPoints(points);
+thisOp->setPoints(thisOp->getPoints() + 1);
 thisOp->setTimeLastOpped(currentTime()); //Update the time they were last opped
 thisOp->commit();
 
-elog << "chanfix::givePoints> DEBUG: Gave " << thisOp->getAccount()
-        << " on " << thisOp->getChannel() << " "
-        << (currentTime() - thisOp->getTimeLastOpped()) / POINTS_UPDATE_TIME << " points"
+elog	<< "chanfix::givePoints> DEBUG: Gave " << thisOp->getAccount()
+        << " on " << thisOp->getChannel() << " a point."
         << endl;
 }
 
@@ -1015,18 +1007,21 @@ int maxScore = sqlChan->getMaxScore();
 if (maxScore <= FIX_MIN_ABS_SCORE_END * MAX_SCORE)
   return false;
 
+/* Get the number of clients that should have ops */
+unsigned int maxOpped = (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED);
+
 /* If the channel has enough ops, abort & return. */
 unsigned int currentOps = countChanOps(netChan);
-if (currentOps >= (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED)) {
+if (currentOps >= maxOpped) {
   elog << "chanfix::fixChan> DEBUG: Enough clients opped on " << netChan->getName() << endl;
   return true;
 } 
 
-int time_passed;
+int time_since_start;
 if (autofix)
-  time_passed = currentTime() - sqlChan->getFixStart();
+  time_since_start = currentTime() - sqlChan->getFixStart();
 else
-  time_passed = currentTime() - (sqlChan->getFixStart() + CHANFIX_DELAY);
+  time_since_start = currentTime() - (sqlChan->getFixStart() + CHANFIX_DELAY);
 
 int max_time = (autofix ? AUTOFIX_MAXIMUM : CHANFIX_MAXIMUM);
 
@@ -1037,21 +1032,22 @@ int max_time = (autofix ? AUTOFIX_MAXIMUM : CHANFIX_MAXIMUM);
  * at time t between 0 and max_time. */
 int min_score_abs = static_cast<int>((MAX_SCORE *
 		static_cast<float>(FIX_MIN_ABS_SCORE_BEGIN)) -
-		time_passed / max_time *
+		time_since_start / max_time *
 		(MAX_SCORE * static_cast<float>(FIX_MIN_ABS_SCORE_BEGIN)
 		 - static_cast<float>(FIX_MIN_ABS_SCORE_END) * MAX_SCORE));
 
 elog << "chanfix::fixChan> [" << netChan->getName() << "] max "
 	<< MAX_SCORE << ", begin " << FIX_MIN_ABS_SCORE_BEGIN
 	<< ", end " << FIX_MIN_ABS_SCORE_END << ", time "
-	<< time_passed << ", maxtime " << max_time << "." << endl;
+	<< time_since_start << ", maxtime " << max_time << "."
+	<< endl;
 
 /* Linear interpolation of (0, fraction_rel_max * max_score_channel) ->
  * (max_time, fraction_rel_min * max_score_channel)
  * at time t between 0 and max_time. */
 int min_score_rel = static_cast<int>((maxScore *
 		static_cast<float>(FIX_MIN_REL_SCORE_BEGIN)) -
-		time_passed / max_time *
+		time_since_start / max_time *
 		(maxScore * static_cast<float>(FIX_MIN_REL_SCORE_BEGIN)
 		 - static_cast<float>(FIX_MIN_REL_SCORE_END) * maxScore));
 
@@ -1062,7 +1058,7 @@ if (min_score_rel > min_score)
   min_score = min_score_rel;
 
 elog << "chanfix::fixChan> [" << netChan->getName() << "] start "
-	<< sqlChan->getFixStart() << ", delta " << time_passed
+	<< sqlChan->getFixStart() << ", delta " << time_since_start
 	<< ", max " << maxScore << ", minabs " << min_score_abs
 	<< ", minrel " << min_score_rel << "." << endl;
 
@@ -1074,11 +1070,12 @@ iClient* curClient = 0;
 sqlChanOp* curOp = 0;
 string modes = "+";
 string args;
+unsigned int numClientsToOp = 0;
 for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
      opPtr++) {
   curOp = *opPtr;
-  elog	<< "chanfix::fixChan> DEBUG: "
-	<< curOp->getPoints() << " >= " << min_score << endl;
+// elog	<< "chanfix::fixChan> DEBUG: "
+//	<< curOp->getPoints() << " >= " << min_score << endl;
   if (curOp->getPoints() >= min_score) {
     curClient = findAccount(curOp->getAccount(), netChan);
     if (curClient && !netChan->findUser(curClient)->isModeO()) {
@@ -1092,22 +1089,27 @@ for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
       if (!args.empty())
 	args += " ";
       args += curClient->getNickName();
+      if ((++numClientsToOp + currentOps) >= maxOpped) {
+	elog	<< "chanfix::fixChan> DEBUG: Enough clients are to be "
+		<< "opped (" << numClientsToOp << "); breaking the loop."
+		<< endl;
+        break;
+      }
     }
   }
 }
 
-int numClientsToOp = modes.size() - 1;
-
 /* If no scores are high enough, return. */
-/* This code is wrong. TODO: fix and put in correct spot */
-/* if (args.empty() || maxScore < min_score) {
-  if (autofix && !sqlChan->getModesRemoved()) {
-    ClearMode(netChan, "ovpsmikbl", true);
+if ((!numClientsToOp || maxScore < min_score) &&
+    (!autofix || !(numClientsToOp + currentOps))) {
+  if (autofix && !sqlChan->getModesRemoved() &&
+      needsModesRemoved(netChan)) {
+    ClearMode(netChan, "biklrD", true);
     sqlChan->setModesRemoved(true);
     Message(netChan, "Channel modes have been removed.");
   }
 return false;
-} */
+}
 
 /* If we need to op at least one client, op him/her. */
 if (numClientsToOp) {
@@ -1120,11 +1122,11 @@ if (numClientsToOp) {
 	    numClientsToOp);
 }
 
-sqlChan->commit();
+//sqlChan->commit(); /* not needed, afaik -reed */
 
 /* Now see if there are enough ops; if so, the fix is complete. */
 if (numClientsToOp + currentOps >= netChan->size() ||
-    numClientsToOp + currentOps >= (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED))
+    numClientsToOp + currentOps >= maxOpped)
   return true;
 
 return false;
@@ -1199,6 +1201,24 @@ for (Channel::const_userIterator ptr = theChan->userList_begin();
      chanOps++;
 
 return chanOps;
+}
+
+bool chanfix::needsModesRemoved(Channel* theChan)
+{
+/* Modes need to be removed if +b/i/k/l/r/D is set.
+ * This check should actually be more specific (checking each ban
+ * to see if it matches a high scored hostmask) but this will do
+ * for now.
+ */
+if (theChan->banList_size() ||
+    theChan->getMode(Channel::MODE_I) ||
+    theChan->getMode(Channel::MODE_K) ||
+    theChan->getMode(Channel::MODE_L) ||
+    theChan->getMode(Channel::MODE_R) ||
+    theChan->getMode(Channel::MODE_D))
+  return true;
+
+return false;
 }
 
 void chanfix::processQueue()
