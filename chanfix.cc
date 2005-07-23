@@ -423,7 +423,7 @@ void chanfix::OnCTCP( iClient* theClient, const std::string& CTCP,
 {
 StringTokenizer st(CTCP);
 
-if(st.empty()) return;
+if (st.empty()) return;
 
 const std::string Command = string_upper(st[0]);
 
@@ -466,19 +466,16 @@ switch( whichEvent )
         case EVT_CREATE:
         case EVT_JOIN:
 		{
-                theClient = static_cast< iClient* >( data1 ) ;
+                theClient = static_cast< iClient* >( data1 );
+                if (theClient->isOper() && theChan->getName() == operChan)
+		  Op(theChan, theClient);
 
-                if( theClient->isOper() && theChan->getName() == operChan)
-                        {
-                        Op( theChan, theClient ) ;
-                        }
-                 
                 break ;
 		}
 	case EVT_KICK:
 	case EVT_PART:
 		{
-                theClient = static_cast< iClient* >( data1 ) ;
+                theClient = static_cast< iClient* >( data1 );
 		if (wasOpped(theClient, theChan)) {
 		  givePoints(theClient, theChan);
 		  lostOps(theClient, theChan);
@@ -711,12 +708,11 @@ sqlChanOp* chanfix::findChanOp(const std::string& account, const std::string& ch
 {
 
 sqlChanOpsType::iterator ptr = sqlChanOps.find(std::pair<string,string>(account, channel));
-if(ptr != sqlChanOps.end())
-        {
-        elog << "chanfix::findChanOp> DEBUG: We've got a winner: "
-                << ptr->second->getAccount() << " on " << ptr->second->getChannel() << "!!" << endl;
-        return ptr->second ;
-        }
+if (ptr != sqlChanOps.end()) {
+  elog	<< "chanfix::findChanOp> DEBUG: We've got a winner: "
+	<< ptr->second->getAccount() << " on " << ptr->second->getChannel() << "!!" << endl;
+  return ptr->second ;
+}
 
 return 0;
 }
@@ -976,9 +972,9 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
    }
 }
 
-elog << "chanfix::autoFix> DEBUG: Found " << numOpLess << " of "
-	<< Network->channelList_size() << " channels in "
-	<< autoFixTimer.stopTimeMS() << " ms." << endl;
+//elog << "chanfix::autoFix> DEBUG: Found " << numOpLess << " of "
+//	<< Network->channelList_size() << " channels in "
+//	<< autoFixTimer.stopTimeMS() << " ms." << endl;
 }
 
 void chanfix::manualFix(Channel* thisChan)
@@ -1088,7 +1084,7 @@ string args;
 for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
      opPtr++) {
    curOp = *opPtr;
-   if (curOp->getPoints() > min_score) {
+   if (curOp->getPoints() >= min_score) {
      curClient = findAccount(curOp->getAccount(), theChan);
      if (curClient && !theChan->findUser(curClient)->isModeO()) {
        elog << "chanfix::fixChan> DEBUG: Decided to op: "
@@ -1214,12 +1210,12 @@ void chanfix::processQueue()
 {
 /* If there are too many servers split, don't process queue. */
 if (currentState != RUN) {
-  elog << "chanfix::processQueue> DEBUG: currentState != RUN" << endl;
+  //elog << "chanfix::processQueue> DEBUG: currentState != RUN" << endl;
   return;
 }
 
 for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
-   elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first->getName() << " in autoFixQ ..." << endl;
+   //elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first->getName() << " in autoFixQ ..." << endl;
    if (ptr->second <= currentTime()) {
      sqlChannel* sqlChan = getChannelRecord(ptr->first);
      if (!sqlChan) sqlChan = newChannelRecord(ptr->first);
@@ -1239,6 +1235,7 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
        ptr = autoFixQ.erase(ptr);
        sqlChan->addSuccessFix();
        sqlChan->setFixStart(0);
+       sqlChan->commit();
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " done!" << endl;
      } else {
        ptr->second = currentTime() + AUTOFIX_INTERVAL;
@@ -1249,7 +1246,7 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
 }
 
 for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
-   elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first->getName() << " in manFixQ ..." << endl;
+   //elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first->getName() << " in manFixQ ..." << endl;
    if (ptr->second <= currentTime()) {
      sqlChannel* sqlChan = getChannelRecord(ptr->first);
      if (!sqlChan) sqlChan = newChannelRecord(ptr->first);
@@ -1267,6 +1264,7 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
        ptr = manFixQ.erase(ptr);
        sqlChan->addSuccessFix();
        sqlChan->setFixStart(0);
+       sqlChan->commit();
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " done!" << endl;
      } else {
        ptr->second = currentTime() + CHANFIX_INTERVAL;
@@ -1287,7 +1285,7 @@ return (isBeingAutoFixed(theChan) || isBeingChanFixed(theChan));
 bool chanfix::isBeingAutoFixed(Channel* theChan)
 {
 for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ptr++) {
-  if(ptr->first->getName() == theChan->getName()) return true;
+  if (ptr->first->getName() == theChan->getName()) return true;
 }
 
 return false;
@@ -1296,7 +1294,7 @@ return false;
 bool chanfix::isBeingChanFixed(Channel* theChan)
 {
 for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ptr++) {
-  if(ptr->first->getName() == theChan->getName()) return true;
+  if (ptr->first->getName() == theChan->getName()) return true;
 }
 
 return false;
@@ -1305,7 +1303,7 @@ return false;
 bool chanfix::removeFromAutoQ(Channel* theChan)
 {
 for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ptr++) {
-  if(ptr->first->getName() == theChan->getName()) {
+  if (ptr->first->getName() == theChan->getName()) {
     ptr = autoFixQ.erase(ptr);
     return true;
   }
@@ -1317,7 +1315,7 @@ return false;
 bool chanfix::removeFromManQ(Channel* theChan)
 {
 for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ptr++) {
-  if(ptr->first->getName() == theChan->getName()) {
+  if (ptr->first->getName() == theChan->getName()) {
     ptr = manFixQ.erase(ptr);
     return true;
   }
@@ -1354,7 +1352,7 @@ chanfix::clientOpsType* chanfix::findMyOps(iClient* theClient)
 {
 clientOpsType* myOps = static_cast< clientOpsType* >(theClient->getCustomData(this) );
 
-if(!myOps) myOps = new clientOpsType;
+if (!myOps) myOps = new clientOpsType;
 
 return myOps;
 }
