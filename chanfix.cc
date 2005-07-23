@@ -476,10 +476,8 @@ switch( whichEvent )
 	case EVT_PART:
 		{
                 theClient = static_cast< iClient* >( data1 );
-		if (wasOpped(theClient, theChan)) {
-		  givePoints(theClient, theChan);
+		if (wasOpped(theClient, theChan))
 		  lostOps(theClient, theChan);
-		}
 		break ;
 		}
         default:
@@ -509,10 +507,8 @@ for( xServer::opVectorType::const_iterator ptr = theTargets.begin() ;
 	  gotOpped(tmpUser->getClient(), theChan);
 	} else {
 	  // Someone is deopped
-          if (wasOpped(tmpUser->getClient(), theChan)) {
-	    givePoints(tmpUser->getClient(), theChan);
+          if (wasOpped(tmpUser->getClient(), theChan))
 	    lostOps(tmpUser->getClient(), theChan);
-	  }
 	} // if
 	} // for
 }
@@ -846,7 +842,7 @@ if (thisClient->getAccount() != "" &&
 
   clientOpsType* myOps = findMyOps(thisClient);
   thisOp->setLastSeenAs(thisClient->getNickUserHost());
-  elog << "chanfix::gotOpped> DEBUG: currentState =" << currentState << endl;
+
   if (currentState == RUN)
     thisOp->setTimeLastOpped(currentTime());
 
@@ -1231,9 +1227,6 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
       * has passed, remove it from the list
       */
      if (isFixed || currentTime() - sqlChan->getFixStart() > AUTOFIX_MAXIMUM) {
-       elog	<< "chanfix::processQueue> DEBUG: isFixed = " << isFixed
-		<< ", other thing = " << currentTime() - sqlChan->getFixStart()
-		<< endl;
        ptr = autoFixQ.erase(ptr);
        if (isFixed)
 	 sqlChan->addSuccessFix();
