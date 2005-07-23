@@ -53,16 +53,10 @@ if (!netChan) {
 }
 
 /* Reports ops and total clients. */
-ChannelUser* curUser;
-unsigned int numOppedUsers = 0;
-for (Channel::userIterator ptr = netChan->userList_begin(); ptr != netChan->userList_end(); ptr++) {
-   curUser = ptr->second;
-   if (curUser->isModeO())
-     numOppedUsers++;
-}
 
-bot->Notice(theClient, "I see %u opped out of %d total clients in %s.",
-	    numOppedUsers, netChan->size(), netChan->getName().c_str());
+bot->Notice(theClient, "I see %d opped out of %d total clients in %s.",
+	    bot->countChanOps(netChan), netChan->size(),
+	    netChan->getName().c_str());
 
 /* Log command */
 /* ... */

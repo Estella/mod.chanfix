@@ -107,7 +107,7 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
     stml = localtime(&tmVarl);
     strftime(ldatetimestring, 24, "%Y-%m-%d %H:%M:%S", stml);
 
-    bot->Notice(theClient, "%d. %4d %s -- %s / %s", opCount,
+    bot->Notice(theClient, "%2d. %4d %s -- %s / %s", opCount,
 		curOp->getPoints(), curOp->getAccount().c_str(),
 		sdatetimestring, ldatetimestring);
   }

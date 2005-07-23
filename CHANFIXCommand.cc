@@ -74,7 +74,7 @@ if (!netChan) {
 
 /* Only allow chanfixes for unregistered channels. */
 if (netChan->getMode(Channel::MODE_A)) {
-  bot->Notice(theClient, "%s uses oplevels (+A/+U).", 
+  bot->Notice(theClient, "%s cannot be chanfixed as it uses oplevels (+A/+U).",
 	      netChan->getName().c_str());
   return;
 }
@@ -144,7 +144,7 @@ if (theChan->getFlag(sqlChannel::F_BLOCKED)) {
 
 /* Don't fix an alerted channel without the OVERRIDE flag. */
 if (theChan->getFlag(sqlChannel::F_ALERT) && !override) {
-  bot->Notice(theClient, "Alert: This channel %s has notes. Use " \
+  bot->Notice(theClient, "Alert: The channel %s has notes. Use " \
 	      "\002INFO %s\002 to read them. Append the OVERRIDE flag " \
 	      "to force a manual fix.",
 	      theChan->getChannel().c_str(),

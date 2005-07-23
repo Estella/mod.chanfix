@@ -376,7 +376,6 @@ vsnprintf( buf, 1024, format, _list ) ;
 va_end( _list ) ;
 
 // Try and locate the relay channel.
-//Channel* tmpChan = Network->findChannel(getConfigVar("CMASTER.RELAY_CHAN")->asString());
 Channel* tmpChan = Network->findChannel(operChan);
 if (!tmpChan)
 	{
@@ -974,8 +973,8 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
    }
 }
 
-elog << "chanfix::autoFix> DEBUG: Found " << numOpLess << " of " \
-	<< Network->channelList_size() << " channels in " \
+elog << "chanfix::autoFix> DEBUG: Found " << numOpLess << " of "
+	<< Network->channelList_size() << " channels in "
 	<< autoFixTimer.stopTimeMS() << " ms." << endl;
 }
 
@@ -991,7 +990,7 @@ if (thisChan->getCreationTime() > 1) {
   if (version >= 12)
     MyUplink->setBursting(false);
 } else {
-  ClearMode(thisChan, "ovpsmikblr", true);
+  ClearMode(thisChan, "biklrD", true);
 }
 
 Message(thisChan, "Channel fix in progress, please stand by.");
@@ -1089,11 +1088,11 @@ for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
    if (curOp->getPoints() > min_score) {
      curClient = findAccount(curOp->getAccount(), theChan);
      if (curClient && !theChan->findUser(curClient)->isModeO()) {
-       elog << "chanfix::fixChan> DEBUG: Decided to op: " \
-	    << curClient->getNickName() << " on " \
-	    << theChan->getName() << ". Client has " \
-	    << curOp->getPoints() << " points. ABS_MIN = " \
-	    << min_score_abs << " and REL_MIN = " << min_score_rel \
+       elog << "chanfix::fixChan> DEBUG: Decided to op: "
+	    << curClient->getNickName() << " on "
+	    << theChan->getName() << ". Client has "
+	    << curOp->getPoints() << " points. ABS_MIN = "
+	    << min_score_abs << " and REL_MIN = " << min_score_rel
 	    << endl;
        modes += "o";
        if (!args.empty())
@@ -1102,6 +1101,8 @@ for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
      }
    }
 }
+
+int numClientsToOp = modes.size() - 1;
 
 /* If no scores are high enough, return. */
 /* This code is wrong. TODO: fix and put in correct spot */
@@ -1115,20 +1116,21 @@ return false;
 } */
 
 /* If we need to op at least one client, op him/her. */
-if (!args.empty()) {
+if (numClientsToOp) {
   Mode(theChan, modes, args, true);
 
-  if (args.size() == 1)
+  if (numClientsToOp == 1)
     Message(theChan, "1 client should have been opped.");
   else
-    Message(theChan, "%d clients should have been opped.", args.size());
+    Message(theChan, "%d clients should have been opped.",
+	    numClientsToOp);
 }
 
 sqlChan->commit();
 
 /* Now see if there are enough ops; if so, the fix is complete. */
-if (args.size() + currentOps >= netChan->size() ||
-    args.size() + currentOps >= (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED))
+if (numClientsToOp + currentOps >= netChan->size() ||
+    numClientsToOp + currentOps >= (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED))
   return true;
 
 return false;
@@ -1138,7 +1140,7 @@ return false;
 iClient* chanfix::findAccount(const std::string& Account, Channel* theChan)
 {
 // TODO: Accounts are not unique! Make this return a vector in case the 
-//       same account occurs more then once on this chan (N/A on Undernet)
+//       same account occurs more then once on this chan
 
 for(Channel::userIterator ptr = theChan->userList_begin(); ptr != theChan->userList_end(); ptr++)
 	{
@@ -1198,11 +1200,9 @@ if (!theChan) {
 size_t chanOps = 0;
 
 for (Channel::const_userIterator ptr = theChan->userList_begin();
-     ptr != theChan->userList_end(); ++ptr) {
-   if (ptr->second->isModeO()) {
+     ptr != theChan->userList_end(); ++ptr)
+   if (ptr->second->isModeO())
      chanOps++;
-   } // If opped.
-}
 
 return chanOps;
 }
@@ -1256,7 +1256,6 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
       * has passed, remove it from the list
       */
      if (isFixed || currentTime() - sqlChan->getFixStart() > CHANFIX_MAXIMUM + CHANFIX_DELAY) {
-       /* TODO: send notice to oper saying "Manual chanfix of %s complete." */
        ptr = manFixQ.erase(ptr);
        sqlChan->addSuccessFix();
        sqlChan->setFixStart(0);
