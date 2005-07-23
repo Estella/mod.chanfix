@@ -603,7 +603,7 @@ void chanfix::preloadChanOpsCache()
 void chanfix::preloadChannelCache()
 {
         std::stringstream theQuery;
-        theQuery        << "SELECT channel, fixed, lastfix, flags FROM channels"
+        theQuery        << "SELECT channel, flags FROM channels"
                                 << ends;
 
         elog            << "*** [chanfix::preloadChannelCache]: Loading channels ..."
@@ -997,20 +997,17 @@ Message(thisChan, "Channel fix in progress, please stand by.");
 manFixQ.push_back(fixQueueType::value_type(thisChan, currentTime() + CHANFIX_DELAY));
 }
 
-bool chanfix::fixChan(Channel* theChan, bool autofix)
+bool chanfix::fixChan(sqlChannel* sqlChan, bool autofix)
 {
-sqlChannel* sqlChan = getChannelRecord(theChan);
-if (!sqlChan) sqlChan = newChannelRecord(theChan);
-
 /* First update the time of the previous attempt to now. */
 if (sqlChan->getFixStart() == 0) sqlChan->setFixStart(currentTime());
 sqlChan->setLastAttempt(currentTime());
 
 /* If the channel doesn't exist (anymore), the fix is successful. */
-Channel* netChan = Network->findChannel(theChan->getName());
+Channel* netChan = Network->findChannel(sqlChan->getChannel());
 if (!netChan) return true;
 
-chanOpsType myOps = getMyOps(theChan);
+chanOpsType myOps = getMyOps(netChan);
 
 if (myOps.begin() != myOps.end())
   sqlChan->setMaxScore((*myOps.begin())->getPoints());
@@ -1025,7 +1022,7 @@ if (maxScore <= FIX_MIN_ABS_SCORE_END * MAX_SCORE)
 /* If the channel has enough ops, abort & return. */
 unsigned int currentOps = countChanOps(netChan);
 if (currentOps >= (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED)) {
-  elog << "chanfix::fixChan> DEBUG: Enough clients opped on " << theChan->getName() << endl;
+  elog << "chanfix::fixChan> DEBUG: Enough clients opped on " << netChan->getName() << endl;
   return true;
 } 
 
@@ -1048,7 +1045,7 @@ int min_score_abs = static_cast<int>((MAX_SCORE *
 		(MAX_SCORE * static_cast<float>(FIX_MIN_ABS_SCORE_BEGIN)
 		 - static_cast<float>(FIX_MIN_ABS_SCORE_END) * MAX_SCORE));
 
-elog << "chanfix::fixChan> [" << theChan->getName() << "] max "
+elog << "chanfix::fixChan> [" << netChan->getName() << "] max "
 	<< MAX_SCORE << ", begin " << FIX_MIN_ABS_SCORE_BEGIN
 	<< ", end " << FIX_MIN_ABS_SCORE_END << ", time "
 	<< time_passed << ", maxtime " << max_time << "." << endl;
@@ -1068,7 +1065,7 @@ int min_score = min_score_abs;
 if (min_score_rel > min_score)
   min_score = min_score_rel;
 
-elog << "chanfix::fixChan> [" << theChan->getName() << "] start "
+elog << "chanfix::fixChan> [" << netChan->getName() << "] start "
 	<< sqlChan->getFixStart() << ", delta " << time_passed
 	<< ", max " << maxScore << ", minabs " << min_score_abs
 	<< ", minrel " << min_score_rel << "." << endl;
@@ -1087,11 +1084,11 @@ for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
   elog	<< "chanfix::fixChan> DEBUG: "
 	<< curOp->getPoints() << " >= " << min_score << endl;
   if (curOp->getPoints() >= min_score) {
-    curClient = findAccount(curOp->getAccount(), theChan);
-    if (curClient && !theChan->findUser(curClient)->isModeO()) {
+    curClient = findAccount(curOp->getAccount(), netChan);
+    if (curClient && !netChan->findUser(curClient)->isModeO()) {
       elog << "chanfix::fixChan> DEBUG: Decided to op: "
 	   << curClient->getNickName() << " on "
-	   << theChan->getName() << ". Client has "
+	   << netChan->getName() << ". Client has "
 	   << curOp->getPoints() << " points. ABS_MIN = "
 	   << min_score_abs << " and REL_MIN = " << min_score_rel
 	   << endl;
@@ -1109,21 +1106,21 @@ int numClientsToOp = modes.size() - 1;
 /* This code is wrong. TODO: fix and put in correct spot */
 /* if (args.empty() || maxScore < min_score) {
   if (autofix && !sqlChan->getModesRemoved()) {
-    ClearMode(theChan, "ovpsmikbl", true);
+    ClearMode(netChan, "ovpsmikbl", true);
     sqlChan->setModesRemoved(true);
-    Message(theChan, "Channel modes have been removed.");
+    Message(netChan, "Channel modes have been removed.");
   }
 return false;
 } */
 
 /* If we need to op at least one client, op him/her. */
 if (numClientsToOp) {
-  Mode(theChan, modes, args, true);
+  Mode(netChan, modes, args, true);
 
   if (numClientsToOp == 1)
-    Message(theChan, "1 client should have been opped.");
+    Message(netChan, "1 client should have been opped.");
   else
-    Message(theChan, "%d clients should have been opped.",
+    Message(netChan, "%d clients should have been opped.",
 	    numClientsToOp);
 }
 
@@ -1226,7 +1223,7 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
      if (currentTime() - sqlChan->getLastAttempt() < AUTOFIX_INTERVAL) {
        /* do nothing */
      } else {
-       isFixed = fixChan(ptr->first, true);
+       isFixed = fixChan(sqlChan, true);
      }
 
      /**
@@ -1258,7 +1255,7 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
      bool isFixed = false;
 
      if (currentTime() - sqlChan->getLastAttempt() >= CHANFIX_INTERVAL) {
-       isFixed = fixChan(ptr->first, false);
+       isFixed = fixChan(sqlChan, false);
      }
 
      /**
@@ -1267,9 +1264,9 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
       */
      if (isFixed || currentTime() - sqlChan->getFixStart() > CHANFIX_MAXIMUM + CHANFIX_DELAY) {
        ptr = manFixQ.erase(ptr);
-       sqlChan->addSuccessFix();
+       if (isFixed)
+	 sqlChan->addSuccessFix();
        sqlChan->setFixStart(0);
-       sqlChan->commit();
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " done!" << endl;
      } else {
        ptr->second = currentTime() + CHANFIX_INTERVAL;

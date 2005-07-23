@@ -230,7 +230,7 @@ public:
 	void autoFix();
 	void manualFix(Channel*);
 
-	bool fixChan(Channel*, bool);
+	bool fixChan(sqlChannel*, bool);
 
 	iClient* findAccount(const std::string&, Channel*);
 
