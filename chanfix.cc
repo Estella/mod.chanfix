@@ -253,12 +253,15 @@ void chanfix::OnTimer(const gnuworld::xServer::timerID& theTimer, void*)
 time_t theTime;
 if (theTimer == tidGivePoints) {
   /* 5 min timer, loop through channels and give all ops a point! */
+  giveAllOpsPoints();
+
+  /* Refresh Timer */
   theTime = time(NULL) + POINTS_UPDATE_TIME;
   tidGivePoints = MyUplink->RegisterTimer(theTime, this, NULL);
-  giveAllOpsPoints();
-}
-if (theTimer == tidAutoFix) {
+  }
+else if (theTimer == tidAutoFix) {
   autoFix();
+
   /* Refresh Timer */
   theTime = time(NULL) + CHECK_CHANS_TIME;
   tidAutoFix = MyUplink->RegisterTimer(theTime, this, NULL);
@@ -1209,6 +1212,11 @@ return chanOps;
 
 void chanfix::processQueue()
 {
+/* If there are too many servers split, don't process queue. */
+if (currentState != RUN) {
+  elog << "chanfix::processQueue> DEBUG: currentState != RUN" << endl;
+  return;
+}
 
 for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
    elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first->getName() << " in autoFixQ ..." << endl;
