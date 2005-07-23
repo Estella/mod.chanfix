@@ -319,9 +319,6 @@ void chanfix::OnConnect()
 if (currentState == INIT)
   changeState(RUN);
 
-/* Start our timers */
-startTimers();
-
 xClient::OnConnect() ;
 }
 
@@ -329,65 +326,6 @@ xClient::OnConnect() ;
 void chanfix::OnDisconnect()
 {
 xClient::OnDisconnect() ;
-}
-
-bool chanfix::serverNotice( Channel* theChannel, const char* format, ... )
-{
-char buf[ 1024 ] = { 0 } ;
-va_list _list ;
-va_start( _list, format ) ;
-vsnprintf( buf, 1024, format, _list ) ;
-va_end( _list ) ;
-
-stringstream s;
-s	<< MyUplink->getCharYY()
-	<< " O "
-	<< theChannel->getName()
-	<< " :"
-	<< buf
-	<< ends;
-
-Write( s );
-
-return false;
-}
-
-/**
- * Send a notice to a channel from the server.
- * TODO: Move this method to xServer.
- */
-bool chanfix::serverNotice( Channel* theChannel, const string& Message)
-{
-stringstream s;
-s	<< MyUplink->getCharYY()
-	<< " O "
-	<< theChannel->getName()
-	<< " :"
-	<< Message
-	<< ends;
-
-Write( s );
-return false;
-}
-
-bool chanfix::logAdminMessage(const char* format, ... )
-{
-char buf[ 1024 ] = { 0 } ;
-va_list _list ;
-va_start( _list, format ) ;
-vsnprintf( buf, 1024, format, _list ) ;
-va_end( _list ) ;
-
-// Try and locate the relay channel.
-Channel* tmpChan = Network->findChannel(operChan);
-if (!tmpChan)
-	{
-	return false;
-	}
-
-string message = string( "[" ) + nickName + "] " + buf ;
-serverNotice(tmpChan, message);
-return true;
 }
 
 void chanfix::OnPrivateMessage( iClient* theClient,
@@ -446,6 +384,9 @@ xClient::BurstChannels();
 Join(consoleChan, consoleChanModes, 0, true);
 Join(operChan, operChanModes, 0, true);
 Join(supportChan, supportChanModes, 0, true);
+
+/* Start our timers */
+startTimers();
 }
 
 /* OnChannelEvent */
@@ -546,6 +487,65 @@ switch(whichEvent)
 	}
 
 xClient::OnEvent( whichEvent, data1, data2, data3, data4 ) ;
+}
+
+bool chanfix::serverNotice( Channel* theChannel, const char* format, ... )
+{
+char buf[ 1024 ] = { 0 } ;
+va_list _list ;
+va_start( _list, format ) ;
+vsnprintf( buf, 1024, format, _list ) ;
+va_end( _list ) ;
+
+stringstream s;
+s	<< MyUplink->getCharYY()
+	<< " O "
+	<< theChannel->getName()
+	<< " :"
+	<< buf
+	<< ends;
+
+Write( s );
+
+return false;
+}
+
+/**
+ * Send a notice to a channel from the server.
+ * TODO: Move this method to xServer.
+ */
+bool chanfix::serverNotice( Channel* theChannel, const string& Message)
+{
+stringstream s;
+s	<< MyUplink->getCharYY()
+	<< " O "
+	<< theChannel->getName()
+	<< " :"
+	<< Message
+	<< ends;
+
+Write( s );
+return false;
+}
+
+bool chanfix::logAdminMessage(const char* format, ... )
+{
+char buf[ 1024 ] = { 0 } ;
+va_list _list ;
+va_start( _list, format ) ;
+vsnprintf( buf, 1024, format, _list ) ;
+va_end( _list ) ;
+
+// Try and locate the relay channel.
+Channel* tmpChan = Network->findChannel(operChan);
+if (!tmpChan)
+	{
+	return false;
+	}
+
+string message = string( "[" ) + nickName + "] " + buf ;
+serverNotice(tmpChan, message);
+return true;
 }
 
 void chanfix::doSqlError(const string& theQuery, const string& theError)
@@ -1170,7 +1170,6 @@ sqlChannel* newChan = new (std::nothrow) sqlChannel(SQLDb);
 assert( newChan != 0 ) ;
 
 newChan->setChannel(Channel);
-newChan->setSuccessFixes(0);
 newChan->setFixStart(0);
 newChan->setLastAttempt(0);
 newChan->Insert();
@@ -1248,8 +1247,6 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
       */
      if (isFixed || currentTime() - sqlChan->getFixStart() > AUTOFIX_MAXIMUM) {
        ptr = autoFixQ.erase(ptr);
-       if (isFixed)
-	 sqlChan->addSuccessFix();
        sqlChan->setFixStart(0);
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " done!" << endl;
      } else {
@@ -1277,8 +1274,6 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
       */
      if (isFixed || currentTime() - sqlChan->getFixStart() > CHANFIX_MAXIMUM + CHANFIX_DELAY) {
        ptr = manFixQ.erase(ptr);
-       if (isFixed)
-	 sqlChan->addSuccessFix();
        sqlChan->setFixStart(0);
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " done!" << endl;
      } else {

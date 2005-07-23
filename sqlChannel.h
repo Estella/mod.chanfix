@@ -60,9 +60,6 @@ public:
 	inline bool	getFlag( const flagType& whichFlag ) const
 		{ return (flags & whichFlag) ; }
 
-        inline unsigned int	getSuccessFixes() const
-                { return successFixes ; }
-
         inline time_t		getLastAttempt() const
                 { return last ; }
 
@@ -91,17 +88,11 @@ public:
 	inline void	clearFlags()
 		{ flags = 0; }
 
-        inline void     setSuccessFixes (unsigned int _successFixes)
-                { successFixes = _successFixes; }
-
         inline void     setLastAttempt (time_t _last)
                 { last = _last; }
 
 	inline void	setFixStart(time_t _start)
                 { start = _start; }
-
-	inline void	addSuccessFix()
-		{ successFixes++; }
 
 	inline void	setMaxScore(unsigned int _maxScore)
 		{ maxScore = _maxScore; }
@@ -118,7 +109,6 @@ protected:
 	string		channel;
 	time_t		last;
 	time_t		start;
-	unsigned int	successFixes;
         unsigned int    maxScore;
 	bool		modesRemoved;
 	flagType	flags;
