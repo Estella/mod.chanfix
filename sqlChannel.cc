@@ -41,20 +41,16 @@ sqlChannel::sqlChannel(PgDatabase* _SQLDb)
 void sqlChannel::setAllMembers(int row) 
 {
 channel = SQLDb->GetValue(row, 0);
-successFixes = atoi(SQLDb->GetValue(row, 1));
-last = atoi(SQLDb->GetValue(row, 2));
-flags = atoi(SQLDb->GetValue(row, 3));
+flags = atoi(SQLDb->GetValue(row, 1));
 };
 
 bool sqlChannel::Insert()
 {
-static const char* queryHeader = "INSERT INTO channels (channel, fixed, lastfix, flags) VALUES (";
+static const char* queryHeader = "INSERT INTO channels (channel, flags) VALUES (";
 
 stringstream queryString;
 queryString     << queryHeader << "'"
 		<< escapeSQLChars(channel) << "',"
-		<< successFixes << "," 
-		<< last << ","
 		<< flags << ")"
                 << ends;
 
@@ -86,10 +82,8 @@ bool sqlChannel::commit()
 static const char* queryHeader =    "UPDATE channels ";
 
 stringstream queryString;
-queryString     << queryHeader << "SET fixed = "
-                << successFixes << ", lastfix = "
-		<< last << ", flags = " << flags
-		<< " WHERE channel = '"
+queryString     << queryHeader << "SET flags = "
+		<< flags << " WHERE channel = '"
                 << escapeSQLChars(channel) << "'"
                 << ends;
 

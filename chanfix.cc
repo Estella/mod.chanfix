@@ -1083,22 +1083,24 @@ string modes = "+";
 string args;
 for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
      opPtr++) {
-   curOp = *opPtr;
-   if (curOp->getPoints() >= min_score) {
-     curClient = findAccount(curOp->getAccount(), theChan);
-     if (curClient && !theChan->findUser(curClient)->isModeO()) {
-       elog << "chanfix::fixChan> DEBUG: Decided to op: "
-	    << curClient->getNickName() << " on "
-	    << theChan->getName() << ". Client has "
-	    << curOp->getPoints() << " points. ABS_MIN = "
-	    << min_score_abs << " and REL_MIN = " << min_score_rel
-	    << endl;
-       modes += "o";
-       if (!args.empty())
-	 args += " ";
-       args += curClient->getNickName();
-     }
-   }
+  curOp = *opPtr;
+  elog	<< "chanfix::fixChan> DEBUG: "
+	<< curOp->getPoints() << " >= " << min_score << endl;
+  if (curOp->getPoints() >= min_score) {
+    curClient = findAccount(curOp->getAccount(), theChan);
+    if (curClient && !theChan->findUser(curClient)->isModeO()) {
+      elog << "chanfix::fixChan> DEBUG: Decided to op: "
+	   << curClient->getNickName() << " on "
+	   << theChan->getName() << ". Client has "
+	   << curOp->getPoints() << " points. ABS_MIN = "
+	   << min_score_abs << " and REL_MIN = " << min_score_rel
+	   << endl;
+      modes += "o";
+      if (!args.empty())
+	args += " ";
+      args += curClient->getNickName();
+    }
+  }
 }
 
 int numClientsToOp = modes.size() - 1;
@@ -1231,11 +1233,14 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
       * If the channel has been fixed, or the fixing time window
       * has passed, remove it from the list
       */
-     if (isFixed || currentTime() - sqlChan->getFixStart() > AUTOFIX_MAXIMUM) { 
+     if (isFixed || currentTime() - sqlChan->getFixStart() > AUTOFIX_MAXIMUM) {
+       elog	<< "chanfix::processQueue> DEBUG: isFixed = " << isFixed
+		<< ", other thing = " << currentTime() - sqlChan->getFixStart()
+		<< endl;
        ptr = autoFixQ.erase(ptr);
-       sqlChan->addSuccessFix();
+       if (isFixed)
+	 sqlChan->addSuccessFix();
        sqlChan->setFixStart(0);
-       sqlChan->commit();
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " done!" << endl;
      } else {
        ptr->second = currentTime() + AUTOFIX_INTERVAL;

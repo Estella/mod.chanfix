@@ -14,8 +14,6 @@ CREATE TABLE chanOps (
 
 CREATE TABLE channels (
 	channel VARCHAR(200) NOT NULL,
-	fixed INT4 DEFAULT 0,
-	lastfix INT4 DEFAULT 0,
 	flags INT4 NOT NULL DEFAULT 0,
 	PRIMARY KEY (channel)
 );
