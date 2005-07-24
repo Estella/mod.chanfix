@@ -63,6 +63,7 @@ namespace gnuworld
 
 using std::endl;
 using std::stringstream;
+using std::map;
 using std::ends;
 
 
@@ -1388,25 +1389,32 @@ elog	<< "chanfix::startTimers> Started all timers."
 void chanfix::giveAllOpsPoints()
 {
 Channel* thisChan;
+map<string,bool> ScoredOpsMap;
+map<string,bool>::iterator scOpiter;
 for (xNetwork::channelIterator ptr = Network->channels_begin();
      ptr != Network->channels_end(); ptr++) {
   thisChan = ptr->second;
   if (thisChan->getMode(Channel::MODE_A))
     continue; // Exit the loop and go to the next chan
   if (thisChan->size() >= minClients && !isBeingFixed(thisChan)) {
+    ScoredOpsMap.clear();
     for (Channel::userIterator ptr = thisChan->userList_begin();
 	 ptr != thisChan->userList_end(); ptr++) {
       ChannelUser* curUser = ptr->second;
-      if (curUser->getClient()->getMode(iClient::MODE_SERVICES))
-	break; // Exit the loop fully, and go to the next chan
+      if (curUser->getClient()->getMode(iClient::MODE_SERVICES)) break; // Exit the loop fully, and go to the next chan
       if (curUser->isModeO() && curUser->getClient()->getAccount() != "") {
-	//Ok hes an op
-	//Grab an iClient for curUser
-	givePoints(curUser->getClient(), thisChan);
+         //Ok hes an op
+         //Grab an iClient for curUser
+         scOpiter = ScoredOpsMap.find(curUser->getClient()->getAccount());
+	     if (scOpiter == ScoredOpsMap.end()) {
+	        givePoints(curUser->getClient(), thisChan);
+	        ScoredOpsMap.insert(make_pair(curUser->getClient()->getAccount(), true));
+         }
       }
-    }
-  }
+   }
 }
+}
+if (ScoredOpsMap.size() > 0) ScoredOpsMap.clear();
 return;                              
 } //giveAllOpsPoints
 
