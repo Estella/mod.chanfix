@@ -286,6 +286,9 @@ public:
 
 	typedef list< sqlChanOp* > chanOpsType;
 	chanOpsType	getMyOps(Channel*);
+
+	typedef map <string, bool> ScoredOpsMapType;
+	ScoredOpsMapType scoredOpsList;
 	
 	/**
 	 * Queues to process.

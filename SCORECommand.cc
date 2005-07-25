@@ -95,14 +95,14 @@ if (myOps.empty()) {
   return;
 }
 
-string scUser;
 if (st.size() > 2) {
-  scUser = st[2];
+  const char* scUser = st[2].c_str();
   if (st[2][0] == '*') {
     //Account
+    ++scUser;
     for (chanfix::chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end(); opPtr++) {
       curOp = *opPtr;
-      if (string_lower(curOp->getAccount()) == string_lower(scUser.substr(1))) {
+      if (string_lower(curOp->getAccount()) == string_lower(scUser)) {
 	if (compact)
 	  bot->Notice(theClient, "~U %s %s %u", netChan->getName().c_str(), curOp->getAccount().c_str(), curOp->getPoints());
 	else
@@ -113,7 +113,7 @@ if (st.size() > 2) {
     if (compact)
       bot->Notice(theClient, "~! %s", netChan->getName().c_str());
     else
-      bot->Notice(theClient, "There are no scores in the database for %s on channel %s", scUser.c_str(), netChan->getName().c_str());
+      bot->Notice(theClient, "There are no scores in the database for %s on channel %s", scUser, netChan->getName().c_str());
     return;
   } else {
    //Nickname
@@ -122,7 +122,7 @@ if (st.size() > 2) {
      if (compact)
        bot->Notice(theClient, "~U %s no@such.nick 0", netChan->getName().c_str());
      else
-       bot->Notice(theClient, "No such nick %s.", st[2].c_str());
+       bot->Notice(theClient, "No such nick %s.", scUser);
      return;
    } else {
      iClient* curClientOp;
@@ -141,7 +141,7 @@ if (st.size() > 2) {
 			curOp->getPoints());
 	  } else {
 	    bot->Notice(theClient, "Score for %s (%s) in channel %s: %u.",
-			scUser.c_str(),
+			curClientOp->getNickName().c_str(),
 			curOp->getAccount().c_str(),
 			netChan->getName().c_str(),
 			curOp->getPoints());
@@ -152,7 +152,7 @@ if (st.size() > 2) {
       if (compact)
 	bot->Notice(theClient, "~U %s no@such.nick 0", netChan->getName().c_str());
       else
-	bot->Notice(theClient, "No such nick %s.", st[2].c_str());
+	bot->Notice(theClient, "No such nick %s.", scUser);
       return;
     }
   }
