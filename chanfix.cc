@@ -1441,10 +1441,11 @@ void chanfix::startScoringChan(Channel* theChan)
         /* Ok, if a channel record exists, should we
          * still add points to ALL ops? -- Compy
          */
+        chanfix::chanOpsType myOps = getMyOps(theChan);
+        if (!myOps.empty()) return;
         typedef map<string,bool> ScoredOpsMapType;
         ScoredOpsMapType scoredOpsList;
         ScoredOpsMapType::iterator scOpiter;
-        elog << "Started scoring " << theChan->getName() << endl;
         if (theChan->getMode(Channel::MODE_A)) return;
         for (Channel::userIterator ptr = theChan->userList_begin();
                 ptr != theChan->userList_end(); ptr++) {
@@ -1454,7 +1455,7 @@ void chanfix::startScoringChan(Channel* theChan)
                 if (curUser->isModeO() && curUser->getClient()->getAccount() != "") {
                         scOpiter = scoredOpsList.find(curUser->getClient()->getAccount());
 	                if (scOpiter == scoredOpsList.end()) {
-                                givePoints(curUser->getClient(), theChan);
+                                gotOpped(curUser->getClient(), theChan);
                                 scoredOpsList.insert(make_pair(curUser->getClient()->getAccount(), true));
                         }
                 }
