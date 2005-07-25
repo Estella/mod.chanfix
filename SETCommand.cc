@@ -44,6 +44,10 @@ using namespace level;
 void SETCommand::Exec(iClient* theClient, const std::string& Message)
 {
 StringTokenizer st(Message);
+if (st.size() < 3) {
+  Usage(theClient);
+  return;
+}
 
 string option = string_upper(st[1]);
 string value = string_upper(st[2]);

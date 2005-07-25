@@ -27,10 +27,9 @@ using std::stringstream ;
 
 
 sqlChanOp::sqlChanOp(PgDatabase* _SQLDb)
-: userHost(""),
-  channel(""),
-  nickUserHost(""),
+: channel(""),
   account(""),
+  nickUserHost(""),
   points(0),
   ts_firstopped(0),
   ts_lastopped(0),
@@ -40,22 +39,20 @@ sqlChanOp::sqlChanOp(PgDatabase* _SQLDb)
 void sqlChanOp::setAllMembers(int row) 
 {
 channel = SQLDb->GetValue(row, 0);
-userHost = SQLDb->GetValue(row, 1);
+account = SQLDb->GetValue(row, 1);
 nickUserHost = SQLDb->GetValue(row, 2);
 points = atoi(SQLDb->GetValue(row, 3));
-account = SQLDb->GetValue(row, 4);
-ts_firstopped = atoi(SQLDb->GetValue(row, 5));
-ts_lastopped = atoi(SQLDb->GetValue(row, 6));
+ts_firstopped = atoi(SQLDb->GetValue(row, 4));
+ts_lastopped = atoi(SQLDb->GetValue(row, 5));
 };
 
 bool sqlChanOp::Insert()
 {
-static const char* queryHeader = "INSERT INTO chanOps (channel, userHost, account, last_seen_as, points, ts_firstopped, ts_lastopped) VALUES (";
+static const char* queryHeader = "INSERT INTO chanOps (channel, account, last_seen_as, points, ts_firstopped, ts_lastopped) VALUES (";
 
 stringstream queryString;
 queryString     << queryHeader << "'"
 		<< escapeSQLChars(channel) << "','"
-                << escapeSQLChars(userHost) << "','"
 		<< escapeSQLChars(account) << "','"
 		<< escapeSQLChars(nickUserHost) << "',"
 		<< points << ","

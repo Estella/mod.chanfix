@@ -30,9 +30,6 @@ public:
         inline const std::string&	getChannel() const
                 { return channel ; }
 
-        inline const std::string&	getUserHost() const
-                { return userHost ; }
-
         inline const std::string&	getAccount() const
                 { return account ; }
 
@@ -54,9 +51,6 @@ public:
 
         inline void	setChannel(string _channel)
                 { channel = _channel ; }
-
-        inline void	setUserHost(string _userHost)
-                { userHost = _userHost ; }
 
         inline void	setAccount(string _account)
                 { account = _account ; }
@@ -82,10 +76,9 @@ public:
 
 private:
 
-	string		userHost;
 	string		channel;
-	string		nickUserHost;
 	string		account;
+	string		nickUserHost;
 	int		points;
 	time_t		ts_firstopped;
 	time_t		ts_lastopped;
