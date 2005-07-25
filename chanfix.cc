@@ -569,7 +569,7 @@ void chanfix::doSqlError(const string& theQuery, const string& theError)
 void chanfix::preloadChanOpsCache()
 {
         std::stringstream theQuery;
-        theQuery        << "SELECT channel,userhost,last_seen_as,points,account,ts_firstopped,ts_lastopped FROM chanOps"
+        theQuery        << "SELECT channel,account,last_seen_as,points,ts_firstopped,ts_lastopped FROM chanOps"
                                 << ends;
 
         elog            << "*** [chanfix::preloadChanOpsCache]: Loading chanOps and their points ..." 
