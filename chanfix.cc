@@ -409,10 +409,13 @@ switch( whichEvent )
         case EVT_JOIN:
 		{
                 theClient = static_cast< iClient* >( data1 );
+                /* First we need to see if the channel is first = minClients */
+                if (theChan->size() == minClients) {
+                        startScoringChan(theChan);
+                }
                 if (theClient->isOper() && theChan->getName() == operChan)
 		  Op(theChan, theClient);
-
-                break ;
+                  break ;
 		}
 	case EVT_KICK:
 	case EVT_PART:
@@ -1069,34 +1072,45 @@ elog << "chanfix::fixChan> [" << netChan->getName() << "] start "
  */
 iClient* curClient = 0;
 sqlChanOp* curOp = 0;
+acctListType acctToOp;
 string modes = "+";
 string args;
 unsigned int numClientsToOp = 0;
+bool cntMaxedOut = false;
 for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
      opPtr++) {
   curOp = *opPtr;
 // elog	<< "chanfix::fixChan> DEBUG: "
 //	<< curOp->getPoints() << " >= " << min_score << endl;
   if (curOp->getPoints() >= min_score) {
-    curClient = findAccount(curOp->getAccount(), netChan);
-    if (curClient && !netChan->findUser(curClient)->isModeO()) {
-      elog << "chanfix::fixChan> DEBUG: Decided to op: "
-	   << curClient->getNickName() << " on "
-	   << netChan->getName() << ". Client has "
-	   << curOp->getPoints() << " points. ABS_MIN = "
-	   << min_score_abs << " and REL_MIN = " << min_score_rel
-	   << endl;
-      modes += "o";
-      if (!args.empty())
-	args += " ";
-      args += curClient->getNickName();
-      if ((++numClientsToOp + currentOps) >= maxOpped) {
-	elog	<< "chanfix::fixChan> DEBUG: Enough clients are to be "
-		<< "opped (" << numClientsToOp << "); breaking the loop."
-		<< endl;
-        break;
-      }
-    }
+    acctToOp = findAccount(curOp->getAccount(), netChan);
+    vector< iClient* >::const_iterator acctPtr = acctToOp.begin(),
+        end = acctToOp.end();
+    while( acctPtr != end ) {       
+            curClient = *acctPtr;
+            if (curClient && !netChan->findUser(curClient)->isModeO()) {
+              elog << "chanfix::fixChan> DEBUG: Decided to op: "
+        	   << curClient->getNickName() << " on "
+        	   << netChan->getName() << ". Client has "
+        	   << curOp->getPoints() << " points. ABS_MIN = "
+        	   << min_score_abs << " and REL_MIN = " << min_score_rel
+        	   << endl;
+              modes += "o";
+              if (!args.empty())
+        	args += " ";
+              args += curClient->getNickName();
+              if ((++numClientsToOp + currentOps) >= maxOpped) {
+        	elog	<< "chanfix::fixChan> DEBUG: Enough clients are to be "
+        		<< "opped (" << numClientsToOp << "); breaking the loop."
+        		<< endl;
+        	cntMaxedOut = true;
+                break;
+              }
+            }
+            ++acctPtr;
+     }
+     acctToOp.clear();
+     if (cntMaxedOut) { break; }
   }
 }
 
@@ -1134,19 +1148,20 @@ return false;
 }
 
 
-iClient* chanfix::findAccount(const std::string& Account, Channel* theChan)
+chanfix::acctListType chanfix::findAccount(const std::string& Account, Channel* theChan)
 {
 // TODO: Accounts are not unique! Make this return a vector in case the 
 //       same account occurs more then once on this chan
-
+acctListType chanAccts;
 for(Channel::userIterator ptr = theChan->userList_begin(); ptr != theChan->userList_end(); ptr++)
 	{
 	if(Account == ptr->second->getClient()->getAccount())
 		{
-		return ptr->second->getClient();
+                chanAccts.push_back(ptr->second->getClient());
+		//return ptr->second->getClient();
 		}
 	}
-return 0;
+        return chanAccts;
 }
 
 sqlChannel* chanfix::getChannelRecord(const std::string& Channel)
@@ -1420,6 +1435,32 @@ if (scoredOpsList.size() > 0)
   scoredOpsList.clear();
 return;                              
 } //giveAllOpsPoints
+
+void chanfix::startScoringChan(Channel* theChan)
+{
+        /* Ok, if a channel record exists, should we
+         * still add points to ALL ops? -- Compy
+         */
+        typedef map<string,bool> ScoredOpsMapType;
+        ScoredOpsMapType scoredOpsList;
+        ScoredOpsMapType::iterator scOpiter;
+        elog << "Started scoring " << theChan->getName() << endl;
+        if (theChan->getMode(Channel::MODE_A)) return;
+        for (Channel::userIterator ptr = theChan->userList_begin();
+                ptr != theChan->userList_end(); ptr++) {
+                ChannelUser* curUser = ptr->second;
+                if (curUser->getClient()->getMode(iClient::MODE_SERVICES))
+                        break;
+                if (curUser->isModeO() && curUser->getClient()->getAccount() != "") {
+                        scOpiter = scoredOpsList.find(curUser->getClient()->getAccount());
+	                if (scOpiter == scoredOpsList.end()) {
+                                givePoints(curUser->getClient(), theChan);
+                                scoredOpsList.insert(make_pair(curUser->getClient()->getAccount(), true));
+                        }
+                }
+        }
+        scoredOpsList.clear();
+}
 
 void chanfix::updatePoints()
 {

@@ -231,8 +231,8 @@ public:
 	void manualFix(Channel*);
 
 	bool fixChan(sqlChannel*, bool);
-
-	iClient* findAccount(const std::string&, Channel*);
+        
+        void chanfix::startScoringChan(Channel*);
 
 	sqlChannel* getChannelRecord(const std::string&);
 	sqlChannel* getChannelRecord(Channel*);
@@ -299,6 +299,11 @@ public:
 
 	typedef list< std::pair <Channel*, iClient*> > opQueueType;
 	opQueueType	opQ;
+
+        typedef vector< iClient* > acctListType; //For reopping all logged in users to an acct.
+        acctListType findAccount(const std::string&, Channel*);
+        
+        //unsigned int    daycount[DAYSAMPLES - 1]; //Shouldn't we -1 this? 0->13 = 14
 
 	string          consoleChan;
 	string          operChan;

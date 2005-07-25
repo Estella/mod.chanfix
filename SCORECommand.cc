@@ -26,6 +26,7 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <vector>
 #include "gnuworld_config.h"
 #include "Network.h"
 
@@ -60,6 +61,8 @@ unsigned int currentRank;
 currentRank = 1;
 sqlChanOp* curOp = 0;
 iClient* curClient = 0;
+chanfix::acctListType acctToScore;
+chanfix::acctListType acctToShow;
 bool compact = (string_upper(st[0]) == "CSCORE");
 
 Channel* netChan = Network->findChannel(st[1]);
@@ -129,7 +132,17 @@ if (st.size() > 2) {
      for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
 	  opPtr != myOps.end(); opPtr++) {
 	curOp = *opPtr;
-	curClientOp = bot->findAccount(curOp->getAccount(), netChan);
+	acctToScore = bot->findAccount(curOp->getAccount(), netChan);
+	vector< iClient* >::const_iterator acctPtr = acctToScore.begin();
+	if (acctPtr == acctToScore.end()) {
+                if (compact) {
+                        bot->Notice(theClient, "~U %s no@such.nick 0", netChan->getName().c_str());
+                } else {
+                        bot->Notice(theClient, "No such nick %s.", scUser);
+                }
+                return;
+        }
+	curClientOp = *acctPtr;
 	if (curClientOp && (string_lower(curClientOp->getNickName()) == string_lower(scUser))) {
 	  //Score for "reed@local.host" in channel "#coder-com": 4.
 	  //Do it like they do on OCF, baby.
@@ -149,14 +162,15 @@ if (st.size() > 2) {
 	  return;
 	}
       }
+      acctToScore.clear();
       if (compact)
 	bot->Notice(theClient, "~U %s no@such.nick 0", netChan->getName().c_str());
       else
 	bot->Notice(theClient, "No such nick %s.", scUser);
       return;
-    }
-  }
-}
+    } // for
+  } //else
+} //else
 
 /* Ok, now lets finally give it to em */
 unsigned int minScoreReply;
@@ -175,7 +189,13 @@ unsigned int intNOPCount = 0; //Rank counter for current non-ops
 for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
      opPtr != myOps.end(); opPtr++) {
   curOp = *opPtr;
-  curClient = bot->findAccount(curOp->getAccount(), netChan);
+  acctToShow = bot->findAccount(curOp->getAccount(), netChan);
+  vector< iClient* >::const_iterator acctPtr = acctToShow.begin();
+  if (acctPtr == acctToScore.end()) {
+        return;
+  }
+  curClient = *acctPtr;
+  //curClient = bot->findAccount(curOp->getAccount(), netChan);
   if (intDBCount < minScoreReply) {
     if (intDBCount++) {
       if (compact)
@@ -209,6 +229,7 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
     }
   }
   currentRank++;
+  acctToShow.clear();
 }
 
 if (!compact) {
