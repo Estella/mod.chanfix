@@ -94,7 +94,7 @@ if (myOps.empty()) {
     bot->Notice(theClient, "~! %s", netChan->getName().c_str());
   else
     bot->Notice(theClient, "There are no scores in the database for %s.",
-	      netChan->getName().c_str());
+		netChan->getName().c_str());
   return;
 }
 
@@ -113,10 +113,6 @@ if (st.size() > 2) {
 	return;
       }
     }
-    if (compact)
-      bot->Notice(theClient, "~! %s", netChan->getName().c_str());
-    else
-      bot->Notice(theClient, "There are no scores in the database for %s on channel %s", scUser, netChan->getName().c_str());
     return;
   } else {
    //Nickname
@@ -135,13 +131,12 @@ if (st.size() > 2) {
 	acctToScore = bot->findAccount(curOp->getAccount(), netChan);
 	vector< iClient* >::const_iterator acctPtr = acctToScore.begin();
 	if (acctPtr == acctToScore.end()) {
-                if (compact) {
-                        bot->Notice(theClient, "~U %s no@such.nick 0", netChan->getName().c_str());
-                } else {
-                        bot->Notice(theClient, "No such nick %s.", scUser);
-                }
-                return;
-        }
+	  if (compact)
+	    bot->Notice(theClient, "~U %s no@such.nick 0", netChan->getName().c_str());
+	  else
+	    bot->Notice(theClient, "No such nick %s.", scUser);
+	  return;
+	}
 	curClientOp = *acctPtr;
 	if (curClientOp && (string_lower(curClientOp->getNickName()) == string_lower(scUser))) {
 	  //Score for "reed@local.host" in channel "#coder-com": 4.
@@ -191,9 +186,8 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
   curOp = *opPtr;
   acctToShow = bot->findAccount(curOp->getAccount(), netChan);
   vector< iClient* >::const_iterator acctPtr = acctToShow.begin();
-  if (acctPtr == acctToScore.end()) {
-        return;
-  }
+  if (acctPtr == acctToScore.end())
+    return;
   curClient = *acctPtr;
   //curClient = bot->findAccount(curOp->getAccount(), netChan);
   if (intDBCount < minScoreReply) {

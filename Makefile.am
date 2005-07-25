@@ -16,6 +16,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	REHASHCommand.cc \
 	RELOADCommand.cc \
 	SCORECommand.cc \
+	SETCommand.cc \
 	SHUTDOWNCommand.cc \
 	STATUSCommand.cc \
 	UNALERTCommand.cc \

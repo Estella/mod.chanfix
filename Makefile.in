@@ -71,7 +71,7 @@ am_libchanfix_la_OBJECTS = libchanfix_la-chanfix.lo \
 	libchanfix_la-OPLISTCommand.lo libchanfix_la-OPNICKSCommand.lo \
 	libchanfix_la-QUOTECommand.lo libchanfix_la-REHASHCommand.lo \
 	libchanfix_la-RELOADCommand.lo libchanfix_la-SCORECommand.lo \
-	libchanfix_la-SHUTDOWNCommand.lo \
+	libchanfix_la-SETCommand.lo libchanfix_la-SHUTDOWNCommand.lo \
 	libchanfix_la-STATUSCommand.lo libchanfix_la-UNALERTCommand.lo \
 	libchanfix_la-UNBLOCKCommand.lo libchanfix_la-sqlChannel.lo \
 	libchanfix_la-sqlChanOp.lo
@@ -222,6 +222,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	REHASHCommand.cc \
 	RELOADCommand.cc \
 	SCORECommand.cc \
+	SETCommand.cc \
 	SHUTDOWNCommand.cc \
 	STATUSCommand.cc \
 	UNALERTCommand.cc \
@@ -355,6 +356,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-REHASHCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-RELOADCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SCORECommand.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SETCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SHUTDOWNCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-STATUSCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-UNALERTCommand.Plo@am__quote@
@@ -474,6 +476,13 @@ libchanfix_la-SCORECommand.lo: SCORECommand.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='SCORECommand.cc' object='libchanfix_la-SCORECommand.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-SCORECommand.lo `test -f 'SCORECommand.cc' || echo '$(srcdir)/'`SCORECommand.cc
+
+libchanfix_la-SETCommand.lo: SETCommand.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-SETCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-SETCommand.Tpo" -c -o libchanfix_la-SETCommand.lo `test -f 'SETCommand.cc' || echo '$(srcdir)/'`SETCommand.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-SETCommand.Tpo" "$(DEPDIR)/libchanfix_la-SETCommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-SETCommand.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='SETCommand.cc' object='libchanfix_la-SETCommand.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-SETCommand.lo `test -f 'SETCommand.cc' || echo '$(srcdir)/'`SETCommand.cc
 
 libchanfix_la-SHUTDOWNCommand.lo: SHUTDOWNCommand.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-SHUTDOWNCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-SHUTDOWNCommand.Tpo" -c -o libchanfix_la-SHUTDOWNCommand.lo `test -f 'SHUTDOWNCommand.cc' || echo '$(srcdir)/'`SHUTDOWNCommand.cc; \

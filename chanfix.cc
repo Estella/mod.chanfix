@@ -98,31 +98,31 @@ currentState = INIT;
 
 std::string Query = "host=" + sqlHost + " dbname=" + sqlDB + " port=" + sqlPort + " user=" + sqlUser;
 
-elog    << "chanfix::chanfix> Attempting to connect to "
-        << sqlHost << " at port " << sqlPort
-        << " as User " << sqlUser << " to database: "
-        << sqlDB
-        << endl;
+elog	<< "chanfix::chanfix> Attempting to connect to "
+	<< sqlHost << " at port " << sqlPort
+	<< " as User " << sqlUser << " to database: "
+	<< sqlDB
+	<< endl;
 
 SQLDb = new (std::nothrow) cmDatabase( Query.c_str() ) ;
 assert( SQLDb != 0 ) ;
 //-- Make sure we connected to the SQL database; if
 // we didn't we exit entirely.
 if (SQLDb->ConnectionBad ())
-        {
-        elog    << "chanfix::chanfix> Unable to connect to SQL server."
-                << endl
-                << "chanfix::chanfix> PostgreSQL error message: "
-                << SQLDb->ErrorMessage()
-                << endl ;
+	{
+	elog	<< "chanfix::chanfix> Unable to connect to SQL server."
+		<< endl
+		<< "chanfix::chanfix> PostgreSQL error message: "
+		<< SQLDb->ErrorMessage()
+		<< endl ;
 
-        ::exit( 0 ) ;
-        }
+	::exit( 0 ) ;
+	}
 else
-        {
-        elog    << "chanfix::chanfix> Connection established to SQL server"
-                << endl ;
-        }
+	{
+	elog	<< "chanfix::chanfix> Connection established to SQL server"
+		<< endl ;
+	}
 
 /* Register the commands we want to use */
 RegisterCommand(new ALERTCommand(this, "ALERT", "<#channel>"));
@@ -138,6 +138,7 @@ RegisterCommand(new REHASHCommand(this, "REHASH", ""));
 RegisterCommand(new RELOADCommand(this, "RELOAD", "[reason]"));
 RegisterCommand(new SCORECommand(this, "SCORE", "<#channel> [nick|*account]"));
 RegisterCommand(new SCORECommand(this, "CSCORE", "<#channel> [nick|*account]"));
+RegisterCommand(new SETCommand(this, "SET", "<option> <value>"));
 RegisterCommand(new SHUTDOWNCommand(this, "SHUTDOWN", "[reason]"));
 RegisterCommand(new STATUSCommand(this, "STATUS", ""));
 RegisterCommand(new UNALERTCommand(this, "UNALERT", "<#channel>"));
@@ -303,9 +304,9 @@ delete SQLDb; SQLDb = 0;
 delete theTimer; theTimer = 0;
 
 /* Delete our commands */
-for(commandMapType::iterator ptr = commandMap.begin() ;
-    ptr != commandMap.end() ; ++ptr) {
-        delete ptr->second;
+for (commandMapType::iterator ptr = commandMap.begin();
+     ptr != commandMap.end(); ++ptr) {
+  delete ptr->second;
 }
 commandMap.clear();
 
@@ -392,8 +393,8 @@ startTimers();
 
 /* OnChannelEvent */
 void chanfix::OnChannelEvent( const channelEventType& whichEvent,
-        Channel* theChan,
-        void* data1, void* data2, void* data3, void* data4 )
+	Channel* theChan,
+	void* data1, void* data2, void* data3, void* data4 )
 {
 iClient* theClient = 0;
 
@@ -404,37 +405,39 @@ if (currentState != RUN) return;
 if (theChan->size() < minClients)  return;
 
 switch( whichEvent )
-        {
-        case EVT_CREATE:
-        case EVT_JOIN:
+	{
+	case EVT_CREATE:
+	case EVT_JOIN:
 		{
-                theClient = static_cast< iClient* >( data1 );
-                /* First we need to see if the channel is first = minClients */
-                if (theChan->size() == minClients) {
-                        startScoringChan(theChan);
-                }
-                if (theClient->isOper() && theChan->getName() == operChan)
+		/* First we need to see if the channel is first = minClients */
+		if (theChan->size() == minClients)
+		  startScoringChan(theChan);
+
+		/* If this is the operChan, op opers on join */
+		theClient = static_cast< iClient* >( data1 );
+		if (theClient->isOper() && theChan->getName() == operChan)
 		  Op(theChan, theClient);
-                  break ;
+
+		break ;
 		}
 	case EVT_KICK:
 	case EVT_PART:
 		{
-                theClient = static_cast< iClient* >( data1 );
+		theClient = static_cast< iClient* >( data1 );
 		if (wasOpped(theClient, theChan))
 		  lostOps(theClient, theChan);
 		break ;
 		}
-        default:
-                break ;
-        }
+	default:
+		break ;
+	}
 
 xClient::OnChannelEvent( whichEvent, theChan,
-        data1, data2, data3, data4 ) ;
+	data1, data2, data3, data4 ) ;
 }
 
 void chanfix::OnChannelModeO( Channel* theChan, ChannelUser*,
-                        const xServer::opVectorType& theTargets)
+			const xServer::opVectorType& theTargets)
 {
 /* if (currentState != RUN) return; */
 
@@ -486,7 +489,7 @@ switch(whichEvent)
 		for (clientOpsType::iterator ptr = myOps->begin();
 		     ptr != myOps->end(); ptr++)
 		  lostOps(theClient, ptr->second);
-                break;
+		break;
 		}
 	}
 
@@ -653,16 +656,16 @@ switch( currentState ) {
 	elog	<< "chanfix::changeState> Exiting state RUN"
 		<< endl;
 	}
-        case SPLIT:
-        {
-        elog    << "chanfix::changeState> Exiting state SPLIT"
-                << endl;
-        }
-        case INIT:
-        {
-        elog    << "chanfix::changeState> Exiting state INIT"
-                << endl;
-        }
+	case SPLIT:
+	{
+	elog	<< "chanfix::changeState> Exiting state SPLIT"
+		<< endl;
+	}
+	case INIT:
+	{
+	elog	<< "chanfix::changeState> Exiting state INIT"
+		<< endl;
+	}
 
 }
 
@@ -681,18 +684,18 @@ switch( currentState ) {
 		<< endl;
 	break;
 	}
-        case SPLIT:
-        {
-        elog    << "chanfix::changeState> Entering state SPLIT"
-                << endl;
-        break;
-        }
-        case INIT:
-        {
-        elog    << "chanfix::changeState> Entering state INIT"
-                << endl;
-        break;
-        }
+	case SPLIT:
+	{
+	elog	<< "chanfix::changeState> Entering state SPLIT"
+		<< endl;
+	break;
+	}
+	case INIT:
+	{
+	elog	<< "chanfix::changeState> Entering state INIT"
+		<< endl;
+	break;
+	}
 
 }
 
@@ -810,8 +813,8 @@ thisOp->setTimeLastOpped(currentTime()); //Update the time they were last opped
 thisOp->commit();
 
 elog	<< "chanfix::givePoints> DEBUG: Gave " << thisOp->getAccount()
-        << " on " << thisOp->getChannel() << " a point."
-        << endl;
+	<< " on " << thisOp->getChannel() << " a point."
+	<< endl;
 }
 
 void chanfix::gotOpped(iClient* thisClient, Channel* thisChan)
@@ -1085,32 +1088,33 @@ for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
   if (curOp->getPoints() >= min_score) {
     acctToOp = findAccount(curOp->getAccount(), netChan);
     vector< iClient* >::const_iterator acctPtr = acctToOp.begin(),
-        end = acctToOp.end();
-    while( acctPtr != end ) {       
-            curClient = *acctPtr;
-            if (curClient && !netChan->findUser(curClient)->isModeO()) {
-              elog << "chanfix::fixChan> DEBUG: Decided to op: "
-        	   << curClient->getNickName() << " on "
-        	   << netChan->getName() << ". Client has "
-        	   << curOp->getPoints() << " points. ABS_MIN = "
-        	   << min_score_abs << " and REL_MIN = " << min_score_rel
-        	   << endl;
-              modes += "o";
-              if (!args.empty())
-        	args += " ";
-              args += curClient->getNickName();
-              if ((++numClientsToOp + currentOps) >= maxOpped) {
-        	elog	<< "chanfix::fixChan> DEBUG: Enough clients are to be "
-        		<< "opped (" << numClientsToOp << "); breaking the loop."
-        		<< endl;
-        	cntMaxedOut = true;
-                break;
-              }
-            }
-            ++acctPtr;
-     }
-     acctToOp.clear();
-     if (cntMaxedOut) { break; }
+	end = acctToOp.end();
+    while (acctPtr != end) {
+      curClient = *acctPtr;
+      if (curClient && !netChan->findUser(curClient)->isModeO()) {
+	elog	<< "chanfix::fixChan> DEBUG: Decided to op: "
+		<< curClient->getNickName() << " on "
+		<< netChan->getName() << ". Client has "
+		<< curOp->getPoints() << " points. ABS_MIN = "
+		<< min_score_abs << " and REL_MIN = " << min_score_rel
+		<< endl;
+	modes += "o";
+	if (!args.empty())
+	  args += " ";
+	args += curClient->getNickName();
+	if ((++numClientsToOp + currentOps) >= maxOpped) {
+	  elog	<< "chanfix::fixChan> DEBUG: Enough clients are to be "
+		<< "opped (" << numClientsToOp << "); breaking the loop."
+		<< endl;
+	  cntMaxedOut = true;
+	  break;
+	}
+      }
+      ++acctPtr;
+    }
+    acctToOp.clear();
+    if (cntMaxedOut)
+      break;
   }
 }
 
@@ -1153,15 +1157,13 @@ chanfix::acctListType chanfix::findAccount(const std::string& Account, Channel* 
 // TODO: Accounts are not unique! Make this return a vector in case the 
 //       same account occurs more then once on this chan
 acctListType chanAccts;
-for(Channel::userIterator ptr = theChan->userList_begin(); ptr != theChan->userList_end(); ptr++)
-	{
-	if(Account == ptr->second->getClient()->getAccount())
-		{
-                chanAccts.push_back(ptr->second->getClient());
-		//return ptr->second->getClient();
-		}
-	}
-        return chanAccts;
+for (Channel::userIterator ptr = theChan->userList_begin();
+     ptr != theChan->userList_end(); ptr++) {
+  if (Account == ptr->second->getClient()->getAccount())
+    chanAccts.push_back(ptr->second->getClient());
+}
+
+return chanAccts;
 }
 
 sqlChannel* chanfix::getChannelRecord(const std::string& Channel)
@@ -1420,47 +1422,49 @@ for (xNetwork::channelIterator ptr = Network->channels_begin();
       if (curUser->getClient()->getMode(iClient::MODE_SERVICES))
 	break; // Exit the loop fully, and go to the next chan
       if (curUser->isModeO() && curUser->getClient()->getAccount() != "") {
-        //Ok hes an op
-        //Grab an iClient for curUser
-        scOpiter = scoredOpsList.find(curUser->getClient()->getAccount());
+	//Ok hes an op
+	//Grab an iClient for curUser
+	scOpiter = scoredOpsList.find(curUser->getClient()->getAccount());
 	if (scOpiter == scoredOpsList.end()) {
 	  givePoints(curUser->getClient(), thisChan);
 	  scoredOpsList.insert(make_pair(curUser->getClient()->getAccount(), true));
-        }
+	}
       }
     }
   }
 }
 if (scoredOpsList.size() > 0)
   scoredOpsList.clear();
-return;                              
+return;
 } //giveAllOpsPoints
 
 void chanfix::startScoringChan(Channel* theChan)
 {
-        /* Ok, if a channel record exists, should we
-         * still add points to ALL ops? -- Compy
-         */
-        chanfix::chanOpsType myOps = getMyOps(theChan);
-        if (!myOps.empty()) return;
-        typedef map<string,bool> ScoredOpsMapType;
-        ScoredOpsMapType scoredOpsList;
-        ScoredOpsMapType::iterator scOpiter;
-        if (theChan->getMode(Channel::MODE_A)) return;
-        for (Channel::userIterator ptr = theChan->userList_begin();
-                ptr != theChan->userList_end(); ptr++) {
-                ChannelUser* curUser = ptr->second;
-                if (curUser->getClient()->getMode(iClient::MODE_SERVICES))
-                        break;
-                if (curUser->isModeO() && curUser->getClient()->getAccount() != "") {
-                        scOpiter = scoredOpsList.find(curUser->getClient()->getAccount());
-	                if (scOpiter == scoredOpsList.end()) {
-                                gotOpped(curUser->getClient(), theChan);
-                                scoredOpsList.insert(make_pair(curUser->getClient()->getAccount(), true));
-                        }
-                }
-        }
-        scoredOpsList.clear();
+/* Ok, if a channel record exists, should we
+ * still add points to ALL ops? -- Compy
+ */
+chanfix::chanOpsType myOps = getMyOps(theChan);
+if (!myOps.empty()) return;
+
+typedef map<string,bool> ScoredOpsMapType;
+ScoredOpsMapType scoredOpsList;
+ScoredOpsMapType::iterator scOpiter;
+if (theChan->getMode(Channel::MODE_A)) return;
+  for (Channel::userIterator ptr = theChan->userList_begin();
+       ptr != theChan->userList_end(); ptr++) {
+    ChannelUser* curUser = ptr->second;
+    if (curUser->getClient()->getMode(iClient::MODE_SERVICES))
+      break;
+    if (curUser->isModeO() && curUser->getClient()->getAccount() != "") {
+      scOpiter = scoredOpsList.find(curUser->getClient()->getAccount());
+      if (scOpiter == scoredOpsList.end()) {
+	gotOpped(curUser->getClient(), theChan);
+	scoredOpsList.insert(make_pair(curUser->getClient()->getAccount(), true));
+      }
+    }
+  }
+  scoredOpsList.clear();
+return;
 }
 
 void chanfix::updatePoints()

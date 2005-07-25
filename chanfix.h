@@ -371,6 +371,9 @@ protected:
 	Timer *theTimer;
 
 public:
+        /*
+         *  Methods to get data attributes.
+         */
 	bool doAutoFix() { return enableAutoFix; }
 	bool doChanFix() { return enableChanFix; }
 	bool doChanBlocking() { return enableChannelBlocking; }
@@ -379,6 +382,20 @@ public:
 	unsigned int getMinServersPresent() { return minServersPresent; }
 	unsigned int getNumTopScores() { return numTopScores; }
 	unsigned int getMinClients() { return minClients; }
+
+        /*
+         *  Methods to set data attributes.
+         */
+	inline void	setNumServers(int _numServers)
+		{ numServers = _numServers; }
+	inline void	setDoAutoFix(bool _enableAutoFix)
+		{ enableAutoFix = _enableAutoFix; }
+	inline void	setDoChanFix(bool _enableChanFix)
+		{ enableChanFix = _enableChanFix; }
+	inline void	setDoChanBlocking(bool _enableChannelBlocking)
+		{ enableChannelBlocking = _enableChannelBlocking; }
+
+
 
 }; // class chanfix
 
