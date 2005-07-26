@@ -289,6 +289,14 @@ else if (theTimer == tidFixQ) {
   theTime = time(NULL) + PROCESS_QUEUE_TIME;
   tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
 }
+else if (theTimer == tidRotateDB) {
+	/* Rotate the database if its 00 GMT */
+	theTime = time(NULL) + DBROTATE_CHECK_TIME;
+	tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
+	int cGMTHour = getCurrentGMTHour();
+	if (cGMTHour != 00) return;
+	logAdminMessage("Beginning database rotation.");
+}
 }
 
 /* OnDetach */
@@ -1408,6 +1416,8 @@ theTime = time(NULL) + PROCESS_QUEUE_TIME;
 tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
 theTime = time(NULL) + POINTS_UPDATE_TIME;
 tidGivePoints = MyUplink->RegisterTimer(theTime, this, NULL);
+theTime = time(NULL) + DBROTATE_CHECK_TIME;
+tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
 elog	<< "chanfix::startTimers> Started all timers."
 	<< endl;
 }

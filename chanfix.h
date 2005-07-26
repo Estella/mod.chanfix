@@ -257,7 +257,7 @@ public:
 
 	const string prettyDuration( int );
 	
-	const int getCurrentGMTHour();
+	const int getCurrentGMTHour(); /* returns the current hour in GMT (00-23) */
 
 	/* Server notices */
 	bool serverNotice( Channel*, const char*, ... );
@@ -366,6 +366,7 @@ protected:
 	xServer::timerID tidFixQ;
 	xServer::timerID tidCheckDB;
 	xServer::timerID tidGivePoints;
+	xServer::timerID tidRotateDB;
 
 	/**
 	 * Internal timer

@@ -169,4 +169,10 @@
  */
 #define REMEMBER_CHANNELS_WITH_NOTES_OR_FLAGS
 
+/**
+ * How often should we check to see if its 00 GMT and rotate the DB
+ * (suggested hourly: 3600)
+ */
+#define DBROTATE_CHECK_TIME	3600
+
 #endif // __CHANFIX_CONFIG_H
