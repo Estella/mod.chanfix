@@ -808,7 +808,7 @@ if (clientNeedsIdent && !hasIdent(theClient))
 sqlChanOp* thisOp = findChanOp(theClient, theChan);
 if(!thisOp) thisOp = newChanOp(theClient, theChan);
 
-thisOp->setPoints(thisOp->getPoints() + 1);
+thisOp->addPoint();
 thisOp->setTimeLastOpped(currentTime()); //Update the time they were last opped
 thisOp->commit();
 
