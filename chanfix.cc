@@ -569,7 +569,7 @@ void chanfix::doSqlError(const string& theQuery, const string& theError)
 void chanfix::preloadChanOpsCache()
 {
         std::stringstream theQuery;
-        theQuery        << "SELECT channel,account,last_seen_as,points,ts_firstopped,ts_lastopped FROM chanOps"
+        theQuery        << "SELECT channel,account,last_seen_as,points,ts_firstopped,ts_lastopped,day0,day1,day2,day3,day4,day5,day6,day7,day8,day9,day10,day11,day12,day13 FROM chanOps"
                                 << ends;
 
         elog            << "*** [chanfix::preloadChanOpsCache]: Loading chanOps and their points ..." 
@@ -1374,6 +1374,15 @@ sprintf(tmpBuf, "%i day%s, %02d:%02d:%02d",
 	secs );
 
 return string( tmpBuf ) ;
+}
+
+const int chanfix::getCurrentGMTHour()
+{
+	time_t rawtime;
+	tm * ptm;
+	time ( &rawtime );
+	ptm = gmtime ( &rawtime );
+	return ptm->tm_hour;
 }
 
 chanfix::clientOpsType* chanfix::findMyOps(iClient* theClient)

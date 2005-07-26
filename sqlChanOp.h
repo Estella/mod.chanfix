@@ -35,6 +35,9 @@ public:
 
 	inline const int&	getPoints() const
 		{ return points ; }
+		
+	inline const short&	getDay(int _dayval) const
+		{ return day[_dayval] ; }
 
 	inline const std::string&	getLastSeenAs() const
                 { return nickUserHost ; }
@@ -69,10 +72,15 @@ public:
 
         inline void	setTimeLastOpped(time_t _ts_lastopped)
                 { ts_lastopped = _ts_lastopped ; }
+		
+	inline void	setDay(int _dayval, short _pointsval)
+		{ day[_dayval] = _pointsval ; }
 
 	bool Insert();
 	bool commit();
 	void setAllMembers(int);
+	void rotatePointSet();
+		
 
 private:
 
@@ -82,20 +90,7 @@ private:
 	int		points;
 	time_t		ts_firstopped;
 	time_t		ts_lastopped;
-	short		day0;
-	short		day1;
-	short		day2;
-	short		day3;
-	short		day4;
-	short		day5;
-	short		day6;
-	short		day7;
-	short		day8;
-	short		day9;
-	short		day10;
-	short		day11;
-	short		day12;
-	short		day13;
+	short		day[13];
         PgDatabase*     SQLDb;
 
 }; // class

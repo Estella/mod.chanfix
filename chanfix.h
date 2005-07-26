@@ -256,6 +256,8 @@ public:
 	bool removeFromManQ(Channel*);
 
 	const string prettyDuration( int );
+	
+	const int getCurrentGMTHour();
 
 	/* Server notices */
 	bool serverNotice( Channel*, const char*, ... );
@@ -382,7 +384,6 @@ public:
 	unsigned int getMinServersPresent() { return minServersPresent; }
 	unsigned int getNumTopScores() { return numTopScores; }
 	unsigned int getMinClients() { return minClients; }
-
         /*
          *  Methods to set data attributes.
          */

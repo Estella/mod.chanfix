@@ -52,7 +52,6 @@ if (st.size() < 2) {
   Usage(theClient);
   return;
 }
-
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
 if (!theChan) {
   bot->Notice(theClient, "No information on %s in the database.",
