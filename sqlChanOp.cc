@@ -63,6 +63,7 @@ day[13] = atoi(SQLDb->GetValue(row, 19));
 void sqlChanOp::rotatePointSet()
 {
 	//Yes this is messy until I can figure out a good method/loop
+	points = points - day[13];
 	day[13] = day[12];
 	day[12] = day[11];
 	day[11] = day[10];
@@ -74,6 +75,7 @@ void sqlChanOp::rotatePointSet()
 	day[3] = day[2];
 	day[1] = day[0];
 	day[0] = 0;
+	points = day[0] + day[1] + day[2] + day[3] + day[4] + day[5] + day[6] + day[7] + day[8] + day[9] + day[10] + day[11] + day[12] + day[13];
 }
 bool sqlChanOp::Insert()
 {

@@ -247,6 +247,8 @@ public:
 	void startTimers();
 
 	void processQueue();
+	
+	void rotateDB();
 
 	bool isBeingFixed(Channel*);
 	bool isBeingAutoFixed(Channel*);

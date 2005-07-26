@@ -136,6 +136,7 @@ RegisterCommand(new OPNICKSCommand(this, "OPNICKS", "<#channel>"));
 RegisterCommand(new QUOTECommand(this, "QUOTE", "<text>"));
 RegisterCommand(new REHASHCommand(this, "REHASH", ""));
 RegisterCommand(new RELOADCommand(this, "RELOAD", "[reason]"));
+RegisterCommand(new ROTATECommand(this, "ROTATE", ""));
 RegisterCommand(new SCORECommand(this, "SCORE", "<#channel> [nick|*account]"));
 RegisterCommand(new SCORECommand(this, "CSCORE", "<#channel> [nick|*account]"));
 RegisterCommand(new SETCommand(this, "SET", "<option> <value>"));
@@ -296,6 +297,7 @@ else if (theTimer == tidRotateDB) {
 	int cGMTHour = getCurrentGMTHour();
 	if (cGMTHour != 00) return;
 	logAdminMessage("Beginning database rotation.");
+	rotateDB();
 }
 }
 
@@ -1420,6 +1422,42 @@ theTime = time(NULL) + DBROTATE_CHECK_TIME;
 tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
 elog	<< "chanfix::startTimers> Started all timers."
 	<< endl;
+}
+
+void chanfix::rotateDB()
+{
+	/* Ok loop through channels/users and remove day 14 points
+	 * Then users/channels with scores of 0 are deleted
+	 * then reload the entire cache
+	 */
+	Channel* thisChan;
+	sqlChanOp* curOp = 0;
+	string removeKey;
+	unsigned int curOpPoints = 0;
+	for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->channels_end(); ptr++) {
+		thisChan = ptr->second;
+		chanOpsType myOps = getMyOps(thisChan);
+		if (myOps.empty()) continue;
+		chanOpsType::iterator opPtr = myOps.begin();
+		while (opPtr != myOps.end()) {
+			curOp = *opPtr;
+			curOp->rotatePointSet();
+			curOpPoints = curOp->getPoints();
+			if (curOpPoints <= 0) {
+				delete(curOp);
+				myOps.erase(opPtr);
+				++opPtr;
+			} else {
+				++opPtr;
+			}
+		}
+		if (myOps.size() <= 0) {
+			sqlChannel* sqlChan = getChannelRecord(thisChan);
+			if (sqlChan) {
+				delete(sqlChan);
+			}
+		}
+	}
 }
 
 void chanfix::giveAllOpsPoints()
