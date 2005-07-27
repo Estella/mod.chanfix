@@ -114,9 +114,11 @@
 #define POINTS_UPDATE_TIME	300
 
 /**
- * Interval between two consecutive SQL updates.
+ * Interval between two consecutive checks of the time.
+ * How often should we check to see if its 00 GMT and rotate the DB
+ * (suggested hourly: 3600)
  */
-#define SQL_UPDATE_TIME		3600
+#define DBROTATE_CHECK_TIME	3600
 
 /**
  * Interval between two consecutive checks for opless channels.
@@ -168,11 +170,5 @@
  * have notes or flags associated with them?
  */
 #define REMEMBER_CHANNELS_WITH_NOTES_OR_FLAGS
-
-/**
- * How often should we check to see if its 00 GMT and rotate the DB
- * (suggested hourly: 3600)
- */
-#define DBROTATE_CHECK_TIME	3600
 
 #endif // __CHANFIX_CONFIG_H

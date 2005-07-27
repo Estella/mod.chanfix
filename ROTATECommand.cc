@@ -1,10 +1,10 @@
 /**
  * ROTATECommand.cc
  *
- * 07/22/2005 - Jimmy Lipham <music0m@alltel.net>
+ * 07/26/2005 - Jimmy Lipham <music0m@alltel.net>
  * Initial Version
  *
- * Reload the bot's configuration file
+ * Rotate the bot's score database (keep only DAYSAMPLES days)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -40,15 +40,13 @@ namespace gnuworld
 using std::string;
 using namespace level;
 
-void ROTATECommand::Exec(iClient* theClient, const std::string& Message)
+void ROTATECommand::Exec(iClient* theClient, const std::string&)
 {
-
-	StringTokenizer st(Message);
-	bot->logAdminMessage("%s (%s) ordered a manual DB rotation.",
+bot->logAdminMessage("%s (%s) ordered a manual DB rotation.",
 		     theClient->getNickName().c_str(),
 		     theClient->getNickUserHost().c_str());
-	bot->rotateDB();
-	return;
+bot->rotateDB();
+return;
 }
 
 } // namespace gnuworld

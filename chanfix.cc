@@ -269,13 +269,6 @@ else if (theTimer == tidAutoFix) {
   theTime = time(NULL) + CHECK_CHANS_TIME;
   tidAutoFix = MyUplink->RegisterTimer(theTime, this, NULL);
   }
-else if (theTimer == tidUpdateDB) {
-  updatePoints();
-
-  /* Refresh Timer */
-  theTime = time(NULL) + SQL_UPDATE_TIME;
-  tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
-  }
 else if (theTimer == tidCheckDB) {
   /*checkDBConnection();*/
 
@@ -291,13 +284,13 @@ else if (theTimer == tidFixQ) {
   tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
 }
 else if (theTimer == tidRotateDB) {
-	/* Rotate the database if its 00 GMT */
-	theTime = time(NULL) + DBROTATE_CHECK_TIME;
-	tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
-	int cGMTHour = getCurrentGMTHour();
-	if (cGMTHour != 00) return;
-	logAdminMessage("Beginning database rotation.");
-	rotateDB();
+  /* Rotate the database if its 00 GMT */
+  theTime = time(NULL) + DBROTATE_CHECK_TIME;
+  tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
+  if (getCurrentGMTHour() != 00)
+    return;
+  logAdminMessage("Beginning database rotation.");
+  rotateDB();
 }
 }
 
@@ -579,7 +572,7 @@ void chanfix::doSqlError(const string& theQuery, const string& theError)
 void chanfix::preloadChanOpsCache()
 {
         std::stringstream theQuery;
-        theQuery        << "SELECT channel,account,last_seen_as,points,ts_firstopped,ts_lastopped,day0,day1,day2,day3,day4,day5,day6,day7,day8,day9,day10,day11,day12,day13 FROM chanOps"
+        theQuery        << "SELECT channel,account,last_seen_as,ts_firstopped,ts_lastopped,day0,day1,day2,day3,day4,day5,day6,day7,day8,day9,day10,day11,day12,day13 FROM chanOps"
                                 << ends;
 
         elog            << "*** [chanfix::preloadChanOpsCache]: Loading chanOps and their points ..." 
@@ -1164,8 +1157,6 @@ return false;
 
 chanfix::acctListType chanfix::findAccount(const std::string& Account, Channel* theChan)
 {
-// TODO: Accounts are not unique! Make this return a vector in case the 
-//       same account occurs more then once on this chan
 acctListType chanAccts;
 for (Channel::userIterator ptr = theChan->userList_begin();
      ptr != theChan->userList_end(); ptr++) {
@@ -1409,8 +1400,9 @@ return myOps;
  */
 void chanfix::startTimers()
 {
-time_t theTime = time(NULL) + CHECK_CHANS_TIME;
-tidCheckDB = MyUplink->RegisterTimer(time(NULL) + connectCheckFreq, this, NULL);
+time_t theTime = time(NULL) + connectCheckFreq;
+tidCheckDB = MyUplink->RegisterTimer(theTime, this, NULL);
+theTime = time(NULL) + CHECK_CHANS_TIME;
 tidAutoFix = MyUplink->RegisterTimer(theTime, this, NULL);
 theTime = time(NULL) + SQL_UPDATE_TIME;
 tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
@@ -1426,38 +1418,38 @@ elog	<< "chanfix::startTimers> Started all timers."
 
 void chanfix::rotateDB()
 {
-	/* Ok loop through channels/users and remove day 14 points
-	 * Then users/channels with scores of 0 are deleted
-	 * then reload the entire cache
-	 */
-	Channel* thisChan;
-	sqlChanOp* curOp = 0;
-	string removeKey;
-	unsigned int curOpPoints = 0;
-	for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->channels_end(); ptr++) {
-		thisChan = ptr->second;
-		chanOpsType myOps = getMyOps(thisChan);
-		if (myOps.empty()) continue;
-		chanOpsType::iterator opPtr = myOps.begin();
-		while (opPtr != myOps.end()) {
-			curOp = *opPtr;
-			curOp->rotatePointSet();
-			curOpPoints = curOp->getPoints();
-			if (curOpPoints <= 0) {
-				delete(curOp);
-				myOps.erase(opPtr);
-				++opPtr;
-			} else {
-				++opPtr;
-			}
-		}
-		if (myOps.size() <= 0) {
-			sqlChannel* sqlChan = getChannelRecord(thisChan);
-			if (sqlChan) {
-				delete(sqlChan);
-			}
-		}
-	}
+/* Ok loop through channels/users and remove day 14 points
+ * Then users/channels with scores of 0 are deleted
+ * then reload the entire cache
+ */
+Channel* thisChan;
+sqlChanOp* curOp = 0;
+string removeKey;
+unsigned int curOpPoints = 0;
+for (xNetwork::channelIterator ptr = Network->channels_begin();
+     ptr != Network->channels_end(); ptr++) {
+  thisChan = ptr->second;
+  chanOpsType myOps = getMyOps(thisChan);
+  if (myOps.empty())
+    continue;
+  chanOpsType::iterator opPtr = myOps.begin();
+  while (opPtr != myOps.end()) {
+    curOp = *opPtr;
+    curOp->rotatePointSet();
+    curOpPoints = curOp->getPoints();
+    if (curOpPoints <= 0) {
+      delete(curOp);
+      myOps.erase(opPtr);
+    }
+    ++opPtr;
+  }
+  if (myOps.size() <= 0) {
+    sqlChannel* sqlChan = getChannelRecord(thisChan);
+    if (sqlChan)
+      delete(sqlChan);
+  }
+}
+return;
 }
 
 void chanfix::giveAllOpsPoints()

@@ -34,10 +34,7 @@ public:
                 { return account ; }
 
 	inline const int&	getPoints() const
-		{ return points ; }
-		
-	inline const short&	getDay(int _dayval) const
-		{ return day[_dayval] ; }
+		{ return points ; }		
 
 	inline const std::string&	getLastSeenAs() const
                 { return nickUserHost ; }
@@ -47,6 +44,9 @@ public:
 
 	inline const time_t	getTimeLastOpped() const
 		{ return ts_lastopped ; }
+
+	inline const short&	getDay(int _dayval) const
+		{ return day[_dayval] ; }
 
         /*
          *  Methods to set data attributes.
@@ -80,7 +80,6 @@ public:
 	bool commit();
 	void setAllMembers(int);
 	void rotatePointSet();
-		
 
 private:
 
