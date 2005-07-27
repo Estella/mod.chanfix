@@ -101,6 +101,7 @@ public:
 		{ modesRemoved = _modesRemoved; }
 
 	bool Insert();
+	bool Delete();
 	bool commit();
         void setAllMembers(int);
 

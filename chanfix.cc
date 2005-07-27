@@ -1204,6 +1204,16 @@ sqlChannel* chanfix::newChannelRecord(Channel* theChan)
 return newChannelRecord(theChan->getName());
 }
 
+bool chanfix::deleteChannelRecord(sqlChannel* sqlChan)
+{
+if (!sqlChan->Delete())
+  return false;
+sqlChanCache.erase(sqlChan->getChannel());
+delete sqlChan; sqlChan = 0;
+
+return !sqlChan;
+}
+
 size_t chanfix::countChanOps(const Channel* theChan)
 {
 if (!theChan) {
@@ -1404,8 +1414,6 @@ time_t theTime = time(NULL) + connectCheckFreq;
 tidCheckDB = MyUplink->RegisterTimer(theTime, this, NULL);
 theTime = time(NULL) + CHECK_CHANS_TIME;
 tidAutoFix = MyUplink->RegisterTimer(theTime, this, NULL);
-theTime = time(NULL) + SQL_UPDATE_TIME;
-tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
 theTime = time(NULL) + PROCESS_QUEUE_TIME;
 tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
 theTime = time(NULL) + POINTS_UPDATE_TIME;

@@ -127,7 +127,6 @@ return true;
 
 };
 
-
 bool sqlChanOp::commit()
 {
 static const char* queryHeader =    "UPDATE chanOps ";

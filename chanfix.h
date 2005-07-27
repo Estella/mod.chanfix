@@ -240,6 +240,8 @@ public:
 	sqlChannel* newChannelRecord(const std::string&);
 	sqlChannel* newChannelRecord(Channel*);
 
+	bool deleteChannelRecord(sqlChannel*);
+
 	static size_t countChanOps(const Channel*);
 
 	bool needsModesRemoved(Channel*);

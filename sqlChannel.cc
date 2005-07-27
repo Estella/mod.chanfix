@@ -75,6 +75,36 @@ return true;
 
 };
 
+bool sqlChannel::Delete()
+{
+static const char* queryHeader =    "DELETE FROM channels ";
+
+stringstream queryString;
+queryString     << queryHeader << "WHERE channel = '"
+                << escapeSQLChars(channel) << "'"
+                << ends;
+
+//#ifdef LOG_SQL
+        elog    << "chanfix::sqlChannel::Delete> "
+                << queryString.str().c_str()
+                << endl;
+//#endif
+
+ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
+
+if( PGRES_COMMAND_OK != status )
+        {
+        // TODO: Log to msgchan here.
+        elog    << "chanfix::sqlChannel::Delete> Something went wrong: "
+                << SQLDb->ErrorMessage()
+                << endl;
+
+        return false;
+        }
+
+return true;
+
+};
 
 bool sqlChannel::commit()
 {
