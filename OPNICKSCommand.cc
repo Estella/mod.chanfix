@@ -60,12 +60,16 @@ ChannelUser* curUser;
 string oppedUsers;
 unsigned int numOppedUsers = 0;
 for (Channel::userIterator ptr = netChan->userList_begin(); ptr != netChan->userList_end(); ptr++) {
-   curUser = ptr->second;
-   if (curUser->isModeO()) {
-     if (numOppedUsers++)
-       oppedUsers += " ";
-     oppedUsers += curUser->getNickName();
-   }
+  curUser = ptr->second;
+  if (curUser->isModeO()) {
+    if ((oppedUsers.size() + string(curUser->getNickName().c_str()).size() + 1) >= 450) {
+      bot->Notice(theClient, "%s", oppedUsers.c_str());
+      oppedUsers.erase(oppedUsers.begin(), oppedUsers.end());
+    }
+    if (numOppedUsers++)
+      oppedUsers += " ";
+    oppedUsers += curUser->getNickName();
+  }
 }
 
 if (numOppedUsers)
