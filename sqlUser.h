@@ -30,9 +30,6 @@
 namespace gnuworld
 {
 
-using std::string;
-using std::vector;
-
 class iClient;
 
 class sqlUser
@@ -42,12 +39,10 @@ public:
 
 	sqlUser(PgDatabase*);
 	virtual ~sqlUser();
-typedef unsigned int flagType;
-	static const flagType F_SUSPENDED;
 
 	/* Accessors */
 
-	inline const string& getUserName() const
+	inline const std::string& getUserName() const
 		{ return user_name; }
 
 	inline const int getCreated() const
@@ -56,18 +51,15 @@ typedef unsigned int flagType;
 	inline const unsigned int getLastSeen() const
 		{ return last_seen; }
 
-	inline const string& getLastUpdatedBy() const
+	inline const std::string& getLastUpdatedBy() const
 		{ return last_updated_by; }
 
 	inline const unsigned int getLastUpdated() const
 		{ return last_updated; }
 
-	inline const unsigned int getAccess() const
-		{ return access; }
-
 	/* Mutators */
 
-	inline void setUserName(const string& _user_name)
+	inline void setUserName(const std::string& _user_name)
 		{ user_name = _user_name; }
 
 	inline void setCreated(const unsigned int _created)
@@ -76,38 +68,35 @@ typedef unsigned int flagType;
 	inline void setLastSeen(const unsigned int _last_seen)
 		{ last_seen = _last_seen; }
 
-	inline void setLastUpdatedBy(const string& _last_updated_by)
+	inline void setLastUpdatedBy(const std::string& _last_updated_by)
 		{ last_updated_by = _last_updated_by; }
 
 	inline void setLastUpdated(const unsigned int _last_updated)
 		{ last_updated = _last_updated; }
 
-	inline void setAccess(const unsigned int _access)
-		{ access = _access; }
-
-	inline void setFlags(const flagType _flags)
-		{ flags = _flags; }
-
-	/* Convenience functions for flags */
-	inline const bool isSuspended() const
-		{ return (flags & F_SUSPENDED); }
-
 
 	/* Methods to alter our SQL status */
 	void setAllMembers(int);
 	bool commit();
-	bool insert();
-	bool remove();
+	bool Insert();
+	bool Delete();
+
 protected:
 
 	PgDatabase*	SQLDb;
-	string		user_name;
+	std::string	user_name;
 	unsigned int	created;
 	unsigned int	last_seen;
-	string		last_updated_by;
 	unsigned int	last_updated;
-	unsigned int	flags;
-	unsigned int	access;
+	std::string	last_updated_by;
+	bool		isServAdmin;
+	bool		canBlock;
+	bool		canAlert;
+	bool		canChanfix;
+	bool		isOwner;
+	bool		canManageUsers;
+	bool		isSuspended;
+	bool		useNotice;
 }; // class sqlUser
 
 } // namespace gnuworld

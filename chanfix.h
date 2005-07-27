@@ -37,24 +37,17 @@
 #include	"sqlChanOp.h"
 #include	"Timer.h"
 
-using std::string;
-
 class PgDatabase;
 class Timer;
 namespace gnuworld
 {
-
-using std::string ;
-using std::vector ;
-using std::map ;
-using std::list ;
 
 /**
  * Case insensitive comparison struct for use by STL structures/algorithms.
  */
 struct noCaseComparePair
 {
-inline bool operator()( const std::pair<string, string>& lhs, const std::pair<string, string>& rhs) const
+inline bool operator()( const std::pair<std::string, std::string>& lhs, const std::pair<std::string, std::string>& rhs) const
 {
 	elog << "gnuworld::noCaseComparePair> DEBUG:"
 		<< "[lfirst=" << lhs.first
@@ -259,13 +252,13 @@ public:
 	bool removeFromAutoQ(Channel*);
 	bool removeFromManQ(Channel*);
 
-	const string prettyDuration( int );
+	const std::string prettyDuration( int );
 	
 	const int getCurrentGMTHour(); /* returns the current hour in GMT (00-23) */
 
 	/* Server notices */
 	bool serverNotice( Channel*, const char*, ... );
-	bool serverNotice( Channel*, const string& );
+	bool serverNotice( Channel*, const std::string& );
 	
 	/* Admin message logs */
 	bool logAdminMessage(const char*, ... );
@@ -280,46 +273,41 @@ public:
 	/**
 	 * ChannelOp map
 	 */
-//        typedef map< std::pair<string, string>, sqlChanOp*, noCaseComparePair> sqlChanOpsType;
-        typedef map< std::pair<string, string>, sqlChanOp*> sqlChanOpsType;
+//        typedef map< std::pair<std::string, std::string>, sqlChanOp*, noCaseComparePair> sqlChanOpsType;
+        typedef std::map< std::pair<std::string, std::string>, sqlChanOp*> sqlChanOpsType;
 	sqlChanOpsType sqlChanOps;
 	
-	typedef map <string, sqlChannel*, noCaseCompare> sqlChannelCacheType;
+	typedef std::map <std::string, sqlChannel*, noCaseCompare> sqlChannelCacheType;
 	sqlChannelCacheType sqlChanCache;
 
-	typedef map <string, Channel*, noCaseCompare> clientOpsType;
+	typedef std::map <std::string, Channel*, noCaseCompare> clientOpsType;
         clientOpsType*  findMyOps(iClient*);
 
-	typedef list< sqlChanOp* > chanOpsType;
+	typedef std::list< sqlChanOp* > chanOpsType;
 	chanOpsType	getMyOps(Channel*);
 
-	typedef map <string, bool> ScoredOpsMapType;
+	typedef std::map <std::string, bool> ScoredOpsMapType;
 	ScoredOpsMapType scoredOpsList;
 	
 	/**
 	 * Queues to process.
 	 */
-	typedef list< std::pair<Channel*, time_t> > fixQueueType;
+	typedef std::list< std::pair<Channel*, time_t> > fixQueueType;
 	fixQueueType	autoFixQ;
 	fixQueueType	manFixQ;
-
-	typedef list< std::pair <Channel*, iClient*> > opQueueType;
-	opQueueType	opQ;
 
         typedef vector< iClient* > acctListType; //For reopping all logged in users to an acct.
         acctListType findAccount(const std::string&, Channel*);
         
-        //unsigned int    daycount[DAYSAMPLES - 1]; //Shouldn't we -1 this? 0->13 = 14
-
-	string          consoleChan;
-	string          operChan;
-	string          supportChan;
+	std::string          consoleChan;
+	std::string          operChan;
+	std::string          supportChan;
 
 protected:
 	/**
 	 * Commands map
 	 */
-	typedef map< string, Command*, noCaseCompare> commandMapType;
+	typedef std::map< std::string, Command*, noCaseCompare> commandMapType;
 	commandMapType commandMap;
 
 	/**
@@ -335,13 +323,13 @@ protected:
 	/**
 	 * Configuration variables
 	 */
-	string		consoleChanModes;
-	string		operChanModes;
-	string		supportChanModes;
+	std::string		consoleChanModes;
+	std::string		operChanModes;
+	std::string		supportChanModes;
 	bool		enableAutoFix;
 	bool		enableChanFix;
 	bool		enableChannelBlocking;
-	string		defaultChannelModes;
+	std::string		defaultChannelModes;
 	unsigned int	version;
 	unsigned int	numServers;
 	unsigned int	minServersPresent;
@@ -350,11 +338,11 @@ protected:
 	bool		clientNeedsIdent;
 	bool		clientNeedsReverse;
 	unsigned int	connectCheckFreq;
-	string          sqlHost;
-	string          sqlPort;
-	string          sqlUser;
-	string          sqlPass;
-	string          sqlDB;
+	std::string          sqlHost;
+	std::string          sqlPort;
+	std::string          sqlUser;
+	std::string          sqlPass;
+	std::string          sqlDB;
 
 	/**
 	 * State variable
@@ -405,7 +393,7 @@ public:
 
 }; // class chanfix
 
-const string escapeSQLChars(const std::string& theString);
+const std::string escapeSQLChars(const std::string& theString);
 
 } // namespace gnuworld
 

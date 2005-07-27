@@ -837,27 +837,17 @@ if (thisClient->getAccount() != "" &&
 	<< endl;
 
   sqlChanOp* thisOp = findChanOp(thisClient, thisChan);
-  if (!thisOp) thisOp = newChanOp(thisClient, thisChan);
+  if (!thisOp)
+    thisOp = newChanOp(thisClient, thisChan);
+  else
+    thisOp->setTimeLastOpped(currentTime());
+
+  thisOp->setLastSeenAs(thisClient->getNickUserHost());
 
   if (wasOpped(thisClient, thisChan))
     return;
 
   clientOpsType* myOps = findMyOps(thisClient);
-  thisOp->setLastSeenAs(thisClient->getNickUserHost());
-
-  if (currentState == RUN)
-    thisOp->setTimeLastOpped(currentTime());
-
-  if ((currentState == BURST) && (thisOp->getTimeLastOpped() < 1))
-    thisOp->setTimeLastOpped(currentTime());
-
-  if ((currentState == BURST) || (currentState == RUN)) {
-    if (thisOp->getTimeFirstOpped() < 1)
-      thisOp->setTimeFirstOpped(currentTime());
-  }
-
-  thisOp->commit();
-
   myOps->insert(clientOpsType::value_type(thisChan->getName(), thisChan));
   thisClient->setCustomData(this, static_cast< void*>(myOps));
 } //if
