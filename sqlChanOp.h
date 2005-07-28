@@ -77,6 +77,7 @@ public:
 		{ day[_dayval] = _pointsval ; }
 
 	bool Insert();
+	bool Delete();
 	bool commit();
 	void setAllMembers(int);
 	void rotatePointSet();

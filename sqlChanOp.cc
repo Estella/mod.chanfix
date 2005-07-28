@@ -60,24 +60,6 @@ day[12] = atoi(SQLDb->GetValue(row, 17));
 day[13] = atoi(SQLDb->GetValue(row, 18));
 };
 
-void sqlChanOp::rotatePointSet()
-{
-//Yes this is messy until I can figure out a good method/loop
-points = points - day[13];
-day[13] = day[12];
-day[12] = day[11];
-day[11] = day[10];
-day[10] = day[9];
-day[9] = day[8];
-day[8] = day[7];
-day[7] = day[6];
-day[5] = day[4];
-day[3] = day[2];
-day[1] = day[0];
-day[0] = 0;
-points = day[0] + day[1] + day[2] + day[3] + day[4] + day[5] + day[6] + day[7] + day[8] + day[9] + day[10] + day[11] + day[12] + day[13];
-}
-
 bool sqlChanOp::Insert()
 {
 static const char* queryHeader = "INSERT INTO chanOps (channel, account, last_seen_as, ts_firstopped, ts_lastopped, day0, day1, day2, day3, day4, day5, day6, day7, day8, day9, day10, day11, day12, day13) VALUES (";
@@ -127,6 +109,39 @@ return true;
 
 };
 
+bool sqlChanOp::Delete()
+{
+static const char* queryHeader =    "DELETE FROM chanOps ";
+
+stringstream queryString;
+queryString	<< queryHeader << "WHERE lower(channel) = '"
+		<< string_lower(escapeSQLChars(channel))
+		<< "' AND lower(account) = '"
+		<< string_lower(escapeSQLChars(account)) << "'"
+		<< ends;
+
+//#ifdef LOG_SQL
+        elog    << "chanfix::sqlChanOp::Delete> "
+                << queryString.str().c_str()
+                << endl;
+//#endif
+
+ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
+
+if( PGRES_COMMAND_OK != status )
+        {
+        // TODO: Log to msgchan here.
+        elog    << "chanfix::sqlChanOp::Delete> Something went wrong: "
+                << SQLDb->ErrorMessage()
+                << endl;
+
+        return false;
+        }
+
+return true;
+
+};
+
 bool sqlChanOp::commit()
 {
 static const char* queryHeader =    "UPDATE chanOps ";
@@ -163,9 +178,7 @@ queryString	<< queryHeader << "SET last_seen_as = "<< "'"
                 << queryString.str().c_str()
                 << endl;
 //#endif
-if (points <= 0) {
-   return true;
-}
+
 ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
 
 if( PGRES_COMMAND_OK != status )

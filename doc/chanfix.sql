@@ -27,14 +27,34 @@ CREATE TABLE chanOps (
 );
 
 CREATE TABLE channels (
-	channel VARCHAR(200) NOT NULL,
+	id SERIAL,
+	channel TEXT NOT NULL UNIQUE,
 	flags INT4 NOT NULL DEFAULT 0,
-	PRIMARY KEY (channel)
+	PRIMARY KEY (id)
 );
+
+CREATE UNIQUE INDEX channels_name_idx ON channels(LOWER(channel));
+
+CREATE TABLE channellog (
+        ts INT4,
+        channelID INT4 CONSTRAINT channel_log_ref REFERENCES channels ( id ),
+        event INT2 DEFAULT '0',
+        -- Defines the message event type, so we can filter nice reports.
+-- 1  -- EV_MISC - Uncategorised event.
+-- 2  -- EV_NOTE - Miscellaneous notes about a channel.
+-- 3  -- EV_BLOCKED - When someone blocks a channel.
+-- 4  -- EV_ALERT - When somebody
+        message TEXT,
+        last_updated INT4 NOT NULL,
+        deleted INT2 DEFAULT '0'
+);
+
+CREATE INDEX channellog_channelID_idx ON channellog(channelID);
+CREATE INDEX channellog_event_idx ON channellog(event);
 
 CREATE TABLE users (
 	id SERIAL,
-	user_name VARCHAR(24) NOT NULL,
+	user_name TEXT NOT NULL,
 	created INT4 NOT NULL DEFAULT 0,
 	last_seen INT4 NOT NULL DEFAULT 0,
 	last_updated INT4 NOT NULL DEFAULT 0,
@@ -58,10 +78,14 @@ CREATE TABLE users (
 	PRIMARY KEY (id)
 );
 
+CREATE INDEX users_username_idx ON users( lower(user_name) );
+
 CREATE TABLE hosts (
-	user_id INT4 NOT NULL,
+	user_id INT4 CONSTRAINT hosts_user_id_ref REFERENCES users ( id ),
 	host VARCHAR(128) NOT NULL
 );
+
+CREATE INDEX hosts_user_id_idx ON hosts(user_id);
 
 CREATE TABLE groups (
 	group_id SERIAL,
@@ -70,10 +94,12 @@ CREATE TABLE groups (
 );
 
 CREATE TABLE group_members (
-	user_id INT4 NOT NULL,
-	group_id INT4 NOT NULL,
+	user_id INT4 CONSTRAINT group_members_user_id_ref REFERENCES users ( id ),
+	group_id INT4 CONSTRAINT group_members_group_id_ref REFERENCES groups ( group_id ),
 	-- currently the main group of the user
 	isMain BOOLEAN NOT NULL DEFAULT FALSE,
 	-- can administrate this group
 	isAdmin BOOLEAN NOT NULL DEFAULT FALSE
 );
+
+CREATE INDEX group_members_user_id_idx ON group_members(user_id);
