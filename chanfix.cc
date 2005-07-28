@@ -66,6 +66,7 @@ using std::stringstream;
 using std::map;
 using std::ends;
 
+short currentDay;
 
 /*
  *  Exported function used by moduleLoader to gain an
@@ -144,6 +145,9 @@ RegisterCommand(new SHUTDOWNCommand(this, "SHUTDOWN", "[reason]"));
 RegisterCommand(new STATUSCommand(this, "STATUS", ""));
 RegisterCommand(new UNALERTCommand(this, "UNALERT", "<#channel>"));
 RegisterCommand(new UNBLOCKCommand(this, "UNBLOCK", "<#channel>"));
+
+/* Set our current day. */
+setCurrentDay();
 
 /* Preload the ChanOps cache */
 preloadChanOpsCache();

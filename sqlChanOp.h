@@ -12,10 +12,8 @@
 #include        "libpq++.h"
 #include	"chanfix_config.h"
 
-
 namespace gnuworld
 {
-
 
 class sqlChanOp {
 
@@ -60,10 +58,10 @@ public:
                 { account = _account ; }
 
         inline void	setPoints(short _points)
-		{ day[::time(0) / 86400 % DAYSAMPLES] = _points; calcTotalPoints(); }
+		{ day[currentDay] = _points; calcTotalPoints(); }
 
 	inline void	addPoint()
-		{ day[::time(0) / 86400 % DAYSAMPLES]++; calcTotalPoints(); }
+		{ day[currentDay]++; calcTotalPoints(); }
 
         inline void	setLastSeenAs(std::string _nickUserHost)
 		{ nickUserHost = _nickUserHost ; }

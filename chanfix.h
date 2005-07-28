@@ -34,8 +34,15 @@
 #include	"chanfixCommands.h"
 #include	"chanfix_config.h"
 #include	"sqlChannel.h"
-#include	"sqlChanOp.h"
 #include	"Timer.h"
+
+/* This must be declared before sqlChanOp.h is #include'd */
+namespace gnuworld
+{
+extern short currentDay;
+}
+#include	"sqlChanOp.h"
+
 
 class PgDatabase;
 class Timer;
@@ -381,7 +388,7 @@ public:
 	unsigned int getMinServersPresent() { return minServersPresent; }
 	unsigned int getNumTopScores() { return numTopScores; }
 	unsigned int getMinClients() { return minClients; }
-	short getCurrentDay() { return ::time(0) / 86400 % DAYSAMPLES; }
+	short getCurrentDay() { return currentDay; }
 
         /*
          *  Methods to set data attributes.
@@ -394,6 +401,8 @@ public:
 		{ enableChanFix = _enableChanFix; }
 	inline void	setDoChanBlocking(bool _enableChannelBlocking)
 		{ enableChannelBlocking = _enableChannelBlocking; }
+	inline void	setCurrentDay()
+		{ currentDay = currentTime() / 86400 % DAYSAMPLES; }
 
 
 }; // class chanfix

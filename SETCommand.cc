@@ -53,7 +53,7 @@ string option = string_upper(st[1]);
 string value = string_upper(st[2]);
 
 string::size_type pos;
-while ((pos = option.find('_', 0) != string::npos))
+while ((pos = option.find('_', 0)) != string::npos)
   option.erase(pos, 1);
 
 if (option == "NUMSERVERS") {

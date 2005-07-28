@@ -14,8 +14,8 @@
 
 #include        "ELog.h"
 #include        "misc.h"
-#include        "sqlChanOp.h"
 #include	"chanfix.h"
+#include        "sqlChanOp.h"
 
 namespace gnuworld
 {
