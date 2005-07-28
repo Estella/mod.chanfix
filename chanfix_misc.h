@@ -27,8 +27,6 @@
 #ifndef __CHANFIX_MISC_H
 #define __CHANFIX_MISC_H "$Id$"
 
-//#include "sqlChanOp.h"
-
 namespace gnuworld
 {
 

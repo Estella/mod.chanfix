@@ -14,7 +14,10 @@
 
 namespace gnuworld
 {
-using std::string ;
+
+short currentDay;
+inline void	setCurrentDay()
+	{ currentDay = ::time(0) / 86400 % DAYSAMPLES; }
 
 
 class sqlChanOp {
@@ -53,19 +56,19 @@ public:
          *  Methods to set data attributes.
          */
 
-        inline void	setChannel(string _channel)
+        inline void	setChannel(std::string _channel)
                 { channel = _channel ; }
 
-        inline void	setAccount(string _account)
+        inline void	setAccount(std::string _account)
                 { account = _account ; }
 
         inline void	setPoints(short _points)
-		{ day[currentDay] = _points; calcTotalPoints(); }
+		{ day[gnuworld::currentDay] = _points; calcTotalPoints(); }
 
 	inline void	addPoint()
-		{ day[currentDay]++; calcTotalPoints(); }
+		{ day[gnuworld::currentDay]++; calcTotalPoints(); }
 
-        inline void	setLastSeenAs(string _nickUserHost)
+        inline void	setLastSeenAs(std::string _nickUserHost)
 		{ nickUserHost = _nickUserHost ; }
 
 	inline void     setTimeFirstOpped(time_t _ts_firstopped)
@@ -85,9 +88,9 @@ public:
 
 private:
 
-	string		channel;
-	string		account;
-	string		nickUserHost;
+	std::string	channel;
+	std::string	account;
+	std::string	nickUserHost;
 	int		points;
 	time_t		ts_firstopped;
 	time_t		ts_lastopped;

@@ -41,9 +41,7 @@ class PgDatabase;
 class Timer;
 namespace gnuworld
 {
-int currentDay;
-int getCurrentDay() { return currentDay; }
-inline void setCurrentDay() { currentDay = currentTime() / 86400 % DAYSAMPLES; }
+
 /**
  * Case insensitive comparison struct for use by STL structures/algorithms.
  */
@@ -383,7 +381,8 @@ public:
 	unsigned int getMinServersPresent() { return minServersPresent; }
 	unsigned int getNumTopScores() { return numTopScores; }
 	unsigned int getMinClients() { return minClients; }
-	
+	short getCurrentDay() { return gnuworld::currentDay; }
+
         /*
          *  Methods to set data attributes.
          */
@@ -395,7 +394,6 @@ public:
 		{ enableChanFix = _enableChanFix; }
 	inline void	setDoChanBlocking(bool _enableChannelBlocking)
 		{ enableChannelBlocking = _enableChannelBlocking; }
-
 
 
 }; // class chanfix
