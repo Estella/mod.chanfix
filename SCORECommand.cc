@@ -137,7 +137,13 @@ if (st.size() > 2) {
 	    bot->Notice(theClient, "No such nick %s.", scUser);
 	  return;
 	}
-	curClientOp = *acctPtr;
+	while (acctPtr != acctToScore.end()) {
+		curClientOp = *acctPtr;
+		if (curClientOp && (string_lower(curClientOp->getNickName()) == string_lower(scUser))) {
+			break;
+		}
+		++acctPtr;
+	}
 	if (curClientOp && (string_lower(curClientOp->getNickName()) == string_lower(scUser))) {
 	  //Score for "reed@local.host" in channel "#coder-com": 4.
 	  //Do it like they do on OCF, baby.

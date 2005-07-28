@@ -41,7 +41,9 @@ class PgDatabase;
 class Timer;
 namespace gnuworld
 {
-
+int currentDay;
+int getCurrentDay() { return currentDay; }
+inline void setCurrentDay() { currentDay = currentTime() / 86400 % DAYSAMPLES; }
 /**
  * Case insensitive comparison struct for use by STL structures/algorithms.
  */
@@ -207,6 +209,8 @@ public:
 	void changeState(STATE);
 
 	time_t currentTime() { return ::time(0); }
+	
+	time_t getSecsTilMidnight() { return 86400 - (currentTime() % 86400); }
 
 	void updatePoints();
 
@@ -343,6 +347,7 @@ protected:
 	std::string          sqlUser;
 	std::string          sqlPass;
 	std::string          sqlDB;
+	
 
 	/**
 	 * State variable
@@ -366,6 +371,7 @@ protected:
 	Timer *theTimer;
 
 public:
+
         /*
          *  Methods to get data attributes.
          */
@@ -377,6 +383,7 @@ public:
 	unsigned int getMinServersPresent() { return minServersPresent; }
 	unsigned int getNumTopScores() { return numTopScores; }
 	unsigned int getMinClients() { return minClients; }
+	
         /*
          *  Methods to set data attributes.
          */

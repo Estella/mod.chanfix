@@ -145,6 +145,9 @@ RegisterCommand(new STATUSCommand(this, "STATUS", ""));
 RegisterCommand(new UNALERTCommand(this, "UNALERT", "<#channel>"));
 RegisterCommand(new UNBLOCKCommand(this, "UNBLOCK", "<#channel>"));
 
+/* Set the current day so we know where to put our scores for today */
+setCurrentDay();
+
 /* Preload the ChanOps cache */
 preloadChanOpsCache();
 
@@ -196,6 +199,7 @@ sqlPass = chanfixConfig->Require("sqlPass")->second;
 elog	<< "chanfix::readConfigFile> Configuration loaded!"
 	<< endl;
 }
+
 
 /* Register a new command */
 bool chanfix::RegisterCommand( Command *theCommand )
@@ -744,13 +748,14 @@ sqlChanOp* chanfix::newChanOp(const std::string& account, const std::string& cha
 sqlChanOp* newOp = new (std::nothrow) sqlChanOp(SQLDb);
 assert( newOp != 0 ) ;
 
-
 sqlChanOps.insert(sqlChanOpsType::value_type(std::pair<string,string>(account, channel), newOp));
 
 elog << "chanfix::newChanOp> DEBUG: Added new operator: " << account << " on " << channel << "!!" << endl;
 
 newOp->setAccount(account);
 newOp->setChannel(channel);
+newOp->setTimeFirstOpped(currentTime());
+newOp->setTimeLastOpped(currentTime());
 newOp->Insert();
 
 return newOp;
@@ -837,16 +842,15 @@ if (thisClient->getAccount() != "" &&
 	<< endl;
 
   sqlChanOp* thisOp = findChanOp(thisClient, thisChan);
-  if (!thisOp)
-    thisOp = newChanOp(thisClient, thisChan);
-  else
-    thisOp->setTimeLastOpped(currentTime());
+  if (!thisOp) thisOp = newChanOp(thisClient, thisChan);
 
   thisOp->setLastSeenAs(thisClient->getNickUserHost());
-
+  thisOp->setTimeLastOpped(currentTime());
+  
   if (wasOpped(thisClient, thisChan))
     return;
-
+  
+  
   clientOpsType* myOps = findMyOps(thisClient);
   myOps->insert(clientOpsType::value_type(thisChan->getName(), thisChan));
   thisClient->setCustomData(this, static_cast< void*>(myOps));
@@ -1416,37 +1420,27 @@ elog	<< "chanfix::startTimers> Started all timers."
 
 void chanfix::rotateDB()
 {
-/* Ok loop through channels/users and remove day 14 points
- * Then users/channels with scores of 0 are deleted
- * then reload the entire cache
+/* CODER NOTES:
+ * go through everybody and remove the oldest day (set it to 0)
+ * then loop back through and pick out the users with 0 points total and check their ts_firstopped
+ * if it is older than 1 day, delete the user
+ * cache: acct,chan
  */
-Channel* thisChan;
 sqlChanOp* curOp = 0;
 string removeKey;
-unsigned int curOpPoints = 0;
-for (xNetwork::channelIterator ptr = Network->channels_begin();
-     ptr != Network->channels_end(); ptr++) {
-  thisChan = ptr->second;
-  chanOpsType myOps = getMyOps(thisChan);
-  if (myOps.empty())
-    continue;
-  chanOpsType::iterator opPtr = myOps.begin();
-  while (opPtr != myOps.end()) {
-    curOp = *opPtr;
-    curOp->rotatePointSet();
-    curOpPoints = curOp->getPoints();
-    if (curOpPoints <= 0) {
-      delete(curOp);
-      myOps.erase(opPtr);
-    }
-    ++opPtr;
-  }
-  if (myOps.size() <= 0) {
-    sqlChannel* sqlChan = getChannelRecord(thisChan);
-    if (sqlChan)
-      delete(sqlChan);
-  }
+
+time_t maxFirstOppedTS = currentTime() - 86400;
+for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
+     ptr != sqlChanOps.end(); ptr++) {
+
+  curOp = ptr->second;
+  if (curOp->getPoints() <= 0 && maxFirstOppedTS > curOp->getTimeFirstOpped())
+    if (!curOp->Delete())
+      elog << "chanfix::rotateDB> Error: Could not delete op "<< curOp->getLastSeenAs() << " " << curOp->getChannel() << endl;
 }
+#ifndef REMEMBER_CHANNELS_WITH_NOTES_OR_FLAGS
+//TODO: Implement a loop/section here that removes channel records/notes with no ops left in them
+#endif
 return;
 }
 

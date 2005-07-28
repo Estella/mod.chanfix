@@ -36,7 +36,7 @@ sqlChanOp::sqlChanOp(PgDatabase* _SQLDb)
   day(),
   SQLDb(_SQLDb)
 {};
-
+	
 void sqlChanOp::setAllMembers(int row) 
 {
 channel = SQLDb->GetValue(row, 0);
@@ -58,7 +58,20 @@ day[10] = atoi(SQLDb->GetValue(row, 15));
 day[11] = atoi(SQLDb->GetValue(row, 16));
 day[12] = atoi(SQLDb->GetValue(row, 17));
 day[13] = atoi(SQLDb->GetValue(row, 18));
+elog << "chanfix::sqlChanOp::setAllMembers> Day13 = " << atoi(SQLDb->GetValue(row, 18)) << endl;
+calcTotalPoints();
 };
+
+
+void sqlChanOp::calcTotalPoints()
+{
+  int i;
+  points = 0;
+  for (i = 0; i < DAYSAMPLES; i++) {
+    points += day[i];
+    elog << "chanfix::sqlChanOp::calcTotalPoints> Points += day[" << i << "] (" << day[i] << ")" << endl;
+  }
+}
 
 bool sqlChanOp::Insert()
 {
@@ -87,11 +100,11 @@ queryString     << queryHeader << "'"
 		<< day[13] << ")"
                 << ends;
 
-#ifdef LOG_SQL
+//#ifdef LOG_SQL
         elog    << "sqlChanOp::Insert> "
                 << queryString.str().c_str()
                 << endl;
-#endif
+//#endif
 
 ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
 

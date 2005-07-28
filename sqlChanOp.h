@@ -10,6 +10,7 @@
 
 #include        <string>
 #include        "libpq++.h"
+#include	"chanfix_config.h"
 
 namespace gnuworld
 {
@@ -58,11 +59,11 @@ public:
         inline void	setAccount(string _account)
                 { account = _account ; }
 
-        inline void	setPoints(int _points)
-                { points = _points ; }
+        inline void	setPoints(short _points)
+		{ day[currentDay] = _points; calcTotalPoints(); }
 
 	inline void	addPoint()
-		{ points++ ; }
+		{ day[currentDay]++; calcTotalPoints(); }
 
         inline void	setLastSeenAs(string _nickUserHost)
 		{ nickUserHost = _nickUserHost ; }
@@ -80,7 +81,7 @@ public:
 	bool Delete();
 	bool commit();
 	void setAllMembers(int);
-	void rotatePointSet();
+	void calcTotalPoints();
 
 private:
 
@@ -90,7 +91,7 @@ private:
 	int		points;
 	time_t		ts_firstopped;
 	time_t		ts_lastopped;
-	short		day[13];
+	short		day[DAYSAMPLES];
         PgDatabase*     SQLDb;
 
 }; // class
