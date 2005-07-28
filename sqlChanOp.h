@@ -12,12 +12,17 @@
 #include        "libpq++.h"
 #include	"chanfix_config.h"
 
+
 namespace gnuworld
 {
 
-short currentDay;
+#ifndef CURRDAY
+extern int currentDay;
 inline void	setCurrentDay()
 	{ currentDay = ::time(0) / 86400 % DAYSAMPLES; }
+#define CURRDAY 0
+#endif
+
 
 
 class sqlChanOp {
