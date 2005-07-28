@@ -16,14 +16,6 @@
 namespace gnuworld
 {
 
-#ifndef CURRDAY
-extern int currentDay;
-inline void	setCurrentDay()
-	{ currentDay = ::time(0) / 86400 % DAYSAMPLES; }
-#define CURRDAY 0
-#endif
-
-
 
 class sqlChanOp {
 
@@ -68,10 +60,10 @@ public:
                 { account = _account ; }
 
         inline void	setPoints(short _points)
-		{ day[gnuworld::currentDay] = _points; calcTotalPoints(); }
+		{ day[::time(0) / 86400 % DAYSAMPLES] = _points; calcTotalPoints(); }
 
 	inline void	addPoint()
-		{ day[gnuworld::currentDay]++; calcTotalPoints(); }
+		{ day[::time(0) / 86400 % DAYSAMPLES]++; calcTotalPoints(); }
 
         inline void	setLastSeenAs(std::string _nickUserHost)
 		{ nickUserHost = _nickUserHost ; }

@@ -25,7 +25,6 @@ using std::endl ;
 using std::ends ;
 using std::stringstream ;
 
-
 sqlChanOp::sqlChanOp(PgDatabase* _SQLDb)
 : channel(""),
   account(""),

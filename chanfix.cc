@@ -145,9 +145,6 @@ RegisterCommand(new STATUSCommand(this, "STATUS", ""));
 RegisterCommand(new UNALERTCommand(this, "UNALERT", "<#channel>"));
 RegisterCommand(new UNBLOCKCommand(this, "UNBLOCK", "<#channel>"));
 
-/* Set the current day so we know where to put our scores for today */
-setCurrentDay();
-
 /* Preload the ChanOps cache */
 preloadChanOpsCache();
 

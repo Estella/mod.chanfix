@@ -381,7 +381,7 @@ public:
 	unsigned int getMinServersPresent() { return minServersPresent; }
 	unsigned int getNumTopScores() { return numTopScores; }
 	unsigned int getMinClients() { return minClients; }
-	short getCurrentDay() { return gnuworld::currentDay; }
+	short getCurrentDay() { return ::time(0) / 86400 % DAYSAMPLES; }
 
         /*
          *  Methods to set data attributes.
