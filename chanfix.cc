@@ -286,7 +286,7 @@ else if (theTimer == tidFixQ) {
 }
 else if (theTimer == tidRotateDB) {
   /* Rotate the database if its 00 GMT */
-  theTime = time(NULL) + DBROTATE_CHECK_TIME;
+  theTime = time(NULL) + 86400;
   tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
   if (getCurrentGMTHour() != 00)
     return;
@@ -1409,7 +1409,7 @@ theTime = time(NULL) + PROCESS_QUEUE_TIME;
 tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
 theTime = time(NULL) + POINTS_UPDATE_TIME;
 tidGivePoints = MyUplink->RegisterTimer(theTime, this, NULL);
-theTime = time(NULL) + DBROTATE_CHECK_TIME;
+theTime = getSecsTilMidnight();
 tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
 elog	<< "chanfix::startTimers> Started all timers."
 	<< endl;
@@ -1432,6 +1432,7 @@ for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
 
   curOp = ptr->second;
   if (curOp->getPoints() <= 0 && maxFirstOppedTS > curOp->getTimeFirstOpped())
+    sqlChanOps.erase(ptr++);
     if (!curOp->Delete())
       elog << "chanfix::rotateDB> Error: Could not delete op "<< curOp->getLastSeenAs() << " " << curOp->getChannel() << endl;
 }
