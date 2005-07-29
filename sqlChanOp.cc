@@ -57,7 +57,6 @@ day[10] = atoi(SQLDb->GetValue(row, 15));
 day[11] = atoi(SQLDb->GetValue(row, 16));
 day[12] = atoi(SQLDb->GetValue(row, 17));
 day[13] = atoi(SQLDb->GetValue(row, 18));
-elog << "chanfix::sqlChanOp::setAllMembers> Day13 = " << atoi(SQLDb->GetValue(row, 18)) << endl;
 calcTotalPoints();
 };
 
@@ -68,7 +67,6 @@ void sqlChanOp::calcTotalPoints()
   points = 0;
   for (i = 0; i < DAYSAMPLES; i++) {
     points += day[i];
-    elog << "chanfix::sqlChanOp::calcTotalPoints> Points += day[" << i << "] (" << day[i] << ")" << endl;
   }
 }
 

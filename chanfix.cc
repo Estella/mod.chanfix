@@ -290,12 +290,9 @@ else if (theTimer == tidFixQ) {
 }
 else if (theTimer == tidRotateDB) {
   /* Rotate the database if its 00 GMT */
+  rotateDB();
   theTime = time(NULL) + 86400;
   tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
-  if (getCurrentGMTHour() != 00)
-    return;
-  logAdminMessage("Beginning database rotation.");
-  rotateDB();
 }
 }
 
@@ -1427,22 +1424,38 @@ void chanfix::rotateDB()
  * if it is older than 1 day, delete the user
  * cache: acct,chan
  */
+if (getSecsTilMidnight() > 60) return; /* For some reason, this function is called at startup, quick fix */
+logAdminMessage("Beginning database rotation.");
 sqlChanOp* curOp = 0;
 string removeKey;
+short nextDay = getCurrentDay();
+setCurrentDay();
+if (nextDay >= (DAYSAMPLES - 1))
+  nextDay = 0;
+else
+  nextDay++;
+
+
 
 time_t maxFirstOppedTS = currentTime() - 86400;
 for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
      ptr != sqlChanOps.end(); ptr++) {
 
   curOp = ptr->second;
-  if (curOp->getPoints() <= 0 && maxFirstOppedTS > curOp->getTimeFirstOpped())
+  curOp->setDay(nextDay, 0);
+  curOp->calcTotalPoints();
+  if (curOp->getPoints() <= 0 && maxFirstOppedTS > curOp->getTimeFirstOpped()) {
     sqlChanOps.erase(ptr++);
     if (!curOp->Delete())
       elog << "chanfix::rotateDB> Error: Could not delete op "<< curOp->getLastSeenAs() << " " << curOp->getChannel() << endl;
+    else
+      delete curOp; curOp = 0;
+  }
 }
 #ifndef REMEMBER_CHANNELS_WITH_NOTES_OR_FLAGS
 //TODO: Implement a loop/section here that removes channel records/notes with no ops left in them
 #endif
+setCurrentDay();
 return;
 }
 
