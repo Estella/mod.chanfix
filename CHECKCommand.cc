@@ -36,8 +36,6 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-using std::string;
-
 void CHECKCommand::Exec(iClient* theClient, const std::string& Message)
 {
 StringTokenizer st(Message);

@@ -40,11 +40,6 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-using std::endl;
-using std::string;
-using std::stringstream;
-using std::ends;
-
 void BLOCKCommand::Exec(iClient* theClient, const std::string& Message)
 {
 StringTokenizer st(Message);
@@ -75,7 +70,7 @@ theChan->commit();
 /* bot->addNote(theChan, ... "BLOCK by %s: %s" */
 
 bot->Notice(theClient, "The channel %s has been blocked.",
-            theChan->getChannel().c_str());
+	    theChan->getChannel().c_str());
 
 return;
 }

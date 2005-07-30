@@ -24,9 +24,10 @@
  * $Id$
  */
 
-#include <stdlib.h>
+#include <sstream>
 #include <iostream>
 #include <vector>
+
 #include "gnuworld_config.h"
 #include "Network.h"
 
@@ -42,11 +43,6 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-using std::endl;
-using std::string;
-using std::stringstream;
-using std::ends;
-
 void SCORECommand::Exec(iClient* theClient, const std::string& Message)
 {
 StringTokenizer st(Message);
@@ -55,8 +51,8 @@ if (st.size() < 2) {
   return;
 }
 
-stringstream strRanks;
-string scoreRanks;
+std::stringstream strRanks;
+std::string scoreRanks;
 unsigned int currentRank;
 currentRank = 1;
 sqlChanOp* curOp = 0;
@@ -128,8 +124,8 @@ if (st.size() > 2) {
      for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
 	  opPtr != myOps.end(); opPtr++) {
 	curOp = *opPtr;
-	acctToScore = bot->findAccount(curOp->getAccount(), netChan);
-	vector< iClient* >::const_iterator acctPtr = acctToScore.begin();
+	acctToScore = bot->findAccount(netChan, curOp->getAccount());
+	std::vector< iClient* >::const_iterator acctPtr = acctToScore.begin();
 	if (acctPtr == acctToScore.end()) {
 	  if (compact)
 	    bot->Notice(theClient, "~U %s no@such.nick 0", netChan->getName().c_str());
@@ -181,21 +177,21 @@ else
   minScoreReply = bot->getNumTopScores();
 
 /* 3 different streams for 3 different output types */
-stringstream strScoresDB; //For scores in the DB
-stringstream strScoresOP; //For scores for users currently opped
-stringstream strScoresNOP; //For scores for users NOT currently opped
+std::stringstream strScoresDB; //For scores in the DB
+std::stringstream strScoresOP; //For scores for users currently opped
+std::stringstream strScoresNOP; //For scores for users NOT currently opped
 unsigned int intDBCount = 0; //Rank counter for DB entries
 unsigned int intOPCount = 0; //Rank counter for current OP entries
 unsigned int intNOPCount = 0; //Rank counter for current non-ops
 for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
      opPtr != myOps.end(); opPtr++) {
   curOp = *opPtr;
-  acctToShow = bot->findAccount(curOp->getAccount(), netChan);
-  vector< iClient* >::const_iterator acctPtr = acctToShow.begin();
+  acctToShow = bot->findAccount(netChan, curOp->getAccount());
+  std::vector< iClient* >::const_iterator acctPtr = acctToShow.begin();
   if (acctPtr == acctToScore.end())
     return;
   curClient = *acctPtr;
-  //curClient = bot->findAccount(curOp->getAccount(), netChan);
+  //curClient = bot->findAccount(netChan, curOp->getAccount());
   if (intDBCount < minScoreReply) {
     if (intDBCount++) {
       if (compact)

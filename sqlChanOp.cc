@@ -5,25 +5,21 @@
  *
  */
 
-#include        <sstream>
-#include        <string>
-#include        <iostream>
-#include        <cstring>
+#include	<sstream>
+#include	<string>
+#include	<iostream>
+#include	<cstring>
 
 #include	"libpq++.h"
 
-#include        "ELog.h"
-#include        "misc.h"
+#include	"ELog.h"
+#include	"misc.h"
+
 #include	"chanfix.h"
-#include        "sqlChanOp.h"
+#include	"sqlChanOp.h"
 
 namespace gnuworld
 {
-
-using std::string ;
-using std::endl ;
-using std::ends ;
-using std::stringstream ;
 
 sqlChanOp::sqlChanOp(PgDatabase* _SQLDb)
 : channel(""),
@@ -74,8 +70,8 @@ bool sqlChanOp::Insert()
 {
 static const char* queryHeader = "INSERT INTO chanOps (channel, account, last_seen_as, ts_firstopped, ts_lastopped, day0, day1, day2, day3, day4, day5, day6, day7, day8, day9, day10, day11, day12, day13) VALUES (";
 
-stringstream queryString;
-queryString     << queryHeader << "'"
+std::stringstream queryString;
+queryString	<< queryHeader << "'"
 		<< escapeSQLChars(channel) << "','"
 		<< escapeSQLChars(account) << "','"
 		<< escapeSQLChars(nickUserHost) << "',"
@@ -95,25 +91,25 @@ queryString     << queryHeader << "'"
 		<< day[11] << ","
 		<< day[12] << ","
 		<< day[13] << ")"
-                << ends;
+		<< std::ends;
 
 //#ifdef LOG_SQL
-        elog    << "sqlChanOp::Insert> "
-                << queryString.str().c_str()
-                << endl;
+	elog	<< "sqlChanOp::Insert> "
+		<< queryString.str().c_str()
+		<< std::endl;
 //#endif
 
 ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
 
 if( PGRES_COMMAND_OK != status )
-        {
-        // TODO: Log to msgchan here.
-        elog    << "sqlChanOp::Insert> Something went wrong: "
-                << SQLDb->ErrorMessage()
-                << endl;
+	{
+	// TODO: Log to msgchan here.
+	elog	<< "sqlChanOp::Insert> Something went wrong: "
+		<< SQLDb->ErrorMessage()
+		<< std::endl;
 
-        return false;
-        }
+	return false;
+	}
 
 return true;
 
@@ -123,30 +119,30 @@ bool sqlChanOp::Delete()
 {
 static const char* queryHeader =    "DELETE FROM chanOps ";
 
-stringstream queryString;
+std::stringstream queryString;
 queryString	<< queryHeader << "WHERE lower(channel) = '"
 		<< string_lower(escapeSQLChars(channel))
 		<< "' AND lower(account) = '"
 		<< string_lower(escapeSQLChars(account)) << "'"
-		<< ends;
+		<< std::ends;
 
 //#ifdef LOG_SQL
-        elog    << "chanfix::sqlChanOp::Delete> "
-                << queryString.str().c_str()
-                << endl;
+	elog	<< "chanfix::sqlChanOp::Delete> "
+		<< queryString.str().c_str()
+		<< std::endl;
 //#endif
 
 ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
 
 if( PGRES_COMMAND_OK != status )
-        {
-        // TODO: Log to msgchan here.
-        elog    << "chanfix::sqlChanOp::Delete> Something went wrong: "
-                << SQLDb->ErrorMessage()
-                << endl;
+	{
+	// TODO: Log to msgchan here.
+	elog	<< "chanfix::sqlChanOp::Delete> Something went wrong: "
+		<< SQLDb->ErrorMessage()
+		<< std::endl;
 
-        return false;
-        }
+	return false;
+	}
 
 return true;
 
@@ -156,9 +152,9 @@ bool sqlChanOp::commit()
 {
 static const char* queryHeader =    "UPDATE chanOps ";
 
-elog    << "chanfix::sqlChanOp::commit> " << account << " && " << channel << endl;
+elog	<< "chanfix::sqlChanOp::commit> " << account << " && " << channel << std::endl;
 
-stringstream queryString;
+std::stringstream queryString;
 queryString	<< queryHeader << "SET last_seen_as = "<< "'"
 		<< escapeSQLChars(nickUserHost)
 		<< "', ts_firstopped = " << ts_firstopped
@@ -181,25 +177,25 @@ queryString	<< queryHeader << "SET last_seen_as = "<< "'"
 		<< string_lower(escapeSQLChars(channel))
 		<< "' AND lower(account) = '"
 		<< string_lower(escapeSQLChars(account)) << "'"
-		<< ends;
+		<< std::ends;
 
 //#ifdef LOG_SQL
-        elog    << "chanfix::sqlChanOp::commit> "
-                << queryString.str().c_str()
-                << endl;
+	elog	<< "chanfix::sqlChanOp::commit> "
+		<< queryString.str().c_str()
+		<< std::endl;
 //#endif
 
 ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
 
 if( PGRES_COMMAND_OK != status )
-        {
-        // TODO: Log to msgchan here.
-        elog    << "chanfix::sqlChanOp::commit> Something went wrong: "
-                << SQLDb->ErrorMessage()
-                << endl;
+	{
+	// TODO: Log to msgchan here.
+	elog	<< "chanfix::sqlChanOp::commit> Something went wrong: "
+		<< SQLDb->ErrorMessage()
+		<< std::endl;
 
-        return false;
-        }
+	return false;
+	}
 
 return true;
 

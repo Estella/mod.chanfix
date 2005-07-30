@@ -26,7 +26,8 @@
 
 #include <stdlib.h>
 #include <iostream>
-#include <time.h>
+#include <ctime>
+
 #include "gnuworld_config.h"
 #include "Network.h"
 
@@ -40,8 +41,6 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
-
-using std::string;
 
 void OPLISTCommand::Exec(iClient* theClient, const std::string& Message)
 {
@@ -61,7 +60,7 @@ if (!netChan) {
 chanfix::chanOpsType myOps = bot->getMyOps(netChan);
 if (myOps.empty()) {
   bot->Notice(theClient, "There are no scores in the database for %s.",
-              netChan->getName().c_str());
+	      netChan->getName().c_str());
   return;
 }
 
@@ -76,7 +75,7 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
  * dont want a notice saying 0 accounts. */
 if (oCnt == 0) {
   bot->Notice(theClient, "There are no scores in the database for %s.",
-              netChan->getName().c_str());
+	      netChan->getName().c_str());
   return;
 }
 

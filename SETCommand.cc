@@ -38,9 +38,6 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-using std::string;
-using namespace level;
-
 void SETCommand::Exec(iClient* theClient, const std::string& Message)
 {
 StringTokenizer st(Message);
@@ -49,11 +46,11 @@ if (st.size() < 3) {
   return;
 }
 
-string option = string_upper(st[1]);
-string value = string_upper(st[2]);
+std::string option = string_upper(st[1]);
+std::string value = string_upper(st[2]);
 
-string::size_type pos;
-while ((pos = option.find('_', 0)) != string::npos)
+std::string::size_type pos;
+while ((pos = option.find('_', 0)) != std::string::npos)
   option.erase(pos, 1);
 
 if (option == "NUMSERVERS") {

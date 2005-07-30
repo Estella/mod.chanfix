@@ -3,26 +3,21 @@
  *
  */
 
-#include        <sstream>
-#include        <string>
-#include        <iostream>
-#include        <cstring>
+#include	<sstream>
+#include	<string>
+#include	<iostream>
+#include	<cstring>
 
 #include	"libpq++.h"
 
-#include        "ELog.h"
-#include        "misc.h"
+#include	"ELog.h"
+#include	"misc.h"
 
-#include        "sqlChannel.h"
+#include	"sqlChannel.h"
 #include	"chanfix.h"
 
 namespace gnuworld
 {
-
-using std::string ;
-using std::endl ;
-using std::ends ;
-using std::stringstream ;
 
 const sqlChannel::flagType sqlChannel::F_BLOCKED	= 0x00000001 ;
 const sqlChannel::flagType sqlChannel::F_ALERT		= 0x00000002 ;
@@ -47,29 +42,29 @@ bool sqlChannel::Insert()
 {
 static const char* queryHeader = "INSERT INTO channels (channel, flags) VALUES (";
 
-stringstream queryString;
-queryString     << queryHeader << "'"
+std::stringstream queryString;
+queryString	<< queryHeader << "'"
 		<< escapeSQLChars(channel) << "',"
 		<< flags << ")"
-                << ends;
+		<< std::ends;
 
 //#ifdef LOG_SQL
-        elog    << "sqlChannel::Insert> "
-                << queryString.str().c_str()
-                << endl;
+	elog	<< "sqlChannel::Insert> "
+		<< queryString.str().c_str()
+		<< std::endl;
 //#endif
 
 ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
 
 if( PGRES_COMMAND_OK != status )
-        {
-        // TODO: Log to msgchan here.
-        elog    << "sqlChannel::Insert> Something went wrong: "
-                << SQLDb->ErrorMessage()
-                << endl;
+	{
+	// TODO: Log to msgchan here.
+	elog	<< "sqlChannel::Insert> Something went wrong: "
+		<< SQLDb->ErrorMessage()
+		<< std::endl;
 
-        return false;
-        }
+	return false;
+	}
 
 return true;
 
@@ -79,28 +74,28 @@ bool sqlChannel::Delete()
 {
 static const char* queryHeader =    "DELETE FROM channels ";
 
-stringstream queryString;
-queryString     << queryHeader << "WHERE channel = '"
-                << escapeSQLChars(channel) << "'"
-                << ends;
+std::stringstream queryString;
+queryString	<< queryHeader << "WHERE channel = '"
+		<< escapeSQLChars(channel) << "'"
+		<< std::ends;
 
 //#ifdef LOG_SQL
-        elog    << "chanfix::sqlChannel::Delete> "
-                << queryString.str().c_str()
-                << endl;
+	elog	<< "chanfix::sqlChannel::Delete> "
+		<< queryString.str().c_str()
+		<< std::endl;
 //#endif
 
 ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
 
 if( PGRES_COMMAND_OK != status )
-        {
-        // TODO: Log to msgchan here.
-        elog    << "chanfix::sqlChannel::Delete> Something went wrong: "
-                << SQLDb->ErrorMessage()
-                << endl;
+	{
+	// TODO: Log to msgchan here.
+	elog	<< "chanfix::sqlChannel::Delete> Something went wrong: "
+		<< SQLDb->ErrorMessage()
+		<< std::endl;
 
-        return false;
-        }
+	return false;
+	}
 
 return true;
 
@@ -110,29 +105,29 @@ bool sqlChannel::commit()
 {
 static const char* queryHeader =    "UPDATE channels ";
 
-stringstream queryString;
-queryString     << queryHeader << "SET flags = "
+std::stringstream queryString;
+queryString	<< queryHeader << "SET flags = "
 		<< flags << " WHERE channel = '"
-                << escapeSQLChars(channel) << "'"
-                << ends;
+		<< escapeSQLChars(channel) << "'"
+		<< std::ends;
 
 //#ifdef LOG_SQL
-        elog    << "chanfix::sqlChannel::commit> "
-                << queryString.str().c_str()
-                << endl;
+	elog	<< "chanfix::sqlChannel::commit> "
+		<< queryString.str().c_str()
+		<< std::endl;
 //#endif
 
 ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
 
 if( PGRES_COMMAND_OK != status )
-        {
-        // TODO: Log to msgchan here.
-        elog    << "chanfix::sqlChannel::commit> Something went wrong: "
-                << SQLDb->ErrorMessage()
-                << endl;
+	{
+	// TODO: Log to msgchan here.
+	elog	<< "chanfix::sqlChannel::commit> Something went wrong: "
+		<< SQLDb->ErrorMessage()
+		<< std::endl;
 
-        return false;
-        }
+	return false;
+	}
 
 return true;
 

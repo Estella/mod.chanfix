@@ -37,9 +37,6 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-using std::string;
-using namespace level;
-
 void SHUTDOWNCommand::Exec(iClient*, const std::string& Message)
 {
 

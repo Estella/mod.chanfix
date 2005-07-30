@@ -36,8 +36,6 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-using std::string;
-
 void CHANFIXCommand::Exec(iClient* theClient, const std::string& Message)
 {
 StringTokenizer st(Message);
@@ -49,7 +47,7 @@ if (st.size() < 2) {
 bool override = false;
 
 if (st.size() > 2) {
-  const string flag = string_upper(st[2]);
+  const std::string flag = string_upper(st[2]);
   if ((flag == "OVERRIDE") || (flag == "NOW") || (flag == "YES") || (flag == "!"))
     override = true;
 }

@@ -30,8 +30,6 @@
 namespace gnuworld
 {
 
-using std::endl;
-
 bool compare_points(gnuworld::sqlChanOp* a, gnuworld::sqlChanOp* b) {
   return a->getPoints() > b->getPoints();
 }

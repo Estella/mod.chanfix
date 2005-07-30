@@ -58,16 +58,16 @@ inline bool operator()( const std::pair<std::string, std::string>& lhs, const st
 {
 	elog << "gnuworld::noCaseComparePair> DEBUG:"
 		<< "[lfirst=" << lhs.first
-                << " lsecond=" << lhs.second
+		<< " lsecond=" << lhs.second
 		<< "] [rfirst=" << rhs.first
 		<< " rsecond=" << rhs.second << "]"
 		<< std::endl;
-        if (!strcasecmp(lhs.first, rhs.first) && !strcasecmp(lhs.second, rhs.second)) {
+	if (!strcasecmp(lhs.first, rhs.first) && !strcasecmp(lhs.second, rhs.second)) {
 		elog << "gnuworld::noCaseComparePair> DEBUG: This is a match!" << std::endl;
 		return true;
 	} else {
-                elog << "gnuworld::noCaseComparePair> DEBUG: This is not a match!" << std::endl;
-                return false;
+		elog << "gnuworld::noCaseComparePair> DEBUG: This is not a match!" << std::endl;
+		return false;
 	}
 }
 } ;
@@ -90,7 +90,7 @@ public:
 	 * Current network state.
 	 */
 	enum STATE {
-	        BURST,
+		BURST,
 		RUN,
 		SPLIT,
 		INIT
@@ -125,76 +125,76 @@ public:
 	 */
 	virtual void BurstChannels() ;
 
-        /**
-         * This method is invoked when this module is first loaded.
-         * This is a good place to setup timers, connect to DB, etc.
-         * At this point, the server may not yet be connected to the
-         * network, so please do not issue join/nick requests.
-         */
-        virtual void OnAttach() ;
+	/**
+	 * This method is invoked when this module is first loaded.
+	 * This is a good place to setup timers, connect to DB, etc.
+	 * At this point, the server may not yet be connected to the
+	 * network, so please do not issue join/nick requests.
+	 */
+	virtual void OnAttach() ;
 
-        /**
-         * This method is called when this module is being unloaded from
-         * the server.  This is a good place to cleanup, including
-         * deallocating timers, closing connections, closing log files,
-         * and deallocating private data stored in iClients.
-         */
-        virtual void OnDetach( const std::string& =
-			string( "Shutting down" ) ) ;
+	/**
+	 * This method is called when this module is being unloaded from
+	 * the server.  This is a good place to cleanup, including
+	 * deallocating timers, closing connections, closing log files,
+	 * and deallocating private data stored in iClients.
+	 */
+	virtual void OnDetach( const std::string& =
+			std::string( "Shutting down" ) ) ;
 
-        /**
-         * This method is called when the server connects to the network.
-         * Note that if this module is attached while already connected
-         * to a network, this method is still invoked.
-         */
-        virtual void OnConnect() ;
+	/**
+	 * This method is called when the server connects to the network.
+	 * Note that if this module is attached while already connected
+	 * to a network, this method is still invoked.
+	 */
+	virtual void OnConnect() ;
 
-        /**
-         * This method is invoked when the server disconnects from
-         * its uplink.
-         */
-        virtual void OnDisconnect() ;
+	/**
+	 * This method is invoked when the server disconnects from
+	 * its uplink.
+	 */
+	virtual void OnDisconnect() ;
 
-        /**
-         * This method will register a given command handler, removing
-         * (and deallocating) the existing handler for this command,
-         * should one exist.
-         */
+	/**
+	 * This method will register a given command handler, removing
+	 * (and deallocating) the existing handler for this command,
+	 * should one exist.
+	 */
 	virtual bool RegisterCommand( Command* ) ;
 
-        /**
-         * This method will unregister the command handler for the command
-         * of the given command name, deallocating the object from the
-         * heap as well.
-         */
+	/**
+	 * This method will unregister the command handler for the command
+	 * of the given command name, deallocating the object from the
+	 * heap as well.
+	 */
 	virtual bool UnRegisterCommand( const std::string& ) ;
 
-        /**
-         * This method is invoked each time a channel event occurs
-         * for one of the channels for which this client has registered
-         * to receive channel events.
-         */
-        virtual void    OnChannelEvent( const channelEventType&, Channel*,
-                void* data1 = 0, void* data2 = 0,
-                void* data3 = 0, void* data4 = 0 ) ;
+	/**
+	 * This method is invoked each time a channel event occurs
+	 * for one of the channels for which this client has registered
+	 * to receive channel events.
+	 */
+	virtual void	OnChannelEvent( const channelEventType&, Channel*,
+		void* data1 = 0, void* data2 = 0,
+		void* data3 = 0, void* data4 = 0 ) ;
 
-        /**
-         * This method is invoked when a user sets or removes
-         * one or more channel mode (o).  Keep in mind that the
-         * source ChannelUser may be NULL if a server is
-         * setting the mode.
-         */
-        virtual void OnChannelModeO( Channel*, ChannelUser*,
-                        const xServer::opVectorType& ) ;
+	/**
+	 * This method is invoked when a user sets or removes
+	 * one or more channel mode (o).  Keep in mind that the
+	 * source ChannelUser may be NULL if a server is
+	 * setting the mode.
+	 */
+	virtual void OnChannelModeO( Channel*, ChannelUser*,
+			const xServer::opVectorType& ) ;
 
-        /**
-         * This method is invoked each time a network event occurs.
-         */
-        virtual void    OnEvent( const eventType& theEvent,
-                void* data1 = 0, void* data2 = 0,
-                void* data3 = 0, void* data4 = 0 ) ;
+	/**
+	 * This method is invoked each time a network event occurs.
+	 */
+	virtual void	OnEvent( const eventType& theEvent,
+		void* data1 = 0, void* data2 = 0,
+		void* data3 = 0, void* data4 = 0 ) ;
 
-        virtual void OnCTCP( iClient*, const std::string&, const std::string&, bool ) ;
+	virtual void OnCTCP( iClient*, const std::string&, const std::string&, bool ) ;
 
 	/**
 	 * Our functions.
@@ -203,10 +203,10 @@ public:
 	void readConfigFile(const std::string&);
 
 	sqlChanOp* newChanOp(const std::string&, const std::string&);
-	sqlChanOp* newChanOp(iClient*, Channel*);
+	sqlChanOp* newChanOp(Channel*, iClient*);
 
 	sqlChanOp* findChanOp(const std::string&, const std::string&);
-	sqlChanOp* findChanOp(iClient*, Channel*);
+	sqlChanOp* findChanOp(Channel*, iClient*);
 
 	void preloadChanOpsCache();
 	void preloadChannelCache();
@@ -219,11 +219,11 @@ public:
 
 	void updatePoints();
 
-	void givePoints(iClient*, Channel*);
-	void gotOpped(iClient*, Channel*);
-	void lostOps(iClient*, Channel*);
+	void givePoints(Channel*, iClient*);
+	void gotOpped(Channel*, iClient*);
+	void lostOps(Channel*, iClient*);
 
-	bool wasOpped(iClient*, Channel*);
+	bool wasOpped(Channel*, iClient*);
 	bool hasIdent(iClient*);
 
 	void checkNetwork();
@@ -233,8 +233,8 @@ public:
 	void manualFix(Channel*);
 
 	bool fixChan(sqlChannel*, bool);
-        
-        void chanfix::startScoringChan(Channel*);
+
+	void chanfix::startScoringChan(Channel*);
 
 	sqlChannel* getChannelRecord(const std::string&);
 	sqlChannel* getChannelRecord(Channel*);
@@ -282,15 +282,15 @@ public:
 	/**
 	 * ChannelOp map
 	 */
-//        typedef map< std::pair<std::string, std::string>, sqlChanOp*, noCaseComparePair> sqlChanOpsType;
-        typedef std::map< std::pair<std::string, std::string>, sqlChanOp*> sqlChanOpsType;
+	//typedef map< std::pair<std::string, std::string>, sqlChanOp*, noCaseComparePair> sqlChanOpsType;
+	typedef std::map< std::pair<std::string, std::string>, sqlChanOp*> sqlChanOpsType;
 	sqlChanOpsType sqlChanOps;
 	
 	typedef std::map <std::string, sqlChannel*, noCaseCompare> sqlChannelCacheType;
 	sqlChannelCacheType sqlChanCache;
 
 	typedef std::map <std::string, Channel*, noCaseCompare> clientOpsType;
-        clientOpsType*  findMyOps(iClient*);
+	clientOpsType*  findMyOps(iClient*);
 
 	typedef std::list< sqlChanOp* > chanOpsType;
 	chanOpsType	getMyOps(Channel*);
@@ -305,12 +305,12 @@ public:
 	fixQueueType	autoFixQ;
 	fixQueueType	manFixQ;
 
-        typedef vector< iClient* > acctListType; //For reopping all logged in users to an acct.
-        acctListType findAccount(const std::string&, Channel*);
-        
-	std::string          consoleChan;
-	std::string          operChan;
-	std::string          supportChan;
+	typedef std::vector< iClient* > acctListType; //For reopping all logged in users to an acct.
+	acctListType findAccount(Channel*, const std::string&);
+
+	std::string	consoleChan;
+	std::string	operChan;
+	std::string	supportChan;
 
 protected:
 	/**
@@ -347,11 +347,11 @@ protected:
 	bool		clientNeedsIdent;
 	bool		clientNeedsReverse;
 	unsigned int	connectCheckFreq;
-	std::string          sqlHost;
-	std::string          sqlPort;
-	std::string          sqlUser;
-	std::string          sqlPass;
-	std::string          sqlDB;
+	std::string	sqlHost;
+	std::string	sqlPort;
+	std::string	sqlUser;
+	std::string	sqlPass;
+	std::string	sqlDB;
 	
 
 	/**
@@ -377,9 +377,9 @@ protected:
 
 public:
 
-        /*
-         *  Methods to get data attributes.
-         */
+	/*
+	 *  Methods to get data attributes.
+	 */
 	bool doAutoFix() { return enableAutoFix; }
 	bool doChanFix() { return enableChanFix; }
 	bool doChanBlocking() { return enableChannelBlocking; }
@@ -390,9 +390,9 @@ public:
 	unsigned int getMinClients() { return minClients; }
 	short getCurrentDay() { return currentDay; }
 
-        /*
-         *  Methods to set data attributes.
-         */
+	/*
+	 *  Methods to set data attributes.
+	 */
 	inline void	setNumServers(int _numServers)
 		{ numServers = _numServers; }
 	inline void	setDoAutoFix(bool _enableAutoFix)

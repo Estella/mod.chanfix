@@ -37,9 +37,6 @@ RCSTAG("$Id: ROTATECommand.cc 1165 2005-07-26 00:52:31Z Compster $");
 namespace gnuworld
 {
 
-using std::string;
-using namespace level;
-
 void ROTATECommand::Exec(iClient* theClient, const std::string&)
 {
 bot->logAdminMessage("%s (%s) ordered a manual DB rotation.",

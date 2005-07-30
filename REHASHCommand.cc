@@ -37,9 +37,6 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-using std::string;
-using namespace level;
-
 void REHASHCommand::Exec(iClient* theClient, const std::string& Message)
 {
 

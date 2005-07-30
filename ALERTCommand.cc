@@ -40,11 +40,6 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-using std::endl;
-using std::string;
-using std::stringstream;
-using std::ends;
-
 void ALERTCommand::Exec(iClient* theClient, const std::string& Message)
 {
 StringTokenizer st(Message);
@@ -69,7 +64,7 @@ theChan->commit();
 /* bot->addNote(theChan, ... "ALERT flag added by %s" */
 
 bot->Notice(theClient, "ALERT flag added from channel %s",
-            theChan->getChannel().c_str());
+	    theChan->getChannel().c_str());
 
 return;
 }

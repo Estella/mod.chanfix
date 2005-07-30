@@ -38,9 +38,6 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-using std::string;
-using namespace level;
-
 void STATUSCommand::Exec(iClient* theClient, const std::string&)
 {
 

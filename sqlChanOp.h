@@ -8,8 +8,8 @@
 #ifndef __SQLCHANOP_H
 #define __SQLCHANOP_H "$Id$"
 
-#include        <string>
-#include        "libpq++.h"
+#include	<string>
+#include	"libpq++.h"
 #include	"chanfix_config.h"
 
 namespace gnuworld
@@ -18,25 +18,25 @@ namespace gnuworld
 class sqlChanOp {
 
 public:
-        sqlChanOp(PgDatabase*) ;
-        virtual ~sqlChanOp() ;
+	sqlChanOp(PgDatabase*) ;
+	virtual ~sqlChanOp() ;
 
 
-        /*
-         *  Methods to get data attributes.
-         */
+	/*
+	 *  Methods to get data attributes.
+	 */
 
-        inline const std::string&	getChannel() const
-                { return channel ; }
+	inline const std::string&	getChannel() const
+		{ return channel ; }
 
-        inline const std::string&	getAccount() const
-                { return account ; }
+	inline const std::string&	getAccount() const
+		{ return account ; }
 
 	inline const int&	getPoints() const
 		{ return points ; }		
 
 	inline const std::string&	getLastSeenAs() const
-                { return nickUserHost ; }
+		{ return nickUserHost ; }
 
 	inline const time_t	getTimeFirstOpped() const
 		{ return ts_firstopped ; }
@@ -47,30 +47,30 @@ public:
 	inline const short&	getDay(int _dayval) const
 		{ return day[_dayval] ; }
 
-        /*
-         *  Methods to set data attributes.
-         */
+	/*
+	 *  Methods to set data attributes.
+	 */
 
-        inline void	setChannel(std::string _channel)
-                { channel = _channel ; }
+	inline void	setChannel(std::string _channel)
+		{ channel = _channel ; }
 
-        inline void	setAccount(std::string _account)
-                { account = _account ; }
+	inline void	setAccount(std::string _account)
+		{ account = _account ; }
 
-        inline void	setPoints(short _points)
+	inline void	setPoints(short _points)
 		{ day[currentDay] = _points; calcTotalPoints(); }
 
 	inline void	addPoint()
 		{ day[currentDay]++; calcTotalPoints(); }
 
-        inline void	setLastSeenAs(std::string _nickUserHost)
+	inline void	setLastSeenAs(std::string _nickUserHost)
 		{ nickUserHost = _nickUserHost ; }
 
 	inline void     setTimeFirstOpped(time_t _ts_firstopped)
 		{ ts_firstopped = _ts_firstopped ; }
 
-        inline void	setTimeLastOpped(time_t _ts_lastopped)
-                { ts_lastopped = _ts_lastopped ; }
+	inline void	setTimeLastOpped(time_t _ts_lastopped)
+		{ ts_lastopped = _ts_lastopped ; }
 		
 	inline void	setDay(int _dayval, short _pointsval)
 		{ day[_dayval] = _pointsval ; }
@@ -90,7 +90,7 @@ private:
 	time_t		ts_firstopped;
 	time_t		ts_lastopped;
 	short		day[DAYSAMPLES];
-        PgDatabase*     SQLDb;
+	PgDatabase*	SQLDb;
 
 }; // class
 

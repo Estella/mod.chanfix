@@ -61,11 +61,6 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-using std::endl;
-using std::stringstream;
-using std::map;
-using std::ends;
-
 short currentDay;
 
 /*
@@ -103,7 +98,7 @@ elog	<< "chanfix::chanfix> Attempting to connect to "
 	<< sqlHost << " at port " << sqlPort
 	<< " as User " << sqlUser << " to database: "
 	<< sqlDB
-	<< endl;
+	<< std::endl;
 
 SQLDb = new (std::nothrow) cmDatabase( Query.c_str() ) ;
 assert( SQLDb != 0 ) ;
@@ -112,17 +107,17 @@ assert( SQLDb != 0 ) ;
 if (SQLDb->ConnectionBad ())
 	{
 	elog	<< "chanfix::chanfix> Unable to connect to SQL server."
-		<< endl
+		<< std::endl
 		<< "chanfix::chanfix> PostgreSQL error message: "
 		<< SQLDb->ErrorMessage()
-		<< endl ;
+		<< std::endl;
 
 	::exit( 0 ) ;
 	}
 else
 	{
 	elog	<< "chanfix::chanfix> Connection established to SQL server"
-		<< endl ;
+		<< std::endl;
 	}
 
 /* Register the commands we want to use */
@@ -198,7 +193,7 @@ sqlUser = chanfixConfig->Require("sqlUser")->second;
 sqlPass = chanfixConfig->Require("sqlPass")->second;
 
 elog	<< "chanfix::readConfigFile> Configuration loaded!"
-	<< endl;
+	<< std::endl;
 }
 
 
@@ -429,8 +424,8 @@ switch( whichEvent )
 	case EVT_PART:
 		{
 		theClient = static_cast< iClient* >( data1 );
-		if (wasOpped(theClient, theChan))
-		  lostOps(theClient, theChan);
+		if (wasOpped(theChan, theClient))
+		  lostOps(theChan, theClient);
 		break ;
 		}
 	default:
@@ -448,26 +443,25 @@ void chanfix::OnChannelModeO( Channel* theChan, ChannelUser*,
 
 if (theChan->size() < minClients) return;
 
-for( xServer::opVectorType::const_iterator ptr = theTargets.begin() ;
-        ptr != theTargets.end() ; ++ptr )
-        {
-        ChannelUser* tmpUser = ptr->second;
-        bool polarity = ptr->first;
+for (xServer::opVectorType::const_iterator ptr = theTargets.begin();
+     ptr != theTargets.end(); ++ptr) {
+  ChannelUser* tmpUser = ptr->second;
+  bool polarity = ptr->first;
 
-        if (polarity) {
-	  // Someone is opped
-	  gotOpped(tmpUser->getClient(), theChan);
-	} else {
-	  // Someone is deopped
-          if (wasOpped(tmpUser->getClient(), theChan))
-	    lostOps(tmpUser->getClient(), theChan);
-	} // if
-	} // for
+  if (polarity) {
+    // Someone is opped
+    gotOpped(theChan, tmpUser->getClient());
+  } else {
+    // Someone is deopped
+    if (wasOpped(theChan, tmpUser->getClient()))
+      lostOps(theChan, tmpUser->getClient());
+  } // if
+} // for
 }
 
 /* OnEvent */
 void chanfix::OnEvent( const eventType& whichEvent,
-        void* data1, void* data2, void* data3, void* data4 )
+	void* data1, void* data2, void* data3, void* data4 )
 {
 switch(whichEvent)
 	{
@@ -493,7 +487,7 @@ switch(whichEvent)
 		clientOpsType* myOps = findMyOps(theClient);
 		for (clientOpsType::iterator ptr = myOps->begin();
 		     ptr != myOps->end(); ptr++)
-		  lostOps(theClient, ptr->second);
+		  lostOps(ptr->second, theClient);
 		break;
 		}
 	}
@@ -509,13 +503,13 @@ va_start( _list, format ) ;
 vsnprintf( buf, 1024, format, _list ) ;
 va_end( _list ) ;
 
-stringstream s;
+std::stringstream s;
 s	<< MyUplink->getCharYY()
 	<< " O "
 	<< theChannel->getName()
 	<< " :"
 	<< buf
-	<< ends;
+	<< std::ends;
 
 Write( s );
 
@@ -526,15 +520,15 @@ return false;
  * Send a notice to a channel from the server.
  * TODO: Move this method to xServer.
  */
-bool chanfix::serverNotice( Channel* theChannel, const string& Message)
+bool chanfix::serverNotice( Channel* theChannel, const std::string& Message)
 {
-stringstream s;
+std::stringstream s;
 s	<< MyUplink->getCharYY()
 	<< " O "
 	<< theChannel->getName()
 	<< " :"
 	<< Message
-	<< ends;
+	<< std::ends;
 
 Write( s );
 return false;
@@ -555,12 +549,12 @@ if (!tmpChan)
 	return false;
 	}
 
-string message = string( "[" ) + nickName + "] " + buf ;
+std::string message = std::string( "[" ) + nickName + "] " + buf ;
 serverNotice(tmpChan, message);
 return true;
 }
 
-void chanfix::doSqlError(const string& theQuery, const string& theError)
+void chanfix::doSqlError(const std::string& theQuery, const std::string& theError)
 {
 	/* First, log it to error out */
 	elog	<< "SQL> Whilst executing: "
@@ -573,71 +567,71 @@ void chanfix::doSqlError(const string& theQuery, const string& theError)
 
 void chanfix::preloadChanOpsCache()
 {
-        std::stringstream theQuery;
-        theQuery        << "SELECT channel,account,last_seen_as,ts_firstopped,ts_lastopped,day0,day1,day2,day3,day4,day5,day6,day7,day8,day9,day10,day11,day12,day13 FROM chanOps"
-                                << ends;
+	std::stringstream theQuery;
+	theQuery	<< "SELECT channel,account,last_seen_as,ts_firstopped,ts_lastopped,day0,day1,day2,day3,day4,day5,day6,day7,day8,day9,day10,day11,day12,day13 FROM chanOps"
+			<< std::ends;
 
-        elog            << "*** [chanfix::preloadChanOpsCache]: Loading chanOps and their points ..." 
-                                << endl;
+	elog		<< "*** [chanfix::preloadChanOpsCache]: Loading chanOps and their points ..." 
+			<< std::endl;
 
-        ExecStatusType status = SQLDb->Exec(theQuery.str().c_str()) ;
+	ExecStatusType status = SQLDb->Exec(theQuery.str().c_str()) ;
 
-        if( PGRES_TUPLES_OK == status )
-        {
-                for (int i = 0 ; i < SQLDb->Tuples(); i++)
-                        {
-                                sqlChanOp* newOp = new (std::nothrow) sqlChanOp(SQLDb);
-                                assert( newOp != 0 ) ;
+	if( PGRES_TUPLES_OK == status )
+	{
+		for (int i = 0 ; i < SQLDb->Tuples(); i++)
+		{
+			sqlChanOp* newOp = new (std::nothrow) sqlChanOp(SQLDb);
+			assert( newOp != 0 ) ;
 
-                                newOp->setAllMembers(i);
-				std::pair<string, string> thePair (newOp->getAccount(), newOp->getChannel());
-                                sqlChanOps.insert(sqlChanOpsType::value_type(thePair, newOp));
-                        }
-        } else	{
+			newOp->setAllMembers(i);
+			std::pair<std::string, std::string> thePair (newOp->getChannel(), newOp->getAccount());
+			sqlChanOps.insert(sqlChanOpsType::value_type(thePair, newOp));
+		}
+	} else	{
 		elog << "[chanfix::preloadChanOpsCache] Something went wrong: "
-        	        << SQLDb->ErrorMessage()
-                	<< endl;
+			<< SQLDb->ErrorMessage()
+			<< std::endl;
 		exit(0);
 	}
 
-        elog    << "*** [chanfix::preloadChanOpsCache]: Done. Loaded "
-                        << SQLDb->Tuples()
-                        << " chanops."
-                        << endl;
+	elog	<< "*** [chanfix::preloadChanOpsCache]: Done. Loaded "
+			<< SQLDb->Tuples()
+			<< " chanops."
+			<< std::endl;
 }
 
 void chanfix::preloadChannelCache()
 {
-        std::stringstream theQuery;
-        theQuery        << "SELECT channel, flags FROM channels"
-                                << ends;
+	std::stringstream theQuery;
+	theQuery	<< "SELECT channel, flags FROM channels"
+			<< std::ends;
 
-        elog            << "*** [chanfix::preloadChannelCache]: Loading channels ..."
-                                << endl;
+	elog		<< "*** [chanfix::preloadChannelCache]: Loading channels ..."
+			<< std::endl;
 
-        ExecStatusType status = SQLDb->Exec(theQuery.str().c_str()) ;
+	ExecStatusType status = SQLDb->Exec(theQuery.str().c_str()) ;
 
-        if( PGRES_TUPLES_OK == status )
-        {
-                for (int i = 0 ; i < SQLDb->Tuples(); i++)
-                        {
-                                sqlChannel* newChan = new (std::nothrow) sqlChannel(SQLDb);
-                                assert( newChan != 0 ) ;
+	if( PGRES_TUPLES_OK == status )
+	{
+		for (int i = 0 ; i < SQLDb->Tuples(); i++)
+		{
+			sqlChannel* newChan = new (std::nothrow) sqlChannel(SQLDb);
+			assert( newChan != 0 ) ;
 
-                                newChan->setAllMembers(i);
-                                sqlChanCache.insert(sqlChannelCacheType::value_type(newChan->getChannel(), newChan));
-                        }
-        } else  {
-                elog << "[chanfix::preloadChannelCache] Something went wrong: "
-                        << SQLDb->ErrorMessage()
-                        << endl;
+			newChan->setAllMembers(i);
+			sqlChanCache.insert(sqlChannelCacheType::value_type(newChan->getChannel(), newChan));
+		}
+	} else  {
+		elog	<< "[chanfix::preloadChannelCache] Something went wrong: "
+			<< SQLDb->ErrorMessage()
+			<< std::endl;
 		exit(0);
-        }
+	}
 
-        elog    << "*** [chanfix::preloadChannelCache]: Done. Loaded "
-                        << SQLDb->Tuples()
-                        << " channels."
-                        << endl;
+	elog	<< "*** [chanfix::preloadChannelCache]: Done. Loaded "
+			<< SQLDb->Tuples()
+			<< " channels."
+			<< std::endl;
 }
 
 void chanfix::changeState(STATE newState)
@@ -653,23 +647,23 @@ switch( currentState ) {
 	case BURST:
 	{
 	elog	<< "chanfix::changeState> Exiting state BURST"
-		<< endl;
+		<< std::endl;
 	break;
 	}
 	case RUN:
 	{
 	elog	<< "chanfix::changeState> Exiting state RUN"
-		<< endl;
+		<< std::endl;
 	}
 	case SPLIT:
 	{
 	elog	<< "chanfix::changeState> Exiting state SPLIT"
-		<< endl;
+		<< std::endl;
 	}
 	case INIT:
 	{
 	elog	<< "chanfix::changeState> Exiting state INIT"
-		<< endl;
+		<< std::endl;
 	}
 
 }
@@ -680,25 +674,25 @@ switch( currentState ) {
 	case BURST:
 	{
 	elog	<< "chanfix::changeState> Entering state BURST"
-		<< endl;
+		<< std::endl;
 	break;
 	}
 	case RUN:
 	{
 	elog	<< "chanfix::changeState> Entering state RUN"
-		<< endl;
+		<< std::endl;
 	break;
 	}
 	case SPLIT:
 	{
 	elog	<< "chanfix::changeState> Entering state SPLIT"
-		<< endl;
+		<< std::endl;
 	break;
 	}
 	case INIT:
 	{
 	elog	<< "chanfix::changeState> Entering state INIT"
-		<< endl;
+		<< std::endl;
 	break;
 	}
 
@@ -707,51 +701,33 @@ switch( currentState ) {
 elog	<< "Changed state in: "
 	<< stateTimer.stopTimeMS()
 	<< "ms"
-	<< endl;
+	<< std::endl;
 }
 
-sqlChanOp* chanfix::findChanOp(const std::string& account, const std::string& channel)
+sqlChanOp* chanfix::findChanOp(const std::string& channel, const std::string& account)
 {
 
-sqlChanOpsType::iterator ptr = sqlChanOps.find(std::pair<string,string>(account, channel));
+sqlChanOpsType::iterator ptr = sqlChanOps.find(std::pair<std::string,std::string>(channel, account));
 if (ptr != sqlChanOps.end()) {
   elog	<< "chanfix::findChanOp> DEBUG: We've got a winner: "
-	<< ptr->second->getAccount() << " on " << ptr->second->getChannel() << "!!" << endl;
+	<< ptr->second->getAccount() << " on " << ptr->second->getChannel() << "!!" << std::endl;
   return ptr->second ;
 }
 
 return 0;
 }
 
-/*
- * sqlChanOp* chanfix::findChanOp(const std::string& account, const std::string& channel)
- * {
- * std::pair<string,string> curPair;
- *
- * for(sqlChanOpsType::iterator ptr = sqlChanOps.begin(); ptr != sqlChanOps.end(); ptr++) {
- *   curPair = ptr->first;
- *   if(!strcasecmp(curPair.first, account) && !strcasecmp(curPair.second, channel)) {
- * //    elog << "chanfix::findChanOp> DEBUG: We've got a winner: " 
- * //         << ptr->second->getAccount() << " on " << ptr->second->getChannel() << "!!" << endl;
- *    return ptr->second ;
- *  }
- * }
- *
- * return 0;
- * }
- */
-
-sqlChanOp* chanfix::newChanOp(const std::string& account, const std::string& channel)
+sqlChanOp* chanfix::newChanOp(const std::string& channel, const std::string& account)
 {
 sqlChanOp* newOp = new (std::nothrow) sqlChanOp(SQLDb);
 assert( newOp != 0 ) ;
 
-sqlChanOps.insert(sqlChanOpsType::value_type(std::pair<string,string>(account, channel), newOp));
+sqlChanOps.insert(sqlChanOpsType::value_type(std::pair<std::string,std::string>(channel, account), newOp));
 
-elog << "chanfix::newChanOp> DEBUG: Added new operator: " << account << " on " << channel << "!!" << endl;
+elog << "chanfix::newChanOp> DEBUG: Added new operator: " << account << " on " << channel << "!!" << std::endl;
 
-newOp->setAccount(account);
 newOp->setChannel(channel);
+newOp->setAccount(account);
 newOp->setTimeFirstOpped(currentTime());
 newOp->setTimeLastOpped(currentTime());
 newOp->Insert();
@@ -759,14 +735,14 @@ newOp->Insert();
 return newOp;
 }
 
-sqlChanOp* chanfix::findChanOp(iClient* theClient, Channel* theChan) 
+sqlChanOp* chanfix::findChanOp(Channel* theChan, iClient* theClient) 
 {
-return findChanOp(theClient->getAccount(), theChan->getName());
+return findChanOp(theChan->getName(), theClient->getAccount());
 }
 
-sqlChanOp* chanfix::newChanOp(iClient* theClient, Channel* theChan)
+sqlChanOp* chanfix::newChanOp(Channel* theChan, iClient* theClient)
 {
-return newChanOp(theClient->getAccount(), theChan->getName());
+return newChanOp(theChan->getName(), theClient->getAccount());
 }
 
 chanfix::chanOpsType chanfix::getMyOps(Channel* theChan)
@@ -784,35 +760,35 @@ return myOps;
 
 const std::string gnuworld::escapeSQLChars(const std::string& theString)
 {
-string retMe ;
+std::string retMe ;
 
 for( std::string::const_iterator ptr = theString.begin() ;
-        ptr != theString.end() ; ++ptr )
-        {
-        if( *ptr == '\'' )
-                {
-                retMe += "\\\047" ;
-                }
-        else if ( *ptr == '\\' )
-                {
-                retMe += "\\\134" ;
-                }
-        else
-                {
-                retMe += *ptr ;
-                }
-        }
+	ptr != theString.end() ; ++ptr )
+	{
+	if( *ptr == '\'' )
+		{
+		retMe += "\\\047" ;
+		}
+	else if ( *ptr == '\\' )
+		{
+		retMe += "\\\134" ;
+		}
+	else
+		{
+		retMe += *ptr ;
+		}
+	}
 return retMe ;
 }
 
-void chanfix::givePoints(iClient* theClient, Channel* theChan)
+void chanfix::givePoints(Channel* theChan, iClient* theClient)
 {
 //No points for unidented clients
 if (clientNeedsIdent && !hasIdent(theClient))
   return;
 
-sqlChanOp* thisOp = findChanOp(theClient, theChan);
-if(!thisOp) thisOp = newChanOp(theClient, theChan);
+sqlChanOp* thisOp = findChanOp(theChan, theClient);
+if(!thisOp) thisOp = newChanOp(theChan, theClient);
 
 thisOp->addPoint();
 thisOp->setTimeLastOpped(currentTime()); //Update the time they were last opped
@@ -820,10 +796,10 @@ thisOp->commit();
 
 elog	<< "chanfix::givePoints> DEBUG: Gave " << thisOp->getAccount()
 	<< " on " << thisOp->getChannel() << " a point."
-	<< endl;
+	<< std::endl;
 }
 
-void chanfix::gotOpped(iClient* thisClient, Channel* thisChan)
+void chanfix::gotOpped(Channel* thisChan, iClient* thisClient)
 {
 //Not enough users, forget about it.
 //if (thisChan->size() < minClients) return;
@@ -837,15 +813,15 @@ if (thisClient->getAccount() != "" &&
     !thisChan->getMode(Channel::MODE_A)) {
   elog	<< "chanfix::gotOpped> DEBUG: " << thisClient->getAccount()
 	<< " got opped on " << thisChan->getName()
-	<< endl;
+	<< std::endl;
 
-  sqlChanOp* thisOp = findChanOp(thisClient, thisChan);
-  if (!thisOp) thisOp = newChanOp(thisClient, thisChan);
+  sqlChanOp* thisOp = findChanOp(thisChan, thisClient);
+  if (!thisOp) thisOp = newChanOp(thisChan, thisClient);
 
   thisOp->setLastSeenAs(thisClient->getNickUserHost());
   thisOp->setTimeLastOpped(currentTime());
   
-  if (wasOpped(thisClient, thisChan))
+  if (wasOpped(thisChan, thisClient))
     return;
   
   
@@ -858,13 +834,13 @@ return;
 
 bool chanfix::hasIdent(iClient* theClient)
 {
-string userName = theClient->getUserName();
+std::string userName = theClient->getUserName();
 if (userName[0] == '~')
   return false;
 return true;
 }
 
-bool chanfix::wasOpped(iClient* theClient, Channel* theChan)
+bool chanfix::wasOpped(Channel* theChan, iClient* theClient)
 {
 clientOpsType* myOps = findMyOps(theClient);
 if (!myOps || myOps->empty())
@@ -878,7 +854,7 @@ if (ptr != myOps->end())
 return false;
 }
 
-void chanfix::lostOps(iClient* theClient, Channel* theChan)
+void chanfix::lostOps(Channel* theChan, iClient* theClient)
 {
 clientOpsType* myOps = findMyOps(theClient);
 if (!myOps || myOps->empty())
@@ -893,13 +869,13 @@ theClient->setCustomData(this, static_cast< void*>(myOps));
 void chanfix::checkNetwork()
 {
 if (100 * Network->serverList_size() < numServers * minServersPresent) {
-  elog << "chanfix::checkNetwork> DEBUG: Not enough servers linked! Going to SPLIT-state" << endl;
+  elog << "chanfix::checkNetwork> DEBUG: Not enough servers linked! Going to SPLIT-state" << std::endl;
   changeState(SPLIT);
   return;
 }
 
 if (currentState == SPLIT) {
-  elog << "chanfix::checkNetwork> DEBUG: Enough servers linked! Going to BURST-state" << endl;
+  elog << "chanfix::checkNetwork> DEBUG: Enough servers linked! Going to BURST-state" << std::endl;
   changeState(BURST);
   return;
 }
@@ -909,13 +885,13 @@ void chanfix::autoFix()
 {
 /* If autofixing has been disabled, well, forget it. */
 if (!enableAutoFix) {
-  elog << "chanfix::autoFix> DEBUG: AutoFix not enabled." << endl;
+  elog << "chanfix::autoFix> DEBUG: AutoFix not enabled." << std::endl;
   return;
 }
 
 /* If there are too many servers split, don't autofix. */
 if (currentState != RUN) {
-  elog << "chanfix::autoFix> DEBUG: currentState != RUN" << endl;
+  elog << "chanfix::autoFix> DEBUG: currentState != RUN" << std::endl;
   return;
 }
 
@@ -954,7 +930,7 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
        if ((sqlChan->getMaxScore() > 
 	   static_cast<int>(static_cast<float>(FIX_MIN_ABS_SCORE_END)
 	   * MAX_SCORE)) && !sqlChan->getFlag(sqlChannel::F_BLOCKED)) {
-	 elog << "chanfix::autoFix> DEBUG: " << thisChan->getName() << " is opless, fixing." << endl;
+	 elog << "chanfix::autoFix> DEBUG: " << thisChan->getName() << " is opless, fixing." << std::endl;
 	 autoFixQ.push_back(fixQueueType::value_type(thisChan, currentTime()));
 	 numOpLess++;
        }
@@ -964,12 +940,12 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
 
 //elog << "chanfix::autoFix> DEBUG: Found " << numOpLess << " of "
 //	<< Network->channelList_size() << " channels in "
-//	<< autoFixTimer.stopTimeMS() << " ms." << endl;
+//	<< autoFixTimer.stopTimeMS() << " ms." << std::endl;
 }
 
 void chanfix::manualFix(Channel* thisChan)
 {
-elog << "chanfix::manualFix> DEBUG: Manual fix " << thisChan->getName() << "!" << endl;
+elog << "chanfix::manualFix> DEBUG: Manual fix " << thisChan->getName() << "!" << std::endl;
 
 if (thisChan->getCreationTime() > 1) {
   if (version >= 12) /* temporary fix until GNUWorld is fixed */
@@ -1015,7 +991,7 @@ unsigned int maxOpped = (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED);
 /* If the channel has enough ops, abort & return. */
 unsigned int currentOps = countChanOps(netChan);
 if (currentOps >= maxOpped) {
-  elog << "chanfix::fixChan> DEBUG: Enough clients opped on " << netChan->getName() << endl;
+  elog << "chanfix::fixChan> DEBUG: Enough clients opped on " << netChan->getName() << std::endl;
   return true;
 } 
 
@@ -1042,7 +1018,7 @@ elog << "chanfix::fixChan> [" << netChan->getName() << "] max "
 	<< MAX_SCORE << ", begin " << FIX_MIN_ABS_SCORE_BEGIN
 	<< ", end " << FIX_MIN_ABS_SCORE_END << ", time "
 	<< time_since_start << ", maxtime " << max_time << "."
-	<< endl;
+	<< std::endl;
 
 /* Linear interpolation of (0, fraction_rel_max * max_score_channel) ->
  * (max_time, fraction_rel_min * max_score_channel)
@@ -1062,7 +1038,7 @@ if (min_score_rel > min_score)
 elog << "chanfix::fixChan> [" << netChan->getName() << "] start "
 	<< sqlChan->getFixStart() << ", delta " << time_since_start
 	<< ", max " << maxScore << ", minabs " << min_score_abs
-	<< ", minrel " << min_score_rel << "." << endl;
+	<< ", minrel " << min_score_rel << "." << std::endl;
 
 /**
  * Get the scores of the accounts of the non-opped clients.
@@ -1071,18 +1047,18 @@ elog << "chanfix::fixChan> [" << netChan->getName() << "] start "
 iClient* curClient = 0;
 sqlChanOp* curOp = 0;
 acctListType acctToOp;
-string modes = "+";
-string args;
+std::string modes = "+";
+std::string args;
 unsigned int numClientsToOp = 0;
 bool cntMaxedOut = false;
 for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
      opPtr++) {
   curOp = *opPtr;
 // elog	<< "chanfix::fixChan> DEBUG: "
-//	<< curOp->getPoints() << " >= " << min_score << endl;
+//	<< curOp->getPoints() << " >= " << min_score << std::endl;
   if (curOp->getPoints() >= min_score) {
-    acctToOp = findAccount(curOp->getAccount(), netChan);
-    vector< iClient* >::const_iterator acctPtr = acctToOp.begin(),
+    acctToOp = findAccount(netChan, curOp->getAccount());
+    std::vector< iClient* >::const_iterator acctPtr = acctToOp.begin(),
 	end = acctToOp.end();
     while (acctPtr != end) {
       curClient = *acctPtr;
@@ -1092,7 +1068,7 @@ for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
 		<< netChan->getName() << ". Client has "
 		<< curOp->getPoints() << " points. ABS_MIN = "
 		<< min_score_abs << " and REL_MIN = " << min_score_rel
-		<< endl;
+		<< std::endl;
 	modes += "o";
 	if (!args.empty())
 	  args += " ";
@@ -1100,7 +1076,7 @@ for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
 	if ((++numClientsToOp + currentOps) >= maxOpped) {
 	  elog	<< "chanfix::fixChan> DEBUG: Enough clients are to be "
 		<< "opped (" << numClientsToOp << "); breaking the loop."
-		<< endl;
+		<< std::endl;
 	  cntMaxedOut = true;
 	  break;
 	}
@@ -1147,7 +1123,7 @@ return false;
 }
 
 
-chanfix::acctListType chanfix::findAccount(const std::string& Account, Channel* theChan)
+chanfix::acctListType chanfix::findAccount(Channel* theChan, const std::string& Account)
 {
 acctListType chanAccts;
 for (Channel::userIterator ptr = theChan->userList_begin();
@@ -1164,7 +1140,7 @@ sqlChannel* chanfix::getChannelRecord(const std::string& Channel)
 sqlChannelCacheType::iterator ptr = sqlChanCache.find(Channel);
 if(ptr != sqlChanCache.end())
 	{
-	elog << "chanfix::getChannelRecord> DEBUG: cached channel " << Channel << " found" << endl;
+	elog << "chanfix::getChannelRecord> DEBUG: cached channel " << Channel << " found" << std::endl;
 	return ptr->second;
 	}
 return 0;
@@ -1186,7 +1162,7 @@ newChan->setLastAttempt(0);
 newChan->Insert();
 
 sqlChanCache.insert(sqlChannelCacheType::value_type(Channel, newChan));
-elog << "chanfix::getChannelRecord> DEBUG: Added new channel: " << Channel << endl;
+elog << "chanfix::getChannelRecord> DEBUG: Added new channel: " << Channel << std::endl;
 
 return newChan;
 }
@@ -1245,12 +1221,12 @@ void chanfix::processQueue()
 {
 /* If there are too many servers split, don't process queue. */
 if (currentState != RUN) {
-  //elog << "chanfix::processQueue> DEBUG: currentState != RUN" << endl;
+  //elog << "chanfix::processQueue> DEBUG: currentState != RUN" << std::endl;
   return;
 }
 
 for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
-   //elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first->getName() << " in autoFixQ ..." << endl;
+   //elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first->getName() << " in autoFixQ ..." << std::endl;
    if (ptr->second <= currentTime()) {
      sqlChannel* sqlChan = getChannelRecord(ptr->first);
      if (!sqlChan) sqlChan = newChannelRecord(ptr->first);
@@ -1269,17 +1245,17 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
      if (isFixed || currentTime() - sqlChan->getFixStart() > AUTOFIX_MAXIMUM) {
        ptr = autoFixQ.erase(ptr);
        sqlChan->setFixStart(0);
-       elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " done!" << endl;
+       elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " done!" << std::endl;
      } else {
        ptr->second = currentTime() + AUTOFIX_INTERVAL;
        ptr++;
-       elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " not done yet ..." << endl;
+       elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " not done yet ..." << std::endl;
      }
    } else ptr++;
 }
 
 for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
-   //elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first->getName() << " in manFixQ ..." << endl;
+   //elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first->getName() << " in manFixQ ..." << std::endl;
    if (ptr->second <= currentTime()) {
      sqlChannel* sqlChan = getChannelRecord(ptr->first);
      if (!sqlChan) sqlChan = newChannelRecord(ptr->first);
@@ -1296,11 +1272,11 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
      if (isFixed || currentTime() - sqlChan->getFixStart() > CHANFIX_MAXIMUM + CHANFIX_DELAY) {
        ptr = manFixQ.erase(ptr);
        sqlChan->setFixStart(0);
-       elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " done!" << endl;
+       elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " done!" << std::endl;
      } else {
        ptr->second = currentTime() + CHANFIX_INTERVAL;
        ptr++;
-       elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " not done yet ..." << endl;
+       elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " not done yet ..." << std::endl;
      }
    } else ptr++;
 }
@@ -1376,7 +1352,7 @@ sprintf(tmpBuf, "%i day%s, %02d:%02d:%02d",
 	mins,
 	secs );
 
-return string( tmpBuf ) ;
+return std::string( tmpBuf ) ;
 }
 
 const int chanfix::getCurrentGMTHour()
@@ -1413,7 +1389,7 @@ tidGivePoints = MyUplink->RegisterTimer(theTime, this, NULL);
 theTime = getSecsTilMidnight();
 tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
 elog	<< "chanfix::startTimers> Started all timers."
-	<< endl;
+	<< std::endl;
 }
 
 void chanfix::rotateDB()
@@ -1427,7 +1403,7 @@ void chanfix::rotateDB()
 if (getSecsTilMidnight() > 60) return; /* For some reason, this function is called at startup, quick fix */
 logAdminMessage("Beginning database rotation.");
 sqlChanOp* curOp = 0;
-string removeKey;
+std::string removeKey;
 short nextDay = getCurrentDay();
 setCurrentDay();
 if (nextDay >= (DAYSAMPLES - 1))
@@ -1447,7 +1423,7 @@ for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
   if (curOp->getPoints() <= 0 && maxFirstOppedTS > curOp->getTimeFirstOpped()) {
     sqlChanOps.erase(ptr++);
     if (!curOp->Delete())
-      elog << "chanfix::rotateDB> Error: Could not delete op "<< curOp->getLastSeenAs() << " " << curOp->getChannel() << endl;
+      elog << "chanfix::rotateDB> Error: Could not delete op "<< curOp->getLastSeenAs() << " " << curOp->getChannel() << std::endl;
     else
       delete curOp; curOp = 0;
   }
@@ -1462,7 +1438,7 @@ return;
 void chanfix::giveAllOpsPoints()
 {
 Channel* thisChan;
-typedef map<string,bool> ScoredOpsMapType;
+typedef std::map<std::string,bool> ScoredOpsMapType;
 ScoredOpsMapType scoredOpsList;
 ScoredOpsMapType::iterator scOpiter;
 for (xNetwork::channelIterator ptr = Network->channels_begin();
@@ -1482,7 +1458,7 @@ for (xNetwork::channelIterator ptr = Network->channels_begin();
 	//Grab an iClient for curUser
 	scOpiter = scoredOpsList.find(curUser->getClient()->getAccount());
 	if (scOpiter == scoredOpsList.end()) {
-	  givePoints(curUser->getClient(), thisChan);
+	  givePoints(thisChan, curUser->getClient());
 	  scoredOpsList.insert(make_pair(curUser->getClient()->getAccount(), true));
 	}
       }
@@ -1502,7 +1478,7 @@ void chanfix::startScoringChan(Channel* theChan)
 chanfix::chanOpsType myOps = getMyOps(theChan);
 if (!myOps.empty()) return;
 
-typedef map<string,bool> ScoredOpsMapType;
+typedef std::map<std::string,bool> ScoredOpsMapType;
 ScoredOpsMapType scoredOpsList;
 ScoredOpsMapType::iterator scOpiter;
 if (theChan->getMode(Channel::MODE_A)) return;
@@ -1514,7 +1490,7 @@ if (theChan->getMode(Channel::MODE_A)) return;
     if (curUser->isModeO() && curUser->getClient()->getAccount() != "") {
       scOpiter = scoredOpsList.find(curUser->getClient()->getAccount());
       if (scOpiter == scoredOpsList.end()) {
-	gotOpped(curUser->getClient(), theChan);
+	gotOpped(theChan, curUser->getClient());
 	scoredOpsList.insert(make_pair(curUser->getClient()->getAccount(), true));
       }
     }
@@ -1544,7 +1520,7 @@ if (SQLDb->Status() == CONNECTION_BAD) { //Check if the connection has died
   MsgChanLog("PANIC! - The Connection With The Db Was Lost\n");
   MsgChanLog("Attempting to reconnect, Attempt %d out of %d\n",
 	     connectCount+1,connectRetry+1);
-  string Query = "host=" + sqlHost + " dbname=" + sqlDb + " port=" + sqlPort;
+  std::string Query = "host=" + sqlHost + " dbname=" + sqlDb + " port=" + sqlPort;
   if (strcasecmp(sqlUser,"''"))
     Query += (" user=" + sqlUser);
   if (strcasecmp(sqlPass,"''"))
@@ -1574,37 +1550,34 @@ void chanfix::updateSQLDb(PgDatabase* _SQLDb)
 {
 
 for(glineIterator ptr = glineList.begin();ptr != glineList.end();++ptr)
-        {
-        (ptr->second)->setSqldb(_SQLDb);
-        }
+	{
+	(ptr->second)->setSqldb(_SQLDb);
+	}
 
-for(glineIterator ptr = rnGlineList.begin();ptr != 
-rnGlineList.end();++ptr)
-        {
-        (ptr->second)->setSqldb(_SQLDb);
-        }
+for(glineIterator ptr = rnGlineList.begin();ptr != rnGlineList.end();++ptr)
+	{
+	(ptr->second)->setSqldb(_SQLDb);
+	}
 
-for(exceptionIterator ptr = exception_begin();ptr != 
-exception_end();++ptr)
-        {
-        (*ptr)->setSqldb(_SQLDb);
-        }
+for(exceptionIterator ptr = exception_begin();ptr != exception_end();++ptr)
+	{
+	(*ptr)->setSqldb(_SQLDb);
+	}
 
 for(usersIterator ptr = usersMap.begin();ptr != usersMap.end();++ptr)
-        {
-        ptr->second->setSqldb(_SQLDb);
-        }
+	{
+	ptr->second->setSqldb(_SQLDb);
+	}
 
-for(serversIterator ptr = serversMap.begin();ptr != 
-serversMap.end();++ptr)
-        {
-        ptr->second->setSqldb(_SQLDb);
-        }
+for(serversIterator ptr = serversMap.begin();ptr != serversMap.end();++ptr)
+	{
+	ptr->second->setSqldb(_SQLDb);
+	}
 }*/
 
 void Command::Usage( iClient* theClient )
 {
-bot->Notice( theClient, string( "SYNTAX: " ) + getInfo() ) ;
+bot->Notice( theClient, std::string( "SYNTAX: " ) + getInfo() ) ;
 }
 
 } // namespace gnuworld

@@ -22,16 +22,12 @@
 #ifndef __SQLCHANNEL_H
 #define __SQLCHANNEL_H "$Id$"
 
-#include        <string>
-#include        <vector>
-#include        <ctime>
-#include        "libpq++.h"
+#include	<string>
+#include	<ctime>
+#include	"libpq++.h"
 
 namespace gnuworld
 {
-
-using std::string;
-using std::vector;
 
 class iClient;
 
@@ -47,12 +43,12 @@ public:
 	static const flagType	F_BLOCKED;
 	static const flagType	F_ALERT;
 
-        /*
-         *  Methods to get data atrributes.
-         */
+	/*
+	 *  Methods to get data atrributes.
+	 */
 
-        inline const std::string&	getChannel() const
-                { return channel ; }
+	inline const std::string&	getChannel() const
+		{ return channel ; }
 
 	inline const flagType&	getFlags() const
 		{ return flags ; }
@@ -60,11 +56,11 @@ public:
 	inline bool	getFlag( const flagType& whichFlag ) const
 		{ return (flags & whichFlag) ; }
 
-        inline time_t		getLastAttempt() const
-                { return last ; }
+	inline time_t		getLastAttempt() const
+		{ return last ; }
 
-        inline time_t		getFixStart() const
-                { return start ; }
+	inline time_t		getFixStart() const
+		{ return start ; }
 
 	inline unsigned int	getMaxScore() const
 		{ return maxScore ; }
@@ -72,12 +68,12 @@ public:
 	inline bool		getModesRemoved() const
 		{ return modesRemoved ; }
 
-        /*
-         *  Methods to set data atrributes.
-         */
+	/*
+	 *  Methods to set data atrributes.
+	 */
 
-        inline void 	setChannel(string _channel)
-                { channel = _channel; }
+	inline void 	setChannel(std::string _channel)
+		{ channel = _channel; }
 
 	inline void	setFlag( const flagType& whichFlag )
 		{ flags |= whichFlag; }
@@ -88,11 +84,11 @@ public:
 	inline void	clearFlags()
 		{ flags = 0; }
 
-        inline void     setLastAttempt (time_t _last)
-                { last = _last; }
+	inline void     setLastAttempt (time_t _last)
+		{ last = _last; }
 
 	inline void	setFixStart(time_t _start)
-                { start = _start; }
+		{ start = _start; }
 
 	inline void	setMaxScore(unsigned int _maxScore)
 		{ maxScore = _maxScore; }
@@ -103,17 +99,17 @@ public:
 	bool Insert();
 	bool Delete();
 	bool commit();
-        void setAllMembers(int);
+	void setAllMembers(int);
 
 protected:
 
-	string		channel;
+	std::string	channel;
 	time_t		last;
 	time_t		start;
-        unsigned int    maxScore;
+	unsigned int	maxScore;
 	bool		modesRemoved;
 	flagType	flags;
-        PgDatabase*     SQLDb;
+	PgDatabase*	SQLDb;
 
 
 }; // class sqlChannel

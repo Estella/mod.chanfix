@@ -40,11 +40,6 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-using std::endl;
-using std::string;
-using std::stringstream;
-using std::ends;
-
 void INFOCommand::Exec(iClient* theClient, const std::string& Message)
 {
 StringTokenizer st(Message);

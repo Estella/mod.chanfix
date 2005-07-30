@@ -65,7 +65,7 @@ class commandName##Command : public Command \
     commandName##Command(chanfix* _bot, \
       const std::string& _commandName, \
       const std::string& _help) : \
-        Command(_bot, _commandName, _help) {} \
+	Command(_bot, _commandName, _help) {} \
     virtual ~commandName##Command() {} \
     virtual void Exec(iClient*, const std::string&); \
 };

@@ -22,10 +22,10 @@
 #ifndef __SQLUSER_H
 #define __SQLUSER_H "$Id$"
 
-#include        <string>
-#include        <vector>
-#include        <ctime>
-#include        "libpq++.h"
+#include	<string>
+#include	<vector>
+#include	<ctime>
+#include	"libpq++.h"
 
 namespace gnuworld
 {

@@ -36,8 +36,6 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-using std::string;
-
 void INVITECommand::Exec(iClient* theClient, const std::string& Message)
 {
 
