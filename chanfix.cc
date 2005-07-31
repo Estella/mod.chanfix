@@ -25,19 +25,15 @@
  * $Id$
  */
 
-#include	<new>
-#include	<map>
-#include	<vector>
+#include	<cstdarg>
+#include	<iomanip>
 #include	<iostream>
+#include	<map>
+#include	<new>
 #include	<sstream>
 #include	<string>
-#include	<iomanip>
 #include	<utility>
-
-#include	<ctime>
-#include	<cstdlib>
-#include	<cstring>
-#include	<cstdarg>
+#include	<vector>
 
 #include	"libpq++.h"
 
@@ -284,9 +280,11 @@ else if (theTimer == tidFixQ) {
   tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
 }
 else if (theTimer == tidRotateDB) {
-  /* Rotate the database if its 00 GMT */
+  /* Clean-up the database if its 00 GMT */
   rotateDB();
-  theTime = time(NULL) + 86400;
+
+  /* Refresh Timer */
+  theTime = time(NULL) + getSecsTilMidnight();
   tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
 }
 }
@@ -1112,8 +1110,6 @@ if (numClientsToOp) {
 	    numClientsToOp);
 }
 
-//sqlChan->commit(); /* not needed, afaik -reed */
-
 /* Now see if there are enough ops; if so, the fix is complete. */
 if (numClientsToOp + currentOps >= netChan->size() ||
     numClientsToOp + currentOps >= maxOpped)
@@ -1386,7 +1382,7 @@ theTime = time(NULL) + PROCESS_QUEUE_TIME;
 tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
 theTime = time(NULL) + POINTS_UPDATE_TIME;
 tidGivePoints = MyUplink->RegisterTimer(theTime, this, NULL);
-theTime = getSecsTilMidnight();
+theTime = time(NULL) + getSecsTilMidnight();
 tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
 elog	<< "chanfix::startTimers> Started all timers."
 	<< std::endl;
@@ -1400,11 +1396,12 @@ void chanfix::rotateDB()
  * if it is older than 1 day, delete the user
  * cache: acct,chan
  */
-if (getSecsTilMidnight() > 60) return; /* For some reason, this function is called at startup, quick fix */
+if (getSecsTilMidnight() > 60)
+  return; /* For some reason, this function is called at startup, quick fix */
 logAdminMessage("Beginning database rotation.");
 sqlChanOp* curOp = 0;
 std::string removeKey;
-short nextDay = getCurrentDay();
+short nextDay = currentDay;
 setCurrentDay();
 if (nextDay >= (DAYSAMPLES - 1))
   nextDay = 0;
@@ -1431,7 +1428,6 @@ for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
 #ifndef REMEMBER_CHANNELS_WITH_NOTES_OR_FLAGS
 //TODO: Implement a loop/section here that removes channel records/notes with no ops left in them
 #endif
-setCurrentDay();
 return;
 }
 

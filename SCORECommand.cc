@@ -191,7 +191,6 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
   if (acctPtr == acctToScore.end())
     return;
   curClient = *acctPtr;
-  //curClient = bot->findAccount(netChan, curOp->getAccount());
   if (intDBCount < minScoreReply) {
     if (intDBCount++) {
       if (compact)

@@ -64,6 +64,7 @@ if (option == "NUMSERVERS") {
   bot->Notice(theClient, "NUM_SERVERS is now %d.", setting);
   bot->logAdminMessage("%s changed NUM_SERVERS to %d.",
 		       theClient->getNickName().c_str(), setting);
+  bot->checkNetwork();
   return;
 }
 

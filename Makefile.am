@@ -22,8 +22,8 @@ libchanfix_la_SOURCES = chanfix.cc \
 	STATUSCommand.cc \
 	UNALERTCommand.cc \
 	UNBLOCKCommand.cc \
-	sqlChannel.cc \
-	sqlChanOp.cc 
+	sqlChanOp.cc \
+	sqlChannel.cc
 
 libchanfix_la_CXXFLAGS = -I$(PGSQL_INCLUDE) -I${top_srcdir}/include \
 	-I${top_srcdir}/libgnuworld \

@@ -24,9 +24,8 @@
  * $Id$
  */
 
-#include <stdlib.h>
-#include <iostream>
 #include <ctime>
+#include <iostream>
 
 #include "gnuworld_config.h"
 #include "Network.h"

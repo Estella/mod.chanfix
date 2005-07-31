@@ -53,8 +53,8 @@ public:
 protected:
 	chanfix		*bot;
 	xServer		*server;
-	std::string		commandName;
-	std::string		help;
+	std::string	commandName;
+	std::string	help;
 
 };
 
