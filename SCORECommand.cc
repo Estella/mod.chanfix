@@ -190,6 +190,7 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
   std::vector< iClient* >::const_iterator acctPtr = acctToShow.begin();
   if (acctPtr == acctToScore.end())
     return;
+  
   curClient = *acctPtr;
   if (intDBCount < minScoreReply) {
     if (intDBCount++) {
@@ -200,6 +201,9 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
     }
     strScoresDB << curOp->getPoints();
   }
+  
+  if ((curClient) && (curOp) && (curClient->getAccount() != curOp->getAccount())) continue; //Horrid IF statement, someone make a better one.
+  
   if (curClient && netChan->findUser(curClient)->isModeO()) {
     if (intOPCount < minScoreReply) {
       if (intOPCount++) {
