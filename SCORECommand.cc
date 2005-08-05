@@ -186,12 +186,7 @@ unsigned int intNOPCount = 0; //Rank counter for current non-ops
 for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
      opPtr != myOps.end(); opPtr++) {
   curOp = *opPtr;
-  acctToShow = bot->findAccount(netChan, curOp->getAccount());
-  std::vector< iClient* >::const_iterator acctPtr = acctToShow.begin();
-  if (acctPtr == acctToScore.end())
-    return;
   
-  curClient = *acctPtr;
   if (intDBCount < minScoreReply) {
     if (intDBCount++) {
       if (compact)
@@ -202,8 +197,12 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
     strScoresDB << curOp->getPoints();
   }
   
-  if ((curClient) && (curOp) && (curClient->getAccount() != curOp->getAccount())) continue; //Horrid IF statement, someone make a better one.
+  acctToShow = bot->findAccount(netChan, curOp->getAccount());
+  std::vector< iClient* >::const_iterator acctPtr = acctToShow.begin();
+  if (acctPtr == acctToShow.end())
+    continue;
   
+  curClient = *acctPtr;
   if (curClient && netChan->findUser(curClient)->isModeO()) {
     if (intOPCount < minScoreReply) {
       if (intOPCount++) {
