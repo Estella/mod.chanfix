@@ -1,0 +1,63 @@
+/**
+ * WHOISCommand.cc
+ *
+ * 08/07/2005 - Jimmy Lipham <music0m@alltel.net>
+ * Initial Version
+ *
+ * Grabs information about a privileged user
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
+ * USA.
+ *
+ * $Id: UNALERTCommand.cc 1192 2005-07-31 02:12:37Z Compster $
+ */
+
+#include <iostream>
+
+#include "gnuworld_config.h"
+#include "Network.h"
+
+#include "chanfix.h"
+#include "levels.h" 
+#include "StringTokenizer.h"
+#include "sqlChannel.h"
+#include "sqlUser.h"
+
+RCSTAG("$Id: WHOISCommand.cc 1192 2005-07-31 02:12:37Z Compster $");
+
+namespace gnuworld
+{
+
+void WHOISCommand::Exec(iClient* theClient, const std::string& Message)
+{
+StringTokenizer st(Message);
+
+if (st.size() < 2) {
+  Usage(theClient);
+  return;
+}
+sqlUser* theUser = bot->GetOper(st[1]);
+if (!theUser) 
+{ 
+  bot->Notice(theClient,"No such user %s.",st[1].c_str());
+  return;
+}
+bot->Notice(theClient, "User: %s", theUser->getUserName().c_str());
+bot->Notice(theClient, "Flags: %s", theUser->getFlags().c_str());
+bot->Notice(theClient, "Hosts: %s", bot->getHostList(theUser).c_str()); //Fix this
+bot->Notice(theClient, "Main server: NA"); //This too
+bot->Notice(theClient, "Other servers: NA"); //Yep, this
+} //whoiscommand::exec
+} //namespace gnuworld

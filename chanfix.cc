@@ -45,8 +45,8 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
-#include	"chanfixCommands.h"
 #include	"chanfix_misc.h"
+#include	"chanfixCommands.h"
 #include	"levels.h"
 #include	"sqlChannel.h"
 #include	"sqlChanOp.h"
@@ -88,11 +88,11 @@ readConfigFile(configFileName);
 /* Initial state */
 currentState = INIT;
 
-std::string Query = "host=" + sqlHost + " dbname=" + sqlDB + " port=" + sqlPort + " user=" + sqlUser;
+std::string Query = "host=" + sqlHost + " dbname=" + sqlDB + " port=" + sqlPort + " user=" + sqlUsername;
 
 elog	<< "chanfix::chanfix> Attempting to connect to "
 	<< sqlHost << " at port " << sqlPort
-	<< " as User " << sqlUser << " to database: "
+	<< " as User " << sqlUsername << " to database: "
 	<< sqlDB
 	<< std::endl;
 
@@ -136,6 +136,7 @@ RegisterCommand(new SHUTDOWNCommand(this, "SHUTDOWN", "[reason]"));
 RegisterCommand(new STATUSCommand(this, "STATUS", ""));
 RegisterCommand(new UNALERTCommand(this, "UNALERT", "<#channel>"));
 RegisterCommand(new UNBLOCKCommand(this, "UNBLOCK", "<#channel>"));
+RegisterCommand(new WHOISCommand(this, "WHOIS", "<username>"));
 
 /* Set our current day. */
 setCurrentDay();
@@ -145,6 +146,9 @@ preloadChanOpsCache();
 
 /* Preload the Channels cache */
 preloadChannelCache();
+
+/* Preload the user access cache */
+preloadUserCache();
 
 /* Set up our timer. */
 theTimer = new Timer();
@@ -185,7 +189,7 @@ connectCheckFreq = atoi((chanfixConfig->Require("connectCheckFreq")->second).c_s
 sqlHost = chanfixConfig->Require("sqlHost")->second;
 sqlPort = chanfixConfig->Require("sqlPort")->second;
 sqlDB = chanfixConfig->Require("sqlDB")->second;
-sqlUser = chanfixConfig->Require("sqlUser")->second;
+sqlUsername = chanfixConfig->Require("sqlUser")->second;
 sqlPass = chanfixConfig->Require("sqlPass")->second;
 
 elog	<< "chanfix::readConfigFile> Configuration loaded!"
@@ -563,6 +567,42 @@ void chanfix::doSqlError(const std::string& theQuery, const std::string& theErro
 		<< std::endl;
 }
 
+void chanfix::preloadUserCache()
+{
+
+	std::stringstream theQuery;
+	theQuery	<< "SELECT id, user_name, created, last_seen, last_updated, last_updated_by, isservadmin, canblock, canalert, canchanfix, isowner, canmanageusers, issuspended, usenotice "
+			<< "FROM users"
+			;
+
+	ExecStatusType status = SQLDb->Exec(theQuery.str().c_str());
+
+	if(PGRES_TUPLES_OK == status) {
+		/* First we need to clear the current cache. */
+		for(usersMapType::iterator itr = usersMap.begin() ;
+		    itr != usersMap.end() ; ++itr) {
+			delete itr->second;
+		}
+		usersMap.clear();
+
+		for(int i = 0; i < SQLDb->Tuples(); ++i) {
+			sqlUser *newUser = new sqlUser(SQLDb);
+			assert(newUser != 0);
+
+			newUser->setAllMembers(i);
+			usersMap.insert(usersMapType::value_type(newUser->getUserName(), newUser));
+		}
+	} else {
+		elog	<< "chanfix::preloadUserCache> "
+			<< SQLDb->ErrorMessage();
+	}
+
+	elog	<< "chanfix::preloadUserCache> Loaded "
+		<< usersMap.size()
+		<< " users."
+		<< std::endl ;
+}
+
 void chanfix::preloadChanOpsCache()
 {
 	std::stringstream theQuery;
@@ -754,6 +794,39 @@ for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
 myOps.sort(compare_points);
 
 return myOps;
+}
+
+const std::string chanfix::getHostList( sqlUser* User)
+{
+static const char* queryHeader
+	= "SELECT host FROM hosts WHERE user_id =  ";
+
+std::stringstream theQuery;
+theQuery	<< queryHeader 
+		<< User->getID()
+		<< std::ends;
+
+ExecStatusType status = SQLDb->Exec( theQuery.str().c_str() ) ;
+
+if( PGRES_TUPLES_OK != status )
+	{
+	elog	<< "getHostList> SQL Error: "
+		<< SQLDb->ErrorMessage()
+		<< std::endl ;
+	return NULL ;
+	}
+
+// SQL Query succeeded
+std::stringstream hostlist;
+for (int i = 0 ; i < SQLDb->Tuples(); i++)
+	{
+	if (!i)
+	  hostlist << SQLDb->GetValue(i, 0);
+	else
+	  hostlist << ", " << SQLDb->GetValue(i, 0);
+	}
+if (hostlist.str() == "") hostlist << "None.";
+return hostlist.str();
 }
 
 const std::string gnuworld::escapeSQLChars(const std::string& theString)
@@ -1360,6 +1433,17 @@ const int chanfix::getCurrentGMTHour()
 	return ptm->tm_hour;
 }
 
+sqlUser* chanfix::GetOper(const std::string Name)
+{
+//Name = escapeSQLChars(Name);
+sqlUser* tempUser = usersMap[Name];
+if(!tempUser)
+	{
+	usersMap.erase(usersMap.find(Name));
+	}
+return tempUser;
+}
+
 chanfix::clientOpsType* chanfix::findMyOps(iClient* theClient)
 {
 clientOpsType* myOps = static_cast< clientOpsType* >(theClient->getCustomData(this) );
@@ -1396,8 +1480,7 @@ void chanfix::rotateDB()
  * if it is older than 1 day, delete the user
  * cache: acct,chan
  */
-if (getSecsTilMidnight() > 60)
-  return; /* For some reason, this function is called at startup, quick fix */
+
 logAdminMessage("Beginning database rotation.");
 sqlChanOp* curOp = 0;
 std::string removeKey;

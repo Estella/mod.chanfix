@@ -42,6 +42,9 @@ public:
 
 	/* Accessors */
 
+	inline const unsigned int&	getID() const
+		{ return Id ; }
+
 	inline const std::string& getUserName() const
 		{ return user_name; }
 
@@ -56,6 +59,56 @@ public:
 
 	inline const unsigned int getLastUpdated() const
 		{ return last_updated; }
+		
+	inline const std::string& getFlags() const
+		{
+			std::string _flagList;
+			if (isServAdmin)
+				_flagList += "a";
+			
+			if (canBlock)
+				_flagList += "b";
+			
+			if (canAlert)
+				_flagList += "c";
+			
+			if (canChanfix)
+				_flagList += "f";
+			
+			if (isOwner)
+				_flagList += "o";
+			
+			if (canManageUsers)
+				_flagList += "u";
+			
+			return _flagList;
+		}
+		
+	inline bool hasFlag(const std::string& _flag) const
+		{
+		/*
+			isServAdmin - a
+			isBlocker - b
+			isAlerter - c
+			isChanfixer - f
+			isOwner - o
+			isUserMan - u
+		*/
+			if (_flag == "a" && isServAdmin)
+				return true;
+			else if (_flag == "b" && canBlock)
+				return true;
+			else if (_flag == "c" && canAlert)
+				return true;
+			else if (_flag == "f" && canChanfix)
+				return true;
+			else if (_flag == "o" && isOwner)
+				return true;
+			else if (_flag == "u" && canManageUsers)
+				return true;
+			else
+				return false;
+		}
 
 	/* Mutators */
 
@@ -74,16 +127,17 @@ public:
 	inline void setLastUpdated(const unsigned int _last_updated)
 		{ last_updated = _last_updated; }
 
-
+		
 	/* Methods to alter our SQL status */
 	void setAllMembers(int);
 	bool commit();
 	bool Insert();
 	bool Delete();
 
-protected:
+private:
 
 	PgDatabase*	SQLDb;
+	unsigned int	Id;
 	std::string	user_name;
 	unsigned int	created;
 	unsigned int	last_seen;
@@ -97,6 +151,12 @@ protected:
 	bool		canManageUsers;
 	bool		isSuspended;
 	bool		useNotice;
+	bool		atob( std::string str )
+			{
+				if(str == "y" || str == "true" || str == "yes") return true;
+				return false;
+			}
+	std::string	flags;
 }; // class sqlUser
 
 } // namespace gnuworld

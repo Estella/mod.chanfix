@@ -42,7 +42,7 @@ namespace gnuworld
 extern short currentDay;
 }
 #include	"sqlChanOp.h"
-
+#include	"sqlUser.h"
 
 class PgDatabase;
 class Timer;
@@ -207,9 +207,12 @@ public:
 
 	sqlChanOp* findChanOp(const std::string&, const std::string&);
 	sqlChanOp* findChanOp(Channel*, iClient*);
+	
+	sqlUser* chanfix::GetOper(const std::string);
 
 	void preloadChanOpsCache();
 	void preloadChannelCache();
+	void preloadUserCache();
 
 	void changeState(STATE);
 
@@ -263,6 +266,8 @@ public:
 
 	const std::string prettyDuration( int );
 	
+	const std::string getHostList( sqlUser* );
+	
 	const int getCurrentGMTHour(); /* returns the current hour in GMT (00-23) */
 
 	/* Server notices */
@@ -297,6 +302,18 @@ public:
 
 	typedef std::map <std::string, bool> ScoredOpsMapType;
 	ScoredOpsMapType scoredOpsList;
+	
+	/**
+	 * The db clients map
+	 */
+	typedef std::map <std::string ,sqlUser* ,noCaseCompare> usersMapType;
+
+	/**
+	 * Holds the authenticated user list
+	 */
+	usersMapType			usersMap ;
+	
+	typedef usersMapType::iterator     usersIterator;
 	
 	/**
 	 * Queues to process.
@@ -349,7 +366,7 @@ protected:
 	unsigned int	connectCheckFreq;
 	std::string	sqlHost;
 	std::string	sqlPort;
-	std::string	sqlUser;
+	std::string	sqlUsername;
 	std::string	sqlPass;
 	std::string	sqlDB;
 	

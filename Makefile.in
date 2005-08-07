@@ -76,8 +76,9 @@ am_libchanfix_la_OBJECTS = libchanfix_la-chanfix.lo \
 	libchanfix_la-SCORECommand.lo libchanfix_la-SETCommand.lo \
 	libchanfix_la-SHUTDOWNCommand.lo \
 	libchanfix_la-STATUSCommand.lo libchanfix_la-UNALERTCommand.lo \
-	libchanfix_la-UNBLOCKCommand.lo libchanfix_la-sqlChanOp.lo \
-	libchanfix_la-sqlChannel.lo
+	libchanfix_la-UNBLOCKCommand.lo libchanfix_la-WHOISCommand.lo \
+	libchanfix_la-sqlChanOp.lo libchanfix_la-sqlChannel.lo \
+	libchanfix_la-sqlUser.lo
 libchanfix_la_OBJECTS = $(am_libchanfix_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -231,8 +232,10 @@ libchanfix_la_SOURCES = chanfix.cc \
 	STATUSCommand.cc \
 	UNALERTCommand.cc \
 	UNBLOCKCommand.cc \
+	WHOISCommand.cc \
 	sqlChanOp.cc \
-	sqlChannel.cc
+	sqlChannel.cc \
+	sqlUser.cc
 
 libchanfix_la_CXXFLAGS = -I$(PGSQL_INCLUDE) -I${top_srcdir}/include \
 	-I${top_srcdir}/libgnuworld \
@@ -366,9 +369,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-STATUSCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-UNALERTCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-UNBLOCKCommand.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-WHOISCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-chanfix.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-sqlChanOp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-sqlChannel.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-sqlUser.Plo@am__quote@
 
 .cc.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -524,6 +529,13 @@ libchanfix_la-UNBLOCKCommand.lo: UNBLOCKCommand.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-UNBLOCKCommand.lo `test -f 'UNBLOCKCommand.cc' || echo '$(srcdir)/'`UNBLOCKCommand.cc
 
+libchanfix_la-WHOISCommand.lo: WHOISCommand.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-WHOISCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-WHOISCommand.Tpo" -c -o libchanfix_la-WHOISCommand.lo `test -f 'WHOISCommand.cc' || echo '$(srcdir)/'`WHOISCommand.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-WHOISCommand.Tpo" "$(DEPDIR)/libchanfix_la-WHOISCommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-WHOISCommand.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WHOISCommand.cc' object='libchanfix_la-WHOISCommand.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-WHOISCommand.lo `test -f 'WHOISCommand.cc' || echo '$(srcdir)/'`WHOISCommand.cc
+
 libchanfix_la-sqlChanOp.lo: sqlChanOp.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-sqlChanOp.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-sqlChanOp.Tpo" -c -o libchanfix_la-sqlChanOp.lo `test -f 'sqlChanOp.cc' || echo '$(srcdir)/'`sqlChanOp.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-sqlChanOp.Tpo" "$(DEPDIR)/libchanfix_la-sqlChanOp.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-sqlChanOp.Tpo"; exit 1; fi
@@ -537,6 +549,13 @@ libchanfix_la-sqlChannel.lo: sqlChannel.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='sqlChannel.cc' object='libchanfix_la-sqlChannel.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-sqlChannel.lo `test -f 'sqlChannel.cc' || echo '$(srcdir)/'`sqlChannel.cc
+
+libchanfix_la-sqlUser.lo: sqlUser.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-sqlUser.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-sqlUser.Tpo" -c -o libchanfix_la-sqlUser.lo `test -f 'sqlUser.cc' || echo '$(srcdir)/'`sqlUser.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-sqlUser.Tpo" "$(DEPDIR)/libchanfix_la-sqlUser.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-sqlUser.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='sqlUser.cc' object='libchanfix_la-sqlUser.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-sqlUser.lo `test -f 'sqlUser.cc' || echo '$(srcdir)/'`sqlUser.cc
 
 mostlyclean-libtool:
 	-rm -f *.lo
