@@ -94,15 +94,15 @@ public:
 			isOwner - o
 			isUserMan - u
 		*/
-			if (_flag == "a" && isServAdmin)
+			if (isOwner)
+				return true;
+			else if (_flag == "a" && isServAdmin)
 				return true;
 			else if (_flag == "b" && canBlock)
 				return true;
 			else if (_flag == "c" && canAlert)
 				return true;
 			else if (_flag == "f" && canChanfix)
-				return true;
-			else if (_flag == "o" && isOwner)
 				return true;
 			else if (_flag == "u" && canManageUsers)
 				return true;
@@ -127,6 +127,37 @@ public:
 	inline void setLastUpdated(const unsigned int _last_updated)
 		{ last_updated = _last_updated; }
 
+	inline void addFlag(const std::string& _flag)
+		{
+			if (_flag == "a")
+				isServAdmin = 1;
+			else if (_flag == "b")
+				canBlock = 1;
+			else if (_flag == "c")
+				canAlert = 1;
+			else if (_flag == "f")
+				canChanfix = 1;
+			else if (_flag == "o")
+				isOwner = 1;
+			else if (_flag == "u")
+				canManageUsers = 1;
+		}
+		
+	inline void delFlag(const std::string& _flag)
+		{
+			if (_flag == "a")
+				isServAdmin = 0;
+			else if (_flag == "b")
+				canBlock = 0;
+			else if (_flag == "c")
+				canAlert = 0;
+			else if (_flag == "f")
+				canChanfix = 0;
+			else if (_flag == "o")
+				isOwner = 0;
+			else if (_flag == "u")
+				canManageUsers = 0;
+		}
 		
 	/* Methods to alter our SQL status */
 	void setAllMembers(int);

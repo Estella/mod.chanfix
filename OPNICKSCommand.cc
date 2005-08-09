@@ -38,6 +38,16 @@ namespace gnuworld
 
 void OPNICKSCommand::Exec(iClient* theClient, const std::string& Message)
 {
+if (theClient->getAccount() == "") return;
+	
+sqlUser* theUser = bot->GetOper(theClient->getAccount());
+if (!theUser) return;
+
+if (!theUser->hasFlag("f")) {
+  bot->Notice(theClient, "This command requires flag f.");
+  return;
+}
+
 StringTokenizer st(Message);
 if (st.size() < 2) {
   Usage(theClient);

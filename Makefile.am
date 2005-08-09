@@ -4,10 +4,15 @@
 lib_LTLIBRARIES = libchanfix.la
 
 libchanfix_la_SOURCES = chanfix.cc \
+	ADDFLAGCommand.cc \
+	ADDUSERCommand.cc \
 	ALERTCommand.cc \
 	BLOCKCommand.cc \
 	CHANFIXCommand.cc \
 	CHECKCommand.cc \
+	DELFLAGCommand.cc \
+	DELUSERCommand.cc \
+	HELPCommand.cc \
 	INFOCommand.cc \
 	INVITECommand.cc \
 	OPLISTCommand.cc \

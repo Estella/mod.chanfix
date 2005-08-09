@@ -42,6 +42,16 @@ namespace gnuworld
 
 void ALERTCommand::Exec(iClient* theClient, const std::string& Message)
 {
+if (theClient->getAccount() == "") return;
+	
+sqlUser* theUser = bot->GetOper(theClient->getAccount());
+if (!theUser) return;
+
+if (!theUser->hasFlag("c")) {
+  bot->Notice(theClient, "This command requires flag c.");
+  return;
+}
+
 StringTokenizer st(Message);
 if (st.size() < 2) {
   Usage(theClient);

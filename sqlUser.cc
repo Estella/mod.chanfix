@@ -172,6 +172,17 @@ if(PGRES_COMMAND_OK != status) {
 	return false;
 }
 
+std::stringstream hostString;
+hostString	<< "DELETE FROM hosts "
+		<< "WHERE user_id = " << Id;
+
+status = SQLDb->Exec(hostString.str().c_str());
+
+if(PGRES_COMMAND_OK != status) {
+	elog << "sqlUser::delete (hosts)> " << SQLDb->ErrorMessage();
+	return false;
+}
+
 return true;
 
 }

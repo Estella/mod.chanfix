@@ -117,10 +117,15 @@ else
 	}
 
 /* Register the commands we want to use */
+RegisterCommand(new ADDFLAGCommand(this, "ADDFLAG", "<username> <flag>"));
+RegisterCommand(new ADDUSERCommand(this, "ADDUSER", "<username> [host]"));
 RegisterCommand(new ALERTCommand(this, "ALERT", "<#channel>"));
 RegisterCommand(new BLOCKCommand(this, "BLOCK", "<#channel> <reason>"));
 RegisterCommand(new CHANFIXCommand(this, "CHANFIX", "<#channel> [override]"));
 RegisterCommand(new CHECKCommand(this, "CHECK", "<#channel>"));
+RegisterCommand(new DELFLAGCommand(this, "DELFLAG", "<username> <flag>"));
+RegisterCommand(new DELUSERCommand(this, "DELUSER", "<username>"));
+RegisterCommand(new HELPCommand(this, "HELP", "[command]"));
 RegisterCommand(new INFOCommand(this, "INFO", "<#channel>"));
 RegisterCommand(new INVITECommand(this, "INVITE", ""));
 RegisterCommand(new OPLISTCommand(this, "OPLIST", "<#channel>"));
