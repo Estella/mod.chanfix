@@ -25,6 +25,7 @@
 namespace gnuworld {
 
 class chanfix;
+class sqlUser;
 
 class Command {
 public:
@@ -34,7 +35,7 @@ public:
 
 	virtual ~Command() { }
 	
-	virtual void Exec(iClient*, const std::string&) = 0;
+	virtual void Exec(iClient*, sqlUser*, const std::string&) = 0;
 	
 	void setServer(xServer *_server)
 		{ server = _server; }
@@ -67,7 +68,7 @@ class commandName##Command : public Command \
       const std::string& _help) : \
 	Command(_bot, _commandName, _help) {} \
     virtual ~commandName##Command() {} \
-    virtual void Exec(iClient*, const std::string&); \
+    virtual void Exec(iClient*, sqlUser*, const std::string&); \
 };
 
 /* Oper commands */

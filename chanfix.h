@@ -208,7 +208,7 @@ public:
 	sqlChanOp* findChanOp(const std::string&, const std::string&);
 	sqlChanOp* findChanOp(Channel*, iClient*);
 	
-	sqlUser* chanfix::GetOper(const std::string);
+	sqlUser* chanfix::isAuthed(const std::string);
 
 	void preloadChanOpsCache();
 	void preloadChannelCache();
@@ -264,6 +264,11 @@ public:
 	bool removeFromAutoQ(Channel*);
 	bool removeFromManQ(Channel*);
 
+	char getFlagChar(const sqlUser::flagType&);
+	const std::string getFlagsString(const sqlUser::flagType&);
+	sqlUser::flagType getFlagType(const char);
+	sqlUser::flagType getCommandType(const std::string& command);
+
 	const std::string prettyDuration( int );
 	
 	const std::string getHostList( sqlUser* );
@@ -276,6 +281,9 @@ public:
 	
 	/* Admin message logs */
 	bool logAdminMessage(const char*, ... );
+
+	/* Write a channel log */
+	void writeChannelLog(sqlChannel*, iClient*, unsigned short, const std::string&);
 
 	void doSqlError(const std::string&, const std::string&);
 	
@@ -424,7 +432,8 @@ public:
 
 }; // class chanfix
 
-const std::string escapeSQLChars(const std::string& theString);
+const std::string escapeSQLChars(const std::string&);
+bool atob(std::string);
 
 } // namespace gnuworld
 

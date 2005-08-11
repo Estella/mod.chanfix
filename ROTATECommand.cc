@@ -30,14 +30,14 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
-#include	"levels.h"
+#include	"flags.h"
 
 RCSTAG("$Id: ROTATECommand.cc 1165 2005-07-26 00:52:31Z Compster $");
 
 namespace gnuworld
 {
 
-void ROTATECommand::Exec(iClient* theClient, const std::string&)
+void ROTATECommand::Exec(iClient* theClient, sqlUser* theUser, const std::string&)
 {
 bot->logAdminMessage("%s (%s) ordered a manual DB rotation.",
 		     theClient->getNickName().c_str(),

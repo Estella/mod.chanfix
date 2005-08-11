@@ -4,7 +4,7 @@
  * 08/07/2005 - Jimmy Lipham <music0m@alltel.net>
  * Initial Version
  *
- * Grabs information about a privileged user
+ * Shows information about this user
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,18 +21,14 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
  * USA.
  *
- * $Id: UNALERTCommand.cc 1192 2005-07-31 02:12:37Z Compster $
+ * $Id$
  */
 
-#include <iostream>
-
 #include "gnuworld_config.h"
-#include "Network.h"
 
 #include "chanfix.h"
-#include "levels.h" 
+#include "flags.h" 
 #include "StringTokenizer.h"
-#include "sqlChannel.h"
 #include "sqlUser.h"
 
 RCSTAG("$Id: WHOISCommand.cc 1192 2005-07-31 02:12:37Z Compster $");
@@ -40,7 +36,7 @@ RCSTAG("$Id: WHOISCommand.cc 1192 2005-07-31 02:12:37Z Compster $");
 namespace gnuworld
 {
 
-void WHOISCommand::Exec(iClient* theClient, const std::string& Message)
+void WHOISCommand::Exec(iClient* theClient, sqlUser*, const std::string& Message)
 {
 StringTokenizer st(Message);
 
@@ -48,14 +44,20 @@ if (st.size() < 2) {
   Usage(theClient);
   return;
 }
-sqlUser* theUser = bot->GetOper(st[1]);
+
+sqlUser* theUser = bot->isAuthed(st[1]);
 if (!theUser) 
 { 
-  bot->Notice(theClient,"No such user %s.",st[1].c_str());
+  bot->Notice(theClient, "No such user %s.", st[1].c_str());
   return;
 }
+
 bot->Notice(theClient, "User: %s", theUser->getUserName().c_str());
-bot->Notice(theClient, "Flags: %s", theUser->getFlags().c_str());
+if (!theUser->getFlags())
+  bot->Notice(theClient, "Flags: none.");
+else
+  bot->Notice(theClient, "Flags: +%s",
+	      bot->getFlagsString(theUser->getFlags()).c_str());
 bot->Notice(theClient, "Hosts: %s", bot->getHostList(theUser).c_str()); //Fix this
 bot->Notice(theClient, "Main server: NA"); //This too
 bot->Notice(theClient, "Other servers: NA"); //Yep, this

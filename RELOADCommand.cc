@@ -30,16 +30,15 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
-#include	"levels.h"
+#include	"flags.h"
 
 RCSTAG("$Id$");
 
 namespace gnuworld
 {
 
-void RELOADCommand::Exec(iClient* theClient, const std::string& Message)
+void RELOADCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
-
 StringTokenizer st(Message);
 
 bot->Notice(theClient, "Reloading client...see you on the flip side");

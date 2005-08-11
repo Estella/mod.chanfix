@@ -1,10 +1,10 @@
 /**
  * DELUSERCommand.cc
  *
- * 07/21/2005 - Jimmy Lipham <music0m@alltel.net>
+ * 08/08/2005 - Jimmy Lipham <music0m@alltel.net>
  * Initial Version
  *
- * Shows a list of accounts plus their score of the top ops of this channel
+ * Deletes this user
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,30 +21,23 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
  * USA.
  *
- * $Id: DELUSERCommand.cc
+ * $Id$
  */
 
-#include <ctime>
-#include <iostream>
-
 #include "gnuworld_config.h"
-#include "Network.h"
 
 #include "chanfix.h"
-#include "levels.h" 
+#include "flags.h" 
 #include "StringTokenizer.h"
-#include "sqlChannel.h"
-#include "sqlChanOp.h"
+#include "sqlUser.h"
 
-RCSTAG("");
+RCSTAG("$Id$");
 
 namespace gnuworld
 {
 
-void DELUSERCommand::Exec(iClient* theClient, const std::string& Message)
+void DELUSERCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
-if (theClient->getAccount() == "" || !theClient->isOper()) return;
-	
 StringTokenizer st(Message);
 
 if (st.size() < 2) {
@@ -52,25 +45,23 @@ if (st.size() < 2) {
   return;
 }
 
-sqlUser* theUser = bot->GetOper(theClient->getAccount());
-if (!theUser) return;
-
-if (!theUser->hasFlag("u") && !theUser->hasFlag("a")) {
+if (!theUser->getFlag(flags::deluser)) {
   bot->Notice(theClient, "This command requires one of these flags: ua.");
   return;
 }
-sqlUser* chkUser = bot->GetOper(st[1]);
+
+sqlUser* chkUser = bot->isAuthed(st[1]);
 if (!chkUser) {
   bot->Notice(theClient, "No such user %s.", st[1].c_str());
   return;
 }
 
-if (chkUser->hasFlag("o")) {
+if (chkUser->getFlag(sqlUser::F_OWNER)) {
   bot->Notice(theClient, "You cannot delete an owner.");
   return;
 }
 
-if (chkUser->hasFlag("u") && !theUser->hasFlag("o")) {
+if (chkUser->getFlag(sqlUser::F_USERMANAGER) && !theUser->getFlag(sqlUser::F_OWNER)) {
   bot->Notice(theClient, "You cannot delete a user manager.");
   return;
 }

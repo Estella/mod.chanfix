@@ -1,10 +1,10 @@
 /**
  * ADDUSERCommand.cc
  *
- * 07/21/2005 - Jimmy Lipham <music0m@alltel.net>
+ * 08/08/2005 - Jimmy Lipham <music0m@alltel.net>
  * Initial Version
  *
- * Shows a list of accounts plus their score of the top ops of this channel
+ * Adds a new user, without flags, and optionally with this hostmask
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,30 +21,24 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
  * USA.
  *
- * $Id: ADDUSERCommand.cc
+ * $Id$
  */
-
-#include <ctime>
-#include <iostream>
 
 #include "gnuworld_config.h"
 #include "Network.h"
 
 #include "chanfix.h"
-#include "levels.h" 
+#include "flags.h" 
 #include "StringTokenizer.h"
-#include "sqlChannel.h"
-#include "sqlChanOp.h"
+#include "sqlUser.h"
 
-RCSTAG("");
+RCSTAG("$Id$");
 
 namespace gnuworld
 {
 
-void ADDUSERCommand::Exec(iClient* theClient, const std::string& Message)
+void ADDUSERCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
-if (theClient->getAccount() == "" || !theClient->isOper()) return;
-	
 StringTokenizer st(Message);
 
 if (st.size() < 2) {
@@ -52,18 +46,18 @@ if (st.size() < 2) {
   return;
 }
 
-sqlUser* theUser = bot->GetOper(theClient->getAccount());
-if (!theUser) return;
-
-if (!theUser->hasFlag("u") && !theUser->hasFlag("a")) {
-  bot->Notice(theClient, "This command requires one of these flags: ua.");
+if (!theUser->getFlag(flags::adduser)) {
+  bot->Notice(theClient, "This command requires one of these flags: %s.",
+	      bot->getFlagsString(flags::adduser));
   return;
 }
-sqlUser* chkUser = bot->GetOper(st[1]);
+
+sqlUser* chkUser = bot->isAuthed(st[1]);
 if (chkUser) {
   bot->Notice(theClient, "User %s already exists.", st[1].c_str());
   return;
 }
+
 sqlUser *newUser = new sqlUser(bot->SQLDb);
 assert(newUser != 0);
 newUser->setUserName(st[1]);

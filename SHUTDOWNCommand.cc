@@ -30,17 +30,22 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
-#include	"levels.h"
+#include	"flags.h"
 
 RCSTAG("$Id$");
 
 namespace gnuworld
 {
 
-void SHUTDOWNCommand::Exec(iClient*, const std::string& Message)
+void SHUTDOWNCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 
 StringTokenizer st(Message);
+
+bot->Notice(theClient, "Shutting down the server as per your request.");
+bot->logAdminMessage("%s (%s) is shutting me down.",
+		     theClient->getNickName().c_str(),
+		     theUser->getUserName().c_str());
 
 if (st.size() < 2) {
   server->UnloadClient(bot, "Quit");

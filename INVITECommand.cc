@@ -29,17 +29,18 @@
 #include "StringTokenizer.h"
 
 #include "chanfix.h"
-#include "levels.h" 
+#include "flags.h" 
 
 RCSTAG("$Id$");
 
 namespace gnuworld
 {
 
-void INVITECommand::Exec(iClient* theClient, const std::string& Message)
+void INVITECommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 
 StringTokenizer st(Message);
+
 Channel* theChannel = 0;
 if (st.size() == 1)
   theChannel = Network->findChannel(bot->consoleChan);

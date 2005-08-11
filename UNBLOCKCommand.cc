@@ -24,13 +24,10 @@
  * $Id$
  */
 
-#include <iostream>
-
 #include "gnuworld_config.h"
-#include "Network.h"
 
 #include "chanfix.h"
-#include "levels.h" 
+#include "flags.h" 
 #include "StringTokenizer.h"
 #include "sqlChannel.h"
 #include "sqlUser.h"
@@ -40,18 +37,8 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-void UNBLOCKCommand::Exec(iClient* theClient, const std::string& Message)
+void UNBLOCKCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
-if (theClient->getAccount() == "") return;
-	
-sqlUser* theUser = bot->GetOper(theClient->getAccount());
-if (!theUser) return;
-
-if (!theUser->hasFlag("b")) {
-  bot->Notice(theClient, "This command requires flag b.");
-  return;
-}
-	
 StringTokenizer st(Message);
 if (st.size() < 2) {
   Usage(theClient);
@@ -63,7 +50,7 @@ if (!bot->doChanBlocking()) {
   bot->Notice(theClient, "Channel blocking is disabled.");
   return;
 }
-
+	
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
 if (!theChan) {
   bot->Notice(theClient, "There is no entry in the database for %s.",

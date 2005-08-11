@@ -30,16 +30,15 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
-#include	"levels.h"
+#include	"flags.h"
 
 RCSTAG("$Id$");
 
 namespace gnuworld
 {
 
-void QUOTECommand::Exec(iClient* theClient, const std::string& Message)
+void QUOTECommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
-
 StringTokenizer st(Message);
 
 if(st.size() < 1) {

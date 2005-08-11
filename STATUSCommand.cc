@@ -30,7 +30,7 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
-#include	"levels.h"
+#include	"flags.h"
 #include	"Network.h"
 
 RCSTAG("$Id$");
@@ -38,7 +38,7 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-void STATUSCommand::Exec(iClient* theClient, const std::string&)
+void STATUSCommand::Exec(iClient* theClient, sqlUser*, const std::string&)
 {
 
 bot->Notice(theClient, "[evilnet development's GNUWorld chanfix version %s]",

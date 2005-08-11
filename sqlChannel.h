@@ -44,8 +44,23 @@ public:
 	static const flagType	F_ALERT;
 
 	/*
+	 *   Channel 'Event' Flags, used in the channelog table.
+	 *   These flags are used to filter channel log records.
+	 *   in reports.
+	 */
+
+	static const int	EV_MISC; /* Uncategorised event */
+	static const int	EV_NOTE; /* Miscellaneous notes */
+	static const int	EV_BLOCKED; /* Channel blocking */
+	static const int	EV_ALERT; /* Channel alerts */
+
+	/*
 	 *  Methods to get data atrributes.
 	 */
+
+
+	inline const unsigned int&	getID() const
+		{ return id ; }
 
 	inline const std::string&	getChannel() const
 		{ return channel ; }
@@ -72,7 +87,12 @@ public:
 	 *  Methods to set data atrributes.
 	 */
 
-	inline void 	setChannel(std::string _channel)
+        // 'ID' is a primary key and cannot be altered.
+
+	inline void	setID( const unsigned int& _id )
+		{ id = _id; }
+
+	inline void 	setChannel(const std::string& _channel)
 		{ channel = _channel; }
 
 	inline void	setFlag( const flagType& whichFlag )
@@ -103,12 +123,14 @@ public:
 
 protected:
 
+	unsigned int	id;
 	std::string	channel;
 	time_t		last;
 	time_t		start;
 	unsigned int	maxScore;
 	bool		modesRemoved;
 	flagType	flags;
+
 	PgDatabase*	SQLDb;
 
 

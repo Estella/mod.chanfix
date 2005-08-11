@@ -40,10 +40,19 @@ public:
 	sqlUser(PgDatabase*);
 	virtual ~sqlUser();
 
-	/* Accessors */
+	typedef unsigned short int	flagType ;
+	static const sqlUser::flagType sqlUser::F_SERVERADMIN =	0x01; /* +a */
+	static const sqlUser::flagType sqlUser::F_BLOCK =	0x02; /* +b */
+	static const sqlUser::flagType sqlUser::F_CHANNEL =	0x04; /* +c */
+	static const sqlUser::flagType sqlUser::F_CHANFIX =	0x08; /* +f */
+	static const sqlUser::flagType sqlUser::F_OWNER =	0x10; /* +o */
+	static const sqlUser::flagType sqlUser::F_USERMANAGER =	0x20; /* +u */
+	static const sqlUser::flagType sqlUser::F_NOLOGIN =	0x40;
+
+	/* Methods to get data attributes. */
 
 	inline const unsigned int&	getID() const
-		{ return Id ; }
+		{ return id ; }
 
 	inline const std::string& getUserName() const
 		{ return user_name; }
@@ -54,61 +63,23 @@ public:
 	inline const unsigned int getLastSeen() const
 		{ return last_seen; }
 
+	inline const unsigned int getLastUpdated() const
+		{ return last_updated; }
+
 	inline const std::string& getLastUpdatedBy() const
 		{ return last_updated_by; }
 
-	inline const unsigned int getLastUpdated() const
-		{ return last_updated; }
-		
-	inline const std::string& getFlags() const
-		{
-			std::string _flagList;
-			if (isServAdmin)
-				_flagList += "a";
-			
-			if (canBlock)
-				_flagList += "b";
-			
-			if (canAlert)
-				_flagList += "c";
-			
-			if (canChanfix)
-				_flagList += "f";
-			
-			if (isOwner)
-				_flagList += "o";
-			
-			if (canManageUsers)
-				_flagList += "u";
-			
-			return _flagList;
-		}
-		
-	inline bool hasFlag(const std::string& _flag) const
-		{
-		/*
-			isServAdmin - a
-			isBlocker - b
-			isAlerter - c
-			isChanfixer - f
-			isOwner - o
-			isUserMan - u
-		*/
-			if (isOwner)
-				return true;
-			else if (_flag == "a" && isServAdmin)
-				return true;
-			else if (_flag == "b" && canBlock)
-				return true;
-			else if (_flag == "c" && canAlert)
-				return true;
-			else if (_flag == "f" && canChanfix)
-				return true;
-			else if (_flag == "u" && canManageUsers)
-				return true;
-			else
-				return false;
-		}
+	inline bool		getFlag( const flagType& whichFlag ) const
+		{ return (whichFlag == (flags & whichFlag)) ; }
+
+	inline const flagType&		getFlags() const
+		{ return flags ; }
+
+	inline const bool getIsSuspended() const
+		{ return isSuspended; }
+
+	inline const bool getUseNotice() const
+		{ return useNotice; }
 
 	/* Mutators */
 
@@ -127,38 +98,18 @@ public:
 	inline void setLastUpdated(const unsigned int _last_updated)
 		{ last_updated = _last_updated; }
 
-	inline void addFlag(const std::string& _flag)
-		{
-			if (_flag == "a")
-				isServAdmin = 1;
-			else if (_flag == "b")
-				canBlock = 1;
-			else if (_flag == "c")
-				canAlert = 1;
-			else if (_flag == "f")
-				canChanfix = 1;
-			else if (_flag == "o")
-				isOwner = 1;
-			else if (_flag == "u")
-				canManageUsers = 1;
-		}
-		
-	inline void delFlag(const std::string& _flag)
-		{
-			if (_flag == "a")
-				isServAdmin = 0;
-			else if (_flag == "b")
-				canBlock = 0;
-			else if (_flag == "c")
-				canAlert = 0;
-			else if (_flag == "f")
-				canChanfix = 0;
-			else if (_flag == "o")
-				isOwner = 0;
-			else if (_flag == "u")
-				canManageUsers = 0;
-		}
-		
+	inline void setFlag(const flagType& whichFlag)
+		{ flags |= whichFlag; }
+
+	inline void removeFlag(const flagType& whichFlag)
+		{ flags &= ~whichFlag; }
+
+	inline void setSuspended(const bool _isSuspended)
+		{ isSuspended = _isSuspended; }
+
+	inline void setNotice(const bool _useNotice)
+		{ useNotice = _useNotice; }
+
 	/* Methods to alter our SQL status */
 	void setAllMembers(int);
 	bool commit();
@@ -167,27 +118,17 @@ public:
 
 private:
 
-	PgDatabase*	SQLDb;
-	unsigned int	Id;
+	unsigned int	id;
 	std::string	user_name;
 	unsigned int	created;
 	unsigned int	last_seen;
 	unsigned int	last_updated;
 	std::string	last_updated_by;
-	bool		isServAdmin;
-	bool		canBlock;
-	bool		canAlert;
-	bool		canChanfix;
-	bool		isOwner;
-	bool		canManageUsers;
+	flagType	flags;
 	bool		isSuspended;
 	bool		useNotice;
-	bool		atob( std::string str )
-			{
-				if(str == "y" || str == "true" || str == "yes") return true;
-				return false;
-			}
-	std::string	flags;
+
+	PgDatabase*	SQLDb;
 }; // class sqlUser
 
 } // namespace gnuworld

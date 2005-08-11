@@ -7,8 +7,6 @@
 
 #include	<sstream>
 #include	<string>
-#include	<iostream>
-#include	<cstring>
 
 #include	"libpq++.h"
 

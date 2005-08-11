@@ -59,22 +59,17 @@ CREATE TABLE users (
 	last_seen INT4 NOT NULL DEFAULT 0,
 	last_updated INT4 NOT NULL DEFAULT 0,
 	last_updated_by VARCHAR(128) NOT NULL,
-	-- server admin (limited access to +u commands)
-	isServAdmin BOOLEAN NOT NULL DEFAULT FALSE,
-	-- can block/unblock channels
-	canBlock BOOLEAN NOT NULL DEFAULT FALSE,
-	-- can add/del notes/alerts to channels
-	canAlert BOOLEAN NOT NULL DEFAULT FALSE,
-	-- can manual chanfix
-	canChanfix BOOLEAN NOT NULL DEFAULT FALSE,
-	-- owner
-	isOwner BOOLEAN NOT NULL DEFAULT FALSE,
-	-- user management rights
-	canManageUsers BOOLEAN NOT NULL DEFAULT FALSE,
-	-- currently suspended
+	flags INT2 NOT NULL DEFAULT 0,
+	-- 0x01 - server admin (limited access to +u commands)
+	-- 0x02 - can block/unblock channels
+	-- 0x04 - can add/del notes/alerts to channels
+	-- 0x08 - can manual chanfix
+	-- 0x10 - owner
+	-- 0x20 - user management rights
 	isSuspended BOOLEAN NOT NULL DEFAULT FALSE,
-	-- use notice instead of privmsg
+	-- currently suspended
 	useNotice BOOLEAN NOT NULL DEFAULT TRUE,
+	-- use notice instead of privmsg
 	PRIMARY KEY (id)
 );
 

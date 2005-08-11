@@ -21,8 +21,6 @@
 
 #include	<sstream>
 #include	<string>
-#include	<iostream>
-#include	<cstring>
 
 #include	"libpq++.h"
 
@@ -34,40 +32,31 @@
 
 namespace gnuworld
 {
+
 sqlUser::sqlUser(PgDatabase* _SQLDb)
-: Id( 0 ),
-  user_name(""),
+: id(0),
+  user_name(),
   created(0),
   last_seen(0),
   last_updated(0),
-  last_updated_by(""),
-  isServAdmin(0),
-  canBlock(0),
-  canAlert(0),
-  canChanfix(0),
-  isOwner(0),
-  canManageUsers(0),
-  isSuspended(0),
-  useNotice(1),
+  last_updated_by(),
+  flags(0),
+  isSuspended(false),
+  useNotice(true),
   SQLDb(_SQLDb)
 {};
 
 void sqlUser::setAllMembers(int row) 
 {
-  Id = atoi(SQLDb->GetValue(row, 0));
+  id = atoi(SQLDb->GetValue(row, 0));
   user_name = SQLDb->GetValue(row, 1);
   created = atoi(SQLDb->GetValue(row, 2));
   last_seen = atoi(SQLDb->GetValue(row, 3));
   last_updated = atoi(SQLDb->GetValue(row, 4));
   last_updated_by = SQLDb->GetValue(row, 5);
-  isServAdmin = (!strcasecmp(SQLDb->GetValue(row, 6),"t") ? 1 : 0 );
-  canBlock = (!strcasecmp(SQLDb->GetValue(row, 7),"t") ? 1 : 0 );
-  canAlert = (!strcasecmp(SQLDb->GetValue(row, 8),"t") ? 1 : 0 );
-  canChanfix = (!strcasecmp(SQLDb->GetValue(row, 9),"t") ? 1 : 0 );
-  isOwner = (!strcasecmp(SQLDb->GetValue(row, 10),"t") ? 1 : 0 );
-  canManageUsers = (!strcasecmp(SQLDb->GetValue(row, 11),"t") ? 1 : 0 );
-  isSuspended = (!strcasecmp(SQLDb->GetValue(row, 12),"t") ? 1 : 0 );
-  useNotice = (!strcasecmp(SQLDb->GetValue(row, 13),"t") ? 1 : 0 );
+  flags = atoi(SQLDb->GetValue(row, 6));
+  isSuspended = atob(SQLDb->GetValue(row, 7));
+  useNotice = atob(SQLDb->GetValue(row, 8));
 };
 
 bool sqlUser::commit()
@@ -83,14 +72,9 @@ queryString	<< "UPDATE users SET "
 		<< "last_seen = " << last_seen << ", "
 		<< "last_updated_by = '" << last_updated_by << "', "
 		<< "last_updated = " << last_updated << ", "
-		<< "isservadmin = " << (isServAdmin ? "'t'" : "'n'") << ", "
-		<< "canblock = " << (canBlock ? "'t'" : "'n'") << ", "
-		<< "canalert = " << (canAlert ? "'t'" : "'n'") << ", "
-		<< "canchanfix = " << (canChanfix ? "'t'" : "'n'") << ", "
-		<< "isowner = " << (isOwner ? "'t'" : "'n'") << ", "
-		<< "canmanageusers = " << (canManageUsers ? "'t'" : "'n'") << ", "
-		<< "issuspended = " << (isSuspended ? "'t'" : "'n'") << ", "
-		<< "usenotice = " << (useNotice ? "'t'" : "'n'")
+		<< "flags = " << flags << ", "
+		<< "issuspended = " << (isSuspended ? "TRUE" : "FALSE") << ", "
+		<< "usenotice = " << (useNotice ? "TRUE" : "FALSE")
 		<< " WHERE "
 		<< "user_name = '" << user_name << "'"
 		;
@@ -116,7 +100,7 @@ bool sqlUser::Insert()
 {
 std::stringstream insertString;
 insertString	<< "INSERT INTO users "
-		<< "(user_name, created, last_seen, last_updated, last_updated_by, isservadmin, canblock, canalert, canchanfix, isowner, canmanageusers, issuspended, usenotice) "
+		<< "(user_name, created, last_seen, last_updated, last_updated_by, flags, issuspended, usenotice) "
 		<< "VALUES "
 		<< "("
 		<< "'" << user_name << "', "
@@ -124,26 +108,14 @@ insertString	<< "INSERT INTO users "
 		<< last_seen << ", "
 		<< last_updated << ", "
 		<< "'" << last_updated_by << "', "
-		<< (isServAdmin ? "'t'" : "'n'")
-		<< ", "
-		<< (canBlock ? "'t'" : "'n'")
-		<< ", "
-		<< (canAlert ? "'t'" : "'n'")
-		<< ", "
-		<< (canChanfix ? "'t'" : "'n'")
-		<< ", "
-		<< (isOwner ? "'t'" : "'n'")
-		<< ", "
-		<< (canManageUsers ? "'t'" : "'n'")
-		<< ", "
-		<< (isSuspended ? "'t'" : "'n'")
-		<< ", "
-		<< (useNotice ? "'t'" : "'n'")
+		<< flags << ", "
+		<< (isSuspended ? "TRUE" : "FALSE") << ", "
+		<< (useNotice ? "TRUE" : "FALSE")
 		<< ")"
 		;
 
 #ifdef LOG_SQL
-elog	<< "sqlUser::insert> "
+elog	<< "sqlUser::Insert> "
 	<< insertString
 	<< endl;
 #endif
@@ -151,12 +123,12 @@ elog	<< "sqlUser::insert> "
 ExecStatusType status = SQLDb->Exec(insertString.str().c_str());
 
 if(PGRES_COMMAND_OK != status) {
-	elog << "sqlUser::insert> " << SQLDb->ErrorMessage();
+	elog << "sqlUser::Insert> " << SQLDb->ErrorMessage();
 	return false;
 }
 
 return true;
-} // sqlUser::insert()
+} // sqlUser::Insert()
 
 bool sqlUser::Delete()
 {
@@ -168,18 +140,18 @@ deleteString	<< "DELETE FROM users "
 ExecStatusType status = SQLDb->Exec(deleteString.str().c_str());
 
 if(PGRES_COMMAND_OK != status) {
-	elog << "sqlUser::delete> " << SQLDb->ErrorMessage();
+	elog << "sqlUser::Delete> " << SQLDb->ErrorMessage();
 	return false;
 }
 
 std::stringstream hostString;
 hostString	<< "DELETE FROM hosts "
-		<< "WHERE user_id = " << Id;
+		<< "WHERE user_id = " << id;
 
 status = SQLDb->Exec(hostString.str().c_str());
 
 if(PGRES_COMMAND_OK != status) {
-	elog << "sqlUser::delete (hosts)> " << SQLDb->ErrorMessage();
+	elog << "sqlUser::Delete (hosts)> " << SQLDb->ErrorMessage();
 	return false;
 }
 
@@ -192,4 +164,4 @@ sqlUser::~sqlUser()
 // No heap space allocated
 }
 
-} //Namespace gnuworld
+} //namespace gnuworld

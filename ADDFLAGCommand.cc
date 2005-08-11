@@ -1,10 +1,10 @@
 /**
  * ADDFLAGCommand.cc
  *
- * 07/21/2005 - Jimmy Lipham <music0m@alltel.net>
+ * 08/08/2005 - Jimmy Lipham <music0m@alltel.net>
  * Initial Version
  *
- * Shows a list of accounts plus their score of the top ops of this channel
+ * Adds this flag to the user
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,30 +21,23 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
  * USA.
  *
- * $Id: ADDFLAGCommand.cc
+ * $Id$
  */
-
-#include <ctime>
-#include <iostream>
 
 #include "gnuworld_config.h"
 #include "Network.h"
 
 #include "chanfix.h"
-#include "levels.h" 
 #include "StringTokenizer.h"
-#include "sqlChannel.h"
-#include "sqlChanOp.h"
+#include "sqlUser.h"
 
-RCSTAG("");
+RCSTAG("$Id$");
 
 namespace gnuworld
 {
 
-void ADDFLAGCommand::Exec(iClient* theClient, const std::string& Message)
+void ADDFLAGCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
-if (theClient->getAccount() == "" || !theClient->isOper()) return;
-	
 StringTokenizer st(Message);
 
 if (st.size() < 2) {
@@ -53,37 +46,61 @@ if (st.size() < 2) {
 }
 
 if (st[2].size() > 1) {
+  bot->Notice(theClient, "You may only add one flag per ADDFLAG command.");
+  return;
+}
+
+const char flag = st[2][0];
+if (!bot->getFlagType(flag)) {
   Usage(theClient);
   return;
 }
 
-if (st[2] != "a" && st[2] != "b" && st[2] != "c" && st[2] != "f" && st[2] != "o" && st[2] != "u") {
-  Usage(theClient);
-  return;
-}
-
-sqlUser* theUser = bot->GetOper(theClient->getAccount());
-if (!theUser) return;
-
-if (!theUser->hasFlag("u") && !theUser->hasFlag("a")) {
-  bot->Notice(theClient, "This command requires one of these flags: ua.");
-  return;
-}
-sqlUser* chkUser = bot->GetOper(st[1]);
+sqlUser* chkUser = bot->isAuthed(st[1]);
 if (!chkUser) {
   bot->Notice(theClient, "No such user %s.", st[1].c_str());
   return;
 }
 
-if (chkUser->hasFlag(st[2])) {
-  bot->Notice(theClient, "User %s already has flag %s.", st[1].c_str(), st[2].c_str());
+if (flag == bot->getFlagChar(sqlUser::F_OWNER)) {
+  bot->Notice(theClient, "You cannot add an owner flag.");
   return;
 }
 
-chkUser->addFlag(st[2]);
+if (flag == bot->getFlagChar(sqlUser::F_USERMANAGER) && 
+    !theUser->getFlag(sqlUser::F_OWNER) {
+  bot->Notice(theClient, "Only an owner can add the user management flag.");
+  return;
+}
+
+/* A serveradmin can only add flags to users on his/her own server. */
+if (theUser->getFlag(sqlUser::F_SERVERADMIN) && 
+    !theUser->getFlag(sqlUser::F_USERMANAGER)) {
+//  if (chkUser->getMainGroup() != theUser->getMainGroup()) {
+//    bot->Notice(theClient, "You cannot add a flag to a user with a different main group.");
+//    return;
+//  }
+  if (flag == bot->getFlagChar(sqlUser::F_BLOCK)) {
+    bot->Notice(theClient, "You cannot add a block flag.");
+    return;
+  }
+  if (flag == bot->getFlagChar(sqlUser::F_SERVERADMIN)) {
+    bot->Notice(theClient, "You cannot add a serveradmin flag.");
+    return;
+  }
+}
+
+if (chkUser->getFlag(bot->getFlagType(flag))) {
+  bot->Notice(theClient, "User %s already has flag %c.", 
+	      chkUser->getUserName().c_str(), flag);
+  return;
+}
+
+chkUser->setFlag(bot->getFlagType(flag));
 chkUser->setLastUpdatedBy(theUser->getUserName());
 chkUser->setLastUpdated(bot->currentTime());
 chkUser->commit();
-bot->Notice(theClient, "Added flag %s to user %s.", st[2].c_str(), st[1].c_str());
+bot->Notice(theClient, "Added flag %c to user %s.", flag, 
+	    chkUser->getUserName().c_str());
 } //ADDFLAGCommand::Exec
 } //Namespace gnuworld

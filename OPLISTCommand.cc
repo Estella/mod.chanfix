@@ -31,7 +31,7 @@
 #include "Network.h"
 
 #include "chanfix.h"
-#include "levels.h" 
+#include "flags.h" 
 #include "StringTokenizer.h"
 #include "sqlChannel.h"
 #include "sqlChanOp.h"
@@ -41,7 +41,7 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-void OPLISTCommand::Exec(iClient* theClient, const std::string& Message)
+void OPLISTCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 if (st.size() < 2) {

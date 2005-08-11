@@ -28,7 +28,7 @@
 #include "Network.h"
 
 #include "chanfix.h"
-#include "levels.h" 
+#include "flags.h" 
 #include "StringTokenizer.h"
 
 RCSTAG("$Id$");
@@ -36,7 +36,7 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-void CHECKCommand::Exec(iClient* theClient, const std::string& Message)
+void CHECKCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 if (st.size() < 2) {

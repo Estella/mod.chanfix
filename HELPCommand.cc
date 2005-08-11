@@ -1,10 +1,10 @@
 /**
- * OPLISTCommand.cc
+ * HELPCommand.cc
  *
- * 07/21/2005 - Jimmy Lipham <music0m@alltel.net>
+ * 08/08/2005 - Jimmy Lipham <music0m@alltel.net>
  * Initial Version
  *
- * Shows a list of accounts plus their score of the top ops of this channel
+ * Shows help about <command> or gives a general list of commands
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,53 +21,49 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
  * USA.
  *
- * $Id: HELPCommand.cc
+ * $Id$
  */
 
-#include <ctime>
-#include <iostream>
-
 #include "gnuworld_config.h"
-#include "Network.h"
 
 #include "chanfix.h"
-#include "levels.h" 
 #include "StringTokenizer.h"
-#include "sqlChannel.h"
-#include "sqlChanOp.h"
+#include "sqlUser.h"
 
-RCSTAG("");
+RCSTAG("$Id$");
 
 namespace gnuworld
 {
 
-void HELPCommand::Exec(iClient* theClient, const std::string& Message)
+void HELPCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
-if (theClient->getAccount() == "" || !theClient->isOper()) return;
-	
 StringTokenizer st(Message);
 
 if (st.size() < 2) {
-  bot->Notice(theClient, "\002Oper Level:\002 SCORE CSCORE HISTORY INFO STATUS");
-  bot->Notice(theClient, "\002Logged In:\002 WHO CHECK");
+  bot->Notice(theClient, "\002Oper Level\002: SCORE CSCORE HISTORY INFO STATUS");
 
-  sqlUser* theUser = bot->GetOper(theClient->getAccount());
+  if (theClient->getAccount() != "")
+    bot->Notice(theClient, "\002Logged In\002: CHECK WHO");
+
   if (!theUser) return;
 
-  if (theUser->hasFlag("o"))
-    bot->Notice(theClient, "\002Owner (+o):\002 REHASH SET");
+  if (theUser->getFlag(sqlUser::F_SERVERADMIN))
+    bot->Notice(theClient, "\002Server Admin (+a)\002: ADDUSER DELUSER ADDHOST DELHOST ADDFLAG DELFLAG WHOSERVER");
 
-  if (theUser->hasFlag("b"))
-    bot->Notice(theClient, "\002Blocker (+b):\002 BLOCK UNBLOCK");
+  if (theUser->getFlag(sqlUser::F_BLOCK))
+    bot->Notice(theClient, "\002Blocker (+b)\002: BLOCK UNBLOCK");
 
-  if (theUser->hasFlag("u"))
-    bot->Notice(theClient, "\002User Manager (+u):\002 WHOIS ADDUSER DELUSER ADDHOST DELHOST ADDSERVER DELSERVER ADDFLAG DELFLAG WHOSERVER");
+  if (theUser->getFlag(sqlUser::F_CHANNEL))
+    bot->Notice(theClient, "\002Channel (+c)\002: ADDNOTE DELNOTE ALERT UNALERT");
 
-  if (theUser->hasFlag("f"))
-    bot->Notice(theClient, "\002Chanfixer (+f):\002 CHANFIX OPLIST OPNICKS");
+  if (theUser->getFlag(sqlUser::F_CHANFIX))
+    bot->Notice(theClient, "\002Chanfixer (+f)\002: CHANFIX OPLIST OPNICKS");
 
-  if (theUser->hasFlag("c"))
-    bot->Notice(theClient, "\002Channel (+c):\002 ADDNOTE DELNOTE ALERT UNALERT");
+  if (theUser->getFlag(sqlUser::F_OWNER))
+    bot->Notice(theClient, "\002Owner (+o)\002: QUOTE REHASH RELOAD SET SHUTDOWN");
+
+  if (theUser->getFlag(sqlUser::F_USERMANAGER))
+    bot->Notice(theClient, "\002User Manager (+u)\002: WHOIS ADDUSER DELUSER ADDHOST DELHOST ADDSERVER DELSERVER ADDFLAG DELFLAG WHOSERVER");
 
 } else {
   bot->Notice(theClient, "No help available on that topic.");

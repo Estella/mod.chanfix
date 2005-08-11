@@ -47,7 +47,7 @@
 #include	"chanfix.h"
 #include	"chanfix_misc.h"
 #include	"chanfixCommands.h"
-#include	"levels.h"
+#include	"flags.h"
 #include	"sqlChannel.h"
 #include	"sqlChanOp.h"
 #include	"sqlUser.h"
@@ -360,7 +360,26 @@ if (commHandler == commandMap.end()) {
   return;
 }
 
-commHandler->second->Exec(theClient, Message);
+sqlUser* theUser = isAuthed(theClient->getAccount());
+sqlUser::flagType requiredFlag = getCommandType(string_lower(Command));
+if (requiredFlag) {
+  if (!theUser) {
+    Notice(theClient, "You need to authenticate to use this command.");
+    return;
+  }
+
+  if (!theUser->getFlag(requiredFlag)) {
+    if (getFlagChar(requiredFlag) != ' ')
+      Notice(theClient, "This command requires flag '%c'.",
+	     getFlagChar(requiredFlag));
+    else
+      Notice(theClient, "This command requires one of these flags: \"%s\".",
+	     getFlagsString(requiredFlag));
+    return;
+  }
+}
+
+commHandler->second->Exec(theClient, theUser ? theUser : NULL, Message);
 
 xClient::OnPrivateMessage(theClient, Message);
 }
@@ -576,7 +595,7 @@ void chanfix::preloadUserCache()
 {
 
 	std::stringstream theQuery;
-	theQuery	<< "SELECT id, user_name, created, last_seen, last_updated, last_updated_by, isservadmin, canblock, canalert, canchanfix, isowner, canmanageusers, issuspended, usenotice "
+	theQuery	<< "SELECT id, user_name, created, last_seen, last_updated, last_updated_by, flags, issuspended, usenotice "
 			<< "FROM users"
 			;
 
@@ -796,9 +815,51 @@ for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
   if (ptr->second->getChannel() == theChan->getName())
     myOps.push_back(ptr->second);
 }
+
 myOps.sort(compare_points);
 
 return myOps;
+}
+
+/**
+ * This method writes a 'channellog' record, recording an event that has
+ * occured in this channel.
+ */
+
+void chanfix::writeChannelLog(sqlChannel* theChannel, iClient* theClient,
+	unsigned short eventType, const std::string& theMessage)
+{
+sqlUser* theUser = isAuthed(theClient->getNickName());
+std::string userExtra = theUser ? theUser->getUserName() : "Not Logged In";
+
+std::stringstream theLog;
+theLog	<< "INSERT INTO channellog (ts, channelID, event, message, "
+	<< "last_updated) VALUES "
+	<< "("
+	<< currentTime()
+	<< ", "
+	<< theChannel->getID()
+	<< ", "
+	<< eventType
+	<< ", "
+	<< "'["
+	<< nickName
+	<< "]: "
+	<< theClient->getNickUserHost()
+	<< " (" << userExtra << ") "
+	<< escapeSQLChars(theMessage)
+	<< "', "
+	<< currentTime()
+	<< ")"
+	<< std::ends;
+
+#ifdef LOG_SQL
+	elog	<< "chanfix::writeChannelLog> "
+		<< theLog.str()
+		<< std::endl;
+#endif
+
+SQLDb->ExecCommandOk(theLog.str().c_str());
 }
 
 const std::string chanfix::getHostList( sqlUser* User)
@@ -855,6 +916,14 @@ for( std::string::const_iterator ptr = theString.begin() ;
 		}
 	}
 return retMe ;
+}
+
+bool gnuworld::atob( std::string str )
+{
+str = string_lower(str);
+if (str == "y" || str == "true" || str == "yes")
+  return true;
+return false;
 }
 
 void chanfix::givePoints(Channel* theChan, iClient* theClient)
@@ -1306,11 +1375,8 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
      if (!sqlChan) sqlChan = newChannelRecord(ptr->first);
      bool isFixed = false;
 
-     if (currentTime() - sqlChan->getLastAttempt() < AUTOFIX_INTERVAL) {
-       /* do nothing */
-     } else {
+     if (currentTime() - sqlChan->getLastAttempt() >= AUTOFIX_INTERVAL)
        isFixed = fixChan(sqlChan, true);
-     }
 
      /**
       * If the channel has been fixed, or the fixing time window
@@ -1319,6 +1385,7 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
      if (isFixed || currentTime() - sqlChan->getFixStart() > AUTOFIX_MAXIMUM) {
        ptr = autoFixQ.erase(ptr);
        sqlChan->setFixStart(0);
+       sqlChan->setLastAttempt(0);
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " done!" << std::endl;
      } else {
        ptr->second = currentTime() + AUTOFIX_INTERVAL;
@@ -1335,9 +1402,8 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
      if (!sqlChan) sqlChan = newChannelRecord(ptr->first);
      bool isFixed = false;
 
-     if (currentTime() - sqlChan->getLastAttempt() >= CHANFIX_INTERVAL) {
+     if (currentTime() - sqlChan->getLastAttempt() >= CHANFIX_INTERVAL)
        isFixed = fixChan(sqlChan, false);
-     }
 
      /**
       * If the channel has been fixed, or the fixing time window
@@ -1346,6 +1412,7 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
      if (isFixed || currentTime() - sqlChan->getFixStart() > CHANFIX_MAXIMUM + CHANFIX_DELAY) {
        ptr = manFixQ.erase(ptr);
        sqlChan->setFixStart(0);
+       sqlChan->setLastAttempt(0);
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " done!" << std::endl;
      } else {
        ptr->second = currentTime() + CHANFIX_INTERVAL;
@@ -1438,7 +1505,7 @@ const int chanfix::getCurrentGMTHour()
 	return ptm->tm_hour;
 }
 
-sqlUser* chanfix::GetOper(const std::string Name)
+sqlUser* chanfix::isAuthed(const std::string Name)
 {
 //Name = escapeSQLChars(Name);
 sqlUser* tempUser = usersMap[Name];
@@ -1581,6 +1648,51 @@ if (theChan->getMode(Channel::MODE_A)) return;
   }
   scoredOpsList.clear();
 return;
+}
+
+char chanfix::getFlagChar(const sqlUser::flagType& whichFlag)
+{
+switch (whichFlag) {
+  case sqlUser::F_SERVERADMIN: return 'a';
+  case sqlUser::F_BLOCK: return 'b';
+  case sqlUser::F_CHANNEL: return 'c';
+  case sqlUser::F_CHANFIX: return 'f';
+  case sqlUser::F_OWNER: return 'o';
+  case sqlUser::F_USERMANAGER: return 'u';
+}
+return ' ';
+}
+
+const std::string chanfix::getFlagsString(const sqlUser::flagType& whichFlags)
+{
+std::string flagstr;
+switch (whichFlags) {
+  case sqlUser::F_SERVERADMIN: flagstr += "a";
+  case sqlUser::F_BLOCK: flagstr += "b";
+  case sqlUser::F_CHANNEL: flagstr += "c";
+  case sqlUser::F_CHANFIX: flagstr += "f";
+  case sqlUser::F_OWNER: flagstr += "o";
+  case sqlUser::F_USERMANAGER: flagstr += "u";
+}
+return flagstr;
+}
+
+sqlUser::flagType chanfix::getFlagType(const char whichChar)
+{
+switch (whichChar) {
+  case 'a': return sqlUser::F_SERVERADMIN;
+  case 'b': return sqlUser::F_BLOCK;
+  case 'c': return sqlUser::F_CHANNEL;
+  case 'f': return sqlUser::F_CHANFIX;
+  case 'o': return sqlUser::F_OWNER;
+  case 'u': return sqlUser::F_USERMANAGER;
+}
+return 0;
+}
+
+sqlUser::flagType chanfix::getCommandType(const std::string& command)
+{
+return 0;
 }
 
 void chanfix::updatePoints()

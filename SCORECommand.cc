@@ -25,14 +25,13 @@
  */
 
 #include <sstream>
-#include <iostream>
 #include <vector>
 
 #include "gnuworld_config.h"
 #include "Network.h"
 
 #include "chanfix.h"
-#include "levels.h" 
+#include "flags.h" 
 #include "StringTokenizer.h"
 #include "sqlChannel.h"
 #include "sqlChanOp.h"
@@ -43,7 +42,7 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-void SCORECommand::Exec(iClient* theClient, const std::string& Message)
+void SCORECommand::Exec(iClient* theClient, sqlUser*, const std::string& Message)
 {
 StringTokenizer st(Message);
 if (st.size() < 2) {

@@ -34,12 +34,6 @@ bool compare_points(gnuworld::sqlChanOp* a, gnuworld::sqlChanOp* b) {
   return a->getPoints() > b->getPoints();
 }
 
-bool atob( std::string str )
-{
-if(str == "y" || str == "true" || str == "yes") return true;
-return false;
-}
-
 } //namespace gnuworld
 
 #endif // __CHANFIX_MISC_H

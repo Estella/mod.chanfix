@@ -24,20 +24,18 @@
  * $Id$
  */
 
-#include	<string>
-
 #include	"gnuworld_config.h"
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
-#include	"levels.h"
+#include	"flags.h"
 
 RCSTAG("$Id$");
 
 namespace gnuworld
 {
 
-void REHASHCommand::Exec(iClient* theClient, const std::string& Message)
+void REHASHCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 
 StringTokenizer st(Message);
