@@ -30,7 +30,7 @@
 #include "StringTokenizer.h"
 #include "sqlUser.h"
 
-RCSTAG("$Id: WHOISCommand.cc 1192 2005-07-31 02:12:37Z Compster $");
+RCSTAG("$Id$");
 
 namespace gnuworld
 {

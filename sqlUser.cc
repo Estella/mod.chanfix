@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
- * $Id: sqlUser.cc 1188 2005-07-30 02:29:02Z Compster $
+ * $Id$
  */
 
 #include	<sstream>

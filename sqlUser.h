@@ -70,7 +70,7 @@ public:
 		{ return last_updated_by; }
 
 	inline bool		getFlag( const flagType& whichFlag ) const
-		{ return (whichFlag == (flags & whichFlag)) ; }
+		{ return ((flags & F_OWNER) || (flags & whichFlag)) ; }
 
 	inline const flagType&		getFlags() const
 		{ return flags ; }

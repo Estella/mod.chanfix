@@ -21,7 +21,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
- * $Id: ROTATECommand.cc 1165 2005-07-26 00:52:31Z Compster $
+ * $Id$
  */
 
 #include	<string>
@@ -31,7 +31,7 @@
 
 #include	"chanfix.h"
 
-RCSTAG("$Id: ROTATECommand.cc 1165 2005-07-26 00:52:31Z Compster $");
+RCSTAG("$Id$");
 
 namespace gnuworld
 {
