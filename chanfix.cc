@@ -1757,28 +1757,37 @@ return;
 
 char chanfix::getFlagChar(const sqlUser::flagType& whichFlag)
 {
-switch (whichFlag) {
-  case sqlUser::F_SERVERADMIN: return 'a';
-  case sqlUser::F_BLOCK: return 'b';
-  case sqlUser::F_CHANNEL: return 'c';
-  case sqlUser::F_CHANFIX: return 'f';
-  case sqlUser::F_OWNER: return 'o';
-  case sqlUser::F_USERMANAGER: return 'u';
-}
-return ' ';
+ if (whichFlag == sqlUser::F_SERVERADMIN)
+   return 'a';
+ else if (whichFlag == sqlUser::F_BLOCK)
+   return 'b';
+ else if (whichFlag == sqlUser::F_CHANNEL)
+   return 'c';
+ else if (whichFlag == sqlUser::F_CHANFIX)
+   return 'f';
+ else if (whichFlag == sqlUser::F_OWNER)
+   return 'o';
+ else if (whichFlag == sqlUser::F_USERMANAGER)
+   return 'u';
+ else
+   return ' ';
 }
 
 const std::string chanfix::getFlagsString(const sqlUser::flagType& whichFlags)
 {
-std::string flagstr;
-switch (whichFlags) {
-  case sqlUser::F_SERVERADMIN: flagstr += "a";
-  case sqlUser::F_BLOCK: flagstr += "b";
-  case sqlUser::F_CHANNEL: flagstr += "c";
-  case sqlUser::F_CHANFIX: flagstr += "f";
-  case sqlUser::F_OWNER: flagstr += "o";
-  case sqlUser::F_USERMANAGER: flagstr += "u";
-}
+ std::string flagstr;
+ if (whichFlags & sqlUser::F_SERVERADMIN)
+   flagstr += "a";
+ if (whichFlags & sqlUser::F_BLOCK)
+   flagstr += "b";
+ if (whichFlags & sqlUser::F_CHANNEL)
+   flagstr += "c";
+ if (whichFlags & sqlUser::F_CHANFIX)
+   flagstr += "f";
+ if (whichFlags & sqlUser::F_OWNER)
+   flagstr += "o";
+ if (whichFlags & sqlUser::F_USERMANAGER)
+   flagstr += "u";
 return flagstr;
 }
 

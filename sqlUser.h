@@ -41,13 +41,13 @@ public:
 	virtual ~sqlUser();
 
 	typedef unsigned short int	flagType ;
-	static const sqlUser::flagType sqlUser::F_SERVERADMIN =	0x01; /* +a */
-	static const sqlUser::flagType sqlUser::F_BLOCK =	0x02; /* +b */
-	static const sqlUser::flagType sqlUser::F_CHANNEL =	0x04; /* +c */
-	static const sqlUser::flagType sqlUser::F_CHANFIX =	0x08; /* +f */
-	static const sqlUser::flagType sqlUser::F_OWNER =	0x10; /* +o */
-	static const sqlUser::flagType sqlUser::F_USERMANAGER =	0x20; /* +u */
-	static const sqlUser::flagType sqlUser::F_LOGGEDIN =	0x40;
+	static const flagType F_SERVERADMIN; /* +a */
+	static const flagType F_BLOCK; /* +b */
+	static const flagType F_CHANNEL; /* +c */
+	static const flagType F_CHANFIX; /* +f */
+	static const flagType F_OWNER; /* +o */
+	static const flagType F_USERMANAGER; /* +u */
+	static const flagType F_LOGGEDIN;
 
 	/* Methods to get data attributes. */
 
