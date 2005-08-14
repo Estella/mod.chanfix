@@ -41,10 +41,10 @@ void SHUTDOWNCommand::Exec(iClient* theClient, sqlUser* theUser, const std::stri
 
 StringTokenizer st(Message);
 
-bot->Notice(theClient, "Shutting down the server as per your request.");
+bot->SendTo(theClient, "Shutting down the server as per your request.");
 bot->logAdminMessage("%s (%s) is shutting me down.",
-		     theClient->getNickName().c_str(),
-		     theUser->getUserName().c_str());
+		     theUser->getUserName().c_str(),
+		     theClient->getNickUserHost().c_str());
 
 if (st.size() < 2) {
   server->UnloadClient(bot, "Quit");

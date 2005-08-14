@@ -43,35 +43,35 @@ StringTokenizer st(Message);
 
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
 if (!theChan) {
-  bot->Notice(theClient, "No information on %s in the database.",
+  bot->SendTo(theClient, "No information on %s in the database.",
 	      st[1].c_str());
   return;
 }
 
-bot->Notice(theClient, "Information on %s:",
+bot->SendTo(theClient, "Information on %s:",
 	    theChan->getChannel().c_str());
 
 if (theChan->getFlag(sqlChannel::F_BLOCKED))
-  bot->Notice(theClient, "%s is BLOCKED.",
+  bot->SendTo(theClient, "%s is BLOCKED.",
 	      theChan->getChannel().c_str());
 else if (theChan->getFlag(sqlChannel::F_ALERT))
-  bot->Notice(theClient, "%s is ALERTED.",
+  bot->SendTo(theClient, "%s is ALERTED.",
 	      theChan->getChannel().c_str());
 
 Channel* netChan = Network->findChannel(st[1]);
 if (netChan) {
   if (bot->isBeingChanFixed(netChan))
-    bot->Notice(theClient, "%s is being chanfixed.",
+    bot->SendTo(theClient, "%s is being chanfixed.",
 		theChan->getChannel().c_str());
   if (bot->isBeingAutoFixed(netChan))
-    bot->Notice(theClient, "%s is being autofixed.",
+    bot->SendTo(theClient, "%s is being autofixed.",
 		theChan->getChannel().c_str());
 }
 
 /* need to check for notes here -reed */
 /* ... */
 
-bot->Notice(theClient, "End of information.");
+bot->SendTo(theClient, "End of information.");
 
 return;
 }

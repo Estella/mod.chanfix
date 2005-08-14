@@ -58,9 +58,9 @@ bool compact = (string_upper(st[0]) == "CSCORE");
 Channel* netChan = Network->findChannel(st[1]);
 if (!netChan) {
   if (compact)
-    bot->Notice(theClient, "~! %s", st[1].c_str());
+    bot->SendTo(theClient, "~! %s", st[1].c_str());
   else
-    bot->Notice(theClient, "No such channel %s.", st[1].c_str());
+    bot->SendTo(theClient, "No such channel %s.", st[1].c_str());
   return;
 }
 
@@ -70,9 +70,9 @@ for (Channel::userIterator ptr = netChan->userList_begin();
   curUser = ptr->second;
   if (curUser->getClient()->getMode(iClient::MODE_SERVICES)) {
     if (compact)
-      bot->Notice(theClient, "~! %s", netChan->getName().c_str());
+      bot->SendTo(theClient, "~! %s", netChan->getName().c_str());
     else
-      bot->Notice(theClient, "%s is a registered channel.",
+      bot->SendTo(theClient, "%s is a registered channel.",
 		  netChan->getName().c_str());
      return;
   }
@@ -81,9 +81,9 @@ for (Channel::userIterator ptr = netChan->userList_begin();
 chanfix::chanOpsType myOps = bot->getMyOps(netChan);
 if (myOps.empty()) {
   if (compact)
-    bot->Notice(theClient, "~! %s", netChan->getName().c_str());
+    bot->SendTo(theClient, "~! %s", netChan->getName().c_str());
   else
-    bot->Notice(theClient, "There are no scores in the database for %s.",
+    bot->SendTo(theClient, "There are no scores in the database for %s.",
 		netChan->getName().c_str());
   return;
 }
@@ -97,9 +97,9 @@ if (st.size() > 2) {
       curOp = *opPtr;
       if (string_lower(curOp->getAccount()) == string_lower(scUser)) {
 	if (compact)
-	  bot->Notice(theClient, "~U %s %s %u", netChan->getName().c_str(), curOp->getAccount().c_str(), curOp->getPoints());
+	  bot->SendTo(theClient, "~U %s %s %u", netChan->getName().c_str(), curOp->getAccount().c_str(), curOp->getPoints());
 	else
-	  bot->Notice(theClient, "Score for %s in channel %s: %u.", curOp->getAccount().c_str(), netChan->getName().c_str(), curOp->getPoints());
+	  bot->SendTo(theClient, "Score for %s in channel %s: %u.", curOp->getAccount().c_str(), netChan->getName().c_str(), curOp->getPoints());
 	return;
       }
     }
@@ -109,9 +109,9 @@ if (st.size() > 2) {
    curClient = Network->findNick(scUser);
    if (!curClient) {
      if (compact)
-       bot->Notice(theClient, "~U %s no@such.nick 0", netChan->getName().c_str());
+       bot->SendTo(theClient, "~U %s no@such.nick 0", netChan->getName().c_str());
      else
-       bot->Notice(theClient, "No such nick %s.", scUser);
+       bot->SendTo(theClient, "No such nick %s.", scUser);
      return;
    } else {
      iClient* curClientOp;
@@ -122,9 +122,9 @@ if (st.size() > 2) {
 	std::vector< iClient* >::const_iterator acctPtr = acctToScore.begin();
 	if (acctPtr == acctToScore.end()) {
 	  if (compact)
-	    bot->Notice(theClient, "~U %s no@such.nick 0", netChan->getName().c_str());
+	    bot->SendTo(theClient, "~U %s no@such.nick 0", netChan->getName().c_str());
 	  else
-	    bot->Notice(theClient, "No such nick %s.", scUser);
+	    bot->SendTo(theClient, "No such nick %s.", scUser);
 	  return;
 	}
 	while (acctPtr != acctToScore.end()) {
@@ -139,12 +139,12 @@ if (st.size() > 2) {
 	  //Do it like they do on OCF, baby.
 	  if (compact) {
 	    //~U #coder-com mc@local.host 176
-	    bot->Notice(theClient, "~U %s %s %u",
+	    bot->SendTo(theClient, "~U %s %s %u",
 			netChan->getName().c_str(),
 			curOp->getAccount().c_str(),
 			curOp->getPoints());
 	  } else {
-	    bot->Notice(theClient, "Score for %s (%s) in channel %s: %u.",
+	    bot->SendTo(theClient, "Score for %s (%s) in channel %s: %u.",
 			curClientOp->getNickName().c_str(),
 			curOp->getAccount().c_str(),
 			netChan->getName().c_str(),
@@ -155,9 +155,9 @@ if (st.size() > 2) {
       }
       acctToScore.clear();
       if (compact)
-	bot->Notice(theClient, "~U %s no@such.nick 0", netChan->getName().c_str());
+	bot->SendTo(theClient, "~U %s no@such.nick 0", netChan->getName().c_str());
       else
-	bot->Notice(theClient, "No such nick %s.", scUser);
+	bot->SendTo(theClient, "No such nick %s.", scUser);
       return;
     } // for
   } //else
@@ -231,30 +231,30 @@ if (!compact) {
 }
 
 if (compact) {
-  bot->Notice(theClient, "~S %s %s", netChan->getName().c_str(), strScoresDB.str().c_str());
-  bot->Notice(theClient, "~O %s %s", netChan->getName().c_str(), strScoresOP.str().c_str());
-  bot->Notice(theClient, "~N %s %s", netChan->getName().c_str(), strScoresNOP.str().c_str());
+  bot->SendTo(theClient, "~S %s %s", netChan->getName().c_str(), strScoresDB.str().c_str());
+  bot->SendTo(theClient, "~O %s %s", netChan->getName().c_str(), strScoresOP.str().c_str());
+  bot->SendTo(theClient, "~N %s %s", netChan->getName().c_str(), strScoresNOP.str().c_str());
 } else {
-  bot->Notice(theClient, "Top %u scores for channel %s in the database:", minScoreReply,
+  bot->SendTo(theClient, "Top %u scores for channel %s in the database:", minScoreReply,
 	      netChan->getName().c_str());
   if (strScoresDB.str() == ".")
-    bot->Notice(theClient, "None.");
+    bot->SendTo(theClient, "None.");
   else
-    bot->Notice(theClient, strScoresDB.str());
+    bot->SendTo(theClient, strScoresDB.str());
 
-  bot->Notice(theClient, "Top %u scores for ops in %s in the database:", minScoreReply,
+  bot->SendTo(theClient, "Top %u scores for ops in %s in the database:", minScoreReply,
 	      netChan->getName().c_str());
   if (strScoresOP.str() == ".")
-    bot->Notice(theClient, "None.");
+    bot->SendTo(theClient, "None.");
   else
-    bot->Notice(theClient, strScoresOP.str());
+    bot->SendTo(theClient, strScoresOP.str());
     
-  bot->Notice(theClient, "Top %u scores for non-ops in %s in the database:", minScoreReply,
+  bot->SendTo(theClient, "Top %u scores for non-ops in %s in the database:", minScoreReply,
 	      netChan->getName().c_str());
   if (strScoresNOP.str() == ".")
-    bot->Notice(theClient, "None.");
+    bot->SendTo(theClient, "None.");
   else
-    bot->Notice(theClient, strScoresNOP.str());
+    bot->SendTo(theClient, strScoresNOP.str());
 }
 
 return;

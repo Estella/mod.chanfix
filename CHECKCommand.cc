@@ -41,13 +41,13 @@ StringTokenizer st(Message);
 
 Channel* netChan = Network->findChannel(st[1]);
 if (!netChan) {
-  bot->Notice(theClient, "No such channel %s.", st[1].c_str());
+  bot->SendTo(theClient, "No such channel %s.", st[1].c_str());
   return;
 }
 
 /* Reports ops and total clients. */
 
-bot->Notice(theClient, "I see %d opped out of %d total clients in %s.",
+bot->SendTo(theClient, "I see %d opped out of %d total clients in %s.",
 	    bot->countChanOps(netChan), netChan->size(),
 	    netChan->getName().c_str());
 

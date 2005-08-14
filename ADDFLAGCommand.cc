@@ -45,7 +45,7 @@ if (st[2].size() > 1) {
   if (flag == '+')
     flag = st[2][1];
   else {    
-    bot->Notice(theClient, "You may only add one flag per ADDFLAG command.");
+    bot->SendTo(theClient, "You may only add one flag per ADDFLAG command.");
     return;
   }
 }
@@ -57,18 +57,18 @@ if (!bot->getFlagType(flag)) {
 
 sqlUser* chkUser = bot->isAuthed(st[1]);
 if (!chkUser) {
-  bot->Notice(theClient, "No such user %s.", st[1].c_str());
+  bot->SendTo(theClient, "No such user %s.", st[1].c_str());
   return;
 }
 
 if (flag == bot->getFlagChar(sqlUser::F_OWNER)) {
-  bot->Notice(theClient, "You cannot add an owner flag.");
+  bot->SendTo(theClient, "You cannot add an owner flag.");
   return;
 }
 
 if (flag == bot->getFlagChar(sqlUser::F_USERMANAGER) && 
     !theUser->getFlag(sqlUser::F_OWNER)) {
-  bot->Notice(theClient, "Only an owner can add the user management flag.");
+  bot->SendTo(theClient, "Only an owner can add the user management flag.");
   return;
 }
 
@@ -76,21 +76,21 @@ if (flag == bot->getFlagChar(sqlUser::F_USERMANAGER) &&
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) && 
     !theUser->getFlag(sqlUser::F_USERMANAGER)) {
 //  if (chkUser->getMainGroup() != theUser->getMainGroup()) {
-//    bot->Notice(theClient, "You cannot add a flag to a user with a different main group.");
+//    bot->SendTo(theClient, "You cannot add a flag to a user with a different main group.");
 //    return;
 //  }
   if (flag == bot->getFlagChar(sqlUser::F_BLOCK)) {
-    bot->Notice(theClient, "You cannot add a block flag.");
+    bot->SendTo(theClient, "You cannot add a block flag.");
     return;
   }
   if (flag == bot->getFlagChar(sqlUser::F_SERVERADMIN)) {
-    bot->Notice(theClient, "You cannot add a serveradmin flag.");
+    bot->SendTo(theClient, "You cannot add a serveradmin flag.");
     return;
   }
 }
 
 if (chkUser->getFlag(bot->getFlagType(flag))) {
-  bot->Notice(theClient, "User %s already has flag %c.", 
+  bot->SendTo(theClient, "User %s already has flag %c.", 
 	      chkUser->getUserName().c_str(), flag);
   return;
 }
@@ -99,7 +99,7 @@ chkUser->setFlag(bot->getFlagType(flag));
 chkUser->setLastUpdatedBy(theUser->getUserName());
 chkUser->setLastUpdated(bot->currentTime());
 chkUser->commit();
-bot->Notice(theClient, "Added flag %c to user %s.", flag, 
+bot->SendTo(theClient, "Added flag %c to user %s.", flag, 
 	    chkUser->getUserName().c_str());
 } //ADDFLAGCommand::Exec
 } //Namespace gnuworld

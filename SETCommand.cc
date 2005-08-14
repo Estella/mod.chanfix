@@ -51,14 +51,16 @@ while ((pos = option.find('_', 0)) != std::string::npos)
 if (option == "NUMSERVERS") {
   int setting = atoi(value.c_str());
   if (setting < 0) {
-    bot->Notice(theClient, "Please use SET NUM_SERVERS <integer number>.");
+    bot->SendTo(theClient, "Please use SET NUM_SERVERS <integer number>.");
     return;
   }
 
   bot->setNumServers(setting);
-  bot->Notice(theClient, "NUM_SERVERS is now %d.", setting);
-  bot->logAdminMessage("%s changed NUM_SERVERS to %d.",
-		       theClient->getNickName().c_str(), setting);
+  bot->SendTo(theClient, "NUM_SERVERS is now %d.", setting);
+  bot->logAdminMessage("%s (%s) changed NUM_SERVERS to %d.",
+		       theUser->getUserName().c_str(),
+		       theClient->getNickUserHost().c_str(),
+		       setting);
   bot->checkNetwork();
   return;
 }
@@ -66,18 +68,20 @@ if (option == "NUMSERVERS") {
 if (option == "ENABLEAUTOFIX") {
   if (value == "ON" || value == "1") {
     bot->setDoAutoFix(true);
-    bot->Notice(theClient, "Enabled autofix.");
-    bot->logAdminMessage("%s enabled autofix.",
-			 theClient->getNickName().c_str());
+    bot->SendTo(theClient, "Enabled autofix.");
+    bot->logAdminMessage("%s (%s) enabled autofix.",
+			 theUser->getUserName().c_str(),
+			 theClient->getNickUserHost().c_str());
     return;
   } else if (value == "OFF" || value == "0") {
     bot->setDoAutoFix(false);
-    bot->Notice(theClient, "Disabled autofix.");
-    bot->logAdminMessage("%s disabled autofix.",
-			 theClient->getNickName().c_str());
+    bot->SendTo(theClient, "Disabled autofix.");
+    bot->logAdminMessage("%s (%s) disabled autofix.",
+			 theUser->getUserName().c_str(),
+			 theClient->getNickUserHost().c_str());
     return;
   } else {
-    bot->Notice(theClient, "Please use SET ENABLE_AUTOFIX <on/off>.");
+    bot->SendTo(theClient, "Please use SET ENABLE_AUTOFIX <on/off>.");
     return;
   }
 }
@@ -85,18 +89,20 @@ if (option == "ENABLEAUTOFIX") {
 if (option == "ENABLECHANFIX") {
   if (value == "ON" || value == "1") {
     bot->setDoChanFix(true);
-    bot->Notice(theClient, "Enabled manual chanfix.");
-    bot->logAdminMessage("%s enabled manual chanfix.",
-			 theClient->getNickName().c_str());
+    bot->SendTo(theClient, "Enabled manual chanfix.");
+    bot->logAdminMessage("%s (%s) enabled manual chanfix.",
+			 theUser->getUserName().c_str(),
+			 theClient->getNickUserHost().c_str());
     return;
   } else if (value == "OFF" || value == "0") {
     bot->setDoChanFix(false);
-    bot->Notice(theClient, "Disabled manual chanfix.");
-    bot->logAdminMessage("%s disabled manual chanfix.",
-			 theClient->getNickName().c_str());
+    bot->SendTo(theClient, "Disabled manual chanfix.");
+    bot->logAdminMessage("%s (%s) disabled manual chanfix.",
+			 theUser->getUserName().c_str(),
+			 theClient->getNickUserHost().c_str());
     return;
   } else {
-    bot->Notice(theClient, "Please use SET ENABLE_CHANFIX <on/off>.");
+    bot->SendTo(theClient, "Please use SET ENABLE_CHANFIX <on/off>.");
     return;
   }
 }
@@ -104,23 +110,25 @@ if (option == "ENABLECHANFIX") {
 if (option == "ENABLECHANNELBLOCKING") {
   if (value == "ON" || value == "1") {
     bot->setDoChanBlocking(true);
-    bot->Notice(theClient, "Enabled channel blocking.");
-    bot->logAdminMessage("%s enabled channel blocking.",
-			 theClient->getNickName().c_str());
+    bot->SendTo(theClient, "Enabled channel blocking.");
+    bot->logAdminMessage("%s (%s) enabled channel blocking.",
+			 theUser->getUserName().c_str(),
+			 theClient->getNickUserHost().c_str());
     return;
   } else if (value == "OFF" || value == "0") {
     bot->setDoChanBlocking(false);
-    bot->Notice(theClient, "Disabled channel blocking.");
-    bot->logAdminMessage("%s disabled channel blocking.",
-			 theClient->getNickName().c_str());
+    bot->SendTo(theClient, "Disabled channel blocking.");
+    bot->logAdminMessage("%s (%s) disabled channel blocking.",
+			 theUser->getUserName().c_str(),
+			 theClient->getNickUserHost().c_str());
     return;
   } else {
-    bot->Notice(theClient, "Please use SET ENABLE_CHANNEL_BLOCKING <on/off>.");
+    bot->SendTo(theClient, "Please use SET ENABLE_CHANNEL_BLOCKING <on/off>.");
     return;
   }
 }
 
-bot->Notice(theClient, "This setting does not exist.");
+bot->SendTo(theClient, "This setting does not exist.");
 
 return;
 }

@@ -42,18 +42,18 @@ StringTokenizer st(Message);
 sqlUser* theUser = bot->isAuthed(st[1]);
 if (!theUser) 
 { 
-  bot->Notice(theClient, "No such user %s.", st[1].c_str());
+  bot->SendTo(theClient, "No such user %s.", st[1].c_str());
   return;
 }
 
-bot->Notice(theClient, "User: %s", theUser->getUserName().c_str());
+bot->SendTo(theClient, "User: %s", theUser->getUserName().c_str());
 if (!theUser->getFlags())
-  bot->Notice(theClient, "Flags: none.");
+  bot->SendTo(theClient, "Flags: none.");
 else
-  bot->Notice(theClient, "Flags: +%s",
+  bot->SendTo(theClient, "Flags: +%s",
 	      bot->getFlagsString(theUser->getFlags()).c_str());
-bot->Notice(theClient, "Hosts: %s", bot->getHostList(theUser).c_str()); //Fix this
-bot->Notice(theClient, "Main server: NA"); //This too
-bot->Notice(theClient, "Other servers: NA"); //Yep, this
+bot->SendTo(theClient, "Hosts: %s", bot->getHostList(theUser).c_str()); //Fix this
+bot->SendTo(theClient, "Main group: NA"); //This too
+bot->SendTo(theClient, "Other groups: NA"); //Yep, this
 } //whoiscommand::exec
 } //namespace gnuworld

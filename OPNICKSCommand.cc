@@ -41,12 +41,12 @@ StringTokenizer st(Message);
 
 Channel* netChan = Network->findChannel(st[1]);
 if (!netChan) {
-  bot->Notice(theClient, "No such channel %s.", st[1].c_str());
+  bot->SendTo(theClient, "No such channel %s.", st[1].c_str());
   return;
 }
 
 /* Send list of opped clients. */
-bot->Notice(theClient, "Opped clients on channel %s:", 
+bot->SendTo(theClient, "Opped clients on channel %s:", 
 	    netChan->getName().c_str());
 
 ChannelUser* curUser;
@@ -56,7 +56,7 @@ for (Channel::userIterator ptr = netChan->userList_begin(); ptr != netChan->user
   curUser = ptr->second;
   if (curUser->isModeO()) {
     if ((oppedUsers.size() + std::string(curUser->getNickName().c_str()).size() + 1) >= 450) {
-      bot->Notice(theClient, "%s", oppedUsers.c_str());
+      bot->SendTo(theClient, "%s", oppedUsers.c_str());
       oppedUsers.erase(oppedUsers.begin(), oppedUsers.end());
     }
     if (numOppedUsers++ && oppedUsers.size())
@@ -66,13 +66,13 @@ for (Channel::userIterator ptr = netChan->userList_begin(); ptr != netChan->user
 }
 
 if (numOppedUsers)
-  bot->Notice(theClient, "%s", oppedUsers.c_str());
+  bot->SendTo(theClient, "%s", oppedUsers.c_str());
 
 if (numOppedUsers == 1)
-  bot->Notice(theClient, "I see 1 opped client in %s.", 
+  bot->SendTo(theClient, "I see 1 opped client in %s.", 
 	      netChan->getName().c_str());
 else
-  bot->Notice(theClient, "I see %u opped clients in %s.",
+  bot->SendTo(theClient, "I see %u opped clients in %s.",
 	      numOppedUsers, netChan->getName().c_str());
 
 /* Log command */

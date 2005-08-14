@@ -39,7 +39,7 @@ namespace gnuworld
 void ROTATECommand::Exec(iClient* theClient, sqlUser* theUser, const std::string&)
 {
 bot->logAdminMessage("%s (%s) ordered a manual DB rotation.",
-		     theClient->getNickName().c_str(),
+		     theUser->getUserName().c_str(),
 		     theClient->getNickUserHost().c_str());
 bot->rotateDB();
 return;

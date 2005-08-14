@@ -42,19 +42,19 @@ StringTokenizer st(Message);
 
 /* Check if channel blocking has been disabled in the config. */
 if (!bot->doChanBlocking()) {
-  bot->Notice(theClient, "Channel blocking is disabled.");
+  bot->SendTo(theClient, "Channel blocking is disabled.");
   return;
 }
 	
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
 if (!theChan) {
-  bot->Notice(theClient, "There is no entry in the database for %s.",
+  bot->SendTo(theClient, "There is no entry in the database for %s.",
 	      st[1].c_str());
   return;
 }
 
 if (!theChan->getFlag(sqlChannel::F_BLOCKED)) {
-  bot->Notice(theClient, "The channel %s is not blocked.",
+  bot->SendTo(theClient, "The channel %s is not blocked.",
 	      theChan->getChannel().c_str());
   return;
 }
@@ -65,7 +65,7 @@ theChan->commit();
 /* Add note to the channel about this command */
 /* bot->addNote(theChan, ... "UNBLOCK by %s" */
 
-bot->Notice(theClient, "Channel %s has been unblocked.",
+bot->SendTo(theClient, "Channel %s has been unblocked.",
 	    theChan->getChannel().c_str());
 
 return;

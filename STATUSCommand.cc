@@ -40,24 +40,24 @@ namespace gnuworld
 void STATUSCommand::Exec(iClient* theClient, sqlUser*, const std::string&)
 {
 
-bot->Notice(theClient, "[evilnet development's GNUWorld chanfix version %s]",
+bot->SendTo(theClient, "[evilnet development's GNUWorld chanfix version %s]",
 	    CF_VERSION);
-bot->Notice(theClient, "Uptime: \002%s\002",
+bot->SendTo(theClient, "Uptime: \002%s\002",
 	    bot->prettyDuration(bot->getUplink()->getStartTime()).c_str());
-bot->Notice(theClient, "Automatic fixing is: \002%s\002",
+bot->SendTo(theClient, "Automatic fixing is: \002%s\002",
 	    bot->doAutoFix() ? "ON" : "OFF");
-bot->Notice(theClient, "Manual fixing is: \002%s\002",
+bot->SendTo(theClient, "Manual fixing is: \002%s\002",
 	    bot->doChanFix() ? "ON" : "OFF");
-bot->Notice(theClient, "Channel blocking is: \002%s\002",
+bot->SendTo(theClient, "Channel blocking is: \002%s\002",
 	    bot->doChanBlocking() ? "ON" : "OFF");
-bot->Notice(theClient, "Required amount of servers linked is %u%% of %u, which is a minimum of %u servers.",
+bot->SendTo(theClient, "Required amount of servers linked is %u%% of %u, which is a minimum of %u servers.",
 	    bot->getMinServersPresent(), bot->getNumServers(),
 	    ((bot->getMinServersPresent() * bot->getNumServers()) / 100 + 1));
 if (bot->getState() == chanfix::SPLIT)
-  bot->Notice(theClient, "Splitmode enabled: only %i servers linked.", 
+  bot->SendTo(theClient, "Splitmode enabled: only %i servers linked.", 
 	      Network->serverList_size());
 else
-  bot->Notice(theClient, "Splitmode disabled. There are %i servers linked.",
+  bot->SendTo(theClient, "Splitmode disabled. There are %i servers linked.",
 	      Network->serverList_size());
 
 return;

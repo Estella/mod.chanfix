@@ -236,6 +236,11 @@ RegisterCommand(new UNBLOCKCommand(this, "UNBLOCK",
 	2,
 	sqlUser::F_BLOCK
 	));
+RegisterCommand(new USETCommand(this, "USET",
+	"<option> <value>",
+	3,
+	sqlUser::F_LOGGEDIN
+	));
 RegisterCommand(new WHOISCommand(this, "WHOIS",
 	"<username>",
 	2,
@@ -444,7 +449,7 @@ if (!theClient->isOper()) {
 }
 
 if (currentState == BURST) {
-  Notice(theClient, "Sorry, I do not accept commands during a burst.");
+  SendTo(theClient, "Sorry, I do not accept commands during a burst.");
   return;
 }
 
@@ -468,17 +473,17 @@ sqlUser* theUser = isAuthed(theClient->getAccount());
 sqlUser::flagType requiredFlags = commHandler->second->getRequiredFlags();
 if (requiredFlags) {
   if (!theUser) {
-    Notice(theClient, "You need to authenticate to use this command.");
+    SendTo(theClient, "You need to authenticate to use this command.");
     return;
   }
 
   if (requiredFlags != sqlUser::F_LOGGEDIN &&
       !theUser->getFlag(requiredFlags)) {
     if (getFlagChar(requiredFlags) != ' ')
-      Notice(theClient, "This command requires flag '%c'.",
+      SendTo(theClient, "This command requires flag '%c'.",
 	     getFlagChar(requiredFlags));
     else
-      Notice(theClient, "This command requires one of these flags: \"%s\".",
+      SendTo(theClient, "This command requires one of these flags: \"%s\".",
 	     getFlagsString(requiredFlags).c_str());
     return;
   }
@@ -683,6 +688,33 @@ if (!tmpChan)
 std::string message = std::string( "[" ) + nickName + "] " + buf ;
 serverNotice(tmpChan, message);
 return true;
+}
+
+void chanfix::SendTo(iClient* theClient, const std::string& theMessage)
+{
+sqlUser* theUser = isAuthed(theClient->getAccount());
+
+if (theUser && !theUser->getUseNotice())
+  Message(theClient, theMessage);
+else
+  Notice(theClient, theMessage);
+}
+
+void chanfix::SendTo(iClient* theClient, const char *Msg, ...)
+{
+char buffer[ 1024 ] = { 0 } ;
+va_list list;
+
+va_start( list, Msg ) ;
+vsprintf( buffer, Msg, list ) ;
+va_end( list ) ;
+
+sqlUser* theUser = isAuthed(theClient->getAccount());
+
+if (theUser && !theUser->getUseNotice())
+  Message(theClient, buffer);
+else
+  Notice(theClient, buffer);
 }
 
 void chanfix::doSqlError(const std::string& theQuery, const std::string& theError)
@@ -1882,7 +1914,7 @@ for(serversIterator ptr = serversMap.begin();ptr != serversMap.end();++ptr)
 
 void Command::Usage( iClient* theClient )
 {
-bot->Notice( theClient, std::string( "SYNTAX: " ) + getInfo() ) ;
+bot->SendTo( theClient, std::string( "SYNTAX: " ) + getInfo() ) ;
 }
 
 } // namespace gnuworld

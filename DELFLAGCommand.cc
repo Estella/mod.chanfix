@@ -44,7 +44,7 @@ if (st[2].size() > 1) {
   if (flag == '-')
     flag = st[2][1];
   else {
-    bot->Notice(theClient, "You may only remove one flag per DELFLAG command.");
+    bot->SendTo(theClient, "You may only remove one flag per DELFLAG command.");
     return;
   }
 }
@@ -56,18 +56,18 @@ if (!bot->getFlagType(flag)) {
 
 sqlUser* chkUser = bot->isAuthed(st[1]);
 if (!chkUser) {
-  bot->Notice(theClient, "No such user %s.", st[1].c_str());
+  bot->SendTo(theClient, "No such user %s.", st[1].c_str());
   return;
 }
 
 if (flag == bot->getFlagChar(sqlUser::F_OWNER)) {
-  bot->Notice(theClient, "You cannot delete an owner flag.");
+  bot->SendTo(theClient, "You cannot delete an owner flag.");
   return;
 }
 
 if (flag == bot->getFlagChar(sqlUser::F_USERMANAGER) &&
     !theUser->getFlag(sqlUser::F_OWNER)) {
-  bot->Notice(theClient, "Only an owner can delete the user management flag.");
+  bot->SendTo(theClient, "Only an owner can delete the user management flag.");
   return;
 }
 
@@ -75,21 +75,21 @@ if (flag == bot->getFlagChar(sqlUser::F_USERMANAGER) &&
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
     !theUser->getFlag(sqlUser::F_USERMANAGER)) {
 //  if (chkUser->getMainGroup() != theUser->getMainGroup()) {
-//    bot->Notice(theClient, "You cannot delete a flag from a user with a different main group.");
+//    bot->SendTo(theClient, "You cannot delete a flag from a user with a different main group.");
 //    return;
 //  }
   if (flag == bot->getFlagChar(sqlUser::F_BLOCK)) {
-    bot->Notice(theClient, "You cannot remove a block flag.");
+    bot->SendTo(theClient, "You cannot remove a block flag.");
     return;
   }
   if (flag == bot->getFlagChar(sqlUser::F_SERVERADMIN)) {
-    bot->Notice(theClient, "You cannot remove a serveradmin flag.");
+    bot->SendTo(theClient, "You cannot remove a serveradmin flag.");
     return;
   }
 }
 
 if (!chkUser->getFlag(bot->getFlagType(flag))) {
-  bot->Notice(theClient, "User %s does not have flag %c.",
+  bot->SendTo(theClient, "User %s does not have flag %c.",
 	      chkUser->getUserName().c_str(), flag);
   return;
 }
@@ -98,7 +98,7 @@ chkUser->removeFlag(flag);
 chkUser->setLastUpdatedBy(theUser->getUserName());
 chkUser->setLastUpdated(bot->currentTime());
 chkUser->commit();
-bot->Notice(theClient, "Deleted flag %c of user %s.", flag,
+bot->SendTo(theClient, "Deleted flag %c of user %s.", flag,
 	    chkUser->getUserName().c_str());
 } //DELFLAGCommand::Exec
 } //Namespace gnuworld

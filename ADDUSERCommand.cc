@@ -42,7 +42,7 @@ StringTokenizer st(Message);
 
 sqlUser* chkUser = bot->isAuthed(st[1]);
 if (chkUser) {
-  bot->Notice(theClient, "User %s already exists.", st[1].c_str());
+  bot->SendTo(theClient, "User %s already exists.", st[1].c_str());
   return;
 }
 
@@ -54,10 +54,10 @@ newUser->setLastSeen(0);
 newUser->setLastUpdatedBy(theClient->getAccount());
 newUser->setLastUpdated(bot->currentTime());
 if (newUser->Insert()) {
-  bot->Notice(theClient, "Created user %s.", st[1].c_str());
+  bot->SendTo(theClient, "Created user %s.", st[1].c_str());
   bot->usersMap[newUser->getUserName()] = newUser;
 } else {
-  bot->Notice(theClient, "Error creating user %s. (Insertion failed)", st[1].c_str());
+  bot->SendTo(theClient, "Error creating user %s. (Insertion failed)", st[1].c_str());
 }
 
 } //addusercommand::exec

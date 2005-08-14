@@ -40,8 +40,10 @@ void RELOADCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string
 {
 StringTokenizer st(Message);
 
-bot->Notice(theClient, "Reloading client...see you on the flip side");
-bot->logAdminMessage("%s (%s) is reloading the chanfix module.", theClient->getNickName().c_str(), theClient->getNickUserHost().c_str());
+bot->SendTo(theClient, "Reloading client...see you on the flip side");
+bot->logAdminMessage("%s (%s) is reloading the chanfix module.",
+		     theUser->getUserName().c_str(),
+		     theClient->getNickUserHost().c_str());
 
 if (st.size() < 2) {
   server->UnloadClient(bot, "Reloading...");

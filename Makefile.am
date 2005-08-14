@@ -27,6 +27,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	STATUSCommand.cc \
 	UNALERTCommand.cc \
 	UNBLOCKCommand.cc \
+	USETCommand.cc \
 	WHOISCommand.cc \
 	sqlChanOp.cc \
 	sqlChannel.cc \

@@ -49,25 +49,25 @@ if (st.size() > 2) {
 
 /* Check if manual chanfix has been disabled in the config. */
 if (!bot->doChanFix()) {
-  bot->Notice(theClient, "Sorry, manual chanfixes are currently disabled.");
+  bot->SendTo(theClient, "Sorry, manual chanfixes are currently disabled.");
   return;
 }
 
 /* If not enough servers are currently linked, bail out. */
 if (bot->getState() != chanfix::RUN) {
-  bot->Notice(theClient, "Sorry, chanfix is currently disabled because not enough servers are linked.");
+  bot->SendTo(theClient, "Sorry, chanfix is currently disabled because not enough servers are linked.");
   return;
 }
 
 Channel* netChan = Network->findChannel(st[1]);
 if (!netChan) {
-  bot->Notice(theClient, "No such channel %s.", st[1].c_str());
+  bot->SendTo(theClient, "No such channel %s.", st[1].c_str());
   return;
 }
 
 /* Only allow chanfixes for unregistered channels. */
 if (netChan->getMode(Channel::MODE_A)) {
-  bot->Notice(theClient, "%s cannot be chanfixed as it uses oplevels (+A/+U).",
+  bot->SendTo(theClient, "%s cannot be chanfixed as it uses oplevels (+A/+U).",
 	      netChan->getName().c_str());
   return;
 }
@@ -76,7 +76,7 @@ ChannelUser* curUser;
 for (Channel::userIterator ptr = netChan->userList_begin(); ptr != netChan->userList_end(); ptr++) {
    curUser = ptr->second;
    if (curUser->getClient()->getMode(iClient::MODE_SERVICES)) {
-     bot->Notice(theClient, "%s is a registered channel.", 
+     bot->SendTo(theClient, "%s is a registered channel.", 
 		 netChan->getName().c_str());
      return;
    }
@@ -85,7 +85,7 @@ for (Channel::userIterator ptr = netChan->userList_begin(); ptr != netChan->user
 /* Only allow chanfixes for channels that are in the database. */
 chanfix::chanOpsType myOps = bot->getMyOps(netChan);
 if (myOps.empty()) {
-  bot->Notice(theClient, "There are no scores in the database for %s.",
+  bot->SendTo(theClient, "There are no scores in the database for %s.",
 	      netChan->getName().c_str());
   return;
 }
@@ -95,7 +95,7 @@ if (!theChan) theChan = bot->newChannelRecord(st[1]);
 
 /* Don't fix a channel being chanfixed. */
 if (bot->isBeingChanFixed(netChan)) {
-  bot->Notice(theClient, "The channel %s is already being manually fixed.",
+  bot->SendTo(theClient, "The channel %s is already being manually fixed.",
 	      netChan->getName().c_str());
   return;
 }
@@ -107,7 +107,7 @@ if (myOps.begin() != myOps.end())
 if (theChan->getMaxScore() <= 
     static_cast<int>(static_cast<float>(FIX_MIN_ABS_SCORE_END) * MAX_SCORE)) 
 {
-  bot->Notice(theClient, "The highscore in channel %s is %d which is lower than the minimum score required (%.2f * %d = %d).",
+  bot->SendTo(theClient, "The highscore in channel %s is %d which is lower than the minimum score required (%.2f * %d = %d).",
 	      theChan->getChannel().c_str(), theChan->getMaxScore(),
 	      FIX_MIN_ABS_SCORE_END, MAX_SCORE,
 	      static_cast<int>(static_cast<float>(FIX_MIN_ABS_SCORE_END) 
@@ -118,7 +118,7 @@ if (theChan->getMaxScore() <=
 /* Don't fix a channel being autofixed without OVERRIDE flag. */
 if (bot->isBeingAutoFixed(netChan)) {
   if (!override) {
-    bot->Notice(theClient, "The channel %s is being automatically fixed. Append the OVERRIDE flag to force a manual fix.",
+    bot->SendTo(theClient, "The channel %s is being automatically fixed. Append the OVERRIDE flag to force a manual fix.",
 		netChan->getName().c_str());
     return;
   } else {
@@ -130,14 +130,14 @@ if (bot->isBeingAutoFixed(netChan)) {
 
 /* Don't fix a blocked channel. */
 if (theChan->getFlag(sqlChannel::F_BLOCKED)) {
-  bot->Notice(theClient, "The channel %s is BLOCKED.", 
+  bot->SendTo(theClient, "The channel %s is BLOCKED.", 
 	      theChan->getChannel().c_str());
   return;
 }
 
 /* Don't fix an alerted channel without the OVERRIDE flag. */
 if (theChan->getFlag(sqlChannel::F_ALERT) && !override) {
-  bot->Notice(theClient, "Alert: The channel %s has notes. Use " \
+  bot->SendTo(theClient, "Alert: The channel %s has notes. Use " \
 	      "\002INFO %s\002 to read them. Append the OVERRIDE flag " \
 	      "to force a manual fix.",
 	      theChan->getChannel().c_str(),
@@ -152,7 +152,7 @@ bot->manualFix(netChan);
 /* bot->addNote(theChan, ... "CHANFIX by %s" */
 
 /* Log the chanfix */
-bot->Notice(theClient, "Manual chanfix acknowledged for %s",
+bot->SendTo(theClient, "Manual chanfix acknowledged for %s",
 	    netChan->getName().c_str());
 
 return;

@@ -41,17 +41,17 @@ StringTokenizer st(Message);
 
 sqlUser* chkUser = bot->isAuthed(st[1]);
 if (!chkUser) {
-  bot->Notice(theClient, "No such user %s.", st[1].c_str());
+  bot->SendTo(theClient, "No such user %s.", st[1].c_str());
   return;
 }
 
 if (chkUser->getFlag(sqlUser::F_OWNER)) {
-  bot->Notice(theClient, "You cannot delete an owner.");
+  bot->SendTo(theClient, "You cannot delete an owner.");
   return;
 }
 
 if (chkUser->getFlag(sqlUser::F_USERMANAGER) && !theUser->getFlag(sqlUser::F_OWNER)) {
-  bot->Notice(theClient, "You cannot delete a user manager.");
+  bot->SendTo(theClient, "You cannot delete a user manager.");
   return;
 }
 
@@ -59,11 +59,14 @@ if (chkUser->getFlag(sqlUser::F_USERMANAGER) && !theUser->getFlag(sqlUser::F_OWN
 
 if (chkUser->Delete()) {
   bot->usersMap.erase(bot->usersMap.find(chkUser->getUserName()));
+  bot->SendTo(theClient, "Deleted user %s.", chkUser->getUserName().c_str());
+  bot->logAdminMessage("%s (%s) deleted user %s.",
+		       theClient->getAccount().c_str(),
+		       theClient->getNickUserHost().c_str(),
+		       chkUser->getUserName().c_str());
   delete chkUser; chkUser = 0;
-  bot->Notice(theClient, "Deleted user %s.", st[1].c_str());
-  bot->logAdminMessage("%s deleted user %s.", theClient->getAccount().c_str(), st[1].c_str());
 } else {
-  bot->Notice(theClient, "Error deleting user %s.", st[1].c_str());
+  bot->SendTo(theClient, "Error deleting user %s.", st[1].c_str());
 }
 } //DELUSERCommand::exec
 } //Namespace gnuworld

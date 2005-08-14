@@ -59,12 +59,12 @@ public:
 		{ return requiredFlags; }
 
 protected:
-	chanfix		*bot;
-	xServer		*server;
-	std::string	commandName;
-	std::string	help;
+	chanfix				*bot;
+	xServer				*server;
+	std::string			commandName;
+	std::string			help;
 	std::string::size_type		numParams;
-	unsigned short int	requiredFlags;
+	unsigned short int		requiredFlags;
 
 };
 
@@ -83,25 +83,36 @@ class commandName##Command : public Command \
 };
 
 /* Oper commands */
-DECLARE_COMMAND( ADDFLAG )
-DECLARE_COMMAND( ADDUSER )
-DECLARE_COMMAND( ALERT )
-DECLARE_COMMAND( BLOCK )
-DECLARE_COMMAND( CHANFIX )
-DECLARE_COMMAND( CHECK )
-DECLARE_COMMAND( DELFLAG )
-DECLARE_COMMAND( DELUSER )
 DECLARE_COMMAND( HELP )
 DECLARE_COMMAND( INFO )
-DECLARE_COMMAND( OPLIST )
-DECLARE_COMMAND( OPNICKS )
 DECLARE_COMMAND( SCORE )
 DECLARE_COMMAND( STATUS )
-DECLARE_COMMAND( UNALERT )
-DECLARE_COMMAND( UNBLOCK )
+
+/* Logged-in commands */
+DECLARE_COMMAND( CHECK )
+DECLARE_COMMAND( USET )
+
+/* User management commands */
+DECLARE_COMMAND( ADDFLAG )
+DECLARE_COMMAND( ADDUSER )
+DECLARE_COMMAND( DELFLAG )
+DECLARE_COMMAND( DELUSER )
 DECLARE_COMMAND( WHOIS )
 
-/* Coder commands */
+/* Block commands */
+DECLARE_COMMAND( BLOCK )
+DECLARE_COMMAND( UNBLOCK )
+
+/* Channel commands */
+DECLARE_COMMAND( ALERT )
+DECLARE_COMMAND( UNALERT )
+
+/* Chanfix commands */
+DECLARE_COMMAND( CHANFIX )
+DECLARE_COMMAND( OPLIST )
+DECLARE_COMMAND( OPNICKS )
+
+/* Owner commands */
 DECLARE_COMMAND( INVITE )
 DECLARE_COMMAND( QUOTE )
 DECLARE_COMMAND( REHASH )

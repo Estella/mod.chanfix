@@ -40,33 +40,33 @@ void HELPCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& 
 StringTokenizer st(Message);
 
 if (st.size() < 2) {
-  bot->Notice(theClient, "\002Oper Level\002: SCORE CSCORE HISTORY INFO STATUS");
+  bot->SendTo(theClient, "\002Oper Level\002: SCORE CSCORE HISTORY INFO STATUS");
 
   if (theClient->getAccount() != "")
-    bot->Notice(theClient, "\002Logged In\002: CHECK WHO");
+    bot->SendTo(theClient, "\002Logged In\002: CHECK USET WHO");
 
   if (!theUser) return;
 
   if (theUser->getFlag(sqlUser::F_SERVERADMIN))
-    bot->Notice(theClient, "\002Server Admin (+a)\002: ADDUSER DELUSER ADDHOST DELHOST ADDFLAG DELFLAG WHOSERVER");
+    bot->SendTo(theClient, "\002Server Admin (+a)\002: ADDUSER DELUSER ADDHOST DELHOST ADDFLAG DELFLAG WHOSERVER");
 
   if (theUser->getFlag(sqlUser::F_BLOCK))
-    bot->Notice(theClient, "\002Blocker (+b)\002: BLOCK UNBLOCK");
+    bot->SendTo(theClient, "\002Blocker (+b)\002: BLOCK UNBLOCK");
 
   if (theUser->getFlag(sqlUser::F_CHANNEL))
-    bot->Notice(theClient, "\002Channel (+c)\002: ADDNOTE DELNOTE ALERT UNALERT");
+    bot->SendTo(theClient, "\002Channel (+c)\002: ADDNOTE DELNOTE ALERT UNALERT");
 
   if (theUser->getFlag(sqlUser::F_CHANFIX))
-    bot->Notice(theClient, "\002Chanfixer (+f)\002: CHANFIX OPLIST OPNICKS");
+    bot->SendTo(theClient, "\002Chanfixer (+f)\002: CHANFIX OPLIST OPNICKS");
 
   if (theUser->getFlag(sqlUser::F_OWNER))
-    bot->Notice(theClient, "\002Owner (+o)\002: QUOTE REHASH RELOAD SET SHUTDOWN");
+    bot->SendTo(theClient, "\002Owner (+o)\002: QUOTE REHASH RELOAD SET SHUTDOWN");
 
   if (theUser->getFlag(sqlUser::F_USERMANAGER))
-    bot->Notice(theClient, "\002User Manager (+u)\002: WHOIS ADDUSER DELUSER ADDHOST DELHOST ADDSERVER DELSERVER ADDFLAG DELFLAG WHOSERVER");
+    bot->SendTo(theClient, "\002User Manager (+u)\002: WHOIS ADDUSER DELUSER ADDHOST DELHOST ADDSERVER DELSERVER ADDFLAG DELFLAG WHOSERVER");
 
 } else {
-  bot->Notice(theClient, "No help available on that topic.");
+  bot->SendTo(theClient, "No help available on that topic.");
 }
 
 } //helpcommand::exec

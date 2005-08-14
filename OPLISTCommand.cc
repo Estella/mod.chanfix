@@ -47,13 +47,13 @@ StringTokenizer st(Message);
 Channel* netChan = Network->findChannel(st[1]);
 sqlChanOp* curOp = 0;
 if (!netChan) {
-  bot->Notice(theClient, "No such channel %s.", st[1].c_str());
+  bot->SendTo(theClient, "No such channel %s.", st[1].c_str());
   return;
 }
 
 chanfix::chanOpsType myOps = bot->getMyOps(netChan);
 if (myOps.empty()) {
-  bot->Notice(theClient, "There are no scores in the database for %s.",
+  bot->SendTo(theClient, "There are no scores in the database for %s.",
 	      netChan->getName().c_str());
   return;
 }
@@ -68,16 +68,16 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
 /* Technically if they are all 0 scores it will get to this point,
  * dont want a notice saying 0 accounts. */
 if (oCnt == 0) {
-  bot->Notice(theClient, "There are no scores in the database for %s.",
+  bot->SendTo(theClient, "There are no scores in the database for %s.",
 	      netChan->getName().c_str());
   return;
 }
 
 if (oCnt == OPCOUNT)
-  bot->Notice(theClient, "Top %d unique op accounts in channel %s:",
+  bot->SendTo(theClient, "Top %d unique op accounts in channel %s:",
 	      OPCOUNT, netChan->getName().c_str());
 else
-  bot->Notice(theClient, "Found %d unique op accounts in channel %s:",
+  bot->SendTo(theClient, "Found %d unique op accounts in channel %s:",
 	      oCnt, netChan->getName().c_str());
 
 unsigned int opCount = 0;
@@ -100,7 +100,7 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
     stml = localtime(&tmVarl);
     strftime(ldatetimestring, 24, "%Y-%m-%d %H:%M:%S", stml);
 
-    bot->Notice(theClient, "%2d. %4d %s -- %s / %s", opCount,
+    bot->SendTo(theClient, "%2d. %4d %s -- %s / %s", opCount,
 		curOp->getPoints(), curOp->getAccount().c_str(),
 		sdatetimestring, ldatetimestring);
   }

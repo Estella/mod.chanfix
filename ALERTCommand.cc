@@ -44,7 +44,7 @@ sqlChannel* theChan = bot->getChannelRecord(st[1]);
 if (!theChan) theChan = bot->newChannelRecord(st[1]);
 
 if (theChan->getFlag(sqlChannel::F_ALERT)) {
-  bot->Notice(theClient, "The channel %s already has the ALERT flag.",
+  bot->SendTo(theClient, "The channel %s already has the ALERT flag.",
 	      theChan->getChannel().c_str());
   return;
 }
@@ -55,7 +55,7 @@ theChan->commit();
 /* Add note to the channel about this command */
 /* bot->addNote(theChan, ... "ALERT flag added by %s" */
 
-bot->Notice(theClient, "ALERT flag added from channel %s",
+bot->SendTo(theClient, "ALERT flag added from channel %s",
 	    theChan->getChannel().c_str());
 
 return;

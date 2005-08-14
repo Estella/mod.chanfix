@@ -42,13 +42,13 @@ StringTokenizer st(Message);
 
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
 if (!theChan) {
-  bot->Notice(theClient, "There is no entry in the database for %s.",
+  bot->SendTo(theClient, "There is no entry in the database for %s.",
 	      st[1].c_str());
   return;
 }
 
 if (!theChan->getFlag(sqlChannel::F_ALERT)) {
-  bot->Notice(theClient, "The channel %s does not have the ALERT flag.",
+  bot->SendTo(theClient, "The channel %s does not have the ALERT flag.",
 	      theChan->getChannel().c_str());
   return;
 }
@@ -59,7 +59,7 @@ theChan->commit();
 /* Add note to the channel about this command */
 /* bot->addNote(theChan, ... "UNALERT by %s" */
 
-bot->Notice(theClient, "ALERT flag removed from channel %s",
+bot->SendTo(theClient, "ALERT flag removed from channel %s",
 	    theChan->getChannel().c_str());
 
 return;

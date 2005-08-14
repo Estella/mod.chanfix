@@ -277,7 +277,14 @@ public:
 	/* Server notices */
 	bool serverNotice( Channel*, const char*, ... );
 	bool serverNotice( Channel*, const std::string& );
-	
+
+	/*
+	 * Send private messages or notices to authenticated users
+	 * By default, send notices
+	 */
+	void SendTo( iClient*, const char*, ... );
+	void SendTo( iClient*, const std::string& );
+
 	/* Admin message logs */
 	bool logAdminMessage(const char*, ... );
 
