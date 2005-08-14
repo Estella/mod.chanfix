@@ -47,7 +47,7 @@ public:
 	static const sqlUser::flagType sqlUser::F_CHANFIX =	0x08; /* +f */
 	static const sqlUser::flagType sqlUser::F_OWNER =	0x10; /* +o */
 	static const sqlUser::flagType sqlUser::F_USERMANAGER =	0x20; /* +u */
-	static const sqlUser::flagType sqlUser::F_NOLOGIN =	0x40;
+	static const sqlUser::flagType sqlUser::F_LOGGEDIN =	0x40;
 
 	/* Methods to get data attributes. */
 

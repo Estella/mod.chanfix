@@ -29,8 +29,9 @@ class sqlUser;
 
 class Command {
 public:
-	Command( chanfix* _bot, const std::string& _commandName, const std::string& _help ) :
-		bot(_bot), server(0), commandName(_commandName), help(_help)
+	Command( chanfix* _bot, const std::string& _commandName, const std::string& _help, std::string::size_type _numParams, unsigned short int _requiredFlags ) :
+		bot(_bot), server(0), commandName(_commandName), help(_help),
+		numParams(_numParams), requiredFlags(_requiredFlags)
 		{ }
 
 	virtual ~Command() { }
@@ -50,12 +51,20 @@ public:
 	
 	inline const std::string& getHelp() const
 		{ return help; }
-	
+
+	inline const std::string::size_type getNumParams() const
+		{ return numParams; }
+
+	inline const unsigned short int getRequiredFlags() const
+		{ return requiredFlags; }
+
 protected:
 	chanfix		*bot;
 	xServer		*server;
 	std::string	commandName;
 	std::string	help;
+	std::string::size_type		numParams;
+	unsigned short int	requiredFlags;
 
 };
 
@@ -65,8 +74,10 @@ class commandName##Command : public Command \
   public: \
     commandName##Command(chanfix* _bot, \
       const std::string& _commandName, \
-      const std::string& _help) : \
-	Command(_bot, _commandName, _help) {} \
+      const std::string& _help, \
+      std::string::size_type _numParams, \
+      unsigned short int _requiredFlags) : \
+	Command(_bot, _commandName, _help, _numParams, _requiredFlags) {} \
     virtual ~commandName##Command() {} \
     virtual void Exec(iClient*, sqlUser*, const std::string&); \
 };

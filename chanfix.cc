@@ -47,7 +47,6 @@
 #include	"chanfix.h"
 #include	"chanfix_misc.h"
 #include	"chanfixCommands.h"
-#include	"flags.h"
 #include	"sqlChannel.h"
 #include	"sqlChanOp.h"
 #include	"sqlUser.h"
@@ -117,31 +116,131 @@ else
 	}
 
 /* Register the commands we want to use */
-RegisterCommand(new ADDFLAGCommand(this, "ADDFLAG", "<username> <flag>"));
-RegisterCommand(new ADDUSERCommand(this, "ADDUSER", "<username> [host]"));
-RegisterCommand(new ALERTCommand(this, "ALERT", "<#channel>"));
-RegisterCommand(new BLOCKCommand(this, "BLOCK", "<#channel> <reason>"));
-RegisterCommand(new CHANFIXCommand(this, "CHANFIX", "<#channel> [override]"));
-RegisterCommand(new CHECKCommand(this, "CHECK", "<#channel>"));
-RegisterCommand(new DELFLAGCommand(this, "DELFLAG", "<username> <flag>"));
-RegisterCommand(new DELUSERCommand(this, "DELUSER", "<username>"));
-RegisterCommand(new HELPCommand(this, "HELP", "[command]"));
-RegisterCommand(new INFOCommand(this, "INFO", "<#channel>"));
-RegisterCommand(new INVITECommand(this, "INVITE", ""));
-RegisterCommand(new OPLISTCommand(this, "OPLIST", "<#channel>"));
-RegisterCommand(new OPNICKSCommand(this, "OPNICKS", "<#channel>"));
-RegisterCommand(new QUOTECommand(this, "QUOTE", "<text>"));
-RegisterCommand(new REHASHCommand(this, "REHASH", ""));
-RegisterCommand(new RELOADCommand(this, "RELOAD", "[reason]"));
-RegisterCommand(new ROTATECommand(this, "ROTATE", ""));
-RegisterCommand(new SCORECommand(this, "SCORE", "<#channel> [nick|*account]"));
-RegisterCommand(new SCORECommand(this, "CSCORE", "<#channel> [nick|*account]"));
-RegisterCommand(new SETCommand(this, "SET", "<option> <value>"));
-RegisterCommand(new SHUTDOWNCommand(this, "SHUTDOWN", "[reason]"));
-RegisterCommand(new STATUSCommand(this, "STATUS", ""));
-RegisterCommand(new UNALERTCommand(this, "UNALERT", "<#channel>"));
-RegisterCommand(new UNBLOCKCommand(this, "UNBLOCK", "<#channel>"));
-RegisterCommand(new WHOISCommand(this, "WHOIS", "<username>"));
+RegisterCommand(new ADDFLAGCommand(this, "ADDFLAG",
+	"<username> <flag>",
+	3,
+	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
+	));
+RegisterCommand(new ADDUSERCommand(this, "ADDUSER",
+	"<username> [host]",
+	2,
+	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
+	));
+RegisterCommand(new ALERTCommand(this, "ALERT",
+	"<#channel>",
+	2,
+	sqlUser::F_CHANNEL
+	));
+RegisterCommand(new BLOCKCommand(this, "BLOCK",
+	"<#channel> <reason>",
+	3,
+	sqlUser::F_BLOCK
+	));
+RegisterCommand(new CHANFIXCommand(this, "CHANFIX",
+	"<#channel> [override]",
+	2,
+	sqlUser::F_CHANFIX
+	));
+RegisterCommand(new CHECKCommand(this, "CHECK",
+	"<#channel>",
+	2,
+	sqlUser::F_LOGGEDIN
+	));
+RegisterCommand(new DELFLAGCommand(this, "DELFLAG",
+	"<username> <flag>",
+	3,
+	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
+	));
+RegisterCommand(new DELUSERCommand(this, "DELUSER",
+	"<username>",
+	2,
+	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
+	));
+RegisterCommand(new HELPCommand(this, "HELP",
+	"[command]",
+	1,
+	0
+	));
+RegisterCommand(new INFOCommand(this, "INFO",
+	"<#channel>",
+	2,
+	0
+	));
+RegisterCommand(new INVITECommand(this, "INVITE",
+	"",
+	1,
+	sqlUser::F_OWNER
+	));
+RegisterCommand(new OPLISTCommand(this, "OPLIST",
+	"<#channel>",
+	2,
+	sqlUser::F_CHANFIX
+	));
+RegisterCommand(new OPNICKSCommand(this, "OPNICKS",
+	"<#channel>",
+	2,
+	sqlUser::F_CHANFIX
+	));
+RegisterCommand(new QUOTECommand(this, "QUOTE",
+	"<text>",
+	2,
+	sqlUser::F_OWNER
+	));
+RegisterCommand(new REHASHCommand(this, "REHASH",
+	"",
+	1,
+	sqlUser::F_OWNER
+	));
+RegisterCommand(new RELOADCommand(this, "RELOAD",
+	"[reason]",
+	1,
+	sqlUser::F_OWNER
+	));
+RegisterCommand(new ROTATECommand(this, "ROTATE",
+	"",
+	1,
+	sqlUser::F_OWNER
+	));
+RegisterCommand(new SCORECommand(this, "SCORE",
+	"<#channel> [nick|*account]",
+	2,
+	0
+	));
+RegisterCommand(new SCORECommand(this, "CSCORE",
+	"<#channel> [nick|*account]",
+	2,
+	0
+	));
+RegisterCommand(new SETCommand(this, "SET",
+	"<option> <value>",
+	3,
+	sqlUser::F_OWNER
+	));
+RegisterCommand(new SHUTDOWNCommand(this, "SHUTDOWN",
+	"[reason]",
+	1,
+	sqlUser::F_OWNER
+	));
+RegisterCommand(new STATUSCommand(this, "STATUS",
+	"",
+	1,
+	0
+	));
+RegisterCommand(new UNALERTCommand(this, "UNALERT",
+	"<#channel>",
+	2,
+	sqlUser::F_CHANNEL
+	));
+RegisterCommand(new UNBLOCKCommand(this, "UNBLOCK",
+	"<#channel>",
+	2,
+	sqlUser::F_BLOCK
+	));
+RegisterCommand(new WHOISCommand(this, "WHOIS",
+	"<username>",
+	2,
+	sqlUser::F_USERMANAGER
+	));
 
 /* Set our current day. */
 setCurrentDay();
@@ -360,21 +459,27 @@ if (commHandler == commandMap.end()) {
   return;
 }
 
+if (st.size() < commHandler->second->getNumParams()) {
+  commHandler->second->Usage(theClient);
+  return;
+}
+
 sqlUser* theUser = isAuthed(theClient->getAccount());
-sqlUser::flagType requiredFlag = getCommandType(string_lower(Command));
-if (requiredFlag) {
+sqlUser::flagType requiredFlags = commHandler->second->getRequiredFlags();
+if (requiredFlags) {
   if (!theUser) {
     Notice(theClient, "You need to authenticate to use this command.");
     return;
   }
 
-  if (!theUser->getFlag(requiredFlag)) {
-    if (getFlagChar(requiredFlag) != ' ')
+  if (requiredFlags != sqlUser::F_LOGGEDIN &&
+      !theUser->getFlag(requiredFlags)) {
+    if (getFlagChar(requiredFlags) != ' ')
       Notice(theClient, "This command requires flag '%c'.",
-	     getFlagChar(requiredFlag));
+	     getFlagChar(requiredFlags));
     else
       Notice(theClient, "This command requires one of these flags: \"%s\".",
-	     getFlagsString(requiredFlag));
+	     getFlagsString(requiredFlags).c_str());
     return;
   }
 }
@@ -1687,11 +1792,6 @@ switch (whichChar) {
   case 'o': return sqlUser::F_OWNER;
   case 'u': return sqlUser::F_USERMANAGER;
 }
-return 0;
-}
-
-sqlUser::flagType chanfix::getCommandType(const std::string& command)
-{
 return 0;
 }
 

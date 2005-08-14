@@ -40,17 +40,16 @@ void ADDFLAGCommand::Exec(iClient* theClient, sqlUser* theUser, const std::strin
 {
 StringTokenizer st(Message);
 
-if (st.size() < 2) {
-  Usage(theClient);
-  return;
-}
-
+char flag = st[2][0];
 if (st[2].size() > 1) {
-  bot->Notice(theClient, "You may only add one flag per ADDFLAG command.");
-  return;
+  if (flag == '+')
+    flag = st[2][1];
+  else {    
+    bot->Notice(theClient, "You may only add one flag per ADDFLAG command.");
+    return;
+  }
 }
 
-const char flag = st[2][0];
 if (!bot->getFlagType(flag)) {
   Usage(theClient);
   return;
@@ -68,7 +67,7 @@ if (flag == bot->getFlagChar(sqlUser::F_OWNER)) {
 }
 
 if (flag == bot->getFlagChar(sqlUser::F_USERMANAGER) && 
-    !theUser->getFlag(sqlUser::F_OWNER) {
+    !theUser->getFlag(sqlUser::F_OWNER)) {
   bot->Notice(theClient, "Only an owner can add the user management flag.");
   return;
 }

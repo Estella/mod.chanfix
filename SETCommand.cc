@@ -30,7 +30,6 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
-#include	"flags.h"
 #include	"Network.h"
 
 RCSTAG("$Id$");
@@ -41,10 +40,6 @@ namespace gnuworld
 void SETCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
-if (st.size() < 3) {
-  Usage(theClient);
-  return;
-}
 
 std::string option = string_upper(st[1]);
 std::string value = string_upper(st[2]);

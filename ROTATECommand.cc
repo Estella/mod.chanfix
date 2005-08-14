@@ -30,7 +30,6 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
-#include	"flags.h"
 
 RCSTAG("$Id: ROTATECommand.cc 1165 2005-07-26 00:52:31Z Compster $");
 

@@ -28,7 +28,6 @@
 #include "Network.h"
 
 #include "chanfix.h"
-#include "flags.h" 
 #include "StringTokenizer.h"
 
 RCSTAG("$Id$");
@@ -39,10 +38,6 @@ namespace gnuworld
 void CHANFIXCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
-if (st.size() < 2) {
-  Usage(theClient);
-  return;
-}
 
 bool override = false;
 

@@ -28,7 +28,6 @@
 #include "Network.h"
 
 #include "chanfix.h"
-#include "flags.h" 
 #include "StringTokenizer.h"
 #include "sqlUser.h"
 
@@ -40,17 +39,6 @@ namespace gnuworld
 void ADDUSERCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
-
-if (st.size() < 2) {
-  Usage(theClient);
-  return;
-}
-
-if (!theUser->getFlag(flags::adduser)) {
-  bot->Notice(theClient, "This command requires one of these flags: %s.",
-	      bot->getFlagsString(flags::adduser));
-  return;
-}
 
 sqlUser* chkUser = bot->isAuthed(st[1]);
 if (chkUser) {

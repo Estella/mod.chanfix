@@ -27,7 +27,6 @@
 #include "gnuworld_config.h"
 
 #include "chanfix.h"
-#include "flags.h" 
 #include "StringTokenizer.h"
 #include "sqlUser.h"
 
@@ -39,11 +38,6 @@ namespace gnuworld
 void WHOISCommand::Exec(iClient* theClient, sqlUser*, const std::string& Message)
 {
 StringTokenizer st(Message);
-
-if (st.size() < 2) {
-  Usage(theClient);
-  return;
-}
 
 sqlUser* theUser = bot->isAuthed(st[1]);
 if (!theUser) 

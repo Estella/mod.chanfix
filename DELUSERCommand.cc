@@ -27,7 +27,6 @@
 #include "gnuworld_config.h"
 
 #include "chanfix.h"
-#include "flags.h" 
 #include "StringTokenizer.h"
 #include "sqlUser.h"
 
@@ -39,16 +38,6 @@ namespace gnuworld
 void DELUSERCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
-
-if (st.size() < 2) {
-  Usage(theClient);
-  return;
-}
-
-if (!theUser->getFlag(flags::deluser)) {
-  bot->Notice(theClient, "This command requires one of these flags: ua.");
-  return;
-}
 
 sqlUser* chkUser = bot->isAuthed(st[1]);
 if (!chkUser) {

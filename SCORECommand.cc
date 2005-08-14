@@ -31,7 +31,6 @@
 #include "Network.h"
 
 #include "chanfix.h"
-#include "flags.h" 
 #include "StringTokenizer.h"
 #include "sqlChannel.h"
 #include "sqlChanOp.h"
@@ -45,10 +44,6 @@ namespace gnuworld
 void SCORECommand::Exec(iClient* theClient, sqlUser*, const std::string& Message)
 {
 StringTokenizer st(Message);
-if (st.size() < 2) {
-  Usage(theClient);
-  return;
-}
 
 std::stringstream strRanks;
 std::string scoreRanks;

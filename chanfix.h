@@ -267,7 +267,6 @@ public:
 	char getFlagChar(const sqlUser::flagType&);
 	const std::string getFlagsString(const sqlUser::flagType&);
 	sqlUser::flagType getFlagType(const char);
-	sqlUser::flagType getCommandType(const std::string& command);
 
 	const std::string prettyDuration( int );
 	

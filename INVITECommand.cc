@@ -29,7 +29,6 @@
 #include "StringTokenizer.h"
 
 #include "chanfix.h"
-#include "flags.h" 
 
 RCSTAG("$Id$");
 

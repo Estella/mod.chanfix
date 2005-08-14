@@ -28,7 +28,6 @@
 #include "Network.h"
 
 #include "chanfix.h"
-#include "flags.h" 
 #include "StringTokenizer.h"
 #include "sqlChannel.h"
 #include "sqlUser.h"
@@ -41,10 +40,6 @@ namespace gnuworld
 void INFOCommand::Exec(iClient* theClient, sqlUser*, const std::string& Message)
 {
 StringTokenizer st(Message);
-if (st.size() < 2) {
-  Usage(theClient);
-  return;
-}
 
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
 if (!theChan) {

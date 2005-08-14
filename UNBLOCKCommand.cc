@@ -27,7 +27,6 @@
 #include "gnuworld_config.h"
 
 #include "chanfix.h"
-#include "flags.h" 
 #include "StringTokenizer.h"
 #include "sqlChannel.h"
 #include "sqlUser.h"
@@ -40,10 +39,6 @@ namespace gnuworld
 void UNBLOCKCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
-if (st.size() < 2) {
-  Usage(theClient);
-  return;
-}
 
 /* Check if channel blocking has been disabled in the config. */
 if (!bot->doChanBlocking()) {
