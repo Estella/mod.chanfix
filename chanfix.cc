@@ -284,7 +284,6 @@ supportChanModes = chanfixConfig->Require("supportChanModes")->second ;
 enableAutoFix = atob(chanfixConfig->Require("enableAutoFix")->second) ;
 enableChanFix = atob(chanfixConfig->Require("enableChanFix")->second) ;
 enableChannelBlocking = atob(chanfixConfig->Require("enableChannelBlocking")->second) ;
-defaultChannelModes = chanfixConfig->Require("defaultChannelModes")->second ;
 version = atoi((chanfixConfig->Require("version")->second).c_str()) ;
 numServers = atoi((chanfixConfig->Require("numServers")->second).c_str()) ;
 minServersPresent = atoi((chanfixConfig->Require("minServersPresent")->second).c_str()) ;
@@ -712,9 +711,9 @@ va_end( list ) ;
 sqlUser* theUser = isAuthed(theClient->getAccount());
 
 if (theUser && !theUser->getUseNotice())
-  Message(theClient, buffer);
+  Message(theClient, "%s", buffer);
 else
-  Notice(theClient, buffer);
+  Notice(theClient, "%s", buffer);
 }
 
 void chanfix::doSqlError(const std::string& theQuery, const std::string& theError)
@@ -1244,6 +1243,13 @@ if (thisChan->getCreationTime() > 1) {
     modeVector.push_back(std::make_pair(false, Channel::MODE_R));
   if (thisChan->getMode(Channel::MODE_D))
     modeVector.push_back(std::make_pair(false, Channel::MODE_D));
+  /* Due to a bug in .11, we need to set at least one mode. */
+  if (version < 12) {
+    if (!thisChan->getMode(Channel::MODE_N))
+      modeVector.push_back(std::make_pair(true, Channel::MODE_N));
+    if (!thisChan->getMode(Channel::MODE_T))
+      modeVector.push_back(std::make_pair(true, Channel::MODE_T));
+  }
   if (!modeVector.empty())
     OnChannelMode(thisChan, 0, modeVector);
 

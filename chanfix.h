@@ -369,7 +369,6 @@ protected:
 	bool		enableAutoFix;
 	bool		enableChanFix;
 	bool		enableChannelBlocking;
-	std::string		defaultChannelModes;
 	unsigned int	version;
 	unsigned int	numServers;
 	unsigned int	minServersPresent;
