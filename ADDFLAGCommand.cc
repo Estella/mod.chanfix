@@ -96,8 +96,11 @@ if (chkUser->getFlag(bot->getFlagType(flag))) {
 }
 
 chkUser->setFlag(bot->getFlagType(flag));
-chkUser->setLastUpdatedBy(theUser->getUserName());
 chkUser->setLastUpdated(bot->currentTime());
+chkUser->setLastUpdatedBy( std::string( "("
+	+ theUser->getUserName()
+	+ ") "
+	+ theClient->getNickUserHost() ) );
 chkUser->commit();
 bot->SendTo(theClient, "Added flag %c to user %s.", flag, 
 	    chkUser->getUserName().c_str());

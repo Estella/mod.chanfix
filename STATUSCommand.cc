@@ -50,8 +50,8 @@ bot->SendTo(theClient, "Manual fixing is: \002%s\002",
 	    bot->doChanFix() ? "ON" : "OFF");
 bot->SendTo(theClient, "Channel blocking is: \002%s\002",
 	    bot->doChanBlocking() ? "ON" : "OFF");
-bot->SendTo(theClient, "Required amount of servers linked is %u%% of %u, which is a minimum of %u servers.",
-	    bot->getMinServersPresent(), bot->getNumServers(),
+bot->SendTo(theClient, "Required amount of servers linked is %u%s of %u, which is a minimum of %u servers.",
+	    bot->getMinServersPresent(), "%", bot->getNumServers(),
 	    ((bot->getMinServersPresent() * bot->getNumServers()) / 100 + 1));
 if (bot->getState() == chanfix::SPLIT)
   bot->SendTo(theClient, "Splitmode enabled: only %i servers linked.", 

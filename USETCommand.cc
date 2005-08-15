@@ -45,12 +45,12 @@ std::string option = string_upper(st[1]);
 std::string value = string_upper(st[2]);
 
 if (option == "NOTICE") {
-  if (value == "ON" || value == "1") {
+  if (value == "ON" || value == "YES" || value == "1") {
     theUser->setNotice(true);
     bot->SendTo(theClient, "I will now send you notices.");
     theUser->commit();
     return;
-  } else if (value == "OFF" || value == "0") {
+  } else if (value == "OFF" || value == "NO" || value == "0") {
     theUser->setNotice(false);
     bot->SendTo(theClient, "I will now send you privmsgs.");
     theUser->commit();

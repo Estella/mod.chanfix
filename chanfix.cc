@@ -1232,12 +1232,28 @@ elog << "chanfix::manualFix> DEBUG: Manual fix " << thisChan->getName() << "!" <
 if (thisChan->getCreationTime() > 1) {
   if (version >= 12) /* temporary fix until GNUWorld is fixed */
     MyUplink->setBursting(true);
-  MyUplink->BurstChannel(thisChan->getName(), defaultChannelModes,
+
+  xServer::modeVectorType modeVector;
+  if (thisChan->getMode(Channel::MODE_I))
+    modeVector.push_back(std::make_pair(false, Channel::MODE_I));
+  if (thisChan->getMode(Channel::MODE_K))
+    OnChannelModeK(thisChan, false, 0, std::string());
+  if (thisChan->getMode(Channel::MODE_L))
+    OnChannelModeL(thisChan, false, 0, 0);
+  if (thisChan->getMode(Channel::MODE_R))
+    modeVector.push_back(std::make_pair(false, Channel::MODE_R));
+  if (thisChan->getMode(Channel::MODE_D))
+    modeVector.push_back(std::make_pair(false, Channel::MODE_D));
+  if (!modeVector.empty())
+    OnChannelMode(thisChan, 0, modeVector);
+
+  MyUplink->BurstChannel(thisChan->getName(), thisChan->getModeString(),
 			 thisChan->getCreationTime() - 1);
+
   if (version >= 12)
     MyUplink->setBursting(false);
 } else {
-  ClearMode(thisChan, "biklrD", true);
+  ClearMode(thisChan, "obiklrD", true);
 }
 
 Message(thisChan, "Channel fix in progress, please stand by.");

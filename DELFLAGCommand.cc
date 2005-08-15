@@ -95,8 +95,11 @@ if (!chkUser->getFlag(bot->getFlagType(flag))) {
 }
 
 chkUser->removeFlag(flag);
-chkUser->setLastUpdatedBy(theUser->getUserName());
 chkUser->setLastUpdated(bot->currentTime());
+chkUser->setLastUpdatedBy( std::string( "("
+	+ theUser->getUserName()
+	+ ") "
+	+ theClient->getNickUserHost() ) );
 chkUser->commit();
 bot->SendTo(theClient, "Deleted flag %c of user %s.", flag,
 	    chkUser->getUserName().c_str());
