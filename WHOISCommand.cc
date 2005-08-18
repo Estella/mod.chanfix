@@ -41,7 +41,7 @@ StringTokenizer st(Message);
 
 if (st[1] == "*") {
   bot->SendTo(theClient, "List of all users:");
-  chanfix::usersIterator ptr;
+  chanfix::usersIterator ptr = bot->usersMap_begin();
   while (ptr != bot->usersMap_end()) {
     sqlUser* tmpUser = ptr->second;
     bot->SendTo(theClient, "User: %s, Flags: %s, Groups: %s",
