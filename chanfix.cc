@@ -1849,6 +1849,26 @@ switch (whichChar) {
 return 0;
 }
 
+const std::string chanfix::getEventName(const int whichEvent)
+{
+if (whichEvent == sqlChannel::EV_MISC)
+  return "MISC";
+else if (whichEvent == sqlChannel::EV_NOTE)
+  return "NOTE";
+else if (whichEvent == sqlChannel::EV_CHANFIX)
+  return "CHANFIX";
+else if (whichEvent == sqlChannel::EV_BLOCK)
+  return "BLOCK";
+else if (whichEvent == sqlChannel::EV_UNBLOCK)
+  return "UNBLOCK";
+else if (whichEvent == sqlChannel::EV_ALERT)
+  return "ALERT";
+else if (whichEvent == sqlChannel::EV_UNALERT)
+  return "UNALERT";
+else
+  return "";
+}
+
 void chanfix::updatePoints()
 {
 /*

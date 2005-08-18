@@ -268,6 +268,8 @@ public:
 	const std::string getFlagsString(const sqlUser::flagType&);
 	sqlUser::flagType getFlagType(const char);
 
+	const std::string getEventName(const int);
+
 	const std::string prettyDuration( int );
 
 	const std::string tsToDateTime(time_t, bool);

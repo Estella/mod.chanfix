@@ -72,7 +72,7 @@ if (netChan) {
  * Perform a query to list all notes belonging to this channel.
  */
 std::stringstream allNotesQuery;
-allNotesQuery	<< "SELECT notes.id, notes.ts, users.user_name, notes.message "
+allNotesQuery	<< "SELECT notes.id, notes.ts, users.user_name, notes.event, notes.message "
  		<< "FROM notes,users "
 		<< "WHERE notes.userID = users.id "
 		<< "AND notes.channelID = "
@@ -101,12 +101,14 @@ if (noteCount > 0) {
     unsigned int note_id = atoi(bot->SQLDb->GetValue(i,0));
     unsigned int when = atoi(bot->SQLDb->GetValue(i,1));
     std::string from = bot->SQLDb->GetValue(i,2);
-    std::string theMessage = bot->SQLDb->GetValue(i,3);
+    unsigned short event = atoi(bot->SQLDb->GetValue(i,3));
+    std::string theMessage = bot->SQLDb->GetValue(i,4);
 
-    bot->SendTo(theClient, "[%d:%s] %s %s",
+    bot->SendTo(theClient, "[%d:%s] %s \002%s\002%s%s",
 		note_id, from.c_str(),
 		bot->tsToDateTime(when, true).c_str(),
-		theMessage.c_str());
+		bot->getEventName(event).c_str(),
+		(!theMessage.empty()) ? " " : "", theMessage.c_str());
   }
 }
 
