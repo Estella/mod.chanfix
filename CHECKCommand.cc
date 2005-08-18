@@ -35,7 +35,7 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-void CHECKCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void CHECKCommand::Exec(iClient* theClient, sqlUser*, const std::string& Message)
 {
 StringTokenizer st(Message);
 
@@ -50,9 +50,6 @@ if (!netChan) {
 bot->SendTo(theClient, "I see %d opped out of %d total clients in %s.",
 	    bot->countChanOps(netChan), netChan->size(),
 	    netChan->getName().c_str());
-
-/* Log command */
-/* ... */
 
 return;
 }

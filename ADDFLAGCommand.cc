@@ -100,7 +100,7 @@ chkUser->setLastUpdated(bot->currentTime());
 chkUser->setLastUpdatedBy( std::string( "("
 	+ theUser->getUserName()
 	+ ") "
-	+ theClient->getNickUserHost() ) );
+	+ theClient->getRealNickUserHost() ) );
 chkUser->commit();
 bot->SendTo(theClient, "Added flag %c to user %s.", flag, 
 	    chkUser->getUserName().c_str());

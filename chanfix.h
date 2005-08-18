@@ -269,7 +269,9 @@ public:
 	sqlUser::flagType getFlagType(const char);
 
 	const std::string prettyDuration( int );
-	
+
+	const std::string tsToDateTime(time_t, bool);
+
 	const std::string getHostList( sqlUser* );
 	
 	const int getCurrentGMTHour(); /* returns the current hour in GMT (00-23) */
@@ -287,9 +289,6 @@ public:
 
 	/* Admin message logs */
 	bool logAdminMessage(const char*, ... );
-
-	/* Write a channel log */
-	void writeChannelLog(sqlChannel*, iClient*, unsigned short, const std::string&);
 
 	void doSqlError(const std::string&, const std::string&);
 	
@@ -325,10 +324,16 @@ public:
 	/**
 	 * Holds the authenticated user list
 	 */
-	usersMapType			usersMap ;
+	usersMapType	usersMap;
 	
-	typedef usersMapType::iterator     usersIterator;
-	
+	typedef usersMapType::iterator	usersIterator;
+
+	usersIterator		usersMap_begin()
+		{ return usersMap.begin(); }
+
+	usersIterator		usersMap_end()
+		{ return usersMap.end(); }
+
 	/**
 	 * Queues to process.
 	 */

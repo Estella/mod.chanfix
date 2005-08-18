@@ -44,7 +44,7 @@ StringTokenizer st(Message);
 bot->SendTo(theClient, "Shutting down the server as per your request.");
 bot->logAdminMessage("%s (%s) is shutting me down.",
 		     theUser->getUserName().c_str(),
-		     theClient->getNickUserHost().c_str());
+		     theClient->getRealNickUserHost().c_str());
 
 if (st.size() < 2) {
   server->UnloadClient(bot, "Quit");

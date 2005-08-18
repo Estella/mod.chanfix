@@ -68,8 +68,47 @@ if (netChan) {
 		theChan->getChannel().c_str());
 }
 
-/* need to check for notes here -reed */
-/* ... */
+/*
+ * Perform a query to list all notes belonging to this channel.
+ */
+std::stringstream allNotesQuery;
+allNotesQuery	<< "SELECT notes.id, notes.ts, users.user_name, notes.message "
+ 		<< "FROM notes,users "
+		<< "WHERE notes.userID = users.id "
+		<< "AND notes.channelID = "
+		<< theChan->getID()
+		<< " ORDER BY notes.ts DESC"
+		<< std::ends;
+
+ExecStatusType status = bot->SQLDb->Exec( allNotesQuery.str().c_str() ) ;
+
+if( PGRES_TUPLES_OK != status )
+	{
+	elog	<< "INFOCommand> SQL Error: "
+		<< bot->SQLDb->ErrorMessage()
+		<< std::endl;
+
+	bot->SendTo(theClient, "An unknown error occurred while reading this channel's notes.");
+	return ;
+	}
+
+unsigned int noteCount = bot->SQLDb->Tuples();
+
+if (noteCount > 0) {
+  bot->SendTo(theClient, "Notes (%d):", noteCount);
+
+  for (unsigned int i = 0; i < noteCount; i++) {
+    unsigned int note_id = atoi(bot->SQLDb->GetValue(i,0));
+    unsigned int when = atoi(bot->SQLDb->GetValue(i,1));
+    std::string from = bot->SQLDb->GetValue(i,2);
+    std::string theMessage = bot->SQLDb->GetValue(i,3);
+
+    bot->SendTo(theClient, "[%d:%s] %s %s",
+		note_id, from.c_str(),
+		bot->tsToDateTime(when, true).c_str(),
+		theMessage.c_str());
+  }
+}
 
 bot->SendTo(theClient, "End of information.");
 

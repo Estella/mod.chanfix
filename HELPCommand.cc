@@ -43,7 +43,7 @@ if (st.size() < 2) {
   bot->SendTo(theClient, "\002Oper Level\002: SCORE CSCORE HISTORY INFO STATUS");
 
   if (theClient->getAccount() != "")
-    bot->SendTo(theClient, "\002Logged In\002: CHECK USET WHO");
+    bot->SendTo(theClient, "\002Logged In\002: CHECK USET WHOIS");
 
   if (!theUser) return;
 
@@ -63,7 +63,7 @@ if (st.size() < 2) {
     bot->SendTo(theClient, "\002Owner (+o)\002: QUOTE REHASH RELOAD SET SHUTDOWN");
 
   if (theUser->getFlag(sqlUser::F_USERMANAGER))
-    bot->SendTo(theClient, "\002User Manager (+u)\002: WHOIS ADDUSER DELUSER ADDHOST DELHOST ADDSERVER DELSERVER ADDFLAG DELFLAG WHOSERVER");
+    bot->SendTo(theClient, "\002User Manager (+u)\002: ADDUSER DELUSER ADDHOST DELHOST ADDGROUP DELGROUP ADDFLAG DELFLAG WHOGROUP");
 
 } else {
   bot->SendTo(theClient, "No help available on that topic.");

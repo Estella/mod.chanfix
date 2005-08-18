@@ -35,22 +35,28 @@ CREATE TABLE channels (
 
 CREATE UNIQUE INDEX channels_name_idx ON channels(LOWER(channel));
 
-CREATE TABLE channellog (
-        ts INT4,
-        channelID INT4 CONSTRAINT channel_log_ref REFERENCES channels ( id ),
-        event INT2 DEFAULT '0',
-        -- Defines the message event type, so we can filter nice reports.
+CREATE TABLE notes (
+	id SERIAL,
+	ts INT4,
+	channelID INT4 CONSTRAINT notes_ref REFERENCES channels ( id ),
+	userID INT4 CONSTRAINT notes_ref REFERENCES users ( id ),
+	event INT2 DEFAULT 0,
+	-- Defines the note event type, so we can filter nice reports.
 -- 1  -- EV_MISC - Uncategorised event.
 -- 2  -- EV_NOTE - Miscellaneous notes about a channel.
--- 3  -- EV_BLOCKED - When someone blocks a channel.
--- 4  -- EV_ALERT - When somebody
-        message TEXT,
-        last_updated INT4 NOT NULL,
-        deleted INT2 DEFAULT '0'
+-- 3  -- EV_CHANFIX - When someone manual chanfixes a channel.
+-- 4  -- EV_BLOCK - When someone blocks a channel.
+-- 5  -- EV_UNBLOCK - When somebody unblocks a channel.
+-- 6  -- EV_ALERT - When someone sets alert flag on a channel.
+-- 7  -- EV_UNALERT - When somebody removes alert flag from a channel.
+	message TEXT,
+
+	PRIMARY KEY(id, channelID, userID)
 );
 
-CREATE INDEX channellog_channelID_idx ON channellog(channelID);
-CREATE INDEX channellog_event_idx ON channellog(event);
+CREATE INDEX notes_channelID_idx ON notes(channelID);
+CREATE INDEX notes_userID_idx ON notes(userID);
+CREATE INDEX notes_event_idx ON notes(event);
 
 CREATE TABLE users (
 	id SERIAL,

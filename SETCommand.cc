@@ -59,7 +59,7 @@ if (option == "NUMSERVERS") {
   bot->SendTo(theClient, "NUM_SERVERS is now %d.", setting);
   bot->logAdminMessage("%s (%s) changed NUM_SERVERS to %d.",
 		       theUser->getUserName().c_str(),
-		       theClient->getNickUserHost().c_str(),
+		       theClient->getRealNickUserHost().c_str(),
 		       setting);
   bot->checkNetwork();
   return;
@@ -71,14 +71,14 @@ if (option == "ENABLEAUTOFIX") {
     bot->SendTo(theClient, "Enabled autofix.");
     bot->logAdminMessage("%s (%s) enabled autofix.",
 			 theUser->getUserName().c_str(),
-			 theClient->getNickUserHost().c_str());
+			 theClient->getRealNickUserHost().c_str());
     return;
   } else if (value == "OFF" || value == "0") {
     bot->setDoAutoFix(false);
     bot->SendTo(theClient, "Disabled autofix.");
     bot->logAdminMessage("%s (%s) disabled autofix.",
 			 theUser->getUserName().c_str(),
-			 theClient->getNickUserHost().c_str());
+			 theClient->getRealNickUserHost().c_str());
     return;
   } else {
     bot->SendTo(theClient, "Please use SET ENABLE_AUTOFIX <on/off>.");
@@ -92,14 +92,14 @@ if (option == "ENABLECHANFIX") {
     bot->SendTo(theClient, "Enabled manual chanfix.");
     bot->logAdminMessage("%s (%s) enabled manual chanfix.",
 			 theUser->getUserName().c_str(),
-			 theClient->getNickUserHost().c_str());
+			 theClient->getRealNickUserHost().c_str());
     return;
   } else if (value == "OFF" || value == "0") {
     bot->setDoChanFix(false);
     bot->SendTo(theClient, "Disabled manual chanfix.");
     bot->logAdminMessage("%s (%s) disabled manual chanfix.",
 			 theUser->getUserName().c_str(),
-			 theClient->getNickUserHost().c_str());
+			 theClient->getRealNickUserHost().c_str());
     return;
   } else {
     bot->SendTo(theClient, "Please use SET ENABLE_CHANFIX <on/off>.");
@@ -113,14 +113,14 @@ if (option == "ENABLECHANNELBLOCKING") {
     bot->SendTo(theClient, "Enabled channel blocking.");
     bot->logAdminMessage("%s (%s) enabled channel blocking.",
 			 theUser->getUserName().c_str(),
-			 theClient->getNickUserHost().c_str());
+			 theClient->getRealNickUserHost().c_str());
     return;
   } else if (value == "OFF" || value == "0") {
     bot->setDoChanBlocking(false);
     bot->SendTo(theClient, "Disabled channel blocking.");
     bot->logAdminMessage("%s (%s) disabled channel blocking.",
 			 theUser->getUserName().c_str(),
-			 theClient->getNickUserHost().c_str());
+			 theClient->getRealNickUserHost().c_str());
     return;
   } else {
     bot->SendTo(theClient, "Please use SET ENABLE_CHANNEL_BLOCKING <on/off>.");

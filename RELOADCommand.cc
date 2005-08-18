@@ -43,7 +43,7 @@ StringTokenizer st(Message);
 bot->SendTo(theClient, "Reloading client...see you on the flip side");
 bot->logAdminMessage("%s (%s) is reloading the chanfix module.",
 		     theUser->getUserName().c_str(),
-		     theClient->getNickUserHost().c_str());
+		     theClient->getRealNickUserHost().c_str());
 
 if (st.size() < 2) {
   server->UnloadClient(bot, "Reloading...");

@@ -35,7 +35,7 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-void OPNICKSCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void OPNICKSCommand::Exec(iClient* theClient, sqlUser*, const std::string& Message)
 {
 StringTokenizer st(Message);
 

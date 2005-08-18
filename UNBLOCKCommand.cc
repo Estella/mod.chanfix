@@ -63,7 +63,7 @@ theChan->removeFlag(sqlChannel::F_BLOCKED);
 theChan->commit();
 
 /* Add note to the channel about this command */
-/* bot->addNote(theChan, ... "UNBLOCK by %s" */
+theChan->addNote(sqlChannel::EV_UNBLOCK, theUser, "");
 
 bot->SendTo(theClient, "Channel %s has been unblocked.",
 	    theChan->getChannel().c_str());

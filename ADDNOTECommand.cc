@@ -1,10 +1,10 @@
 /**
- * ROTATECommand.cc
+ * ADDNOTECommand.cc
  *
- * 07/26/2005 - Jimmy Lipham <music0m@alltel.net>
+ * 08/18/2005 - Reed Loden <reed@reedloden.com>
  * Initial Version
  *
- * Rotate the bot's score database (keep only DAYSAMPLES days)
+ * Adds a note to a channel
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,31 +18,36 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
  * USA.
  *
  * $Id$
  */
 
-#include	<string>
+#include "gnuworld_config.h"
 
-#include	"gnuworld_config.h"
-#include	"StringTokenizer.h"
-
-#include	"chanfix.h"
+#include "chanfix.h"
+#include "StringTokenizer.h"
+#include "sqlChannel.h"
+#include "sqlUser.h"
 
 RCSTAG("$Id$");
 
 namespace gnuworld
 {
 
-void ROTATECommand::Exec(iClient* theClient, sqlUser* theUser, const std::string&)
+void ADDNOTECommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
-bot->logAdminMessage("%s (%s) ordered a manual DB rotation.",
-		     theUser->getUserName().c_str(),
-		     theClient->getRealNickUserHost().c_str());
-bot->rotateDB();
+StringTokenizer st(Message);
+
+sqlChannel* theChan = bot->getChannelRecord(st[1]);
+if (!theChan) theChan = bot->newChannelRecord(st[1]);
+
+theChan->addNote(sqlChannel::EV_NOTE, theUser, st.assemble(2));
+
+bot->SendTo(theClient, "Note recorded for channel %s",
+	    theChan->getChannel().c_str());
+
 return;
 }
-
 } // namespace gnuworld

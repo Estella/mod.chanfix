@@ -13,7 +13,7 @@ username = chanfix
 hostname = evilnet.development
 
 # Real name (info) of bot
-userdescription = Channel Fixer
+userdescription = Lean, mean, channel-opping machine
 
 # User modes bot should set
 mode = +idk

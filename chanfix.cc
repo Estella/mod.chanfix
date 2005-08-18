@@ -26,6 +26,7 @@
  */
 
 #include	<cstdarg>
+#include	<ctime>
 #include	<iomanip>
 #include	<iostream>
 #include	<map>
@@ -121,6 +122,11 @@ RegisterCommand(new ADDFLAGCommand(this, "ADDFLAG",
 	3,
 	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
 	));
+RegisterCommand(new ADDNOTECommand(this, "ADDNOTE",
+	"<#channel> <reason>",
+	3,
+	sqlUser::F_CHANNEL
+	));
 RegisterCommand(new ADDUSERCommand(this, "ADDUSER",
 	"<username> [host]",
 	2,
@@ -151,6 +157,11 @@ RegisterCommand(new DELFLAGCommand(this, "DELFLAG",
 	3,
 	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
 	));
+RegisterCommand(new DELNOTECommand(this, "DELNOTE",
+	"<#channel> <note_id>",
+	3,
+	sqlUser::F_CHANNEL
+	));
 RegisterCommand(new DELUSERCommand(this, "DELUSER",
 	"<username>",
 	2,
@@ -159,6 +170,11 @@ RegisterCommand(new DELUSERCommand(this, "DELUSER",
 RegisterCommand(new HELPCommand(this, "HELP",
 	"[command]",
 	1,
+	0
+	));
+RegisterCommand(new HISTORYCommand(this, "HISTORY",
+	"<#channel>",
+	2,
 	0
 	));
 RegisterCommand(new INFOCommand(this, "INFO",
@@ -244,7 +260,7 @@ RegisterCommand(new USETCommand(this, "USET",
 RegisterCommand(new WHOISCommand(this, "WHOIS",
 	"<username>",
 	2,
-	sqlUser::F_USERMANAGER
+	sqlUser::F_LOGGEDIN
 	));
 
 /* Set our current day. */
@@ -957,47 +973,6 @@ myOps.sort(compare_points);
 return myOps;
 }
 
-/**
- * This method writes a 'channellog' record, recording an event that has
- * occured in this channel.
- */
-
-void chanfix::writeChannelLog(sqlChannel* theChannel, iClient* theClient,
-	unsigned short eventType, const std::string& theMessage)
-{
-sqlUser* theUser = isAuthed(theClient->getNickName());
-std::string userExtra = theUser ? theUser->getUserName() : "Not Logged In";
-
-std::stringstream theLog;
-theLog	<< "INSERT INTO channellog (ts, channelID, event, message, "
-	<< "last_updated) VALUES "
-	<< "("
-	<< currentTime()
-	<< ", "
-	<< theChannel->getID()
-	<< ", "
-	<< eventType
-	<< ", "
-	<< "'["
-	<< nickName
-	<< "]: "
-	<< theClient->getNickUserHost()
-	<< " (" << userExtra << ") "
-	<< escapeSQLChars(theMessage)
-	<< "', "
-	<< currentTime()
-	<< ")"
-	<< std::ends;
-
-#ifdef LOG_SQL
-	elog	<< "chanfix::writeChannelLog> "
-		<< theLog.str()
-		<< std::endl;
-#endif
-
-SQLDb->ExecCommandOk(theLog.str().c_str());
-}
-
 const std::string chanfix::getHostList( sqlUser* User)
 {
 static const char* queryHeader
@@ -1099,7 +1074,7 @@ if (thisClient->getAccount() != "" &&
   sqlChanOp* thisOp = findChanOp(thisChan, thisClient);
   if (!thisOp) thisOp = newChanOp(thisChan, thisClient);
 
-  thisOp->setLastSeenAs(thisClient->getNickUserHost());
+  thisOp->setLastSeenAs(thisClient->getRealNickUserHost());
   thisOp->setTimeLastOpped(currentTime());
   
   if (wasOpped(thisChan, thisClient))
@@ -1653,6 +1628,22 @@ sprintf(tmpBuf, "%i day%s, %02d:%02d:%02d",
 	secs );
 
 return std::string( tmpBuf ) ;
+}
+
+const std::string chanfix::tsToDateTime(time_t timestamp, bool time)
+{
+char datetimestring[ 20 ] = {0};
+struct tm *stm;
+
+stm = localtime(&timestamp);
+memset(datetimestring, 0, sizeof(datetimestring));
+
+if (time)
+  strftime(datetimestring, sizeof(datetimestring), "%Y-%m-%d %H:%M:%S", stm);
+else
+  strftime(datetimestring, sizeof(datetimestring), "%Y-%m-%d", stm);
+
+return std::string(datetimestring);
 }
 
 const int chanfix::getCurrentGMTHour()

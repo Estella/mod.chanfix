@@ -29,7 +29,7 @@
 namespace gnuworld
 {
 
-class iClient;
+class sqlUser;
 
 class sqlChannel
 {
@@ -51,8 +51,11 @@ public:
 
 	static const int	EV_MISC; /* Uncategorised event */
 	static const int	EV_NOTE; /* Miscellaneous notes */
-	static const int	EV_BLOCKED; /* Channel blocking */
-	static const int	EV_ALERT; /* Channel alerts */
+	static const int	EV_CHANFIX; /* Manual chanfixes */
+	static const int	EV_BLOCK; /* Channel block */
+	static const int	EV_UNBLOCK; /* Channel unblock */
+	static const int	EV_ALERT; /* Channel alert */
+	static const int	EV_UNALERT; /* Channel unalert */
 
 	/*
 	 *  Methods to get data atrributes.
@@ -120,6 +123,13 @@ public:
 	bool Delete();
 	bool commit();
 	void setAllMembers(int);
+
+	void addNote(unsigned short, sqlUser*, const std::string&);
+	bool deleteNote(unsigned int, sqlUser*);
+	bool deleteOldestNote();
+	bool deleteAllNotes();
+	size_t countNotes(unsigned short);
+	const std::string getLastNote(unsigned short, time_t&);
 
 protected:
 

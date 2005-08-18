@@ -149,11 +149,15 @@ if (theChan->getFlag(sqlChannel::F_ALERT) && !override) {
 bot->manualFix(netChan);
 
 /* Add note to the channel about this manual fix */
-/* bot->addNote(theChan, ... "CHANFIX by %s" */
+theChan->addNote(sqlChannel::EV_CHANFIX, theUser, "");
 
 /* Log the chanfix */
 bot->SendTo(theClient, "Manual chanfix acknowledged for %s",
 	    netChan->getName().c_str());
+bot->logAdminMessage("%s (%s) requested manual fix for %s",
+		     theUser->getUserName().c_str(),
+		     theClient->getRealNickUserHost().c_str(),
+		     netChan->getName().c_str());
 
 return;
 }

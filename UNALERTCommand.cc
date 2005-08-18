@@ -57,7 +57,7 @@ theChan->removeFlag(sqlChannel::F_ALERT);
 theChan->commit();
 
 /* Add note to the channel about this command */
-/* bot->addNote(theChan, ... "UNALERT by %s" */
+theChan->addNote(sqlChannel::EV_UNALERT, theUser, "");
 
 bot->SendTo(theClient, "ALERT flag removed from channel %s",
 	    theChan->getChannel().c_str());

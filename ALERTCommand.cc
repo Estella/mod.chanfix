@@ -53,7 +53,7 @@ theChan->setFlag(sqlChannel::F_ALERT);
 theChan->commit();
 
 /* Add note to the channel about this command */
-/* bot->addNote(theChan, ... "ALERT flag added by %s" */
+theChan->addNote(sqlChannel::EV_ALERT, theUser, "");
 
 bot->SendTo(theClient, "ALERT flag added from channel %s",
 	    theChan->getChannel().c_str());

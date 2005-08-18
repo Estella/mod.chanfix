@@ -44,7 +44,7 @@ bot->readConfigFile(bot->getConfigFileName());
 bot->SendTo(theClient, "Successfully rehashed configuration file.");
 bot->logAdminMessage("%s (%s) rehashed the chanfix module.",
 		     theUser->getUserName().c_str(),
-		     theClient->getNickUserHost().c_str());
+		     theClient->getRealNickUserHost().c_str());
 
 return;
 }

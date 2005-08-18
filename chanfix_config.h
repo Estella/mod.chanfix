@@ -154,6 +154,12 @@
 #define MAXOPCOUNT	256
 
 /**
+ * The maximum number of notes allowed per channel.
+ * (default: 8)
+ */
+#define MAXNOTECOUNT	8
+
+/**
  * The maximum number of automatic fixes to retain in history per
  * channel. (default: 10)
  */

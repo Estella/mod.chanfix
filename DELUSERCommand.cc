@@ -62,7 +62,7 @@ if (chkUser->Delete()) {
   bot->SendTo(theClient, "Deleted user %s.", chkUser->getUserName().c_str());
   bot->logAdminMessage("%s (%s) deleted user %s.",
 		       theClient->getAccount().c_str(),
-		       theClient->getNickUserHost().c_str(),
+		       theClient->getRealNickUserHost().c_str(),
 		       chkUser->getUserName().c_str());
   delete chkUser; chkUser = 0;
 } else {

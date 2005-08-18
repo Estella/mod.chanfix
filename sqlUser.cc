@@ -142,7 +142,7 @@ bool sqlUser::Delete()
 {
 std::stringstream deleteString;
 deleteString	<< "DELETE FROM users "
-		<< "WHERE user_name = '" << user_name << "'"
+		<< "WHERE id = '" << id << "'"
 		;
 
 ExecStatusType status = SQLDb->Exec(deleteString.str().c_str());

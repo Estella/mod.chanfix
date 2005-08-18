@@ -24,9 +24,6 @@
  * $Id$
  */
 
-#include <ctime>
-#include <iostream>
-
 #include "gnuworld_config.h"
 #include "Network.h"
 
@@ -80,34 +77,30 @@ else
   bot->SendTo(theClient, "Found %d unique op accounts in channel %s:",
 	      oCnt, netChan->getName().c_str());
 
+bot->SendTo(theClient, "Rank Score Account -- Time first opped / Time last opped");
+
 unsigned int opCount = 0;
-static char sdatetimestring[24];
-static char ldatetimestring[24];
-struct tm * stms;
-struct tm * stml;
-time_t tmVars;
-time_t tmVarl;
+std::string firstop;
+std::string lastop;
 
 for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
      opPtr != myOps.end(); opPtr++) {
   curOp = *opPtr;
   if (opCount < OPCOUNT) {
     opCount++;
-    tmVars = curOp->getTimeFirstOpped();
-    tmVarl = curOp->getTimeLastOpped();
-    stms = localtime(&tmVars);
-    strftime(sdatetimestring, 24, "%Y-%m-%d", stms);
-    stml = localtime(&tmVarl);
-    strftime(ldatetimestring, 24, "%Y-%m-%d %H:%M:%S", stml);
-
+    firstop = bot->tsToDateTime(curOp->getTimeFirstOpped(), false);
+    lastop = bot->tsToDateTime(curOp->getTimeLastOpped(), true);
     bot->SendTo(theClient, "%2d. %4d %s -- %s / %s", opCount,
 		curOp->getPoints(), curOp->getAccount().c_str(),
-		sdatetimestring, ldatetimestring);
+		firstop.c_str(), lastop.c_str());
   }
 }
 
 /* Log command */
-/* ... */
+bot->logAdminMessage("%s (%s) has requested OPLIST for %s",
+		     theUser->getUserName().c_str(),
+		     theClient->getRealNickUserHost().c_str(),
+		     netChan->getName().c_str());
 
 return;
 }

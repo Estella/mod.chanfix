@@ -55,7 +55,7 @@ newUser->setLastUpdated(bot->currentTime());
 newUser->setLastUpdatedBy( std::string( "("
 	+ theUser->getUserName()
 	+ ") "
-	+ theClient->getNickUserHost() ) );
+	+ theClient->getRealNickUserHost() ) );
 if (newUser->Insert()) {
   bot->SendTo(theClient, "Created user %s.", st[1].c_str());
   bot->usersMap[newUser->getUserName()] = newUser;
