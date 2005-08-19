@@ -39,6 +39,100 @@ sqlChannel::sqlChannel(PgDatabase* _SQLDb)
   SQLDb(_SQLDb)
 {};
 
+bool sqlChannel::loadData(const std::string& channelName)
+{
+/*
+ *  With the open database handle 'SQLDb', retrieve information about
+ *  'channelName' and fill our member variables.
+ */
+
+#ifdef LOG_DEBUG
+	elog	<< "sqlChannel::loadData> Attempting to load data for"
+		<< " channel-name: "
+		<< channelName
+		<< std::endl;
+#endif
+
+std::stringstream queryString;
+queryString	<< "SELECT "
+		<< "id, channel, flags"
+		<< " FROM channels WHERE lower(channel) = '"
+		<< escapeSQLChars(string_lower(channelName))
+		<< "'"
+		<< std::ends;
+
+#ifdef LOG_SQL
+	elog	<< "sqlChannel::loadData> "
+		<< queryString.str().c_str()
+		<< std::endl;
+#endif
+
+ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
+
+if( PGRES_TUPLES_OK == status )
+	{
+	/*
+	 *  If the channel doesn't exist, we won't get any rows back.
+	 */
+
+	if(SQLDb->Tuples() < 1)
+		{
+		return (false);
+		}
+
+	setAllMembers(0);
+	return (true);
+	}
+return (false);
+}
+
+bool sqlChannel::loadData(unsigned int channelID)
+{
+/*
+ *  With the open database handle 'SQLDb', retrieve information about
+ *  'channelID' and fill our member variables.
+ */
+
+#ifdef LOG_DEBUG
+	elog	<< "sqlChannel::loadData> Attempting to load data for "
+		<< "channel-id: "
+		<< channelID
+		<< std::endl;
+#endif
+
+std::stringstream queryString;
+queryString	<< "SELECT "
+		<< "id, channel, flags"
+		<< " FROM channels WHERE id = "
+		<< channelID
+		<< std::ends;
+
+#ifdef LOG_SQL
+	elog	<< "sqlChannel::loadData> "
+		<< queryString.str().c_str()
+		<< endl;
+#endif
+
+ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
+
+if( PGRES_TUPLES_OK == status )
+	{
+	/*
+	 *  If the channel doesn't exist, we won't get any rows back.
+	 */
+
+	if(SQLDb->Tuples() < 1)
+		{
+		return (false);
+		}
+
+	setAllMembers(0);
+	return (true);
+	}
+
+return (false);
+}
+
 void sqlChannel::setAllMembers(int row) 
 {
 id = atoi(SQLDb->GetValue(row, 0));
@@ -64,18 +158,19 @@ queryString	<< queryHeader << "'"
 
 ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
 
-if( PGRES_COMMAND_OK != status )
+if( PGRES_COMMAND_OK == status )
 	{
-	// TODO: Log to msgchan here.
-	elog	<< "sqlChannel::Insert> Something went wrong: "
-		<< SQLDb->ErrorMessage()
-		<< std::endl;
-
-	return false;
+	if (!loadData(channel))
+		return false;
+	return true;
 	}
 
-return true;
+// TODO: Log to msgchan here.
+elog	<< "sqlChannel::Insert> Something went wrong: "
+	<< SQLDb->ErrorMessage()
+	<< std::endl;
 
+return false;
 };
 
 bool sqlChannel::Delete()
@@ -249,7 +344,7 @@ return true;
 bool sqlChannel::deleteOldestNote()
 {
 std::stringstream queryString;
-queryString	<< "DELETE FROM notes WHERE channelID = "
+queryString	<< "SELECT id FROM notes WHERE channelID = "
 		<< id
 		<< " ORDER BY ts ASC LIMIT 1"
 		<< std::ends;
@@ -261,6 +356,35 @@ queryString	<< "DELETE FROM notes WHERE channelID = "
 #endif
 
 ExecStatusType status = SQLDb->Exec(queryString.str().c_str());
+
+if( PGRES_COMMAND_OK != status )
+	{
+	elog	<< "sqlChannel::deleteOldestNote> Something went wrong: "
+		<< SQLDb->ErrorMessage()
+		<< std::endl;
+	return false;
+	}
+
+if(SQLDb->Tuples() < 1)
+	{
+	return false;
+	}
+
+unsigned int note_id = atoi(SQLDb->GetValue(0, 0));
+
+std::stringstream deleteString;
+deleteString	<< "DELETE FROM notes WHERE id = "
+		<< note_id
+		<< " LIMIT 1"
+		<< std::ends;
+
+#ifdef LOG_SQL
+	elog	<< "sqlChannel::deleteOldestNote> "
+		<< deleteString.str().c_str()
+		<< std::endl;
+#endif
+
+status = SQLDb->Exec(deleteString.str().c_str());
 
 if( PGRES_COMMAND_OK != status )
 	{

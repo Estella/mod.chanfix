@@ -40,6 +40,12 @@ void ADDNOTECommand::Exec(iClient* theClient, sqlUser* theUser, const std::strin
 {
 StringTokenizer st(Message);
 
+if (st[1][0] != '#') {
+  bot->SendTo(theClient, "%s is an invalid channel name."),
+	      st[1].c_str();
+  return;
+}
+
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
 if (!theChan) theChan = bot->newChannelRecord(st[1]);
 

@@ -54,6 +54,105 @@ sqlUser::sqlUser(PgDatabase* _SQLDb)
   SQLDb(_SQLDb)
 {};
 
+/*
+ *  Load all data for this user from the backend. (Key: userID)
+ */
+
+bool sqlUser::loadData(unsigned int userID)
+{
+/*
+ *  With the open database handle 'SQLDb', retrieve information about
+ *  'userID' and fill our member variables.
+ */
+
+#ifdef LOG_DEBUG
+	elog	<< "sqlUser::loadData> Attempting to load data for user-id: "
+		<< userID
+		<< std::endl;
+#endif
+
+std::stringstream queryString;
+queryString	<< "SELECT "
+		<< "id, user_name, created, last_seen, last_updated, last_updated_by, flags, issuspended, usenotice"
+		<< " FROM users WHERE id = "
+		<< userID
+		<< std::ends;
+
+#ifdef LOG_SQL
+	elog	<< "sqlUser::loadData> "
+		<< queryString.str().c_str()
+		<< std::endl;
+#endif
+
+ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
+
+if( PGRES_TUPLES_OK == status )
+	{
+	/*
+	 *  If the user doesn't exist, we won't get any rows back.
+	 */
+
+	if(SQLDb->Tuples() < 1)
+		{
+		return (false);
+		}
+
+	setAllMembers(0);
+
+	return (true);
+	}
+
+return (false);
+}
+
+bool sqlUser::loadData(const std::string& userName)
+{
+/*
+ *  With the open database handle 'SQLDb', retrieve information about
+ *  'userID' and fill our member variables.
+ */
+
+#ifdef LOG_DEBUG
+	elog	<< "sqlUser::loadData> Attempting to load data for user-name: "
+		<< userName
+		<< std::endl;
+#endif
+
+std::stringstream queryString;
+queryString	<< "SELECT "
+		<< "id, user_name, created, last_seen, last_updated, last_updated_by, flags, issuspended, usenotice"
+		<< " FROM users WHERE lower(user_name) = '"
+		<< escapeSQLChars(string_lower(userName))
+		<< "'"
+		<< std::ends;
+
+#ifdef LOG_SQL
+	elog	<< "sqlUser::loadData> "
+		<< queryString.str().c_str()
+		<< std::endl;
+#endif
+
+ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
+
+if( PGRES_TUPLES_OK == status )
+	{
+	/*
+	 *  If the user doesn't exist, we won't get any rows back.
+	 */
+
+	if(SQLDb->Tuples() < 1)
+		{
+		return (false);
+		}
+
+	setAllMembers(0);
+
+	return (true);
+	}
+
+return (false);
+}
+
 void sqlUser::setAllMembers(int row) 
 {
   id = atoi(SQLDb->GetValue(row, 0));
@@ -84,7 +183,7 @@ queryString	<< "UPDATE users SET "
 		<< "issuspended = " << (isSuspended ? "TRUE" : "FALSE") << ", "
 		<< "usenotice = " << (useNotice ? "TRUE" : "FALSE")
 		<< " WHERE "
-		<< "user_name = '" << user_name << "'"
+		<< "id = " << id
 		;
 
 #ifdef LOG_SQL
@@ -131,11 +230,13 @@ elog	<< "sqlUser::Insert> "
 ExecStatusType status = SQLDb->Exec(insertString.str().c_str());
 
 if(PGRES_COMMAND_OK != status) {
-	elog << "sqlUser::Insert> " << SQLDb->ErrorMessage();
-	return false;
+	if (!loadData(user_name))
+		return false;
+	return true;
 }
 
-return true;
+elog << "sqlUser::Insert> " << SQLDb->ErrorMessage();
+return false;
 } // sqlUser::Insert()
 
 bool sqlUser::Delete()

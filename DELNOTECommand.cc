@@ -47,7 +47,7 @@ if (!theChan) {
   return;
 }
 
-if (!theChan->countNotes(0) <= 0) {
+if (theChan->countNotes(0) <= 0) {
   bot->SendTo(theClient, "The channel %s does not have any notes.",
 	      theChan->getChannel().c_str());
   return;

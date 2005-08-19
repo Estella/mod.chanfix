@@ -122,6 +122,8 @@ public:
 	bool Insert();
 	bool Delete();
 	bool commit();
+	bool loadData(const std::string&);
+	bool loadData(unsigned int);
 	void setAllMembers(int);
 
 	void addNote(unsigned short, sqlUser*, const std::string&);

@@ -111,6 +111,8 @@ public:
 		{ useNotice = _useNotice; }
 
 	/* Methods to alter our SQL status */
+	bool loadData(unsigned int);
+	bool loadData(const std::string&);
 	void setAllMembers(int);
 	bool commit();
 	bool Insert();
