@@ -817,7 +817,7 @@ void chanfix::preloadChanOpsCache()
 void chanfix::preloadChannelCache()
 {
 	std::stringstream theQuery;
-	theQuery	<< "SELECT channel, flags FROM channels"
+	theQuery	<< "SELECT id, channel, flags FROM channels"
 			<< std::ends;
 
 	elog		<< "*** [chanfix::preloadChannelCache]: Loading channels ..."
@@ -1211,9 +1211,9 @@ if (thisChan->getCreationTime() > 1) {
   if (thisChan->getMode(Channel::MODE_I))
     modeVector.push_back(std::make_pair(false, Channel::MODE_I));
   if (thisChan->getMode(Channel::MODE_K))
-    OnChannelModeK(thisChan, false, 0, std::string());
+    MyUplink->OnChannelModeK(thisChan, false, 0, std::string());
   if (thisChan->getMode(Channel::MODE_L))
-    OnChannelModeL(thisChan, false, 0, 0);
+    MyUplink->OnChannelModeL(thisChan, false, 0, 0);
   if (thisChan->getMode(Channel::MODE_R))
     modeVector.push_back(std::make_pair(false, Channel::MODE_R));
   if (thisChan->getMode(Channel::MODE_D))
@@ -1226,7 +1226,7 @@ if (thisChan->getCreationTime() > 1) {
       modeVector.push_back(std::make_pair(true, Channel::MODE_T));
   }
   if (!modeVector.empty())
-    OnChannelMode(thisChan, 0, modeVector);
+    MyUplink->OnChannelMode(thisChan, 0, modeVector);
 
   MyUplink->BurstChannel(thisChan->getName(), thisChan->getModeString(),
 			 thisChan->getCreationTime() - 1);

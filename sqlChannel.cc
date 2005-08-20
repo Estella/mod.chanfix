@@ -355,11 +355,11 @@ queryString	<< "SELECT id FROM notes WHERE channelID = "
 		<< std::endl;
 #endif
 
-ExecStatusType status = SQLDb->Exec(queryString.str().c_str());
+ExecStatusType queryStatus = SQLDb->Exec(queryString.str().c_str());
 
-if( PGRES_COMMAND_OK != status )
+if( PGRES_TUPLES_OK != queryStatus )
 	{
-	elog	<< "sqlChannel::deleteOldestNote> Something went wrong: "
+	elog	<< "sqlChannel::deleteOldestNote> Something went wrong with select: "
 		<< SQLDb->ErrorMessage()
 		<< std::endl;
 	return false;
@@ -375,7 +375,6 @@ unsigned int note_id = atoi(SQLDb->GetValue(0, 0));
 std::stringstream deleteString;
 deleteString	<< "DELETE FROM notes WHERE id = "
 		<< note_id
-		<< " LIMIT 1"
 		<< std::ends;
 
 #ifdef LOG_SQL
@@ -384,11 +383,11 @@ deleteString	<< "DELETE FROM notes WHERE id = "
 		<< std::endl;
 #endif
 
-status = SQLDb->Exec(deleteString.str().c_str());
+ExecStatusType deleteStatus = SQLDb->Exec(deleteString.str().c_str());
 
-if( PGRES_COMMAND_OK != status )
+if( PGRES_COMMAND_OK != deleteStatus )
 	{
-	elog	<< "sqlChannel::deleteOldestNote> Something went wrong: "
+	elog	<< "sqlChannel::deleteOldestNote> Something went wrong with delete: "
 		<< SQLDb->ErrorMessage()
 		<< std::endl;
 	return false;

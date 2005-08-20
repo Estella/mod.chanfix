@@ -48,7 +48,7 @@ if (st.size() < 2) {
   if (!theUser) return;
 
   if (theUser->getFlag(sqlUser::F_SERVERADMIN))
-    bot->SendTo(theClient, "\002Server Admin (+a)\002: ADDUSER DELUSER ADDHOST DELHOST ADDFLAG DELFLAG WHOSERVER");
+    bot->SendTo(theClient, "\002Server Admin (+a)\002: ADDUSER DELUSER ADDHOST DELHOST ADDFLAG DELFLAG WHOGROUP");
 
   if (theUser->getFlag(sqlUser::F_BLOCK))
     bot->SendTo(theClient, "\002Blocker (+b)\002: BLOCK UNBLOCK");

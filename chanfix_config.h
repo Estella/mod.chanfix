@@ -155,19 +155,21 @@
 
 /**
  * The maximum number of notes allowed per channel.
- * (default: 8)
+ * (default: 30)
  */
-#define MAXNOTECOUNT	8
+#define MAXNOTECOUNT	30
 
 /**
  * The maximum number of automatic fixes to retain in history per
  * channel. (default: 10)
+ * NOTE: Not used (yet).
  */
 #define MAXAUTOFIX	10
 
 /**
  * The maximum number of manual fixes to retain in history per channel.
  * (default: 10)
+ * NOTE: Not used (yet).
  */
 #define MAXMANUALFIX	10
 
