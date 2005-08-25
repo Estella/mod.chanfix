@@ -78,7 +78,7 @@ allNotesQuery	<< "SELECT notes.id, notes.ts, users.user_name, notes.event, notes
 		<< "AND notes.channelID = "
 		<< theChan->getID()
 		<< " ORDER BY notes.ts DESC"
-		<< std::ends;
+		;
 
 ExecStatusType status = bot->SQLDb->Exec( allNotesQuery.str().c_str() ) ;
 

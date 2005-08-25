@@ -485,6 +485,12 @@ if (st.size() < commHandler->second->getNumParams()) {
 }
 
 sqlUser* theUser = isAuthed(theClient->getAccount());
+
+if (theUser->getIsSuspended()) {
+  SendTo(theClient, "Your access to this service is suspended.");
+  return;
+}
+
 sqlUser::flagType requiredFlags = commHandler->second->getRequiredFlags();
 if (requiredFlags) {
   if (!theUser) {
@@ -694,11 +700,9 @@ vsnprintf( buf, 1024, format, _list ) ;
 va_end( _list ) ;
 
 // Try and locate the relay channel.
-Channel* tmpChan = Network->findChannel(operChan);
+Channel* tmpChan = Network->findChannel(consoleChan);
 if (!tmpChan)
-	{
-	return false;
-	}
+  return false;
 
 std::string message = std::string( "[" ) + nickName + "] " + buf ;
 serverNotice(tmpChan, message);
@@ -783,7 +787,7 @@ void chanfix::preloadChanOpsCache()
 {
 	std::stringstream theQuery;
 	theQuery	<< "SELECT channel,account,last_seen_as,ts_firstopped,ts_lastopped,day0,day1,day2,day3,day4,day5,day6,day7,day8,day9,day10,day11,day12,day13 FROM chanOps"
-			<< std::ends;
+			;
 
 	elog		<< "*** [chanfix::preloadChanOpsCache]: Loading chanOps and their points ..." 
 			<< std::endl;
@@ -818,7 +822,7 @@ void chanfix::preloadChannelCache()
 {
 	std::stringstream theQuery;
 	theQuery	<< "SELECT id, channel, flags FROM channels"
-			<< std::ends;
+			;
 
 	elog		<< "*** [chanfix::preloadChannelCache]: Loading channels ..."
 			<< std::endl;
@@ -981,7 +985,7 @@ static const char* queryHeader
 std::stringstream theQuery;
 theQuery	<< queryHeader 
 		<< User->getID()
-		<< std::ends;
+		;
 
 ExecStatusType status = SQLDb->Exec( theQuery.str().c_str() ) ;
 

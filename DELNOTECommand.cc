@@ -56,11 +56,11 @@ if (theChan->countNotes(0) <= 0) {
 unsigned int messageId = atoi(st[2].c_str());
 
 std::stringstream noteCheckQuery;
-noteCheckQuery	<< "SELECT channelID, userID "
+noteCheckQuery	<< "SELECT channelID, userID, event "
 		<< "FROM notes "
 		<< "WHERE id = "
 		<< messageId
-		<< std::ends;
+		;
 
 ExecStatusType status = bot->SQLDb->Exec( noteCheckQuery.str().c_str() ) ;
 
@@ -81,6 +81,7 @@ if (bot->SQLDb->Tuples() != 1) {
 
 unsigned int channelID = atoi(bot->SQLDb->GetValue(0,0));
 unsigned int userID = atoi(bot->SQLDb->GetValue(0,1));
+unsigned short eventType = atoi(bot->SQLDb->GetValue(0,2));
 
 if (channelID != theChan->getID()) {
   bot->SendTo(theClient, "No such note %d for channel %s.",
@@ -94,7 +95,13 @@ if (userID != theUser->getID() && !theUser->getFlag(sqlUser::F_OWNER)) {
   return;
 }
 
-if (!theChan->deleteNote(messageId, theUser))
+if (eventType != sqlChannel::EV_NOTE && !theUser->getFlag(sqlUser::F_OWNER)) {
+  bot->SendTo(theClient, "Note %d for channel %s is not a manually added note. You can only delete notes that were manually added.",
+	      messageId, theChan->getChannel().c_str());
+  return;
+}
+
+if (!theChan->deleteNote(messageId))
   return;
 
 bot->SendTo(theClient, "Note %d for channel %s deleted.",

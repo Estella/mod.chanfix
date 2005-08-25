@@ -58,7 +58,7 @@ chanfixQuery	<< "SELECT ts "
 		<< " AND event = "
 		<< sqlChannel::EV_CHANFIX
 		<< " ORDER BY ts DESC"
-		<< std::ends;
+		;
 
 ExecStatusType status = bot->SQLDb->Exec( chanfixQuery.str().c_str() ) ;
 

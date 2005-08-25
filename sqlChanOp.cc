@@ -89,7 +89,7 @@ queryString	<< queryHeader << "'"
 		<< day[11] << ","
 		<< day[12] << ","
 		<< day[13] << ")"
-		<< std::ends;
+		;
 
 //#ifdef LOG_SQL
 	elog	<< "sqlChanOp::Insert> "
@@ -122,7 +122,7 @@ queryString	<< queryHeader << "WHERE lower(channel) = '"
 		<< string_lower(escapeSQLChars(channel))
 		<< "' AND lower(account) = '"
 		<< string_lower(escapeSQLChars(account)) << "'"
-		<< std::ends;
+		;
 
 //#ifdef LOG_SQL
 	elog	<< "chanfix::sqlChanOp::Delete> "
@@ -175,7 +175,7 @@ queryString	<< queryHeader << "SET last_seen_as = "<< "'"
 		<< string_lower(escapeSQLChars(channel))
 		<< "' AND lower(account) = '"
 		<< string_lower(escapeSQLChars(account)) << "'"
-		<< std::ends;
+		;
 
 //#ifdef LOG_SQL
 	elog	<< "chanfix::sqlChanOp::commit> "

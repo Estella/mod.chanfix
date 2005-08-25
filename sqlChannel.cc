@@ -59,11 +59,11 @@ queryString	<< "SELECT "
 		<< " FROM channels WHERE lower(channel) = '"
 		<< escapeSQLChars(string_lower(channelName))
 		<< "'"
-		<< std::ends;
+		;
 
 #ifdef LOG_SQL
 	elog	<< "sqlChannel::loadData> "
-		<< queryString.str().c_str()
+		<< queryString.str()
 		<< std::endl;
 #endif
 
@@ -105,11 +105,11 @@ queryString	<< "SELECT "
 		<< "id, channel, flags"
 		<< " FROM channels WHERE id = "
 		<< channelID
-		<< std::ends;
+		;
 
 #ifdef LOG_SQL
 	elog	<< "sqlChannel::loadData> "
-		<< queryString.str().c_str()
+		<< queryString.str()
 		<< endl;
 #endif
 
@@ -148,11 +148,11 @@ std::stringstream queryString;
 queryString	<< queryHeader << "'"
 		<< escapeSQLChars(channel) << "',"
 		<< flags << ")"
-		<< std::ends;
+		;
 
 //#ifdef LOG_SQL
 	elog	<< "sqlChannel::Insert> "
-		<< queryString.str().c_str()
+		<< queryString.str()
 		<< std::endl;
 //#endif
 
@@ -179,11 +179,11 @@ static const char* queryHeader =    "DELETE FROM channels ";
 
 std::stringstream queryString;
 queryString	<< queryHeader << "WHERE id = " << id
-		<< std::ends;
+		;
 
 //#ifdef LOG_SQL
-	elog	<< "chanfix::sqlChannel::Delete> "
-		<< queryString.str().c_str()
+	elog	<< "sqlChannel::Delete> "
+		<< queryString.str()
 		<< std::endl;
 //#endif
 
@@ -210,11 +210,11 @@ static const char* queryHeader =    "UPDATE channels ";
 std::stringstream queryString;
 queryString	<< queryHeader << "SET flags = "
 		<< flags << " WHERE id = " << id
-		<< std::ends;
+		;
 
 //#ifdef LOG_SQL
-	elog	<< "chanfix::sqlChannel::commit> "
-		<< queryString.str().c_str()
+	elog	<< "sqlChannel::commit> "
+		<< queryString.str()
 		<< std::endl;
 //#endif
 
@@ -263,7 +263,7 @@ theLog	<< "INSERT INTO notes (ts, channelID, userID, event, message) "
 	<< "'"
 	<< escapeSQLChars(theMessage)
 	<< "')"
-	<< std::ends;
+	;
 
 #ifdef LOG_SQL
 	elog	<< "sqlChannel::addNote> "
@@ -284,11 +284,11 @@ queryString	<< "SELECT message,ts"
 			<< " AND event = "
 			<< eventType
 			<< " ORDER BY ts DESC LIMIT 1"
-			<< std::ends;
+			;
 
 #ifdef LOG_SQL
 	elog	<< "sqlChannel::getLastNote> "
-			<< queryString.str().c_str()
+			<< queryString.str()
 			<< std::endl;
 #endif
 
@@ -311,20 +311,18 @@ if( PGRES_TUPLES_OK == status )
 return ("");
 }
 
-bool sqlChannel::deleteNote(unsigned int messageId, sqlUser* theUser)
+bool sqlChannel::deleteNote(unsigned int messageId)
 {
 std::stringstream queryString;
 queryString	<< "DELETE FROM notes WHERE channelID = "
 		<< id
-		<< " AND userID = "
-		<< theUser->getID()
 		<< " AND id = "
 		<< messageId
-		<< std::ends;
+		;
 
 #ifdef LOG_SQL
 	elog	<< "sqlChannel::deleteNote> "
-		<< queryString.str().c_str()
+		<< queryString.str()
 		<< std::endl;
 #endif
 
@@ -347,11 +345,11 @@ std::stringstream queryString;
 queryString	<< "SELECT id FROM notes WHERE channelID = "
 		<< id
 		<< " ORDER BY ts ASC LIMIT 1"
-		<< std::ends;
+		;
 
 #ifdef LOG_SQL
 	elog	<< "sqlChannel::deleteOldestNote> "
-		<< queryString.str().c_str()
+		<< queryString.str()
 		<< std::endl;
 #endif
 
@@ -375,11 +373,11 @@ unsigned int note_id = atoi(SQLDb->GetValue(0, 0));
 std::stringstream deleteString;
 deleteString	<< "DELETE FROM notes WHERE id = "
 		<< note_id
-		<< std::ends;
+		;
 
 #ifdef LOG_SQL
 	elog	<< "sqlChannel::deleteOldestNote> "
-		<< deleteString.str().c_str()
+		<< deleteString.str()
 		<< std::endl;
 #endif
 
@@ -401,11 +399,11 @@ bool sqlChannel::deleteAllNotes()
 std::stringstream queryString;
 queryString	<< "DELETE FROM notes WHERE channelID = "
 		<< id
-		<< std::ends;
+		;
 
 #ifdef LOG_SQL
 	elog	<< "sqlChannel::deleteAllNotes> "
-		<< queryString.str().c_str()
+		<< queryString.str()
 		<< std::endl;
 #endif
 
@@ -430,16 +428,16 @@ queryString	<< "SELECT count(id) FROM notes WHERE channelID = "
 		<< id
 		<< " AND event = "
 		<< eventType
-		<< std::ends;
+		;
 } else {
 queryString	<< "SELECT count(id) FROM notes WHERE channelID = "
 		<< id
-		<< std::ends;
+		;
 }
 
 #ifdef LOG_SQL
 	elog	<< "sqlChannel::countNotes> "
-		<< queryString.str().c_str()
+		<< queryString.str()
 		<< std::endl;
 #endif
 

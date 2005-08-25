@@ -76,11 +76,11 @@ queryString	<< "SELECT "
 		<< "id, user_name, created, last_seen, last_updated, last_updated_by, flags, issuspended, usenotice"
 		<< " FROM users WHERE id = "
 		<< userID
-		<< std::ends;
+		;
 
 #ifdef LOG_SQL
 	elog	<< "sqlUser::loadData> "
-		<< queryString.str().c_str()
+		<< queryString.str()
 		<< std::endl;
 #endif
 
@@ -124,11 +124,11 @@ queryString	<< "SELECT "
 		<< " FROM users WHERE lower(user_name) = '"
 		<< escapeSQLChars(string_lower(userName))
 		<< "'"
-		<< std::ends;
+		;
 
 #ifdef LOG_SQL
 	elog	<< "sqlUser::loadData> "
-		<< queryString.str().c_str()
+		<< queryString.str()
 		<< std::endl;
 #endif
 
@@ -162,8 +162,8 @@ void sqlUser::setAllMembers(int row)
   last_updated = atoi(SQLDb->GetValue(row, 4));
   last_updated_by = SQLDb->GetValue(row, 5);
   flags = atoi(SQLDb->GetValue(row, 6));
-  isSuspended = atob(SQLDb->GetValue(row, 7));
-  useNotice = atob(SQLDb->GetValue(row, 8));
+  isSuspended = (!strcasecmp(SQLDb->GetValue(row,7),"t") ? true : false);
+  useNotice = (!strcasecmp(SQLDb->GetValue(row,8),"t") ? true : false);
 };
 
 bool sqlUser::commit()
@@ -180,22 +180,24 @@ queryString	<< "UPDATE users SET "
 		<< "last_updated_by = '" << last_updated_by << "', "
 		<< "last_updated = " << last_updated << ", "
 		<< "flags = " << flags << ", "
-		<< "issuspended = " << (isSuspended ? "TRUE" : "FALSE") << ", "
-		<< "usenotice = " << (useNotice ? "TRUE" : "FALSE")
+		<< "issuspended = " << (isSuspended ? "'t'" : "'f'") << ", "
+		<< "usenotice = " << (useNotice ? "'t'" : "'f'")
 		<< " WHERE "
 		<< "id = " << id
 		;
 
 #ifdef LOG_SQL
 elog	<< "sqlUser::commit> "
-	<< queryString
-	<< endl;
+	<< queryString.str()
+	<< std::endl;
 #endif
 
 ExecStatusType status = SQLDb->Exec(queryString.str().c_str());
 
 if(PGRES_COMMAND_OK != status) {
-	elog << "sqlUser::commit> " << SQLDb->ErrorMessage();
+	elog	<< "sqlUser::commit> "
+		<< SQLDb->ErrorMessage()
+		<< std::endl;
 	return false;
 }
 
@@ -216,15 +218,15 @@ insertString	<< "INSERT INTO users "
 		<< last_updated << ", "
 		<< "'" << last_updated_by << "', "
 		<< flags << ", "
-		<< (isSuspended ? "TRUE" : "FALSE") << ", "
-		<< (useNotice ? "TRUE" : "FALSE")
+		<< (isSuspended ? "'t'" : "'f'") << ", "
+		<< (useNotice ? "'t'" : "'f'")
 		<< ")"
 		;
 
 #ifdef LOG_SQL
 elog	<< "sqlUser::Insert> "
-	<< insertString
-	<< endl;
+	<< insertString.str()
+	<< std::endl;
 #endif
 
 ExecStatusType status = SQLDb->Exec(insertString.str().c_str());
@@ -249,18 +251,23 @@ deleteString	<< "DELETE FROM users "
 ExecStatusType status = SQLDb->Exec(deleteString.str().c_str());
 
 if(PGRES_COMMAND_OK != status) {
-	elog << "sqlUser::Delete> " << SQLDb->ErrorMessage();
+	elog	<< "sqlUser::Delete> "
+		<< SQLDb->ErrorMessage()
+		<< std::endl;
 	return false;
 }
 
 std::stringstream hostString;
 hostString	<< "DELETE FROM hosts "
-		<< "WHERE user_id = " << id;
+		<< "WHERE user_id = " << id
+		;
 
 status = SQLDb->Exec(hostString.str().c_str());
 
 if(PGRES_COMMAND_OK != status) {
-	elog << "sqlUser::Delete (hosts)> " << SQLDb->ErrorMessage();
+	elog	<< "sqlUser::Delete (hosts)> "
+		<< SQLDb->ErrorMessage()
+		<< std::endl;
 	return false;
 }
 

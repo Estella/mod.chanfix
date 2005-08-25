@@ -127,7 +127,7 @@ public:
 	void setAllMembers(int);
 
 	void addNote(unsigned short, sqlUser*, const std::string&);
-	bool deleteNote(unsigned int, sqlUser*);
+	bool deleteNote(unsigned int);
 	bool deleteOldestNote();
 	bool deleteAllNotes();
 	size_t countNotes(unsigned short);
