@@ -66,8 +66,8 @@ if (!netChan) {
 }
 
 /* Only allow chanfixes for unregistered channels. */
-if (netChan->getMode(Channel::MODE_A)) {
-  bot->SendTo(theClient, "%s cannot be chanfixed as it uses oplevels (+A/+U).",
+if (netChan->getMode(Channel::MODE_A) && !override) {
+  bot->SendTo(theClient, "%s cannot be chanfixed as it uses oplevels (+A/+U). If this channel has been taken over and needs to be returned to the original owners, append the OVERRIDE flag to force a manual fix.",
 	      netChan->getName().c_str());
   return;
 }
@@ -76,7 +76,7 @@ ChannelUser* curUser;
 for (Channel::userIterator ptr = netChan->userList_begin(); ptr != netChan->userList_end(); ptr++) {
    curUser = ptr->second;
    if (curUser->getClient()->getMode(iClient::MODE_SERVICES)) {
-     bot->SendTo(theClient, "%s is a registered channel.", 
+     bot->SendTo(theClient, "%s is a registered channel.",
 		 netChan->getName().c_str());
      return;
    }

@@ -64,16 +64,6 @@ if (!netChan) {
   return;
 }
 
-/* Only allow score checks for unregistered channels. */
-if (netChan->getMode(Channel::MODE_A)) {
-  if (compact)
-    bot->SendTo(theClient, "~! %s", netChan->getName().c_str());
-  else
-    bot->SendTo(theClient, "%s has no scores as it uses oplevels (+A/+U).",
-		netChan->getName().c_str());
-  return;
-}
-
 ChannelUser* curUser;
 for (Channel::userIterator ptr = netChan->userList_begin();
      ptr != netChan->userList_end(); ptr++) {

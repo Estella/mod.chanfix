@@ -1220,8 +1220,12 @@ if (thisChan->getCreationTime() > 1) {
     MyUplink->OnChannelModeL(thisChan, false, 0, 0);
   if (thisChan->getMode(Channel::MODE_R))
     modeVector.push_back(std::make_pair(false, Channel::MODE_R));
+  if (thisChan->getMode(Channel::MODE_A))
+    MyUplink->OnChannelModeA(thisChan, false, 0, std::string());
   if (thisChan->getMode(Channel::MODE_D))
     modeVector.push_back(std::make_pair(false, Channel::MODE_D));
+  if (thisChan->getMode(Channel::MODE_U))
+    MyUplink->OnChannelModeU(thisChan, false, 0, std::string());
   /* Due to a bug in .11, we need to set at least one mode. */
   if (version < 12) {
     if (!thisChan->getMode(Channel::MODE_N))
