@@ -486,7 +486,7 @@ if (st.size() < commHandler->second->getNumParams()) {
 
 sqlUser* theUser = isAuthed(theClient->getAccount());
 
-if (theUser->getIsSuspended()) {
+if (theUser && theUser->getIsSuspended()) {
   SendTo(theClient, "Your access to this service is suspended.");
   return;
 }
@@ -747,42 +747,6 @@ void chanfix::doSqlError(const std::string& theQuery, const std::string& theErro
 		<< std::endl;
 }
 
-void chanfix::preloadUserCache()
-{
-
-	std::stringstream theQuery;
-	theQuery	<< "SELECT id, user_name, created, last_seen, last_updated, last_updated_by, flags, issuspended, usenotice "
-			<< "FROM users"
-			;
-
-	ExecStatusType status = SQLDb->Exec(theQuery.str().c_str());
-
-	if(PGRES_TUPLES_OK == status) {
-		/* First we need to clear the current cache. */
-		for(usersMapType::iterator itr = usersMap.begin() ;
-		    itr != usersMap.end() ; ++itr) {
-			delete itr->second;
-		}
-		usersMap.clear();
-
-		for(int i = 0; i < SQLDb->Tuples(); ++i) {
-			sqlUser *newUser = new sqlUser(SQLDb);
-			assert(newUser != 0);
-
-			newUser->setAllMembers(i);
-			usersMap.insert(usersMapType::value_type(newUser->getUserName(), newUser));
-		}
-	} else {
-		elog	<< "chanfix::preloadUserCache> "
-			<< SQLDb->ErrorMessage();
-	}
-
-	elog	<< "chanfix::preloadUserCache> Loaded "
-		<< usersMap.size()
-		<< " users."
-		<< std::endl ;
-}
-
 void chanfix::preloadChanOpsCache()
 {
 	std::stringstream theQuery;
@@ -850,6 +814,42 @@ void chanfix::preloadChannelCache()
 			<< SQLDb->Tuples()
 			<< " channels."
 			<< std::endl;
+}
+
+void chanfix::preloadUserCache()
+{
+	std::stringstream theQuery;
+	theQuery	<< "SELECT id, user_name, created, last_seen, last_updated, last_updated_by, flags, issuspended, usenotice "
+			<< "FROM users"
+			;
+
+	ExecStatusType status = SQLDb->Exec(theQuery.str().c_str());
+
+	if(PGRES_TUPLES_OK == status) {
+		/* First we need to clear the current cache. */
+		for(usersMapType::iterator itr = usersMap.begin() ;
+		    itr != usersMap.end() ; ++itr) {
+			delete itr->second;
+		}
+		usersMap.clear();
+
+		for(int i = 0; i < SQLDb->Tuples(); ++i) {
+			sqlUser *newUser = new sqlUser(SQLDb);
+			assert(newUser != 0);
+
+			newUser->setAllMembers(i);
+			usersMap.insert(usersMapType::value_type(newUser->getUserName(), newUser));
+		}
+	} else {
+		elog	<< "chanfix::preloadUserCache> "
+			<< SQLDb->ErrorMessage()
+			<< std::endl;
+	}
+
+	elog	<< "chanfix::preloadUserCache> Loaded "
+		<< usersMap.size()
+		<< " users."
+		<< std::endl ;
 }
 
 void chanfix::changeState(STATE newState)
