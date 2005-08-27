@@ -166,6 +166,45 @@ void sqlUser::setAllMembers(int row)
   useNotice = (!strcasecmp(SQLDb->GetValue(row,8),"t") ? true : false);
 };
 
+void sqlUser::loadHostList()
+{
+  static const char* queryHeader
+	= "SELECT host FROM hosts WHERE user_id = ";
+
+  std::stringstream theQuery;
+  theQuery	<< queryHeader 
+		<< id
+		;
+// DEBUG
+elog	<< "sqlUser::loadHostList> "
+	<< theQuery.str()
+	<< std::endl;
+//END DEBUG
+  ExecStatusType status = SQLDb->Exec( theQuery.str().c_str() ) ;
+
+  if( PGRES_TUPLES_OK != status )
+	{
+	elog	<< "sqlUser::loadHostList> SQL Error: "
+		<< SQLDb->ErrorMessage()
+		<< std::endl ;
+	return;
+	}
+
+// SQL Query succeeded
+  for (int i = 0 ; i < SQLDb->Tuples(); i++) {
+    hostList.push_back(SQLDb->GetValue(i, 0));
+  }
+  
+};
+
+void sqlUser::delHost(const std::string& _theHost)
+{
+  if (hostList.size() < 1) return;
+  hostListType::iterator ptr = find( hostList.begin(), hostList.end(), string_lower(_theHost) );
+  if (ptr == hostList.end()) return;
+  hostList.erase(ptr);
+}
+
 bool sqlUser::commit()
 {
 
@@ -240,6 +279,24 @@ if(PGRES_COMMAND_OK != status) {
 elog << "sqlUser::Insert> " << SQLDb->ErrorMessage();
 return false;
 } // sqlUser::Insert()
+
+bool sqlUser::matchHost(const std::string& _host)
+{
+  if (hostList.size() < 1) return false;
+  for(hostListType::iterator itr = hostList.begin() ;
+    itr != hostList.end() ; ++itr) {
+      if (match(*itr,_host) == 0) return true;
+  }
+  return false;
+}
+
+bool sqlUser::hasHost(const std::string& _host)
+{
+  if (hostList.size() < 1) return false;
+  hostListType::iterator ptr = find( hostList.begin(), hostList.end(), string_lower(_host) );
+  if ( ptr == hostList.end() ) return false;
+  return true;
+}
 
 bool sqlUser::Delete()
 {

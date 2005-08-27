@@ -294,6 +294,10 @@ public:
 
 	void doSqlError(const std::string&, const std::string&);
 	
+	bool removeFromUpdateQueue(sqlChanOp*);
+	
+	void processUserUpdateQueue();
+	
 	/**
 	 * PostgreSQL Database
 	 */
@@ -346,6 +350,9 @@ public:
 	typedef std::vector< iClient* > acctListType; //For reopping all logged in users to an acct.
 	acctListType findAccount(Channel*, const std::string&);
 
+	typedef std::list< sqlChanOp* >	queueListType;
+	queueListType			userUpdateQueue;
+
 	std::string	consoleChan;
 	std::string	operChan;
 	std::string	supportChan;
@@ -384,6 +391,8 @@ protected:
 	bool		clientNeedsIdent;
 	bool		clientNeedsReverse;
 	unsigned int	connectCheckFreq;
+	unsigned int	updatesPerCycle;
+	unsigned int	updateCycleInterval;
 	std::string	sqlHost;
 	std::string	sqlPort;
 	std::string	sqlUsername;
@@ -406,6 +415,7 @@ protected:
 	xServer::timerID tidCheckDB;
 	xServer::timerID tidGivePoints;
 	xServer::timerID tidRotateDB;
+	xServer::timerID tidProcessQueue;
 
 	/**
 	 * Internal timer

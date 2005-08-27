@@ -122,6 +122,11 @@ RegisterCommand(new ADDFLAGCommand(this, "ADDFLAG",
 	3,
 	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
 	));
+RegisterCommand(new ADDHOSTCommand(this, "ADDHOST",
+	"<username> <nick!user@host>",
+	3,
+	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
+	));
 RegisterCommand(new ADDNOTECommand(this, "ADDNOTE",
 	"<#channel> <reason>",
 	3,
@@ -154,6 +159,11 @@ RegisterCommand(new CHECKCommand(this, "CHECK",
 	));
 RegisterCommand(new DELFLAGCommand(this, "DELFLAG",
 	"<username> <flag>",
+	3,
+	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
+	));
+RegisterCommand(new DELHOSTCommand(this, "DELHOST",
+	"<username> <nick!user@host>",
 	3,
 	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
 	));
@@ -308,6 +318,8 @@ minClients = atoi((chanfixConfig->Require("minClients")->second).c_str()) ;
 clientNeedsIdent = atob(chanfixConfig->Require("clientNeedsIdent")->second) ;
 clientNeedsReverse = atob(chanfixConfig->Require("clientNeedsReverse")->second) ;
 connectCheckFreq = atoi((chanfixConfig->Require("connectCheckFreq")->second).c_str()) ;
+updatesPerCycle = atoi((chanfixConfig->Require("updatesPerCycle")->second).c_str());
+updateCycleInterval = atoi((chanfixConfig->Require("updateCycleInterval")->second).c_str());
 
 /* Database processing */
 sqlHost = chanfixConfig->Require("sqlHost")->second;
@@ -415,6 +427,13 @@ else if (theTimer == tidRotateDB) {
   theTime = time(NULL) + getSecsTilMidnight();
   tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
 }
+else if (theTimer == tidProcessQueue) {
+  processUserUpdateQueue();
+  
+  /* Refresh Timer */
+  theTime = time(NULL) + updateCycleInterval;
+  tidProcessQueue = MyUplink->RegisterTimer(theTime, this, NULL);
+}
 }
 
 /* OnDetach */
@@ -486,9 +505,15 @@ if (st.size() < commHandler->second->getNumParams()) {
 
 sqlUser* theUser = isAuthed(theClient->getAccount());
 
-if (theUser && theUser->getIsSuspended()) {
-  SendTo(theClient, "Your access to this service is suspended.");
-  return;
+if (theUser) {
+  if (theUser->getIsSuspended()) {
+    SendTo(theClient, "Your access to this service is suspended.");
+    return;
+  }
+  if (!theUser->matchHost(theClient->getRealNickUserHost().c_str())) {
+    SendTo(theClient, "Your current host does not match any registered hosts for your username.");
+    return;
+  }
 }
 
 sqlUser::flagType requiredFlags = commHandler->second->getRequiredFlags();
@@ -846,6 +871,12 @@ void chanfix::preloadUserCache()
 			<< std::endl;
 	}
 
+	/* Load up the host cache */
+	for (usersMapType::iterator itr = usersMap.begin();
+	  itr != usersMap.end(); ++itr) {
+	    itr->second->loadHostList();
+	}
+	
 	elog	<< "chanfix::preloadUserCache> Loaded "
 		<< usersMap.size()
 		<< " users."
@@ -1052,11 +1083,22 @@ if(!thisOp) thisOp = newChanOp(theChan, theClient);
 
 thisOp->addPoint();
 thisOp->setTimeLastOpped(currentTime()); //Update the time they were last opped
-thisOp->commit();
+//thisOp->commit();
+queueListType::iterator ptr = find( userUpdateQueue.begin(), userUpdateQueue.end(), thisOp );
+if (ptr == userUpdateQueue.end())
+  userUpdateQueue.push_back(thisOp);
 
 elog	<< "chanfix::givePoints> DEBUG: Gave " << thisOp->getAccount()
 	<< " on " << thisOp->getChannel() << " a point."
 	<< std::endl;
+}
+
+bool chanfix::removeFromUpdateQueue(sqlChanOp* userToRemove)
+{
+  queueListType::iterator ptr = find( userUpdateQueue.begin(), userUpdateQueue.end(), userToRemove );
+  if (ptr == userUpdateQueue.end()) return false;
+  userUpdateQueue.erase(ptr);
+  return true;
 }
 
 void chanfix::gotOpped(Channel* thisChan, iClient* thisClient)
@@ -1698,8 +1740,24 @@ theTime = time(NULL) + POINTS_UPDATE_TIME;
 tidGivePoints = MyUplink->RegisterTimer(theTime, this, NULL);
 theTime = time(NULL) + getSecsTilMidnight();
 tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
+theTime = time(NULL) + updateCycleInterval;
+tidProcessQueue = MyUplink->RegisterTimer(theTime, this, NULL);
 elog	<< "chanfix::startTimers> Started all timers."
 	<< std::endl;
+}
+
+void chanfix::processUserUpdateQueue()
+{
+  if (userUpdateQueue.empty()) return;
+  elog	<< "chanfix::processUserUpdateQueue> Processing queue of " << userUpdateQueue.size() << " users."
+	<< std::endl;
+  sqlChanOp* curOp;
+  for(unsigned int i = 0; i< (userUpdateQueue.size() > updatesPerCycle ? updatesPerCycle : userUpdateQueue.size());++i)
+  {
+    curOp = userUpdateQueue.front();
+    userUpdateQueue.pop_front();
+    curOp->commit();
+  }
 }
 
 void chanfix::rotateDB()
@@ -1738,6 +1796,23 @@ for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
       delete curOp; curOp = 0;
   }
 }
+std::stringstream queryString;
+queryString << "DELETE FROM users WHERE "
+  << "ts_lastopped IS NOT NULL AND "
+  << "ts_lastopped < " << (currentTime() - (DAYSAMPLES * 86400))
+  ;
+
+ExecStatusType status = SQLDb->Exec( queryString.str().c_str() ) ;
+
+if( PGRES_TUPLES_OK != status )
+{
+  elog	<< "chanfix::rotateDB> SQL Error: "
+	<< SQLDb->ErrorMessage()
+	<< std::endl ;
+  return;
+}
+
+
 #ifndef REMEMBER_CHANNELS_WITH_NOTES_OR_FLAGS
 //TODO: Implement a loop/section here that removes channel records/notes with no ops left in them
 #endif

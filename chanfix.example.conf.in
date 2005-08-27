@@ -98,5 +98,12 @@ clientNeedsReverse = false
 # Frequency (in seconds) between database connection status checks
 connectCheckFreq = 10
 
+# The amount of time (in seconds) that the update queue for each 
+# User->DB is processed
+updateCycleInterval = 5
+
+# The amount of users to commit to the database per cycle
+updatesPerCycle = 20
+
 # End of config file.
 # ---------------------------------------------------------------------

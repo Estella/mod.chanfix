@@ -68,10 +68,12 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libchanfix_la_LIBADD =
 am_libchanfix_la_OBJECTS = libchanfix_la-chanfix.lo \
 	libchanfix_la-ADDFLAGCommand.lo \
+	libchanfix_la-ADDHOSTCommand.lo \
 	libchanfix_la-ADDNOTECommand.lo \
 	libchanfix_la-ADDUSERCommand.lo libchanfix_la-ALERTCommand.lo \
 	libchanfix_la-BLOCKCommand.lo libchanfix_la-CHANFIXCommand.lo \
 	libchanfix_la-CHECKCommand.lo libchanfix_la-DELFLAGCommand.lo \
+	libchanfix_la-DELHOSTCommand.lo \
 	libchanfix_la-DELNOTECommand.lo \
 	libchanfix_la-DELUSERCommand.lo libchanfix_la-HELPCommand.lo \
 	libchanfix_la-HISTORYCommand.lo libchanfix_la-INFOCommand.lo \
@@ -220,6 +222,7 @@ target_alias = @target_alias@
 lib_LTLIBRARIES = libchanfix.la
 libchanfix_la_SOURCES = chanfix.cc \
 	ADDFLAGCommand.cc \
+	ADDHOSTCommand.cc \
 	ADDNOTECommand.cc \
 	ADDUSERCommand.cc \
 	ALERTCommand.cc \
@@ -227,6 +230,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	CHANFIXCommand.cc \
 	CHECKCommand.cc \
 	DELFLAGCommand.cc \
+	DELHOSTCommand.cc \
 	DELNOTECommand.cc \
 	DELUSERCommand.cc \
 	HELPCommand.cc \
@@ -365,6 +369,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-ADDFLAGCommand.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-ADDHOSTCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-ADDNOTECommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-ADDUSERCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-ALERTCommand.Plo@am__quote@
@@ -372,6 +377,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-CHANFIXCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-CHECKCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-DELFLAGCommand.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-DELHOSTCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-DELNOTECommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-DELUSERCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-HELPCommand.Plo@am__quote@
@@ -432,6 +438,13 @@ libchanfix_la-ADDFLAGCommand.lo: ADDFLAGCommand.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-ADDFLAGCommand.lo `test -f 'ADDFLAGCommand.cc' || echo '$(srcdir)/'`ADDFLAGCommand.cc
 
+libchanfix_la-ADDHOSTCommand.lo: ADDHOSTCommand.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-ADDHOSTCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-ADDHOSTCommand.Tpo" -c -o libchanfix_la-ADDHOSTCommand.lo `test -f 'ADDHOSTCommand.cc' || echo '$(srcdir)/'`ADDHOSTCommand.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-ADDHOSTCommand.Tpo" "$(DEPDIR)/libchanfix_la-ADDHOSTCommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-ADDHOSTCommand.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ADDHOSTCommand.cc' object='libchanfix_la-ADDHOSTCommand.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-ADDHOSTCommand.lo `test -f 'ADDHOSTCommand.cc' || echo '$(srcdir)/'`ADDHOSTCommand.cc
+
 libchanfix_la-ADDNOTECommand.lo: ADDNOTECommand.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-ADDNOTECommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-ADDNOTECommand.Tpo" -c -o libchanfix_la-ADDNOTECommand.lo `test -f 'ADDNOTECommand.cc' || echo '$(srcdir)/'`ADDNOTECommand.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-ADDNOTECommand.Tpo" "$(DEPDIR)/libchanfix_la-ADDNOTECommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-ADDNOTECommand.Tpo"; exit 1; fi
@@ -480,6 +493,13 @@ libchanfix_la-DELFLAGCommand.lo: DELFLAGCommand.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='DELFLAGCommand.cc' object='libchanfix_la-DELFLAGCommand.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-DELFLAGCommand.lo `test -f 'DELFLAGCommand.cc' || echo '$(srcdir)/'`DELFLAGCommand.cc
+
+libchanfix_la-DELHOSTCommand.lo: DELHOSTCommand.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-DELHOSTCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-DELHOSTCommand.Tpo" -c -o libchanfix_la-DELHOSTCommand.lo `test -f 'DELHOSTCommand.cc' || echo '$(srcdir)/'`DELHOSTCommand.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-DELHOSTCommand.Tpo" "$(DEPDIR)/libchanfix_la-DELHOSTCommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-DELHOSTCommand.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='DELHOSTCommand.cc' object='libchanfix_la-DELHOSTCommand.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-DELHOSTCommand.lo `test -f 'DELHOSTCommand.cc' || echo '$(srcdir)/'`DELHOSTCommand.cc
 
 libchanfix_la-DELNOTECommand.lo: DELNOTECommand.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-DELNOTECommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-DELNOTECommand.Tpo" -c -o libchanfix_la-DELNOTECommand.lo `test -f 'DELNOTECommand.cc' || echo '$(srcdir)/'`DELNOTECommand.cc; \

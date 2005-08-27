@@ -49,6 +49,8 @@ public:
 	static const flagType F_USERMANAGER; /* +u */
 	static const flagType F_LOGGEDIN;
 
+	typedef std::list< std::string >	hostListType;
+
 	/* Methods to get data attributes. */
 
 	inline const unsigned int&	getID() const
@@ -80,6 +82,9 @@ public:
 
 	inline const bool getUseNotice() const
 		{ return useNotice; }
+		
+	inline const hostListType& getHostList() const
+		{ return hostList; }
 
 	/* Mutators */
 
@@ -110,13 +115,23 @@ public:
 	inline void setNotice(const bool _useNotice)
 		{ useNotice = _useNotice; }
 
+	inline void addHost(const std::string& _theHost)
+		{ hostList.push_back(_theHost); }
+		
+
 	/* Methods to alter our SQL status */
 	bool loadData(unsigned int);
 	bool loadData(const std::string&);
 	void setAllMembers(int);
+	void loadHostList();
+	void delHost(const std::string&);
 	bool commit();
 	bool Insert();
 	bool Delete();
+		
+	bool matchHost(const std::string&);
+	bool hasHost(const std::string&);
+	//bool setHostList();
 
 private:
 
@@ -129,6 +144,7 @@ private:
 	flagType	flags;
 	bool		isSuspended;
 	bool		useNotice;
+	hostListType	hostList;
 
 	PgDatabase*	SQLDb;
 }; // class sqlUser

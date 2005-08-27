@@ -67,7 +67,21 @@ if (!theUser->getFlags())
 else
   bot->SendTo(theClient, "Flags: +%s",
 	      bot->getFlagsString(theUser->getFlags()).c_str());
-bot->SendTo(theClient, "Hosts: %s", bot->getHostList(theUser).c_str()); //Fix this
+
+sqlUser::hostListType sqlHostList = theUser->getHostList();
+std::stringstream hostlist;
+
+if (sqlHostList.size() > 0) {
+  for(sqlUser::hostListType::iterator itr = sqlHostList.begin() ;
+    itr != sqlHostList.end() ; ++itr) {
+      if (hostlist.str() == "")
+        hostlist << *itr;
+      else
+	hostlist << ", " << *itr;
+    }
+}
+if (hostlist.str() == "") hostlist << "None.";
+bot->SendTo(theClient, "Hosts: %s", hostlist.str().c_str()); //Fix this
 bot->SendTo(theClient, "Main group: NA"); //This too
 bot->SendTo(theClient, "Other groups: NA"); //Yep, this
 } //whoiscommand::exec
