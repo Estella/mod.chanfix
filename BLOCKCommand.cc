@@ -65,7 +65,7 @@ theChan->setFlag(sqlChannel::F_BLOCKED);
 theChan->commit();
 
 /* Add note to the channel about this command */
-theChan->addNote(sqlChannel::EV_BLOCK, theUser, "");
+theChan->addNote(sqlChannel::EV_BLOCK, theUser, st.assemble(2));
 
 bot->SendTo(theClient, "The channel %s has been blocked.",
 	    theChan->getChannel().c_str());

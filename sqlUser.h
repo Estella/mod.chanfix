@@ -71,7 +71,7 @@ public:
 	inline const std::string& getLastUpdatedBy() const
 		{ return last_updated_by; }
 
-	inline bool		getFlag( const flagType& whichFlag ) const
+	inline bool	getFlag( const flagType& whichFlag ) const
 		{ return ((flags & F_OWNER) || (flags & whichFlag)) ; }
 
 	inline const flagType&		getFlags() const
@@ -117,21 +117,19 @@ public:
 
 	inline void addHost(const std::string& _theHost)
 		{ hostList.push_back(_theHost); }
-		
 
 	/* Methods to alter our SQL status */
 	bool loadData(unsigned int);
 	bool loadData(const std::string&);
 	void setAllMembers(int);
-	void loadHostList();
-	void delHost(const std::string&);
 	bool commit();
 	bool Insert();
 	bool Delete();
-		
+
+	void loadHostList();
+	void delHost(const std::string&);		
 	bool matchHost(const std::string&);
 	bool hasHost(const std::string&);
-	//bool setHostList();
 
 private:
 

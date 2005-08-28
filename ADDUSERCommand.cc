@@ -58,11 +58,53 @@ newUser->setLastUpdatedBy( std::string( "("
 	+ theClient->getRealNickUserHost() ) );
 
 if (newUser->Insert()) {
-  bot->SendTo(theClient, "Created user %s.", st[1].c_str());
   bot->usersMap[newUser->getUserName()] = newUser;
+  ExecStatusType status;
+  if (st.size() > 2) {
+    std::stringstream insertString;
+    insertString	<< "INSERT INTO hosts "
+			<< "(user_id, host) VALUES "
+			<< "("
+			<< newUser->getID()
+			<< ", '"
+			<< st[2].c_str()
+			<< "')"
+			;
+
+    status = bot->SQLDb->Exec(insertString.str().c_str());
+
+    if (PGRES_COMMAND_OK != status) {
+      bot->SendTo(theClient, "Failed adding hostmask %s to user %s.",
+		  st[2].c_str(), newUser->getUserName().c_str());
+    } else
+      newUser->addHost(st[2].c_str());
+  }
+  if (st.size() > 2 && PGRES_COMMAND_OK == status) {
+    bot->SendTo(theClient, "Created user %s (%s).", st[1].c_str(),
+		st[2].c_str());
+    bot->logAdminMessage("%s (%s) added user %s (%s).",
+			 theUser->getUserName().c_str(), 
+			 theClient->getRealNickUserHost().c_str(),
+			 st[1].c_str(), st[2].c_str());
+  } else {
+    bot->SendTo(theClient, "Created user %s.", st[1].c_str());
+    bot->logAdminMessage("%s (%s) added user %s.",
+			 theUser->getUserName().c_str(), 
+			 theClient->getRealNickUserHost().c_str(),
+			 st[1].c_str());
+  }
 } else {
   bot->SendTo(theClient, "Error creating user %s. (Insertion failed)", st[1].c_str());
 }
 
+/* A user added by a serveradmin automatically has the same main group. */
+if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
+    !theUser->getFlag(sqlUser::F_USERMANAGER)) {
+//  targetUser->setMainGroup(theUser->getMainGroup());
+//  bot->SendTo(theClient, "Set main group to %s.", 
+//	      targetUser->getMainGroup());
+}
+
+return;
 } //addusercommand::exec
 } //namespace gnuworld

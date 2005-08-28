@@ -4,7 +4,7 @@
  * 08/26/2005 - Jimmy Lipham <music0m@alltel.net>
  * Initial Version
  *
- * Adds a new user, without flags, and optionally with this hostmask
+ * Adds this hostmask to the user's list of hostmasks
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,61 +21,79 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
  * USA.
  *
- * $Id: ADDHOSTCommand.cc 1260 2005-08-26 02:28:50Z Compster $
+ * $Id$
  */
 
 #include "gnuworld_config.h"
-#include "Network.h"
 
 #include "chanfix.h"
 #include "StringTokenizer.h"
 #include "sqlUser.h"
 
-RCSTAG("");
+RCSTAG("$Id$");
 
 namespace gnuworld
 {
 
 void ADDHOSTCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
-  StringTokenizer st(Message);
+StringTokenizer st(Message);
 
-  if (st[2] == "*!*@*") {
-    bot->SendTo(theClient, "I dont think your superiors would like that type of security issue..");
-    return;
-  }
+sqlUser* targetUser = bot->isAuthed(st[1]);  
+if (!targetUser) {
+  bot->SendTo(theClient, "No such user %s.", st[1].c_str());
+  return;
+}
+
+/* A serveradmin can only add flags to users on his/her own server. */
+if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
+    !theUser->getFlag(sqlUser::F_USERMANAGER)) {
+//  if (targetUser->getMainGroup() != theUser->getMainGroup()) {
+//    bot->SendTo(theClient, "You cannot add a host to a user with a different main group.");
+//    return;
+//  }
+}
   
-  sqlUser* Target = bot->isAuthed(st[1]);
-  
-  if (!Target) {
-    bot->SendTo(theClient, "No such user %s.", st[1].c_str());
-    return;
-  }
-  
-  if (Target->matchHost(st[2].c_str())) {
-    bot->SendTo(theClient, "%s already has a host matching the given mask.", st[1].c_str());
-    return;
-  }
-  
-  std::stringstream insertString;
-  insertString	<< "INSERT INTO hosts "
-                << "(user_id, host) VALUES "
-                << "("
-                << Target->getID()
-                << ", '"
-                << st[2].c_str()
-                << "')"
+if (targetUser->matchHost(st[2].c_str())) {
+  bot->SendTo(theClient, "User %s already has hostmask %s.",
+	      targetUser->getUserName().c_str(), st[2].c_str());
+  return;
+}
+
+std::stringstream insertString;
+insertString	<< "INSERT INTO hosts "
+		<< "(user_id, host) VALUES "
+		<< "("
+		<< targetUser->getID()
+		<< ", '"
+		<< st[2].c_str()
+		<< "')"
 		;
-  ExecStatusType status = bot->SQLDb->Exec(insertString.str().c_str());
 
-  if(PGRES_COMMAND_OK != status) {
-    bot->SendTo(theClient, "Could not add host to %s (Insertion failed)", st[1].c_str());
-    return;
-  }
+ExecStatusType status = bot->SQLDb->Exec(insertString.str().c_str());
+
+if (PGRES_COMMAND_OK != status) {
+  bot->SendTo(theClient, "Failed adding hostmask %s to user %s.",
+	      st[2].c_str(), targetUser->getUserName().c_str());
+  return;
+}
   
-  Target->addHost(st[2].c_str());
-  bot->SendTo(theClient, "Added %s to %s's list of registered hostmasks.", st[2].c_str(), st[1].c_str());
-  
+targetUser->addHost(st[2].c_str());
+targetUser->setLastUpdated(bot->currentTime());
+targetUser->setLastUpdatedBy( std::string( "("
+	+ theUser->getUserName()
+	+ ") "
+	+ theClient->getRealNickUserHost() ) );
+targetUser->commit();
+
+bot->SendTo(theClient, "Added hostmask %s to user %s.", st[2].c_str(), 
+	    targetUser->getUserName().c_str());
+bot->logAdminMessage("%s (%s) added hostmask %s to user %s.",
+		     theUser->getUserName().c_str(), 
+		     theClient->getRealNickUserHost().c_str(), 
+		     st[2].c_str(), targetUser->getUserName().c_str());
+
+return;
 }
 
 } //namespace gnuworld
