@@ -81,11 +81,13 @@ am_libchanfix_la_OBJECTS = libchanfix_la-chanfix.lo \
 	libchanfix_la-OPNICKSCommand.lo libchanfix_la-QUOTECommand.lo \
 	libchanfix_la-REHASHCommand.lo libchanfix_la-RELOADCommand.lo \
 	libchanfix_la-ROTATECommand.lo libchanfix_la-SCORECommand.lo \
-	libchanfix_la-SETCommand.lo libchanfix_la-SHUTDOWNCommand.lo \
+	libchanfix_la-SETCommand.lo libchanfix_la-SETGROUPCommand.lo \
+	libchanfix_la-SHUTDOWNCommand.lo \
 	libchanfix_la-STATUSCommand.lo libchanfix_la-UNALERTCommand.lo \
 	libchanfix_la-UNBLOCKCommand.lo libchanfix_la-USETCommand.lo \
-	libchanfix_la-WHOISCommand.lo libchanfix_la-sqlChanOp.lo \
-	libchanfix_la-sqlChannel.lo libchanfix_la-sqlUser.lo
+	libchanfix_la-WHOGROUPCommand.lo libchanfix_la-WHOISCommand.lo \
+	libchanfix_la-sqlChanOp.lo libchanfix_la-sqlChannel.lo \
+	libchanfix_la-sqlUser.lo
 libchanfix_la_OBJECTS = $(am_libchanfix_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -245,11 +247,13 @@ libchanfix_la_SOURCES = chanfix.cc \
 	ROTATECommand.cc \
 	SCORECommand.cc \
 	SETCommand.cc \
+	SETGROUPCommand.cc \
 	SHUTDOWNCommand.cc \
 	STATUSCommand.cc \
 	UNALERTCommand.cc \
 	UNBLOCKCommand.cc \
 	USETCommand.cc \
+	WHOGROUPCommand.cc \
 	WHOISCommand.cc \
 	sqlChanOp.cc \
 	sqlChannel.cc \
@@ -392,11 +396,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-ROTATECommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SCORECommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SETCommand.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SETGROUPCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SHUTDOWNCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-STATUSCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-UNALERTCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-UNBLOCKCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-USETCommand.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-WHOGROUPCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-WHOISCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-chanfix.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-sqlChanOp.Plo@am__quote@
@@ -599,6 +605,13 @@ libchanfix_la-SETCommand.lo: SETCommand.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-SETCommand.lo `test -f 'SETCommand.cc' || echo '$(srcdir)/'`SETCommand.cc
 
+libchanfix_la-SETGROUPCommand.lo: SETGROUPCommand.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-SETGROUPCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-SETGROUPCommand.Tpo" -c -o libchanfix_la-SETGROUPCommand.lo `test -f 'SETGROUPCommand.cc' || echo '$(srcdir)/'`SETGROUPCommand.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-SETGROUPCommand.Tpo" "$(DEPDIR)/libchanfix_la-SETGROUPCommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-SETGROUPCommand.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='SETGROUPCommand.cc' object='libchanfix_la-SETGROUPCommand.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-SETGROUPCommand.lo `test -f 'SETGROUPCommand.cc' || echo '$(srcdir)/'`SETGROUPCommand.cc
+
 libchanfix_la-SHUTDOWNCommand.lo: SHUTDOWNCommand.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-SHUTDOWNCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-SHUTDOWNCommand.Tpo" -c -o libchanfix_la-SHUTDOWNCommand.lo `test -f 'SHUTDOWNCommand.cc' || echo '$(srcdir)/'`SHUTDOWNCommand.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-SHUTDOWNCommand.Tpo" "$(DEPDIR)/libchanfix_la-SHUTDOWNCommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-SHUTDOWNCommand.Tpo"; exit 1; fi
@@ -633,6 +646,13 @@ libchanfix_la-USETCommand.lo: USETCommand.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='USETCommand.cc' object='libchanfix_la-USETCommand.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-USETCommand.lo `test -f 'USETCommand.cc' || echo '$(srcdir)/'`USETCommand.cc
+
+libchanfix_la-WHOGROUPCommand.lo: WHOGROUPCommand.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-WHOGROUPCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-WHOGROUPCommand.Tpo" -c -o libchanfix_la-WHOGROUPCommand.lo `test -f 'WHOGROUPCommand.cc' || echo '$(srcdir)/'`WHOGROUPCommand.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-WHOGROUPCommand.Tpo" "$(DEPDIR)/libchanfix_la-WHOGROUPCommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-WHOGROUPCommand.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WHOGROUPCommand.cc' object='libchanfix_la-WHOGROUPCommand.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-WHOGROUPCommand.lo `test -f 'WHOGROUPCommand.cc' || echo '$(srcdir)/'`WHOGROUPCommand.cc
 
 libchanfix_la-WHOISCommand.lo: WHOISCommand.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-WHOISCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-WHOISCommand.Tpo" -c -o libchanfix_la-WHOISCommand.lo `test -f 'WHOISCommand.cc' || echo '$(srcdir)/'`WHOISCommand.cc; \

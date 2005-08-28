@@ -45,13 +45,13 @@ if (!targetUser) {
   return;
 }
 
-/* A serveradmin can only add flags to users on his/her own server. */
+/* A serveradmin can only add flags to users on his/her own group. */
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
     !theUser->getFlag(sqlUser::F_USERMANAGER)) {
-//  if (targetUser->getMainGroup() != theUser->getMainGroup()) {
-//    bot->SendTo(theClient, "You cannot add a host to a user with a different main group.");
-//    return;
-//  }
+  if (targetUser->getGroup() != theUser->getGroup()) {
+    bot->SendTo(theClient, "You cannot add a host to a user in a different group.");
+    return;
+  }
 }
   
 if (targetUser->matchHost(st[2].c_str())) {

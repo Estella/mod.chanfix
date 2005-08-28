@@ -71,6 +71,9 @@ public:
 	inline const std::string& getLastUpdatedBy() const
 		{ return last_updated_by; }
 
+	inline const std::string& getGroup() const
+		{ return group; }
+
 	inline bool	getFlag( const flagType& whichFlag ) const
 		{ return ((flags & F_OWNER) || (flags & whichFlag)) ; }
 
@@ -97,11 +100,14 @@ public:
 	inline void setLastSeen(const unsigned int _last_seen)
 		{ last_seen = _last_seen; }
 
+	inline void setLastUpdated(const unsigned int _last_updated)
+		{ last_updated = _last_updated; }
+
 	inline void setLastUpdatedBy(const std::string& _last_updated_by)
 		{ last_updated_by = _last_updated_by; }
 
-	inline void setLastUpdated(const unsigned int _last_updated)
-		{ last_updated = _last_updated; }
+	inline void setGroup(const std::string& _group)
+		{ group = string_lower(_group); }
 
 	inline void setFlag(const flagType& whichFlag)
 		{ flags |= whichFlag; }
@@ -139,6 +145,7 @@ private:
 	unsigned int	last_seen;
 	unsigned int	last_updated;
 	std::string	last_updated_by;
+	std::string	group;
 	flagType	flags;
 	bool		isSuspended;
 	bool		useNotice;

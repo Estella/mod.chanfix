@@ -55,7 +55,14 @@ if (chkUser->getFlag(sqlUser::F_USERMANAGER) && !theUser->getFlag(sqlUser::F_OWN
   return;
 }
 
-/* Main Server checks */
+/* A serveradmin can only delete users on his own group. */
+if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
+    !theUser->getFlag(sqlUser::F_USERMANAGER)) {
+  if (chkUser->getGroup() != theUser->getGroup()) {
+    bot->SendTo(theClient, "You cannot delete a user in a different group.");
+    return;
+  }
+}
 
 if (chkUser->Delete()) {
   bot->usersMap.erase(bot->usersMap.find(chkUser->getUserName()));

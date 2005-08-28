@@ -242,6 +242,11 @@ RegisterCommand(new SETCommand(this, "SET",
 	3,
 	sqlUser::F_OWNER
 	));
+RegisterCommand(new SETGROUPCommand(this, "SETGROUP",
+	"<user> <group>",
+	3,
+	sqlUser::F_USERMANAGER
+	));
 RegisterCommand(new SHUTDOWNCommand(this, "SHUTDOWN",
 	"[reason]",
 	1,
@@ -266,6 +271,11 @@ RegisterCommand(new USETCommand(this, "USET",
 	"<option> <value>",
 	3,
 	sqlUser::F_LOGGEDIN
+	));
+RegisterCommand(new WHOGROUPCommand(this, "WHOGROUP",
+	"<group>",
+	2,
+	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
 	));
 RegisterCommand(new WHOISCommand(this, "WHOIS",
 	"<username>",
@@ -478,9 +488,8 @@ xClient::OnDisconnect() ;
 void chanfix::OnPrivateMessage( iClient* theClient,
 	const std::string& Message, bool)
 {
-if (!theClient->isOper()) {
+if (!theClient->isOper())
   return;
-}
 
 if (currentState == BURST) {
   SendTo(theClient, "Sorry, I do not accept commands during a burst.");
@@ -495,6 +504,7 @@ const std::string Command = string_upper(st[0]);
 
 commandMapType::iterator commHandler = commandMap.find(Command);
 if (commHandler == commandMap.end()) {
+  SendTo(theClient, "Unknown command.");
   return;
 }
 
@@ -844,7 +854,7 @@ void chanfix::preloadChannelCache()
 void chanfix::preloadUserCache()
 {
 	std::stringstream theQuery;
-	theQuery	<< "SELECT id, user_name, created, last_seen, last_updated, last_updated_by, flags, issuspended, usenotice "
+	theQuery	<< "SELECT id, user_name, created, last_seen, last_updated, last_updated_by, group, flags, issuspended, usenotice "
 			<< "FROM users"
 			;
 
@@ -1778,8 +1788,6 @@ if (nextDay >= (DAYSAMPLES - 1))
   nextDay = 0;
 else
   nextDay++;
-
-
 
 time_t maxFirstOppedTS = currentTime() - 86400;
 for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();

@@ -65,6 +65,7 @@ CREATE TABLE users (
 	last_seen INT4 NOT NULL DEFAULT 0,
 	last_updated INT4 NOT NULL DEFAULT 0,
 	last_updated_by VARCHAR(128) NOT NULL,
+	group VARCHAR(128) NOT NULL DEFAULT 'undernet.org',
 	flags INT2 NOT NULL DEFAULT 0,
 	-- 0x01 - server admin (limited access to +u commands)
 	-- 0x02 - can block/unblock channels
@@ -87,20 +88,3 @@ CREATE TABLE hosts (
 );
 
 CREATE INDEX hosts_user_id_idx ON hosts(user_id);
-
-CREATE TABLE groups (
-	group_id SERIAL,
-	name VARCHAR(128) NOT NULL,
-	PRIMARY KEY (group_id)
-);
-
-CREATE TABLE group_members (
-	user_id INT4 CONSTRAINT group_members_user_id_ref REFERENCES users ( id ),
-	group_id INT4 CONSTRAINT group_members_group_id_ref REFERENCES groups ( group_id ),
-	-- currently the main group of the user
-	isMain BOOLEAN NOT NULL DEFAULT FALSE,
-	-- can administrate this group
-	isAdmin BOOLEAN NOT NULL DEFAULT FALSE
-);
-
-CREATE INDEX group_members_user_id_idx ON group_members(user_id);

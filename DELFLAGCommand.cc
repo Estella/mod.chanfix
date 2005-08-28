@@ -71,13 +71,13 @@ if (flag == bot->getFlagChar(sqlUser::F_USERMANAGER) &&
   return;
 }
 
-/* A serveradmin can only delete flags from users on his/her own server. */
+/* A serveradmin can only delete flags from users on his/her own group. */
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
     !theUser->getFlag(sqlUser::F_USERMANAGER)) {
-//  if (chkUser->getMainGroup() != theUser->getMainGroup()) {
-//    bot->SendTo(theClient, "You cannot delete a flag from a user with a different main group.");
-//    return;
-//  }
+  if (chkUser->getGroup() != theUser->getGroup()) {
+    bot->SendTo(theClient, "You cannot delete a flag from a user in a different group.");
+    return;
+  }
   if (flag == bot->getFlagChar(sqlUser::F_BLOCK)) {
     bot->SendTo(theClient, "You cannot remove a block flag.");
     return;

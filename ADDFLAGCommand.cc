@@ -72,13 +72,13 @@ if (flag == bot->getFlagChar(sqlUser::F_USERMANAGER) &&
   return;
 }
 
-/* A serveradmin can only add flags to users on his/her own server. */
+/* A serveradmin can only add flags to users on his/her own group. */
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) && 
     !theUser->getFlag(sqlUser::F_USERMANAGER)) {
-//  if (chkUser->getMainGroup() != theUser->getMainGroup()) {
-//    bot->SendTo(theClient, "You cannot add a flag to a user with a different main group.");
-//    return;
-//  }
+  if (chkUser->getGroup() != theUser->getGroup()) {
+    bot->SendTo(theClient, "You cannot add a flag to a user in a different group.");
+    return;
+  }
   if (flag == bot->getFlagChar(sqlUser::F_BLOCK)) {
     bot->SendTo(theClient, "You cannot add a block flag.");
     return;

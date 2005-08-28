@@ -28,11 +28,13 @@ libchanfix_la_SOURCES = chanfix.cc \
 	ROTATECommand.cc \
 	SCORECommand.cc \
 	SETCommand.cc \
+	SETGROUPCommand.cc \
 	SHUTDOWNCommand.cc \
 	STATUSCommand.cc \
 	UNALERTCommand.cc \
 	UNBLOCKCommand.cc \
 	USETCommand.cc \
+	WHOGROUPCommand.cc \
 	WHOISCommand.cc \
 	sqlChanOp.cc \
 	sqlChannel.cc \

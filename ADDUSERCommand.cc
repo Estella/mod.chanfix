@@ -57,6 +57,11 @@ newUser->setLastUpdatedBy( std::string( "("
 	+ ") "
 	+ theClient->getRealNickUserHost() ) );
 
+/* A user added by a serveradmin automatically has the same group. */
+if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
+    !theUser->getFlag(sqlUser::F_USERMANAGER))
+  newUser->setGroup(theUser->getGroup());
+
 if (newUser->Insert()) {
   bot->usersMap[newUser->getUserName()] = newUser;
   ExecStatusType status;
@@ -73,10 +78,10 @@ if (newUser->Insert()) {
 
     status = bot->SQLDb->Exec(insertString.str().c_str());
 
-    if (PGRES_COMMAND_OK != status) {
+    if (PGRES_COMMAND_OK != status)
       bot->SendTo(theClient, "Failed adding hostmask %s to user %s.",
 		  st[2].c_str(), newUser->getUserName().c_str());
-    } else
+    else
       newUser->addHost(st[2].c_str());
   }
   if (st.size() > 2 && PGRES_COMMAND_OK == status) {
@@ -95,14 +100,6 @@ if (newUser->Insert()) {
   }
 } else {
   bot->SendTo(theClient, "Error creating user %s. (Insertion failed)", st[1].c_str());
-}
-
-/* A user added by a serveradmin automatically has the same main group. */
-if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
-    !theUser->getFlag(sqlUser::F_USERMANAGER)) {
-//  targetUser->setMainGroup(theUser->getMainGroup());
-//  bot->SendTo(theClient, "Set main group to %s.", 
-//	      targetUser->getMainGroup());
 }
 
 return;

@@ -44,10 +44,10 @@ if (st[1] == "*") {
   chanfix::usersIterator ptr = bot->usersMap_begin();
   while (ptr != bot->usersMap_end()) {
     sqlUser* tmpUser = ptr->second;
-    bot->SendTo(theClient, "User: %s, Flags: %s, Groups: %s",
+    bot->SendTo(theClient, "User: %s, Flags: %s, Group: %s",
 		tmpUser->getUserName().c_str(), (tmpUser->getFlags()) ?
 		std::string("+" + bot->getFlagsString(tmpUser->getFlags())).c_str() : "None", 
-		"N/A");
+		tmpUser->getGroup().c_str());
     ptr++;
   }
   bot->SendTo(theClient, "End of user list.");
@@ -81,8 +81,9 @@ if (sqlHostList.size() > 0) {
     }
 }
 if (hostlist.str() == "") hostlist << "None.";
-bot->SendTo(theClient, "Hosts: %s", hostlist.str().c_str()); //Fix this
-bot->SendTo(theClient, "Main group: NA"); //This too
-bot->SendTo(theClient, "Other groups: NA"); //Yep, this
+bot->SendTo(theClient, "Hosts: %s", hostlist.str().c_str());
+bot->SendTo(theClient, "Group: %s", theUser->getGroup().c_str());
+
+return;
 } //whoiscommand::exec
 } //namespace gnuworld
