@@ -35,29 +35,6 @@ CREATE TABLE channels (
 
 CREATE UNIQUE INDEX channels_name_idx ON channels(LOWER(channel));
 
-CREATE TABLE notes (
-	id SERIAL,
-	ts INT4,
-	channelID INT4 CONSTRAINT notes_ref REFERENCES channels ( id ),
-	userID INT4 CONSTRAINT notes_ref REFERENCES users ( id ),
-	event INT2 DEFAULT 0,
-	-- Defines the note event type, so we can filter nice reports.
--- 1  -- EV_MISC - Uncategorised event.
--- 2  -- EV_NOTE - Miscellaneous notes about a channel.
--- 3  -- EV_CHANFIX - When someone manual chanfixes a channel.
--- 4  -- EV_BLOCK - When someone blocks a channel.
--- 5  -- EV_UNBLOCK - When somebody unblocks a channel.
--- 6  -- EV_ALERT - When someone sets alert flag on a channel.
--- 7  -- EV_UNALERT - When somebody removes alert flag from a channel.
-	message TEXT,
-
-	PRIMARY KEY(id, channelID, userID)
-);
-
-CREATE INDEX notes_channelID_idx ON notes(channelID);
-CREATE INDEX notes_userID_idx ON notes(userID);
-CREATE INDEX notes_event_idx ON notes(event);
-
 CREATE TABLE users (
 	id SERIAL,
 	user_name TEXT NOT NULL,
@@ -88,3 +65,26 @@ CREATE TABLE hosts (
 );
 
 CREATE INDEX hosts_user_id_idx ON hosts(user_id);
+
+CREATE TABLE notes (
+	id SERIAL,
+	ts INT4,
+	channelID INT4 CONSTRAINT notes_channelID_ref REFERENCES channels ( id ),
+	userID INT4 CONSTRAINT notes_userID_ref REFERENCES users ( id ),
+	event INT2 DEFAULT 0,
+	-- Defines the note event type, so we can filter nice reports.
+-- 1  -- EV_MISC - Uncategorised event.
+-- 2  -- EV_NOTE - Miscellaneous notes about a channel.
+-- 3  -- EV_CHANFIX - When someone manual chanfixes a channel.
+-- 4  -- EV_BLOCK - When someone blocks a channel.
+-- 5  -- EV_UNBLOCK - When somebody unblocks a channel.
+-- 6  -- EV_ALERT - When someone sets alert flag on a channel.
+-- 7  -- EV_UNALERT - When somebody removes alert flag from a channel.
+	message TEXT,
+
+	PRIMARY KEY(id, channelID, userID)
+);
+
+CREATE INDEX notes_channelID_idx ON notes(channelID);
+CREATE INDEX notes_userID_idx ON notes(userID);
+CREATE INDEX notes_event_idx ON notes(event);
