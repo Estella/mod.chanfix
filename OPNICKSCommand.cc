@@ -59,7 +59,7 @@ for (Channel::userIterator ptr = netChan->userList_begin(); ptr != netChan->user
       bot->SendTo(theClient, "%s", oppedUsers.c_str());
       oppedUsers.erase(oppedUsers.begin(), oppedUsers.end());
     }
-    if (numOppedUsers++ && oppedUsers.size())
+    if (numOppedUsers++ && !oppedUsers.empty())
       oppedUsers += " ";
     oppedUsers += curUser->getNickName();
   }

@@ -48,7 +48,7 @@ if (st.size() < 2) {
   if (!theUser) return;
 
   if (theUser->getFlag(sqlUser::F_SERVERADMIN))
-    bot->SendTo(theClient, "\002Server Admin (+a)\002: ADDUSER DELUSER ADDHOST DELHOST ADDFLAG DELFLAG WHOGROUP");
+    bot->SendTo(theClient, "\002Server Admin (+a)\002: ADDUSER DELUSER ADDHOST DELHOST ADDFLAG DELFLAG WHOGROUP SUSPEND UNSUSPEND");
 
   if (theUser->getFlag(sqlUser::F_BLOCK))
     bot->SendTo(theClient, "\002Blocker (+b)\002: BLOCK UNBLOCK");
@@ -63,7 +63,7 @@ if (st.size() < 2) {
     bot->SendTo(theClient, "\002Owner (+o)\002: QUOTE REHASH RELOAD SET SHUTDOWN");
 
   if (theUser->getFlag(sqlUser::F_USERMANAGER))
-    bot->SendTo(theClient, "\002User Manager (+u)\002: ADDUSER DELUSER ADDHOST DELHOST ADDFLAG DELFLAG SETGROUP WHOGROUP");
+    bot->SendTo(theClient, "\002User Manager (+u)\002: ADDUSER DELUSER ADDHOST DELHOST ADDFLAG DELFLAG SETGROUP WHOGROUP SUSPEND UNSUSPEND");
 
 } else {
   bot->SendTo(theClient, "No help available on that topic.");

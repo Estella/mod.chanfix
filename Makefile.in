@@ -83,8 +83,10 @@ am_libchanfix_la_OBJECTS = libchanfix_la-chanfix.lo \
 	libchanfix_la-ROTATECommand.lo libchanfix_la-SCORECommand.lo \
 	libchanfix_la-SETCommand.lo libchanfix_la-SETGROUPCommand.lo \
 	libchanfix_la-SHUTDOWNCommand.lo \
-	libchanfix_la-STATUSCommand.lo libchanfix_la-UNALERTCommand.lo \
-	libchanfix_la-UNBLOCKCommand.lo libchanfix_la-USETCommand.lo \
+	libchanfix_la-STATUSCommand.lo libchanfix_la-SUSPENDCommand.lo \
+	libchanfix_la-UNALERTCommand.lo \
+	libchanfix_la-UNBLOCKCommand.lo \
+	libchanfix_la-UNSUSPENDCommand.lo libchanfix_la-USETCommand.lo \
 	libchanfix_la-WHOGROUPCommand.lo libchanfix_la-WHOISCommand.lo \
 	libchanfix_la-sqlChanOp.lo libchanfix_la-sqlChannel.lo \
 	libchanfix_la-sqlUser.lo
@@ -250,8 +252,10 @@ libchanfix_la_SOURCES = chanfix.cc \
 	SETGROUPCommand.cc \
 	SHUTDOWNCommand.cc \
 	STATUSCommand.cc \
+	SUSPENDCommand.cc \
 	UNALERTCommand.cc \
 	UNBLOCKCommand.cc \
+	UNSUSPENDCommand.cc \
 	USETCommand.cc \
 	WHOGROUPCommand.cc \
 	WHOISCommand.cc \
@@ -399,8 +403,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SETGROUPCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SHUTDOWNCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-STATUSCommand.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SUSPENDCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-UNALERTCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-UNBLOCKCommand.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-UNSUSPENDCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-USETCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-WHOGROUPCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-WHOISCommand.Plo@am__quote@
@@ -626,6 +632,13 @@ libchanfix_la-STATUSCommand.lo: STATUSCommand.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-STATUSCommand.lo `test -f 'STATUSCommand.cc' || echo '$(srcdir)/'`STATUSCommand.cc
 
+libchanfix_la-SUSPENDCommand.lo: SUSPENDCommand.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-SUSPENDCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-SUSPENDCommand.Tpo" -c -o libchanfix_la-SUSPENDCommand.lo `test -f 'SUSPENDCommand.cc' || echo '$(srcdir)/'`SUSPENDCommand.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-SUSPENDCommand.Tpo" "$(DEPDIR)/libchanfix_la-SUSPENDCommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-SUSPENDCommand.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='SUSPENDCommand.cc' object='libchanfix_la-SUSPENDCommand.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-SUSPENDCommand.lo `test -f 'SUSPENDCommand.cc' || echo '$(srcdir)/'`SUSPENDCommand.cc
+
 libchanfix_la-UNALERTCommand.lo: UNALERTCommand.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-UNALERTCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-UNALERTCommand.Tpo" -c -o libchanfix_la-UNALERTCommand.lo `test -f 'UNALERTCommand.cc' || echo '$(srcdir)/'`UNALERTCommand.cc; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-UNALERTCommand.Tpo" "$(DEPDIR)/libchanfix_la-UNALERTCommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-UNALERTCommand.Tpo"; exit 1; fi
@@ -639,6 +652,13 @@ libchanfix_la-UNBLOCKCommand.lo: UNBLOCKCommand.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='UNBLOCKCommand.cc' object='libchanfix_la-UNBLOCKCommand.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-UNBLOCKCommand.lo `test -f 'UNBLOCKCommand.cc' || echo '$(srcdir)/'`UNBLOCKCommand.cc
+
+libchanfix_la-UNSUSPENDCommand.lo: UNSUSPENDCommand.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-UNSUSPENDCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-UNSUSPENDCommand.Tpo" -c -o libchanfix_la-UNSUSPENDCommand.lo `test -f 'UNSUSPENDCommand.cc' || echo '$(srcdir)/'`UNSUSPENDCommand.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-UNSUSPENDCommand.Tpo" "$(DEPDIR)/libchanfix_la-UNSUSPENDCommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-UNSUSPENDCommand.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='UNSUSPENDCommand.cc' object='libchanfix_la-UNSUSPENDCommand.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-UNSUSPENDCommand.lo `test -f 'UNSUSPENDCommand.cc' || echo '$(srcdir)/'`UNSUSPENDCommand.cc
 
 libchanfix_la-USETCommand.lo: USETCommand.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-USETCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-USETCommand.Tpo" -c -o libchanfix_la-USETCommand.lo `test -f 'USETCommand.cc' || echo '$(srcdir)/'`USETCommand.cc; \

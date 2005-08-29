@@ -51,18 +51,29 @@ if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
 bot->SendTo(theClient, "Users with group %s [username (flags)]:", 
 	    st[1].c_str());
 
-int numUsersInGroup = 0;
+std::string groupUsers;
+unsigned int numUsersInGroup = 0;
 chanfix::usersIterator ptr = bot->usersMap_begin();
 while (ptr != bot->usersMap_end()) {
   sqlUser* tmpUser = ptr->second;
-  if (tmpUser->getGroup() == theUser->getGroup()) {
-    bot->SendTo(theClient, "%s (%s)", tmpUser->getUserName().c_str(),
-		(tmpUser->getFlags()) ?
-		std::string("+" + bot->getFlagsString(tmpUser->getFlags())).c_str() : "None");
-    numUsersInGroup++;
+  if (tmpUser->getGroup() == string_lower(st[1])) {
+    if (numUsersInGroup++ && !groupUsers.empty())
+      groupUsers += " ";
+    groupUsers += tmpUser->getUserName();
+    groupUsers += " (";
+    groupUsers += (tmpUser->getFlags()) ? std::string("+" + bot->getFlagsString(tmpUser->getFlags())).c_str() : "";
+    groupUsers += ")";
+    if (groupUsers.size() > 460) {
+      bot->SendTo(theClient, "%s", groupUsers.c_str());
+      groupUsers.erase();
+    }
   }
   ptr++;
 }
+
+if (!groupUsers.empty())
+  bot->SendTo(theClient, "%s", groupUsers.c_str());
+
 bot->SendTo(theClient, "Number of users: %d.", numUsersInGroup);
 
 return;

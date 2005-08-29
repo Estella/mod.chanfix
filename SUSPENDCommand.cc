@@ -1,10 +1,10 @@
 /**
- * SETGROUPCommand.cc
+ * SUSPENDCommand.cc
  *
- * 08/27/2005 - Reed Loden <reed@reedloden.com>
+ * 08/29/2005 - Reed Loden <reed@reedloden.com>
  * Initial Version
  *
- * Sets the group of the user
+ * Suspends a user indefinitely
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -35,7 +35,7 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-void SETGROUPCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void SUSPENDCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 
@@ -45,13 +45,22 @@ if (!targetUser) {
   return;
 }
 
-if (targetUser->getGroup() == string_lower(st[2])) {
-  bot->SendTo(theClient, "User %s is already in group %s.", 
-	      targetUser->getUserName().c_str(), st[2].c_str());
+/* A serveradmin can only suspend users in his/her own group. */
+if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
+    !theUser->getFlag(sqlUser::F_USERMANAGER)) {
+  if (targetUser->getGroup() != theUser->getGroup()) {
+    bot->SendTo(theClient, "You cannot suspend a user in a different group.");
+    return;
+  }
+}
+
+if (targetUser->getIsSuspended()) {
+  bot->SendTo(theClient, "User %s is already suspended.", 
+	      targetUser->getUserName().c_str());
   return;
 }
 
-targetUser->setGroup(st[2]);
+targetUser->setSuspended(true);
 targetUser->setLastUpdated(bot->currentTime());
 targetUser->setLastUpdatedBy( std::string( "("
 	+ theUser->getUserName()
@@ -59,14 +68,13 @@ targetUser->setLastUpdatedBy( std::string( "("
 	+ theClient->getRealNickUserHost() ) );
 targetUser->commit();
 
-bot->SendTo(theClient, "Set group %s for user %s.", st[2].c_str(), 
+bot->SendTo(theClient, "Suspended user %s indefinitely.",
 	    targetUser->getUserName().c_str());
-bot->logAdminMessage("%s (%s) set the group of user %s to %s.",
+bot->logAdminMessage("%s (%s) suspended user %s indefinitely.",
 	    theUser->getUserName().c_str(),
 	    theClient->getRealNickUserHost().c_str(),
-	    targetUser->getUserName().c_str(),
-	    st[2].c_str());
+	    targetUser->getUserName().c_str());
 
 return;
-} //SETGROUPCommand::Exec
+} //SUSPENDCommand::Exec
 } //Namespace gnuworld

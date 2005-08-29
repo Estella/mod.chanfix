@@ -55,7 +55,7 @@ if (chkUser->getFlag(sqlUser::F_USERMANAGER) && !theUser->getFlag(sqlUser::F_OWN
   return;
 }
 
-/* A serveradmin can only delete users on his own group. */
+/* A serveradmin can only delete users in his/her own group. */
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
     !theUser->getFlag(sqlUser::F_USERMANAGER)) {
   if (chkUser->getGroup() != theUser->getGroup()) {

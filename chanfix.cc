@@ -257,6 +257,11 @@ RegisterCommand(new STATUSCommand(this, "STATUS",
 	1,
 	0
 	));
+RegisterCommand(new SUSPENDCommand(this, "SUSPEND",
+	"<username>",
+	2,
+	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
+	));
 RegisterCommand(new UNALERTCommand(this, "UNALERT",
 	"<#channel>",
 	2,
@@ -266,6 +271,11 @@ RegisterCommand(new UNBLOCKCommand(this, "UNBLOCK",
 	"<#channel>",
 	2,
 	sqlUser::F_BLOCK
+	));
+RegisterCommand(new UNSUSPENDCommand(this, "UNSUSPEND",
+	"<username>",
+	2,
+	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
 	));
 RegisterCommand(new USETCommand(this, "USET",
 	"<option> <value>",
