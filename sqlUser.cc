@@ -74,7 +74,7 @@ bool sqlUser::loadData(unsigned int userID)
 
 std::stringstream queryString;
 queryString	<< "SELECT "
-		<< "id, user_name, created, last_seen, last_updated, last_updated_by, group, flags, issuspended, usenotice"
+		<< "id, user_name, created, last_seen, last_updated, last_updated_by, faction, flags, issuspended, usenotice"
 		<< " FROM users WHERE id = "
 		<< userID
 		;
@@ -121,7 +121,7 @@ bool sqlUser::loadData(const std::string& userName)
 
 std::stringstream queryString;
 queryString	<< "SELECT "
-		<< "id, user_name, created, last_seen, last_updated, last_updated_by, group, flags, issuspended, usenotice"
+		<< "id, user_name, created, last_seen, last_updated, last_updated_by, faction, flags, issuspended, usenotice"
 		<< " FROM users WHERE lower(user_name) = '"
 		<< escapeSQLChars(string_lower(userName))
 		<< "'"
@@ -181,7 +181,7 @@ queryString	<< "UPDATE users SET "
 		<< "last_seen = " << last_seen << ", "
 		<< "last_updated = " << last_updated << ", "
 		<< "last_updated_by = '" << last_updated_by << "', "
-		<< "group = '" << group << "', "
+		<< "faction = '" << group << "', "
 		<< "flags = " << flags << ", "
 		<< "issuspended = " << (isSuspended ? "'t'" : "'f'") << ", "
 		<< "usenotice = " << (useNotice ? "'t'" : "'f'")
@@ -212,7 +212,7 @@ bool sqlUser::Insert()
 {
 std::stringstream insertString;
 insertString	<< "INSERT INTO users "
-		<< "(user_name, created, last_seen, last_updated, last_updated_by, group, flags, issuspended, usenotice) "
+		<< "(user_name, created, last_seen, last_updated, last_updated_by, faction, flags, issuspended, usenotice) "
 		<< "VALUES "
 		<< "("
 		<< "'" << user_name << "', "

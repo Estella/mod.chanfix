@@ -854,7 +854,7 @@ void chanfix::preloadChannelCache()
 void chanfix::preloadUserCache()
 {
 	std::stringstream theQuery;
-	theQuery	<< "SELECT id, user_name, created, last_seen, last_updated, last_updated_by, group, flags, issuspended, usenotice "
+	theQuery	<< "SELECT id, user_name, created, last_seen, last_updated, last_updated_by, faction, flags, issuspended, usenotice "
 			<< "FROM users"
 			;
 

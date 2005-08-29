@@ -65,7 +65,7 @@ CREATE TABLE users (
 	last_seen INT4 NOT NULL DEFAULT 0,
 	last_updated INT4 NOT NULL DEFAULT 0,
 	last_updated_by VARCHAR(128) NOT NULL,
-	group VARCHAR(128) NOT NULL DEFAULT 'undernet.org',
+	faction VARCHAR(128) NOT NULL DEFAULT 'undernet.org',
 	flags INT2 NOT NULL DEFAULT 0,
 	-- 0x01 - server admin (limited access to +u commands)
 	-- 0x02 - can block/unblock channels
