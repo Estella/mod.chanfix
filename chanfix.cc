@@ -1,3 +1,4 @@
+
 /**
  * chanfix.cc
  * 
@@ -1028,6 +1029,24 @@ myOps.sort(compare_points);
 return myOps;
 }
 
+size_t chanfix::countMyOps(const std::string& channel)
+{
+size_t myOpsCount = 0;
+
+for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
+     ptr != sqlChanOps.end(); ptr++) {
+  if (ptr->second->getChannel() == channel)
+    myOpsCount++;
+}
+
+return myOpsCount;
+}
+
+size_t chanfix::countMyOps(Channel* theChan)
+{
+return countMyOps(theChan->getName());
+}
+
 const std::string chanfix::getHostList( sqlUser* User)
 {
 static const char* queryHeader
@@ -1099,7 +1118,11 @@ if (clientNeedsIdent && !hasIdent(theClient))
   return;
 
 sqlChanOp* thisOp = findChanOp(theChan, theClient);
-if(!thisOp) thisOp = newChanOp(theChan, theClient);
+if (!thisOp) {
+  if (countMyOps(theChan) >= MAXOPCOUNT)
+    return; /* No room for new ops */
+  thisOp = newChanOp(theChan, theClient);
+}
 
 thisOp->addPoint();
 thisOp->setTimeLastOpped(currentTime()); //Update the time they were last opped
@@ -1136,9 +1159,13 @@ if (thisClient->getAccount() != "" &&
   elog	<< "chanfix::gotOpped> DEBUG: " << thisClient->getAccount()
 	<< " got opped on " << thisChan->getName()
 	<< std::endl;
-
+	    
   sqlChanOp* thisOp = findChanOp(thisChan, thisClient);
-  if (!thisOp) thisOp = newChanOp(thisChan, thisClient);
+  if (!thisOp) {
+    if (countMyOps(thisChan) >= MAXOPCOUNT)
+      return; /* No room for new ops */
+    thisOp = newChanOp(thisChan, thisClient);
+  }
 
   thisOp->setLastSeenAs(thisClient->getRealNickUserHost());
   thisOp->setTimeLastOpped(currentTime());
@@ -1790,8 +1817,11 @@ void chanfix::rotateDB()
  */
 
 logAdminMessage("Beginning database rotation.");
-sqlChanOp* curOp = 0;
-std::string removeKey;
+
+/* Start our timer */
+Timer rotateDBTimer;
+rotateDBTimer.Start();
+
 short nextDay = currentDay;
 setCurrentDay();
 if (nextDay >= (DAYSAMPLES - 1))
@@ -1800,29 +1830,66 @@ else
   nextDay++;
 
 time_t maxFirstOppedTS = currentTime() - 86400;
+unsigned int numOpsLeft = 0;
+std::string curChan;
+sqlChanOp* curOp;
+
 for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
      ptr != sqlChanOps.end(); ptr++) {
-
   curOp = ptr->second;
+  if (curChan != curOp->getChannel()) {
+    curChan = curOp->getChannel();
+    numOpsLeft = countMyOps(curChan);
+  }
   curOp->setDay(nextDay, 0);
   curOp->calcTotalPoints();
   if (curOp->getPoints() <= 0 && maxFirstOppedTS > curOp->getTimeFirstOpped()) {
     sqlChanOps.erase(ptr++);
-    if (!curOp->Delete())
-      elog << "chanfix::rotateDB> Error: Could not delete op "<< curOp->getLastSeenAs() << " " << curOp->getChannel() << std::endl;
-    else
+    if (!curOp->Delete()) {
+      elog	<< "chanfix::rotateDB> Error: Could not delete op "
+		<< curOp->getLastSeenAs()
+		<< " "
+		<< curOp->getChannel()
+		<< std::endl;
+    } else {
+      numOpsLeft--;
       delete curOp; curOp = 0;
+    }
   }
+#ifndef REMEMBER_CHANNELS_WITH_NOTES_OR_FLAGS
+  if (!numOpsLeft) {
+    /* Empty channel, start deleting info */
+    sqlChannel* sqlChan = getChannelRecord(curChan);
+    if (!sqlChan)
+      continue;
+
+    if (!sqlChan->deleteAllNotes()) {
+      elog	<< "chanfix::rotateDB> Error: could not delete all the notes of channel "
+		<< curChan.c_str()
+		<< std::endl;
+    }
+
+    if (!deleteChannelRecord(sqlChan)) {
+      elog	<< "chanfix::rotateDB> Error: could not delete channel "
+		<< curChan.c_str()
+		<< std::endl;
+    }
+  }
+#endif
 }
-std::stringstream queryString;
-queryString << "DELETE FROM users WHERE "
-  << "ts_lastopped IS NOT NULL AND "
+
+/* Final cleanup routine */
+std::stringstream deleteString;
+deleteString << "DELETE FROM chanOps WHERE "
+  << "ts_lastopped > 0 AND "
   << "ts_lastopped < " << (currentTime() - (DAYSAMPLES * 86400))
   ;
 
-ExecStatusType status = SQLDb->Exec( queryString.str().c_str() ) ;
+elog << "chanfix::rotateDB> " << deleteString.str() << std::endl;
 
-if( PGRES_TUPLES_OK != status )
+ExecStatusType status = SQLDb->Exec( deleteString.str().c_str() ) ;
+
+if( PGRES_COMMAND_OK != status )
 {
   elog	<< "chanfix::rotateDB> SQL Error: "
 	<< SQLDb->ErrorMessage()
@@ -1830,10 +1897,9 @@ if( PGRES_TUPLES_OK != status )
   return;
 }
 
+logAdminMessage("Completed database rotation in %u ms.",
+		rotateDBTimer.stopTimeMS());
 
-#ifndef REMEMBER_CHANNELS_WITH_NOTES_OR_FLAGS
-//TODO: Implement a loop/section here that removes channel records/notes with no ops left in them
-#endif
 return;
 }
 

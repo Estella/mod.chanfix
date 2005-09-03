@@ -207,7 +207,10 @@ public:
 
 	sqlChanOp* findChanOp(const std::string&, const std::string&);
 	sqlChanOp* findChanOp(Channel*, iClient*);
-	
+
+	size_t countMyOps(const std::string&);
+	size_t countMyOps(Channel*);
+
 	sqlUser* chanfix::isAuthed(const std::string);
 
 	void preloadChanOpsCache();
@@ -237,7 +240,7 @@ public:
 
 	bool fixChan(sqlChannel*, bool);
 
-	void chanfix::startScoringChan(Channel*);
+	void startScoringChan(Channel*);
 
 	sqlChannel* getChannelRecord(const std::string&);
 	sqlChannel* getChannelRecord(Channel*);
@@ -309,7 +312,7 @@ public:
 	//typedef map< std::pair<std::string, std::string>, sqlChanOp*, noCaseComparePair> sqlChanOpsType;
 	typedef std::map< std::pair<std::string, std::string>, sqlChanOp*> sqlChanOpsType;
 	sqlChanOpsType sqlChanOps;
-	
+
 	typedef std::map <std::string, sqlChannel*, noCaseCompare> sqlChannelCacheType;
 	sqlChannelCacheType sqlChanCache;
 

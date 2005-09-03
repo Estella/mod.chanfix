@@ -148,7 +148,7 @@
 #define OPCOUNT		10
 
 /**
- * The maximum number of top tops to keep track of per channel.
+ * The maximum number of top ops to keep track of per channel.
  * (default: 256)
  */
 #define MAXOPCOUNT	256

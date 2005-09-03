@@ -76,6 +76,12 @@ if (newUser->Insert()) {
 			<< "')"
 			;
 
+#ifdef LOG_SQL
+    elog	<< "chanfix::ADDUSERCommand> "
+		<< insertString.str()
+		<< std::endl;
+#endif
+	  
     status = bot->SQLDb->Exec(insertString.str().c_str());
 
     if (PGRES_COMMAND_OK != status)
