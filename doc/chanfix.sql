@@ -66,6 +66,24 @@ CREATE TABLE hosts (
 
 CREATE INDEX hosts_user_id_idx ON hosts(user_id);
 
+CREATE TABLE languages (
+        id SERIAL,
+        code VARCHAR( 16 ) UNIQUE,
+        name VARCHAR( 16 ),
+        last_updated INT4 NOT NULL,
+        deleted INT2 DEFAULT '0',
+        PRIMARY KEY(id)
+);
+
+CREATE TABLE help (
+        topic VARCHAR(20) NOT NULL,
+        language_id INT4 CONSTRAINT help_language_id_ref REFERENCES languages ( id ),
+        contents TEXT
+);
+
+CREATE INDEX help_topic_idx ON help (topic);
+CREATE INDEX help_language_id_idx ON help (language_id);
+
 CREATE TABLE notes (
 	id SERIAL,
 	ts INT4,

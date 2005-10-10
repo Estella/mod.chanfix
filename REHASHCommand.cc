@@ -41,7 +41,10 @@ StringTokenizer st(Message);
 
 bot->readConfigFile(bot->getConfigFileName());
 
-bot->SendTo(theClient, "Successfully rehashed configuration file.");
+bot->helpTable.clear();
+bot->loadHelpTable();
+
+bot->SendTo(theClient, "Successfully rehashed configuration file and reloaded help.");
 bot->logAdminMessage("%s (%s) rehashed the chanfix module.",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str());

@@ -306,6 +306,9 @@ preloadChannelCache();
 /* Preload the user access cache */
 preloadUserCache();
 
+/* Load help messages */
+loadHelpTable();
+
 /* Set up our timer. */
 theTimer = new Timer();
 
@@ -2034,6 +2037,46 @@ else if (whichEvent == sqlChannel::EV_UNALERT)
   return "UNALERT";
 else
   return "";
+}
+
+const std::string chanfix::getHelpMessage(std::string topic)
+{
+	int lang_id = 1;
+
+/*	Commented for now, maybe future expansion into multi language - SiRVulcaN
+ *	sqlUser* theUser will need to be readded to getHelpMessage
+ *	if (theUser)
+ *		lang_id = theUser->getLanguageId();
+ */
+	std::pair <int, std::string> thePair(lang_id, topic);
+	helpTableType::iterator ptr = helpTable.find(thePair);
+	if (ptr != helpTable.end())
+		return ptr->second;
+
+	if (lang_id != 1)
+		return getHelpMessage(topic);
+
+	return std::string("");
+}
+
+void chanfix::loadHelpTable()
+{
+ExecStatusType status;
+
+status = SQLDb->Exec("SELECT language_id,topic,contents FROM help");
+
+if (PGRES_TUPLES_OK == status)
+	for (int i = 0; i < SQLDb->Tuples(); i++)
+		helpTable.insert(helpTableType::value_type(std::make_pair(
+			atoi(SQLDb->GetValue(i, 0)),
+			SQLDb->GetValue(i, 1)),
+			SQLDb->GetValue(i, 2)));
+
+        elog    << "*** [Chanfix::loadHelpTable]: Loaded "
+                        << helpTable.size()
+                        << " help messages."
+                        << std::endl;
+
 }
 
 void chanfix::updatePoints()

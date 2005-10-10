@@ -455,6 +455,13 @@ public:
 		{ currentDay = currentTime() / 86400 % DAYSAMPLES; }
 
 
+	typedef std::map < std::pair <int, std::string>, std::string > helpTableType;
+	helpTableType helpTable;
+
+	void loadHelpTable();
+	const std::string getHelpMessage(std::string);
+
+
 }; // class chanfix
 
 const std::string escapeSQLChars(const std::string&);

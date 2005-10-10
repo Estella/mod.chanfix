@@ -66,7 +66,13 @@ if (st.size() < 2) {
     bot->SendTo(theClient, "\002User Manager (+u)\002: ADDUSER DELUSER ADDHOST DELHOST ADDFLAG DELFLAG SETGROUP WHOGROUP SUSPEND UNSUSPEND");
 
 } else {
-  bot->SendTo(theClient, "No help available on that topic.");
+  std::string msg = bot->getHelpMessage(string_upper(st.assemble(1)));
+
+  if (!msg.empty())
+    bot->SendTo(theClient, msg);
+  else
+    bot->SendTo(theClient, "There is no help available for that topic.");
+
 }
 
 } //helpcommand::exec
