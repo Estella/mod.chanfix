@@ -40,6 +40,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	WHOISCommand.cc \
 	sqlChanOp.cc \
 	sqlChannel.cc \
+	sqlManager.cc \
 	sqlUser.cc
 
 libchanfix_la_CXXFLAGS = -I$(PGSQL_INCLUDE) -I${top_srcdir}/include \
@@ -53,8 +54,9 @@ EXTRA_DIST = chanfix.h \
 	chanfixCommands.h \
 	chanfix_config.h \
 	chanfix_misc.h \
-	sqlChannel.h \
 	sqlChanOp.h \
+	sqlChannel.h \
+	sqlManager.h \
 	sqlUser.h \
 	Timer.h \
         $(COMMAND_CONF)

@@ -44,11 +44,16 @@ StringTokenizer st(Message);
 std::string option = string_upper(st[1]);
 std::string value = string_upper(st[2]);
 
+/*
+ * This code removes underscores from the option string.
+ * Please do NOT add underscores to the if statements below, 
+ * as it will break the checking code. -reed
+ */
 std::string::size_type pos;
 while ((pos = option.find('_', 0)) != std::string::npos)
   option.erase(pos, 1);
 
-if (option == "NUM_SERVERS") {
+if (option == "NUMSERVERS") {
   int setting = atoi(value.c_str());
   if (setting < 0) {
     bot->SendTo(theClient, "Please use SET NUM_SERVERS <integer number>.");
@@ -65,7 +70,7 @@ if (option == "NUM_SERVERS") {
   return;
 }
 
-if (option == "ENABLE_AUTOFIX") {
+if (option == "ENABLEAUTOFIX") {
   if (value == "ON" || value == "1") {
     bot->setDoAutoFix(true);
     bot->SendTo(theClient, "Enabled autofix.");
@@ -86,7 +91,7 @@ if (option == "ENABLE_AUTOFIX") {
   }
 }
 
-if (option == "ENABLE_CHANFIX") {
+if (option == "ENABLECHANFIX") {
   if (value == "ON" || value == "1") {
     bot->setDoChanFix(true);
     bot->SendTo(theClient, "Enabled manual chanfix.");
@@ -107,7 +112,7 @@ if (option == "ENABLE_CHANFIX") {
   }
 }
 
-if (option == "ENABLE_CHANNEL_BLOCKING") {
+if (option == "ENABLECHANNELBLOCKING") {
   if (value == "ON" || value == "1") {
     bot->setDoChanBlocking(true);
     bot->SendTo(theClient, "Enabled channel blocking.");

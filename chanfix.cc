@@ -1,4 +1,3 @@
-
 /**
  * chanfix.cc
  * 
@@ -89,7 +88,10 @@ readConfigFile(configFileName);
 /* Initial state */
 currentState = INIT;
 
-std::string Query = "host=" + sqlHost + " dbname=" + sqlDB + " port=" + sqlPort + " user=" + sqlUsername;
+std::string dbString = "host=" + sqlHost + " dbname=" + sqlDB
+  + " port=" + sqlPort + " user=" + sqlUsername + " password=" + sqlPass;
+
+theManager = sqlManager::getInstance(dbString, commitCount);
 
 elog	<< "chanfix::chanfix> Attempting to connect to "
 	<< sqlHost << " at port " << sqlPort
@@ -97,7 +99,7 @@ elog	<< "chanfix::chanfix> Attempting to connect to "
 	<< sqlDB
 	<< std::endl;
 
-SQLDb = new (std::nothrow) cmDatabase( Query.c_str() ) ;
+SQLDb = new (std::nothrow) cmDatabase( dbString.c_str() ) ;
 assert( SQLDb != 0 ) ;
 //-- Make sure we connected to the SQL database; if
 // we didn't we exit entirely.
@@ -344,6 +346,8 @@ clientNeedsReverse = atob(chanfixConfig->Require("clientNeedsReverse")->second) 
 connectCheckFreq = atoi((chanfixConfig->Require("connectCheckFreq")->second).c_str()) ;
 updatesPerCycle = atoi((chanfixConfig->Require("updatesPerCycle")->second).c_str());
 updateCycleInterval = atoi((chanfixConfig->Require("updateCycleInterval")->second).c_str());
+commitFreq = atoi(chanfixConfig->Require("commitFreq")->second.c_str());
+commitCount = atoi(chanfixConfig->Require("commitCount")->second.c_str());
 
 /* Database processing */
 sqlHost = chanfixConfig->Require("sqlHost")->second;
@@ -1191,7 +1195,7 @@ bool chanfix::removeFromUpdateQueue(sqlChanOp* userToRemove)
 {
   queueListType::iterator ptr = find( userUpdateQueue.begin(), userUpdateQueue.end(), userToRemove );
   if (ptr == userUpdateQueue.end()) return false;
-  userUpdateQueue.erase(ptr);
+  ptr = userUpdateQueue.erase(ptr);
   return true;
 }
 
@@ -1220,11 +1224,10 @@ if (thisClient->getAccount() != "" &&
 
   thisOp->setLastSeenAs(thisClient->getRealNickUserHost());
   thisOp->setTimeLastOpped(currentTime());
-  
+
   if (wasOpped(thisChan, thisClient))
     return;
-  
-  
+
   clientOpsType* myOps = findMyOps(thisClient);
   myOps->insert(clientOpsType::value_type(thisChan->getName(), thisChan));
   thisClient->setCustomData(this, static_cast< void*>(myOps));
@@ -1860,7 +1863,8 @@ void chanfix::processUserUpdateQueue()
 
 void chanfix::rotateDB()
 {
-/* CODER NOTES:
+/* 
+ * CODER NOTES:
  * go through everybody and remove the oldest day (set it to 0)
  * then loop back through and pick out the users with 0 points total and check their ts_firstopped
  * if it is older than 1 day, delete the user
@@ -1895,7 +1899,7 @@ for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
   curOp->setDay(nextDay, 0);
   curOp->calcTotalPoints();
   if (curOp->getPoints() <= 0 && maxFirstOppedTS > curOp->getTimeFirstOpped()) {
-    sqlChanOps.erase(ptr++);
+    sqlChanOps.erase(ptr);
     if (!curOp->Delete()) {
       elog	<< "chanfix::rotateDB> Error: Could not delete op "
 		<< curOp->getLastSeenAs()
@@ -1927,25 +1931,6 @@ for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
     }
   }
 #endif
-}
-
-/* Final cleanup routine */
-std::stringstream deleteString;
-deleteString << "DELETE FROM chanOps WHERE "
-  << "ts_lastopped > 0 AND "
-  << "ts_lastopped < " << (currentTime() - (DAYSAMPLES * 86400))
-  ;
-
-elog << "chanfix::rotateDB> " << deleteString.str() << std::endl;
-
-ExecStatusType status = SQLDb->Exec( deleteString.str().c_str() ) ;
-
-if( PGRES_COMMAND_OK != status )
-{
-  elog	<< "chanfix::rotateDB> SQL Error: "
-	<< SQLDb->ErrorMessage()
-	<< std::endl ;
-  return;
 }
 
 logAdminMessage("Completed database rotation in %u ms.",

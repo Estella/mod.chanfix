@@ -42,6 +42,7 @@ namespace gnuworld
 extern short currentDay;
 }
 #include	"sqlChanOp.h"
+#include	"sqlManager.h"
 #include	"sqlUser.h"
 
 class PgDatabase;
@@ -302,6 +303,11 @@ public:
 	bool removeFromUpdateQueue(sqlChanOp*);
 	
 	void processUserUpdateQueue();
+
+	/**
+	 * Our sqlManager instance for DB communication
+	 */
+	sqlManager* theManager;
 	
 	/**
 	 * PostgreSQL Database
@@ -311,15 +317,15 @@ public:
 	/**
 	 * ChannelOp map
 	 */
-	//typedef map< std::pair<std::string, std::string>, sqlChanOp*, noCaseComparePair> sqlChanOpsType;
+	//typedef std::map< std::pair<std::string, std::string>, sqlChanOp*, noCaseComparePair> sqlChanOpsType;
 	typedef std::map< std::pair<std::string, std::string>, sqlChanOp*> sqlChanOpsType;
-	sqlChanOpsType sqlChanOps;
+	sqlChanOpsType	sqlChanOps;
 
 	typedef std::map <std::string, sqlChannel*, noCaseCompare> sqlChannelCacheType;
-	sqlChannelCacheType sqlChanCache;
+	sqlChannelCacheType	sqlChanCache;
 
 	typedef std::map <std::string, Channel*, noCaseCompare> clientOpsType;
-	clientOpsType*  findMyOps(iClient*);
+	clientOpsType*	findMyOps(iClient*);
 
 	typedef std::list< sqlChanOp* > chanOpsType;
 	chanOpsType	getMyOps(Channel*);
@@ -330,7 +336,7 @@ public:
 	/**
 	 * The db clients map
 	 */
-	typedef std::map <std::string ,sqlUser* ,noCaseCompare> usersMapType;
+	typedef std::map <std::string, sqlUser*, noCaseCompare> usersMapType;
 
 	/**
 	 * Holds the authenticated user list
@@ -398,6 +404,8 @@ protected:
 	unsigned int	connectCheckFreq;
 	unsigned int	updatesPerCycle;
 	unsigned int	updateCycleInterval;
+	unsigned int	commitCount;
+	unsigned int	commitFreq;
 	std::string	sqlHost;
 	std::string	sqlPort;
 	std::string	sqlUsername;
