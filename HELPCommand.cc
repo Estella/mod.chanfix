@@ -69,7 +69,7 @@ if (st.size() < 2) {
   std::string msg = bot->getHelpMessage(string_upper(st.assemble(1)));
 
   if (!msg.empty())
-    bot->SendTo(theClient, msg);
+    bot->SendFmtTo(theClient, msg);
   else
     bot->SendTo(theClient, "There is no help available for that topic.");
 

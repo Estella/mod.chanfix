@@ -768,6 +768,54 @@ else
   Notice(theClient, theMessage);
 }
 
+bool chanfix::SendFmtTo( const iClient* Target, const std::string& Message )
+{
+	bool returnMe = false ;
+
+        char buffer[512] = { 0 };
+        char *b = buffer ;
+        const char *m = 0 ;
+
+	sqlUser* theUser = isAuthed(Target->getAccount());
+
+        for (m=Message.c_str();*m!=0;m++)
+                {
+                if (*m == '\n' || *m == '\r')
+                        {
+                        *b='\0';
+			if (theUser && !theUser->getUseNotice())
+                        	MyUplink->Write( "%s P %s :%s\r\n",
+                                	getCharYYXXX().c_str(),
+                                	Target->getCharYYXXX().c_str(),
+                                	buffer ) ;
+			else if (theUser && theUser->getUseNotice())
+                        	MyUplink->Write( "%s O %s :%s\r\n",
+                                	getCharYYXXX().c_str(),
+                                	Target->getCharYYXXX().c_str(),
+                                	buffer ) ;				
+                        b=buffer;
+                        }
+                else
+                        {
+                        if (b<buffer+509)
+                          *(b++)=*m;
+                        }
+
+                }
+        *b='\0';
+	if (theUser && !theUser->getUseNotice())
+	        returnMe = MyUplink->Write( "%s P %s :%s\r\n",
+        	        getCharYYXXX().c_str(),
+                	Target->getCharYYXXX().c_str(),
+	                buffer ) ;
+	else if (theUser && theUser->getUseNotice())
+	        returnMe = MyUplink->Write( "%s O %s :%s\r\n",
+        	        getCharYYXXX().c_str(),
+                	Target->getCharYYXXX().c_str(),
+	                buffer ) ;
+	return returnMe;
+}
+
 void chanfix::SendTo(iClient* theClient, const char *Msg, ...)
 {
 char buffer[ 1024 ] = { 0 } ;

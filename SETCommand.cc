@@ -48,7 +48,7 @@ std::string::size_type pos;
 while ((pos = option.find('_', 0)) != std::string::npos)
   option.erase(pos, 1);
 
-if (option == "NUMSERVERS") {
+if (option == "NUM_SERVERS") {
   int setting = atoi(value.c_str());
   if (setting < 0) {
     bot->SendTo(theClient, "Please use SET NUM_SERVERS <integer number>.");
@@ -65,7 +65,7 @@ if (option == "NUMSERVERS") {
   return;
 }
 
-if (option == "ENABLEAUTOFIX") {
+if (option == "ENABLE_AUTOFIX") {
   if (value == "ON" || value == "1") {
     bot->setDoAutoFix(true);
     bot->SendTo(theClient, "Enabled autofix.");
@@ -86,7 +86,7 @@ if (option == "ENABLEAUTOFIX") {
   }
 }
 
-if (option == "ENABLECHANFIX") {
+if (option == "ENABLE_CHANFIX") {
   if (value == "ON" || value == "1") {
     bot->setDoChanFix(true);
     bot->SendTo(theClient, "Enabled manual chanfix.");
@@ -107,7 +107,7 @@ if (option == "ENABLECHANFIX") {
   }
 }
 
-if (option == "ENABLECHANNELBLOCKING") {
+if (option == "ENABLE_CHANNEL_BLOCKING") {
   if (value == "ON" || value == "1") {
     bot->setDoChanBlocking(true);
     bot->SendTo(theClient, "Enabled channel blocking.");
