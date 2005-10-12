@@ -46,6 +46,16 @@ namespace gnuworld
 		const int send_privmsgs			= 15;
 		const int uset_notice_on_off		= 16;
 		const int usetting_doesnt_exist		= 17;
+
+		/* chanfix.cc */
+		const int no_commands_during_burst	= 18;
+		const int unknown_command		= 19;
+		const int access_suspended		= 20;
+		const int host_not_matching		= 21;
+		const int need_to_auth			= 22;
+		const int requires_flag			= 23;
+		const int requires_flags		= 24;
+		const int syntax			= 25;
 	}
 }
 

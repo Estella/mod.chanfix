@@ -514,7 +514,11 @@ if (!theClient->isOper())
   return;
 
 if (currentState == BURST) {
-  SendTo(theClient, "Sorry, I do not accept commands during a burst.");
+  sqlUser* theUser = isAuthed(theClient->getAccount());
+  SendTo(theClient,
+         getResponse(theUser,
+                     language::no_commands_during_burst,
+                     std::string("Sorry, I do not accept commands during a burst.")).c_str());
   return;
 }
 
@@ -525,8 +529,12 @@ if ( st.empty() )
 const std::string Command = string_upper(st[0]);
 
 commandMapType::iterator commHandler = commandMap.find(Command);
+sqlUser* theUser = isAuthed(theClient->getAccount());
 if (commHandler == commandMap.end()) {
-  SendTo(theClient, "Unknown command.");
+  SendTo(theClient,
+         getResponse(theUser,
+                     language::unknown_command,
+                     std::string("Unknown command.")).c_str());
   return;
 }
 
@@ -535,15 +543,19 @@ if (st.size() < commHandler->second->getNumParams()) {
   return;
 }
 
-sqlUser* theUser = isAuthed(theClient->getAccount());
-
 if (theUser) {
   if (theUser->getIsSuspended()) {
-    SendTo(theClient, "Your access to this service is suspended.");
+    SendTo(theClient,
+           getResponse(theUser,
+                       language::access_suspended,
+                       std::string("Your access to this service is suspended.")).c_str());
     return;
   }
   if (!theUser->matchHost(theClient->getRealNickUserHost().c_str())) {
-    SendTo(theClient, "Your current host does not match any registered hosts for your username.");
+    SendTo(theClient,
+           getResponse(theUser,
+                       language::host_not_matching,
+                       std::string("Your current host does not match any registered hosts for your username.")).c_str());
     return;
   }
 }
@@ -551,18 +563,27 @@ if (theUser) {
 sqlUser::flagType requiredFlags = commHandler->second->getRequiredFlags();
 if (requiredFlags) {
   if (!theUser) {
-    SendTo(theClient, "You need to authenticate to use this command.");
+    SendTo(theClient,
+           getResponse(theUser,
+                       language::need_to_auth,
+                       std::string("You need to authenticate to use this command.")).c_str());
     return;
   }
 
   if (requiredFlags != sqlUser::F_LOGGEDIN &&
       !theUser->getFlag(requiredFlags)) {
     if (getFlagChar(requiredFlags) != ' ')
-      SendTo(theClient, "This command requires flag '%c'.",
-	     getFlagChar(requiredFlags));
+      SendTo(theClient,
+             getResponse(theUser,
+                         language::requires_flag,
+                         std::string("This command requires flag '%c'.")).c_str(),
+                                     getFlagChar(requiredFlags));
     else
-      SendTo(theClient, "This command requires one of these flags: \"%s\".",
-	     getFlagsString(requiredFlags).c_str());
+      SendTo(theClient,
+             getResponse(theUser,
+                         language::requires_flags,
+                         std::string("This command requires one of these flags: \"%s\".")).c_str(),
+                                     getFlagsString(requiredFlags).c_str());
     return;
   }
 }
@@ -2284,7 +2305,11 @@ for(serversIterator ptr = serversMap.begin();ptr != serversMap.end();++ptr)
 
 void Command::Usage( iClient* theClient )
 {
-bot->SendTo( theClient, std::string( "SYNTAX: " ) + getInfo() ) ;
+sqlUser* theUser = bot->isAuthed(theClient->getAccount());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                             language::syntax,
+                             std::string("SYNTAX: ")).c_str() + getInfo() );
 }
 
 } // namespace gnuworld
