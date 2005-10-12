@@ -26,11 +26,26 @@ namespace gnuworld
 	{
 	namespace language
 	{
-		const int lang_set_to		= 1;
-		const int send_notices		= 2;
-		const int send_privmsgs		= 3;
-		const int uset_notice_on_off	= 4;
-		const int usetting_doesnt_exist	= 5;
+		/* CHANFIX */
+		const int manual_fix_disabled		= 1;
+		const int not_enough_servers		= 2;
+		const int no_such_channel		= 3;
+		const int cant_fix_oplevels		= 4;
+		const int registered_channel		= 5;
+		const int no_scores_for_chan		= 6;
+		const int already_being_man_fixed	= 7;
+		const int highscore_channel		= 9;
+		const int channel_being_auto_fixed	= 9;
+		const int channel_blocked		= 10;
+		const int channel_has_notes		= 11;
+		const int manual_chanfix_ack		= 12;
+
+		/* USET */
+		const int lang_set_to			= 13;
+		const int send_notices			= 14;
+		const int send_privmsgs			= 15;
+		const int uset_notice_on_off		= 16;
+		const int usetting_doesnt_exist		= 17;
 	}
 }
 

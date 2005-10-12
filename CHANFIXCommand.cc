@@ -28,6 +28,7 @@
 #include "Network.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 
 RCSTAG("$Id$");
@@ -49,26 +50,38 @@ if (st.size() > 2) {
 
 /* Check if manual chanfix has been disabled in the config. */
 if (!bot->doChanFix()) {
-  bot->SendTo(theClient, "Sorry, manual chanfixes are currently disabled.");
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::manual_fix_disabled,
+                              std::string("Sorry, manual chanfixes are currently disabled.")).c_str());
   return;
 }
 
 /* If not enough servers are currently linked, bail out. */
 if (bot->getState() != chanfix::RUN) {
-  bot->SendTo(theClient, "Sorry, chanfix is currently disabled because not enough servers are linked.");
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::not_enough_servers,
+                              std::string("Sorry, chanfix is currently disabled because not enough servers are linked.")).c_str());
   return;
 }
 
 Channel* netChan = Network->findChannel(st[1]);
 if (!netChan) {
-  bot->SendTo(theClient, "No such channel %s.", st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_such_channel,
+                              std::string("No such channel %s.")).c_str(), st[1].c_str());
   return;
 }
 
 /* Only allow chanfixes for unregistered channels. */
 if (netChan->getMode(Channel::MODE_A) && !override) {
-  bot->SendTo(theClient, "%s cannot be chanfixed as it uses oplevels (+A/+U). If this channel has been taken over and needs to be returned to the original owners, append the OVERRIDE flag to force a manual fix.",
-	      netChan->getName().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::cant_fix_oplevels,
+                              std::string("%s cannot be chanfixed as it uses oplevels (+A/+U). If this channel has been taken over and needs to be returned to the original owners, append the OVERRIDE flag to force a manual fix.")).c_str(),
+                                          netChan->getName().c_str());
   return;
 }
 
@@ -76,8 +89,11 @@ ChannelUser* curUser;
 for (Channel::userIterator ptr = netChan->userList_begin(); ptr != netChan->userList_end(); ptr++) {
    curUser = ptr->second;
    if (curUser->getClient()->getMode(iClient::MODE_SERVICES)) {
-     bot->SendTo(theClient, "%s is a registered channel.",
-		 netChan->getName().c_str());
+     bot->SendTo(theClient,
+                 bot->getResponse(theUser,
+                                 language::registered_channel,
+                                 std::string("%s is a registered channel.")).c_str(),
+                                             netChan->getName().c_str());
      return;
    }
 }
@@ -85,8 +101,11 @@ for (Channel::userIterator ptr = netChan->userList_begin(); ptr != netChan->user
 /* Only allow chanfixes for channels that are in the database. */
 chanfix::chanOpsType myOps = bot->getMyOps(netChan);
 if (myOps.empty()) {
-  bot->SendTo(theClient, "There are no scores in the database for %s.",
-	      netChan->getName().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_scores_for_chan,
+                              std::string("There are no scores in the database for %s.")).c_str(),
+                                          netChan->getName().c_str());
   return;
 }
 
@@ -95,8 +114,11 @@ if (!theChan) theChan = bot->newChannelRecord(st[1]);
 
 /* Don't fix a channel being chanfixed. */
 if (bot->isBeingChanFixed(netChan)) {
-  bot->SendTo(theClient, "The channel %s is already being manually fixed.",
-	      netChan->getName().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::already_being_man_fixed,
+                              std::string("The channel %s is already being manually fixed.")).c_str(),
+                                          netChan->getName().c_str());
   return;
 }
 
@@ -107,19 +129,26 @@ if (myOps.begin() != myOps.end())
 if (theChan->getMaxScore() <= 
     static_cast<int>(static_cast<float>(FIX_MIN_ABS_SCORE_END) * MAX_SCORE)) 
 {
-  bot->SendTo(theClient, "The highscore in channel %s is %d which is lower than the minimum score required (%.2f * %d = %d).",
-	      theChan->getChannel().c_str(), theChan->getMaxScore(),
-	      FIX_MIN_ABS_SCORE_END, MAX_SCORE,
-	      static_cast<int>(static_cast<float>(FIX_MIN_ABS_SCORE_END) 
-	      * MAX_SCORE));
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::highscore_channel,
+                              std::string("The highscore in channel %s is %d which is lower than the minimum score required (%.2f * %d = %d).")).c_str(),
+                                          theChan->getChannel().c_str(), theChan->getMaxScore(),
+                                          FIX_MIN_ABS_SCORE_END, MAX_SCORE,
+                                          static_cast<int>(static_cast<float>(FIX_MIN_ABS_SCORE_END) 
+                                          * MAX_SCORE));
+
   return;
 }
 
 /* Don't fix a channel being autofixed without OVERRIDE flag. */
 if (bot->isBeingAutoFixed(netChan)) {
   if (!override) {
-    bot->SendTo(theClient, "The channel %s is being automatically fixed. Append the OVERRIDE flag to force a manual fix.",
-		netChan->getName().c_str());
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::channel_being_auto_fixed,
+                                std::string("The channel %s is being automatically fixed. Append the OVERRIDE flag to force a manual fix.")).c_str(),
+                                            netChan->getName().c_str());
     return;
   } else {
     /* We're going to manually fix this instead of autofixing it,
@@ -130,18 +159,21 @@ if (bot->isBeingAutoFixed(netChan)) {
 
 /* Don't fix a blocked channel. */
 if (theChan->getFlag(sqlChannel::F_BLOCKED)) {
-  bot->SendTo(theClient, "The channel %s is BLOCKED.", 
-	      theChan->getChannel().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::channel_blocked,
+                              std::string("The channel %s is BLOCKED.")).c_str(),
+                                          theChan->getChannel().c_str());
   return;
 }
 
 /* Don't fix an alerted channel without the OVERRIDE flag. */
 if (theChan->getFlag(sqlChannel::F_ALERT) && !override) {
-  bot->SendTo(theClient, "Alert: The channel %s has notes. Use " \
-	      "\002INFO %s\002 to read them. Append the OVERRIDE flag " \
-	      "to force a manual fix.",
-	      theChan->getChannel().c_str(),
-	      theChan->getChannel().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::channel_has_notes,
+                              std::string("Alert: The channel %s has notes. Use \002INFO %s\002 to read them. Append the OVERRIDE flag to force a manual fix.")).c_str(),
+                                          theChan->getChannel().c_str(), theChan->getChannel().c_str());
   return;
 }
 
@@ -152,8 +184,11 @@ bot->manualFix(netChan);
 theChan->addNote(sqlChannel::EV_CHANFIX, theUser, "");
 
 /* Log the chanfix */
-bot->SendTo(theClient, "Manual chanfix acknowledged for %s",
-	    netChan->getName().c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::manual_chanfix_ack,
+                            std::string("Manual chanfix acknowledged for %s")).c_str(),
+                                        netChan->getName().c_str());
 bot->logAdminMessage("%s (%s) requested manual fix for %s",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str(),
