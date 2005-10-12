@@ -28,6 +28,7 @@
 #include "Network.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlUser.h"
 
@@ -44,8 +45,11 @@ char flag = st[2][0];
 if (st[2].size() > 1) {
   if (flag == '+')
     flag = st[2][1];
-  else {    
-    bot->SendTo(theClient, "You may only add one flag per ADDFLAG command.");
+  else {
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::one_flag_per_addflag,
+                                std::string("You may only add one flag per ADDFLAG command.")).c_str());   
     return;
   }
 }
@@ -57,18 +61,27 @@ if (!bot->getFlagType(flag)) {
 
 sqlUser* chkUser = bot->isAuthed(st[1]);
 if (!chkUser) {
-  bot->SendTo(theClient, "No such user %s.", st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_such_user,
+                              std::string("No such user %s.")).c_str(), st[1].c_str());
   return;
 }
 
 if (flag == bot->getFlagChar(sqlUser::F_OWNER)) {
-  bot->SendTo(theClient, "You cannot add an owner flag.");
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::cant_add_owner_flag,
+                              std::string("You cannot add an owner flag.")).c_str());
   return;
 }
 
 if (flag == bot->getFlagChar(sqlUser::F_USERMANAGER) && 
     !theUser->getFlag(sqlUser::F_OWNER)) {
-  bot->SendTo(theClient, "Only an owner can add the user management flag.");
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::user_man_add_owner_only,
+                              std::string("Only an owner can add the user management flag.")).c_str());
   return;
 }
 
@@ -76,22 +89,34 @@ if (flag == bot->getFlagChar(sqlUser::F_USERMANAGER) &&
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) && 
     !theUser->getFlag(sqlUser::F_USERMANAGER)) {
   if (chkUser->getGroup() != theUser->getGroup()) {
-    bot->SendTo(theClient, "You cannot add a flag to a user in a different group.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::cant_add_flag_diff_group,
+                                std::string("You cannot add a flag to a user in a different group.")).c_str());
     return;
   }
   if (flag == bot->getFlagChar(sqlUser::F_BLOCK)) {
-    bot->SendTo(theClient, "You cannot add a block flag.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::cant_add_block_flag,
+                                std::string("You cannot add a block flag.")).c_str());
     return;
   }
   if (flag == bot->getFlagChar(sqlUser::F_SERVERADMIN)) {
-    bot->SendTo(theClient, "You cannot add a serveradmin flag.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::cant_add_serveradmin_flag,
+                                std::string("You cannot add a serveradmin flag.")).c_str());
     return;
   }
 }
 
 if (chkUser->getFlag(bot->getFlagType(flag))) {
-  bot->SendTo(theClient, "User %s already has flag %c.", 
-	      chkUser->getUserName().c_str(), flag);
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::user_already_has_flag,
+                              std::string("User %s already has flag %c.")).c_str(),
+                                          chkUser->getUserName().c_str(), flag);
   return;
 }
 
@@ -102,7 +127,10 @@ chkUser->setLastUpdatedBy( std::string( "("
 	+ ") "
 	+ theClient->getRealNickUserHost() ) );
 chkUser->commit();
-bot->SendTo(theClient, "Added flag %c to user %s.", flag, 
-	    chkUser->getUserName().c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::added_flag_to_user,
+                            std::string("Added flag %c to user %s.")).c_str(),
+                                        chkUser->getUserName().c_str());
 } //ADDFLAGCommand::Exec
 } //Namespace gnuworld
