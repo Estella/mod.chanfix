@@ -54,6 +54,7 @@ EXTRA_DIST = chanfix.h \
 	chanfixCommands.h \
 	chanfix_config.h \
 	chanfix_misc.h \
+	responses.h \
 	sqlChanOp.h \
 	sqlChannel.h \
 	sqlManager.h \

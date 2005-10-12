@@ -1,9 +1,8 @@
-DELETE FROM languages;
-DELETE FROM help;
+-- Help information.
+--
+-- $Id: cservice.help.sql,v 1.3 2002/08/30 10:18:44 nighty Exp $
 
-COPY "languages" FROM stdin;
-1	EN	English	31337	0
-\.
+DELETE FROM help;
 
 COPY "help" FROM stdin;
 ADDFLAG	1	/msg C ADDFLAG <user> <flag>\nAdds this flag to the user. Possible flags:\nb - can block/unblock channels\nf - can perform manual chanfix\nu - can manage users\nNote: add only a single flag per command.\nThis command requires one of these flags: ua.
@@ -31,7 +30,7 @@ SET	1	/msg C SET <setting> <value>\nSets <setting> to value <value>.\nBoolean se
 STATUS	1	/msg C STATUS\nShows current status.
 SUSPEND	1	/msg C SUSPEND <username>\nSuspends the specified user.\nThis command requires one of these flags: ua.
 UNBLOCK	1	/msg C UNBLOCK <channel>\nRemoves the block on a channel.\nThis command requires flag b.
-USET	1	/msg C USET <setting> <value>\nSets options on your account. Possible settings:\nNOTICE - recieve notices, if no then PRIVMSG's will be sent.
+USET	1	/msg C USET <setting> <value>\nSets options on your account. Possible settings:\nNOTICE - recieve notices, if no then PRIVMSG's will be sent.\nLANG - What language Chanfix will communicate with you in, Available languages: EN - English.
 WHOIS	1	/msg C WHOIS <user>\nShows information about this user.
 SETGROUP	1	/msg C SETGROUP <user> <group>\nSets the group for the specified user.
 SHUTDOWN	1	/msg C SHUTDOWN\nShuts down Chanfix.\nThis command requires flag o.

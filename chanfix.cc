@@ -48,6 +48,7 @@
 #include	"chanfix.h"
 #include	"chanfix_misc.h"
 #include	"chanfixCommands.h"
+#include	"responses.h"
 #include	"sqlChannel.h"
 #include	"sqlChanOp.h"
 #include	"sqlUser.h"
@@ -310,6 +311,9 @@ preloadUserCache();
 
 /* Load help messages */
 loadHelpTable();
+
+/* Load our translation tables. */
+loadTranslationTable();
 
 /* Set up our timer. */
 theTimer = new Timer();
@@ -920,7 +924,7 @@ void chanfix::preloadChannelCache()
 void chanfix::preloadUserCache()
 {
 	std::stringstream theQuery;
-	theQuery	<< "SELECT id, user_name, created, last_seen, last_updated, last_updated_by, faction, flags, issuspended, usenotice "
+	theQuery	<< "SELECT id, user_name, created, last_seen, last_updated, last_updated_by, language_id, faction, flags, issuspended, usenotice "
 			<< "FROM users"
 			;
 
@@ -2072,22 +2076,20 @@ else
   return "";
 }
 
-const std::string chanfix::getHelpMessage(std::string topic)
+const std::string chanfix::getHelpMessage(sqlUser* theUser, std::string topic)
 {
 	int lang_id = 1;
 
-/*	Commented for now, maybe future expansion into multi language - SiRVulcaN
- *	sqlUser* theUser will need to be readded to getHelpMessage
- *	if (theUser)
- *		lang_id = theUser->getLanguageId();
- */
+	if (theUser)
+		lang_id = theUser->getLanguageId();
+
 	std::pair <int, std::string> thePair(lang_id, topic);
 	helpTableType::iterator ptr = helpTable.find(thePair);
 	if (ptr != helpTable.end())
 		return ptr->second;
 
 	if (lang_id != 1)
-		return getHelpMessage(topic);
+		return getHelpMessage(theUser, topic);
 
 	return std::string("");
 }
@@ -2109,6 +2111,98 @@ if (PGRES_TUPLES_OK == status)
                         << helpTable.size()
                         << " help messages."
                         << std::endl;
+
+}
+
+const std::string chanfix::getResponse( sqlUser* theUser, int response_id,
+        std::string msg )
+{
+
+// Language defaults to English
+int lang_id = 1;
+
+if (theUser)
+        {
+        lang_id = theUser->getLanguageId();
+        }
+
+std::pair<int, int> thePair( lang_id, response_id );
+
+translationTableType::iterator ptr = translationTable.find(thePair);
+if(ptr != translationTable.end())
+        {
+        /* Found something! */
+        return ptr->second ;
+        }
+
+/*
+ * Can't find this response Id within a valid language.
+ * Realistically we should bomb here, however it might be wise
+ * to 'fallback' to a lower language ID and try again, only bombing if we
+ * can't find an english variant. (Carrying on here could corrupt
+ * numerous varg lists, and will most likely segfault anyway).
+ */
+if (lang_id != 1)
+        {
+        std::pair<int, int> thePair( 1, response_id );
+        translationTableType::iterator ptr = translationTable.find(thePair);
+        if(ptr != translationTable.end())
+                return ptr->second ;
+
+        }
+
+if( !msg.empty() )
+        {
+        return msg;
+        }
+
+return std::string( "Unable to retrieve response. Please contact a chanfix "
+        "administrator." ) ;
+}
+
+void chanfix::loadTranslationTable()
+{
+ExecStatusType status;
+
+status = SQLDb->Exec("SELECT id,code,name FROM languages");
+
+if (PGRES_TUPLES_OK == status)
+        for (int i = 0; i < SQLDb->Tuples(); i++)
+                languageTable.insert(languageTableType::value_type(SQLDb->GetValue(i, 1),
+                        std::make_pair(atoi(SQLDb->GetValue(i, 0)),
+                                SQLDb->GetValue(i, 2))));
+
+        elog    << "*** [Chanfix::loadTranslationTable]: Loaded "
+                        << languageTable.size()
+                        << " languages."
+                        << std::endl;
+
+status = SQLDb->Exec(
+        "SELECT language_id,response_id,text FROM translations" ) ;
+
+if( PGRES_TUPLES_OK == status )
+        {
+        for (int i = 0 ; i < SQLDb->Tuples(); i++)
+                {
+                /*
+                 *  Add to our translations table.
+                 */
+
+                int lang_id = atoi(SQLDb->GetValue( i, 0 ));
+                int resp_id = atoi(SQLDb->GetValue( i, 1 ));
+
+                std::pair<int, int> thePair( lang_id, resp_id ) ;
+
+                translationTable.insert(
+                        translationTableType::value_type(
+                                thePair, SQLDb->GetValue( i, 2 )) );
+                }
+        }
+
+        elog    << "*** [Chanfix::loadTranslationTable]: Loaded "
+                << translationTable.size()
+                << " translations."
+                << std::endl;
 
 }
 

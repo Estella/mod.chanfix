@@ -89,7 +89,13 @@ public:
 	inline const hostListType& getHostList() const
 		{ return hostList; }
 
+	inline const unsigned int&      getLanguageId() const
+		{ return language_id ; }
+
 	/* Mutators */
+
+	inline void setLanguageId( const unsigned int& _language_id )
+		{ language_id = _language_id; }
 
 	inline void setUserName(const std::string& _user_name)
 		{ user_name = _user_name; }
@@ -145,6 +151,7 @@ private:
 	unsigned int	last_seen;
 	unsigned int	last_updated;
 	std::string	last_updated_by;
+	unsigned int	language_id;
 	std::string	group;
 	flagType	flags;
 	bool		isSuspended;

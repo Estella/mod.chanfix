@@ -3,6 +3,35 @@
 -- (c) 2005 Reed Loden <reed@reedloden.com>
 -- $Id$
 
+CREATE TABLE languages (
+        id SERIAL,
+        code VARCHAR( 16 ) UNIQUE,
+        name VARCHAR( 16 ),
+        last_updated INT4 NOT NULL,
+        deleted INT2 DEFAULT '0',
+        PRIMARY KEY(id)
+);
+
+
+CREATE TABLE translations (
+        language_id INT4 CONSTRAINT translations_language_id_ref REFERENCES languages ( id ),
+        response_id INT4 NOT NULL DEFAULT '0',
+        text TEXT,
+        last_updated INT4 NOT NULL,
+        deleted INT2 DEFAULT '0',
+
+        PRIMARY KEY (language_id, response_id)
+);
+
+CREATE TABLE help (
+        topic VARCHAR(20) NOT NULL,
+        language_id INT4 CONSTRAINT help_language_id_ref REFERENCES languages ( id ),
+        contents TEXT
+);
+
+CREATE INDEX help_topic_idx ON help (topic);
+CREATE INDEX help_language_id_idx ON help (language_id);
+
 CREATE TABLE chanOps (
 	channel VARCHAR(200) NOT NULL,
 	account VARCHAR(24) NOT NULL,
@@ -42,6 +71,7 @@ CREATE TABLE users (
 	last_seen INT4 NOT NULL DEFAULT 0,
 	last_updated INT4 NOT NULL DEFAULT 0,
 	last_updated_by VARCHAR(128) NOT NULL,
+	language_id INT4 CONSTRAINT language_channel_id_ref REFERENCES languages (id),
 	faction VARCHAR(128) NOT NULL DEFAULT 'undernet.org',
 	flags INT2 NOT NULL DEFAULT 0,
 	-- 0x01 - server admin (limited access to +u commands)
@@ -65,24 +95,6 @@ CREATE TABLE hosts (
 );
 
 CREATE INDEX hosts_user_id_idx ON hosts(user_id);
-
-CREATE TABLE languages (
-        id SERIAL,
-        code VARCHAR( 16 ) UNIQUE,
-        name VARCHAR( 16 ),
-        last_updated INT4 NOT NULL,
-        deleted INT2 DEFAULT '0',
-        PRIMARY KEY(id)
-);
-
-CREATE TABLE help (
-        topic VARCHAR(20) NOT NULL,
-        language_id INT4 CONSTRAINT help_language_id_ref REFERENCES languages ( id ),
-        contents TEXT
-);
-
-CREATE INDEX help_topic_idx ON help (topic);
-CREATE INDEX help_language_id_idx ON help (language_id);
 
 CREATE TABLE notes (
 	id SERIAL,

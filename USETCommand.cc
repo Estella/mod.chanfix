@@ -30,6 +30,7 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
+#include	"responses.h"
 #include	"sqlUser.h"
 
 RCSTAG("$Id$");
@@ -47,21 +48,53 @@ std::string value = string_upper(st[2]);
 if (option == "NOTICE") {
   if (value == "ON" || value == "YES" || value == "1") {
     theUser->setNotice(true);
-    bot->SendTo(theClient, "I will now send you notices.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::send_notices,
+                                std::string("I will now send you notices.")).c_str());
     theUser->commit();
     return;
   } else if (value == "OFF" || value == "NO" || value == "0") {
     theUser->setNotice(false);
-    bot->SendTo(theClient, "I will now send you privmsgs.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::send_privmsgs,
+                                std::string("I will now send you privmsgs.")).c_str());
     theUser->commit();
     return;
   } else {
-    bot->SendTo(theClient, "Please use USET NOTICE <on/off>.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::uset_notice_on_off,
+                                std::string("Please use USET NOTICE <on/off>.")).c_str());
     return;
   }
 }
 
-bot->SendTo(theClient, "This setting does not exist.");
+if (option == "LANG")
+{
+	chanfix::languageTableType::iterator ptr = bot->languageTable.find(value);
+	if (ptr != bot->languageTable.end())
+	{
+		std::string lang = ptr->second.second;
+                theUser->setLanguageId(ptr->second.first);
+		theUser->commit();
+		bot->SendTo(theClient,
+		    bot->getResponse(theUser,
+			    language::lang_set_to,
+			    std::string("Language is set to %s.")).c_str(), lang.c_str());
+		return;
+	}
+
+	bot->SendTo(theClient,
+		"ERROR: Invalid language selection.");
+	return;
+}
+
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::usetting_doesnt_exist,
+                            std::string("This setting does not exist.")).c_str());
 
 return;
 }

@@ -48,6 +48,7 @@ sqlUser::sqlUser(PgDatabase* _SQLDb)
   last_seen(0),
   last_updated(0),
   last_updated_by(),
+  language_id(0),
   group(),
   flags(0),
   isSuspended(false),
@@ -74,7 +75,7 @@ bool sqlUser::loadData(unsigned int userID)
 
 std::stringstream queryString;
 queryString	<< "SELECT "
-		<< "id, user_name, created, last_seen, last_updated, last_updated_by, faction, flags, issuspended, usenotice"
+		<< "id, user_name, created, last_seen, last_updated, last_updated_by, language_id, faction, flags, issuspended, usenotice"
 		<< " FROM users WHERE id = "
 		<< userID
 		;
@@ -121,7 +122,7 @@ bool sqlUser::loadData(const std::string& userName)
 
 std::stringstream queryString;
 queryString	<< "SELECT "
-		<< "id, user_name, created, last_seen, last_updated, last_updated_by, faction, flags, issuspended, usenotice"
+		<< "id, user_name, created, last_seen, last_updated, last_updated_by, language_id, faction, flags, issuspended, usenotice"
 		<< " FROM users WHERE lower(user_name) = '"
 		<< escapeSQLChars(string_lower(userName))
 		<< "'"
@@ -162,10 +163,11 @@ void sqlUser::setAllMembers(int row)
   last_seen = atoi(SQLDb->GetValue(row, 3));
   last_updated = atoi(SQLDb->GetValue(row, 4));
   last_updated_by = SQLDb->GetValue(row, 5);
-  group = SQLDb->GetValue(row, 6);
-  flags = atoi(SQLDb->GetValue(row, 7));
-  isSuspended = (!strcasecmp(SQLDb->GetValue(row,8),"t") ? true : false);
-  useNotice = (!strcasecmp(SQLDb->GetValue(row,9),"t") ? true : false);
+  language_id = atoi(SQLDb->GetValue(row, 6));
+  group = SQLDb->GetValue(row, 7);
+  flags = atoi(SQLDb->GetValue(row, 8));
+  isSuspended = (!strcasecmp(SQLDb->GetValue(row,9),"t") ? true : false);
+  useNotice = (!strcasecmp(SQLDb->GetValue(row,10),"t") ? true : false);
 };
 
 bool sqlUser::commit()
@@ -181,6 +183,7 @@ queryString	<< "UPDATE users SET "
 		<< "last_seen = " << last_seen << ", "
 		<< "last_updated = " << last_updated << ", "
 		<< "last_updated_by = '" << last_updated_by << "', "
+		<< "language_id = '" << language_id << "', "
 		<< "faction = '" << group << "', "
 		<< "flags = " << flags << ", "
 		<< "issuspended = " << (isSuspended ? "'t'" : "'f'") << ", "
@@ -212,7 +215,7 @@ bool sqlUser::Insert()
 {
 std::stringstream insertString;
 insertString	<< "INSERT INTO users "
-		<< "(user_name, created, last_seen, last_updated, last_updated_by, faction, flags, issuspended, usenotice) "
+		<< "(user_name, created, last_seen, last_updated, last_updated_by, language_id, faction, flags, issuspended, usenotice) "
 		<< "VALUES "
 		<< "("
 		<< "'" << user_name << "', "
@@ -220,6 +223,7 @@ insertString	<< "INSERT INTO users "
 		<< last_seen << ", "
 		<< last_updated << ", "
 		<< "'" << last_updated_by << "', "
+		<< "'" << language_id << "', "
 		<< "'" << group << "', "
 		<< flags << ", "
 		<< (isSuspended ? "'t'" : "'f'") << ", "

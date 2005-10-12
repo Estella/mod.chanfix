@@ -469,8 +469,17 @@ public:
 	helpTableType helpTable;
 
 	void loadHelpTable();
-	const std::string getHelpMessage(std::string);
+	const std::string getHelpMessage(sqlUser*, std::string);
 
+	typedef std::map < std::string, std::pair <int, std::string> > languageTableType;
+	languageTableType languageTable;
+
+	typedef std::map < std::pair <int, int>, std::string > translationTableType ;
+	translationTableType translationTable;
+
+	void loadTranslationTable();
+
+	const std::string getResponse( sqlUser*, int , std::string = std::string() );
 
 }; // class chanfix
 

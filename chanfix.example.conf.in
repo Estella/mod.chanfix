@@ -105,5 +105,10 @@ updateCycleInterval = 5
 # The amount of users to commit to the database per cycle
 updatesPerCycle = 20
 
+# How frequently to commit to the database
+# _freq is max time to wait, _count is max entries to wait
+commitFreq = 5
+commitCount = 1
+
 # End of config file.
 # ---------------------------------------------------------------------
