@@ -27,6 +27,7 @@
 #include "gnuworld_config.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlUser.h"
 
@@ -41,7 +42,10 @@ StringTokenizer st(Message);
 
 sqlUser* targetUser = bot->isAuthed(st[1]);
 if (!targetUser) {
-  bot->SendTo(theClient, "No such user %s.", st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_such_user,
+                              std::string("No such user %s.")).c_str(), st[1].c_str());
   return;
 }
 
@@ -49,14 +53,20 @@ if (!targetUser) {
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
     !theUser->getFlag(sqlUser::F_USERMANAGER)) {
   if (targetUser->getGroup() != theUser->getGroup()) {
-    bot->SendTo(theClient, "You cannot add a host to a user in a different group.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::cant_del_host_diff_group,
+                                std::string("You cannot delete a host on a user in a different group.")).c_str());
     return;
   }
 }
 
 if (!targetUser->hasHost(st[2].c_str())) {
-  bot->SendTo(theClient, "User %s doesn't have hostmask %s.",
-	      targetUser->getUserName().c_str(), st[2].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::user_doesnt_have_host,
+                              std::string("User %s doesn't have hostmask %s.")).c_str(),
+                                          targetUser->getUserName().c_str(), st[2].c_str());
   return;
 }
 
@@ -72,8 +82,11 @@ deleteString	<< "DELETE FROM hosts "
 ExecStatusType status = bot->SQLDb->Exec(deleteString.str().c_str());
 
 if (PGRES_COMMAND_OK != status) {
-  bot->SendTo(theClient, "Failed deleting hostmask %s from user %s.",
-	      st[2].c_str(), targetUser->getUserName().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::failed_deleting_host,
+                              std::string("Failed deleting hostmask %s from user %s.")).c_str(),
+                                          st[2].c_str(), targetUser->getUserName().c_str());
   return;
 }
 
@@ -85,8 +98,11 @@ targetUser->setLastUpdatedBy( std::string( "("
 	+ theClient->getRealNickUserHost() ) );
 targetUser->commit();
 
-bot->SendTo(theClient, "Deleted hostmask %s from user %s.", st[2].c_str(),
-	    targetUser->getUserName().c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::deleted_hostmask,
+                            std::string("Deleted hostmask %s from user %s.")).c_str(),
+                                        st[2].c_str(), targetUser->getUserName().c_str());
 bot->logAdminMessage("%s (%s) deleted hostmask %s from user %s.",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str(),

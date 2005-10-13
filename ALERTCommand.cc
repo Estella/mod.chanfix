@@ -27,6 +27,7 @@
 #include "gnuworld_config.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlChannel.h"
 #include "sqlUser.h"
@@ -41,8 +42,11 @@ void ALERTCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string&
 StringTokenizer st(Message);
 
 if (st[1][0] != '#') {
-  bot->SendTo(theClient, "%s is an invalid channel name.",
-	      st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::invalid_channel_name,
+                              std::string("%s is an invalid channel name.")).c_str(),
+                                          st[1].c_str());
   return;
 }
 
@@ -50,8 +54,11 @@ sqlChannel* theChan = bot->getChannelRecord(st[1]);
 if (!theChan) theChan = bot->newChannelRecord(st[1]);
 
 if (theChan->getFlag(sqlChannel::F_ALERT)) {
-  bot->SendTo(theClient, "The channel %s already has the ALERT flag.",
-	      theChan->getChannel().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::alert_already_set,
+                              std::string("The channel %s already has the ALERT flag.")).c_str(),
+                                          theChan->getChannel().c_str());
   return;
 }
 
@@ -61,8 +68,11 @@ theChan->commit();
 /* Add note to the channel about this command */
 theChan->addNote(sqlChannel::EV_ALERT, theUser, "");
 
-bot->SendTo(theClient, "ALERT flag added from channel %s",
-	    theChan->getChannel().c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::alert_flag_added,
+                            std::string("ALERT flag added from channel %s")).c_str(),
+                                        theChan->getChannel().c_str());
 
 return;
 }

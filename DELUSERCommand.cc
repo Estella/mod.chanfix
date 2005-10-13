@@ -27,6 +27,7 @@
 #include "gnuworld_config.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlUser.h"
 
@@ -41,17 +42,26 @@ StringTokenizer st(Message);
 
 sqlUser* chkUser = bot->isAuthed(st[1]);
 if (!chkUser) {
-  bot->SendTo(theClient, "No such user %s.", st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_such_user,
+                              std::string("No such user %s.")).c_str(), st[1].c_str());
   return;
 }
 
 if (chkUser->getFlag(sqlUser::F_OWNER)) {
-  bot->SendTo(theClient, "You cannot delete an owner.");
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::cant_delete_an_owner,
+                              std::string("You cannot delete an owner.")).c_str());
   return;
 }
 
 if (chkUser->getFlag(sqlUser::F_USERMANAGER) && !theUser->getFlag(sqlUser::F_OWNER)) {
-  bot->SendTo(theClient, "You cannot delete a user manager.");
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::cant_delete_manager,
+                              std::string("You cannot delete a user manager.")).c_str());
   return;
 }
 
@@ -59,21 +69,30 @@ if (chkUser->getFlag(sqlUser::F_USERMANAGER) && !theUser->getFlag(sqlUser::F_OWN
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
     !theUser->getFlag(sqlUser::F_USERMANAGER)) {
   if (chkUser->getGroup() != theUser->getGroup()) {
-    bot->SendTo(theClient, "You cannot delete a user in a different group.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::cant_delete_from_diff_group,
+                                std::string("You cannot delete a user in a different group.")).c_str());
     return;
   }
 }
 
 if (chkUser->Delete()) {
   bot->usersMap.erase(bot->usersMap.find(chkUser->getUserName()));
-  bot->SendTo(theClient, "Deleted user %s.", chkUser->getUserName().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::deleted_user,
+                              std::string("Deleted user %s.")).c_str(), chkUser->getUserName().c_str());
   bot->logAdminMessage("%s (%s) deleted user %s.",
 		       theClient->getAccount().c_str(),
 		       theClient->getRealNickUserHost().c_str(),
 		       chkUser->getUserName().c_str());
   delete chkUser; chkUser = 0;
 } else {
-  bot->SendTo(theClient, "Error deleting user %s.", st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::error_deleting_user,
+                              std::string("Error deleting user %s.")).c_str(), st[1].c_str());
 }
 } //DELUSERCommand::exec
 } //Namespace gnuworld

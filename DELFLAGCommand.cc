@@ -27,6 +27,7 @@
 #include "gnuworld_config.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlUser.h"
 
@@ -44,7 +45,10 @@ if (st[2].size() > 1) {
   if (flag == '-')
     flag = st[2][1];
   else {
-    bot->SendTo(theClient, "You may only remove one flag per DELFLAG command.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::one_flag_per_delflag,
+                                std::string("You may only remove one flag per DELFLAG command.")).c_str());
     return;
   }
 }
@@ -56,18 +60,27 @@ if (!bot->getFlagType(flag)) {
 
 sqlUser* chkUser = bot->isAuthed(st[1]);
 if (!chkUser) {
-  bot->SendTo(theClient, "No such user %s.", st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_such_user,
+                              std::string("No such user %s.")).c_str(), st[1].c_str());
   return;
 }
 
 if (flag == bot->getFlagChar(sqlUser::F_OWNER)) {
-  bot->SendTo(theClient, "You cannot delete an owner flag.");
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::cant_delete_owner_flag,
+                              std::string("You cannot delete an owner flag.")).c_str());
   return;
 }
 
 if (flag == bot->getFlagChar(sqlUser::F_USERMANAGER) &&
     !theUser->getFlag(sqlUser::F_OWNER)) {
-  bot->SendTo(theClient, "Only an owner can delete the user management flag.");
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::only_owner_del_user_flag,
+                              std::string("Only an owner can delete the user management flag.")).c_str());
   return;
 }
 
@@ -75,22 +88,34 @@ if (flag == bot->getFlagChar(sqlUser::F_USERMANAGER) &&
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
     !theUser->getFlag(sqlUser::F_USERMANAGER)) {
   if (chkUser->getGroup() != theUser->getGroup()) {
-    bot->SendTo(theClient, "You cannot delete a flag from a user in a different group.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::cant_delete_flag_diff_group,
+                                std::string("You cannot delete a flag from a user in a different group.")).c_str());
     return;
   }
   if (flag == bot->getFlagChar(sqlUser::F_BLOCK)) {
-    bot->SendTo(theClient, "You cannot remove a block flag.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::cant_remove_block_flag,
+                                std::string("You cannot remove a block flag.")).c_str());
     return;
   }
   if (flag == bot->getFlagChar(sqlUser::F_SERVERADMIN)) {
-    bot->SendTo(theClient, "You cannot remove a serveradmin flag.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::cant_remove_server_flag,
+                                std::string("You cannot remove a serveradmin flag.")).c_str());
     return;
   }
 }
 
 if (!chkUser->getFlag(bot->getFlagType(flag))) {
-  bot->SendTo(theClient, "User %s does not have flag %c.",
-	      chkUser->getUserName().c_str(), flag);
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::user_does_not_have_flag,
+                              std::string("User %s does not have flag %c.")).c_str(),
+                                          chkUser->getUserName().c_str(), flag);
   return;
 }
 
@@ -101,7 +126,10 @@ chkUser->setLastUpdatedBy( std::string( "("
 	+ ") "
 	+ theClient->getRealNickUserHost() ) );
 chkUser->commit();
-bot->SendTo(theClient, "Deleted flag %c of user %s.", flag,
-	    chkUser->getUserName().c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::deleted_flag,
+                            std::string("Deleted flag %c of user %s.")).c_str(), flag,
+                                        chkUser->getUserName().c_str());
 } //DELFLAGCommand::Exec
 } //Namespace gnuworld

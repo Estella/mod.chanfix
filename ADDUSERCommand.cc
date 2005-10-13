@@ -28,6 +28,7 @@
 #include "Network.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlUser.h"
 
@@ -42,7 +43,10 @@ StringTokenizer st(Message);
 
 sqlUser* chkUser = bot->isAuthed(st[1]);
 if (chkUser) {
-  bot->SendTo(theClient, "User %s already exists.", st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::user_already_exists,
+                              std::string("User %s already exists.")).c_str(), st[1].c_str());
   return;
 }
 
@@ -85,27 +89,40 @@ if (newUser->Insert()) {
     status = bot->SQLDb->Exec(insertString.str().c_str());
 
     if (PGRES_COMMAND_OK != status)
-      bot->SendTo(theClient, "Failed adding hostmask %s to user %s.",
-		  st[2].c_str(), newUser->getUserName().c_str());
+      bot->SendTo(theClient,
+                  bot->getResponse(theUser,
+                                  language::failed_adding_hostmask,
+                                  std::string("Failed adding hostmask %s to user %s.")).c_str(),
+                                              st[2].c_str(), newUser->getUserName().c_str());
     else
       newUser->addHost(st[2].c_str());
   }
   if (st.size() > 2 && PGRES_COMMAND_OK == status) {
-    bot->SendTo(theClient, "Created user %s (%s).", st[1].c_str(),
-		st[2].c_str());
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::created_user_w_host,
+                                std::string("Created user %s (%s).")).c_str(),
+                                            st[1].c_str(), st[2].c_str());
     bot->logAdminMessage("%s (%s) added user %s (%s).",
 			 theUser->getUserName().c_str(), 
 			 theClient->getRealNickUserHost().c_str(),
 			 st[1].c_str(), st[2].c_str());
   } else {
-    bot->SendTo(theClient, "Created user %s.", st[1].c_str());
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::created_user_wo_host,
+                                std::string("Created user %s.")).c_str(), st[1].c_str());
     bot->logAdminMessage("%s (%s) added user %s.",
 			 theUser->getUserName().c_str(), 
 			 theClient->getRealNickUserHost().c_str(),
 			 st[1].c_str());
   }
 } else {
-  bot->SendTo(theClient, "Error creating user %s. (Insertion failed)", st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::error_creating_user,
+                              std::string("Error creating user %s. (Insertion failed)")).c_str(),
+                                          st[1].c_str());
 }
 
 return;

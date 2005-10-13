@@ -27,6 +27,7 @@
 #include "gnuworld_config.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlChannel.h"
 #include "sqlUser.h"
@@ -36,14 +37,17 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-void HISTORYCommand::Exec(iClient* theClient, sqlUser*, const std::string& Message)
+void HISTORYCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
 if (!theChan) {
-  bot->SendTo(theClient, "Channel %s has never been manually fixed.",
-	      st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::chan_no_manual_fixes,
+                              std::string("Channel %s has never been manually fixed.")).c_str(),
+                                          st[1].c_str());
   return;
 }
 
@@ -68,26 +72,40 @@ if( PGRES_TUPLES_OK != status )
 		<< bot->SQLDb->ErrorMessage()
 		<< std::endl;
 
-	bot->SendTo(theClient, "An unknown error occurred while reading this channel's notes.");
+        bot->SendTo(theClient,
+                    bot->getResponse(theUser,
+                                    language::error_occured_notes,
+                                    std::string("An unknown error occurred while reading this channel's notes.")).c_str());
 	return ;
 	}
 
 unsigned int noteCount = bot->SQLDb->Tuples();
 
 if (noteCount <= 0) {
-  bot->SendTo(theClient, "Channel %s has never been manually fixed.",
-	      theChan->getChannel().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::chan_no_manual_fixes,
+                              std::string("Channel %s has never been manually fixed.")).c_str(),
+                                          theChan->getChannel().c_str());
   return;
 }
 
-bot->SendTo(theClient, "Channel %s has been manually fixed on:",
-	    theChan->getChannel().c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::chan_manually_fix,
+                            std::string("Channel %s has been manually fixed on:")).c_str(),
+                                        theChan->getChannel().c_str());
 
 for (unsigned int i = 0; i < noteCount; i++)
-  bot->SendTo(theClient, "%s",
-	      bot->tsToDateTime(atoi(bot->SQLDb->GetValue(i,0)), true).c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::chan_manual_fix,
+                              std::string("%s")).c_str(), bot->tsToDateTime(atoi(bot->SQLDb->GetValue(i,0)), true).c_str());
 
-bot->SendTo(theClient, "End of list.");
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::end_of_list,
+                            std::string("End of list.")).c_str());
 
 return;
 }

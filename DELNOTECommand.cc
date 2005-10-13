@@ -27,6 +27,7 @@
 #include "gnuworld_config.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlChannel.h"
 #include "sqlUser.h"
@@ -42,14 +43,20 @@ StringTokenizer st(Message);
 
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
 if (!theChan) {
-  bot->SendTo(theClient, "There is no entry in the database for %s.",
-	      st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_entry_in_db,
+                              std::string("There is no entry in the database for %s.")).c_str(),
+                                          st[1].c_str());
   return;
 }
 
 if (theChan->countNotes(0) <= 0) {
-  bot->SendTo(theClient, "The channel %s does not have any notes.",
-	      theChan->getChannel().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::chan_has_no_notes,
+                              std::string("The channel %s does not have any notes.")).c_str(),
+                                          theChan->getChannel().c_str());
   return;
 }
 
@@ -70,12 +77,18 @@ if( PGRES_TUPLES_OK != status )
 		<< bot->SQLDb->ErrorMessage()
 		<< std::endl ;
 
-	bot->SendTo(theClient, "An unknown error occured while checking the note id.");
+        bot->SendTo(theClient,
+                    bot->getResponse(theUser,
+                                    language::error_checking_noteid,
+                                    std::string("An unknown error occured while checking the note id.")).c_str());
 	return;
 	}
 
 if (bot->SQLDb->Tuples() != 1) {
-  bot->SendTo(theClient, "There is no such note with that note_id.");
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_note_with_id,
+                              std::string("There is no such note with that note_id.")).c_str());
   return;
 }
 
@@ -84,28 +97,40 @@ unsigned int userID = atoi(bot->SQLDb->GetValue(0,1));
 unsigned short eventType = atoi(bot->SQLDb->GetValue(0,2));
 
 if (channelID != theChan->getID()) {
-  bot->SendTo(theClient, "No such note %d for channel %s.",
-	      messageId, theChan->getChannel().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_note_id_for_chan,
+                              std::string("No such note %d for channel %s.")).c_str(),
+                                          messageId, theChan->getChannel().c_str());
   return;
 }
 
 if (userID != theUser->getID() && !theUser->getFlag(sqlUser::F_OWNER)) {
-  bot->SendTo(theClient, "Note %d for channel %s was not added by you. You can only delete notes that you added.",
-	      messageId, theChan->getChannel().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::note_not_added_by_you,
+                              std::string("Note %d for channel %s was not added by you. You can only delete notes that you added.")).c_str(),
+                                          messageId, theChan->getChannel().c_str());
   return;
 }
 
 if (eventType != sqlChannel::EV_NOTE && !theUser->getFlag(sqlUser::F_OWNER)) {
-  bot->SendTo(theClient, "Note %d for channel %s is not a manually added note. You can only delete notes that were manually added.",
-	      messageId, theChan->getChannel().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::note_not_manually_added,
+                              std::string("Note %d for channel %s is not a manually added note. You can only delete notes that were manually added.")).c_str(),
+                                          messageId, theChan->getChannel().c_str());
   return;
 }
 
 if (!theChan->deleteNote(messageId))
   return;
 
-bot->SendTo(theClient, "Note %d for channel %s deleted.",
-	    messageId, theChan->getChannel().c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::note_deleted,
+                            std::string("Note %d for channel %s deleted.")).c_str(),
+                                        messageId, theChan->getChannel().c_str());
 
 return;
 }

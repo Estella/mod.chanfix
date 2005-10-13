@@ -27,6 +27,7 @@
 #include "gnuworld_config.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlChannel.h"
 #include "sqlUser.h"
@@ -41,8 +42,11 @@ void ADDNOTECommand::Exec(iClient* theClient, sqlUser* theUser, const std::strin
 StringTokenizer st(Message);
 
 if (st[1][0] != '#') {
-  bot->SendTo(theClient, "%s is an invalid channel name.",
-	      st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::invalid_channel_name,
+                              std::string("%s is an invalid channel name.")).c_str(),
+                                          st[1].c_str());
   return;
 }
 
@@ -51,8 +55,11 @@ if (!theChan) theChan = bot->newChannelRecord(st[1]);
 
 theChan->addNote(sqlChannel::EV_NOTE, theUser, st.assemble(2));
 
-bot->SendTo(theClient, "Note recorded for channel %s",
-	    theChan->getChannel().c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::note_recorded,
+                            std::string("Note recorded for channel %s.")).c_str(),
+                                        theChan->getChannel().c_str());
 
 return;
 }

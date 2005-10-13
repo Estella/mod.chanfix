@@ -27,6 +27,7 @@
 #include "gnuworld_config.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlChannel.h"
 #include "sqlUser.h"
@@ -42,13 +43,19 @@ StringTokenizer st(Message);
 
 /* Check if channel blocking has been disabled in the config. */
 if (!bot->doChanBlocking()) {
-  bot->SendTo(theClient, "Channel blocking is disabled.");
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::channel_blocking_disabled,
+                              std::string("Channel blocking is disabled.")).c_str());
   return;
 }
 
 if (st[1][0] != '#') {
-  bot->SendTo(theClient, "%s is an invalid channel name.",
-	      st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::invalid_channel_name,
+                              std::string("%s is an invalid channel name.")).c_str(),
+                                          st[1].c_str());
   return;
 }
 
@@ -56,8 +63,11 @@ sqlChannel* theChan = bot->getChannelRecord(st[1]);
 if (!theChan) theChan = bot->newChannelRecord(st[1]);
 
 if (theChan->getFlag(sqlChannel::F_BLOCKED)) {
-  bot->SendTo(theClient, "The channel %s is already blocked.",
-	      theChan->getChannel().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::channel_already_blocked,
+                              std::string("The channel %s is already blocked.")).c_str(),
+                                          theChan->getChannel().c_str());
   return;
 }
 
@@ -67,8 +77,11 @@ theChan->commit();
 /* Add note to the channel about this command */
 theChan->addNote(sqlChannel::EV_BLOCK, theUser, st.assemble(2));
 
-bot->SendTo(theClient, "The channel %s has been blocked.",
-	    theChan->getChannel().c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::channel_has_been_blocked,
+                            std::string("The channel %s has been blocked.")).c_str(),
+                                        theChan->getChannel().c_str());
 
 return;
 }

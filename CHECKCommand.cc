@@ -28,6 +28,7 @@
 #include "Network.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 
 RCSTAG("$Id$");
@@ -35,21 +36,27 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-void CHECKCommand::Exec(iClient* theClient, sqlUser*, const std::string& Message)
+void CHECKCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 
 Channel* netChan = Network->findChannel(st[1]);
 if (!netChan) {
-  bot->SendTo(theClient, "No such channel %s.", st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_such_channel,
+                              std::string("No such channel %s.")).c_str());
   return;
 }
 
 /* Reports ops and total clients. */
 
-bot->SendTo(theClient, "I see %d opped out of %d total clients in %s.",
-	    bot->countChanOps(netChan), netChan->size(),
-	    netChan->getName().c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::check_results,
+                            std::string("I see %d opped out of %d total clients in %s.")).c_str(),
+                                        bot->countChanOps(netChan), netChan->size(),
+                                        netChan->getName().c_str());
 
 return;
 }
