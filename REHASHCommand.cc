@@ -28,6 +28,7 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
+#include	"responses.h"
 
 RCSTAG("$Id$");
 
@@ -44,8 +45,23 @@ std::string option = string_upper(st[1]);
 if (option == "HELP") {
   bot->helpTable.clear();
   bot->loadHelpTable();
-  bot->SendTo(theClient, "Successfully reloaded help tables.");
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::reloaded_help,
+                              std::string("Successfully reloaded help tables.")).c_str());
   bot->logAdminMessage("%s (%s) rehashed the chanfix help tables.",
+		       theUser->getUserName().c_str(),
+		       theClient->getRealNickUserHost().c_str());
+  return;
+}
+
+if (option == "TRANSLATIONS") {
+  bot->languageTable.clear();
+  bot->translationTable.clear();
+  bot->loadTranslationTable();
+  bot->SendTo(theClient, "Successfully reloaded translation tables. %i entries in table.",
+              bot->translationTable.size());
+  bot->logAdminMessage("%s (%s) rehashed the chanfix translation tables.",
 		       theUser->getUserName().c_str(),
 		       theClient->getRealNickUserHost().c_str());
   return;
@@ -53,7 +69,10 @@ if (option == "HELP") {
 
 bot->readConfigFile(bot->getConfigFileName());
 
-bot->SendTo(theClient, "Successfully rehashed configuration file.");
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::reloaded_conf,
+                            std::string("Successfully rehashed configuration file.")).c_str());
 bot->logAdminMessage("%s (%s) rehashed the chanfix module.",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str());

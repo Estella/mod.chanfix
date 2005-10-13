@@ -28,6 +28,7 @@
 #include "Network.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlChannel.h"
 #include "sqlChanOp.h"
@@ -44,14 +45,20 @@ StringTokenizer st(Message);
 Channel* netChan = Network->findChannel(st[1]);
 sqlChanOp* curOp = 0;
 if (!netChan) {
-  bot->SendTo(theClient, "No such channel %s.", st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_such_channel,
+                              std::string("No such channel %s.")).c_str(), st[1].c_str());
   return;
 }
 
 chanfix::chanOpsType myOps = bot->getMyOps(netChan);
 if (myOps.empty()) {
-  bot->SendTo(theClient, "There are no scores in the database for %s.",
-	      netChan->getName().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_scores_for_chan,
+                              std::string("There are no scores in the database for %s.")).c_str(),
+                                          netChan->getName().c_str());
   return;
 }
 
@@ -65,19 +72,31 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
 /* Technically if they are all 0 scores it will get to this point,
  * dont want a notice saying 0 accounts. */
 if (oCnt == 0) {
-  bot->SendTo(theClient, "There are no scores in the database for %s.",
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_scores_for_chan,
+                              std::string("There are no scores in the database for %s.")).c_str(),
 	      netChan->getName().c_str());
   return;
 }
 
 if (oCnt == OPCOUNT)
-  bot->SendTo(theClient, "Top %d unique op accounts in channel %s:",
-	      OPCOUNT, netChan->getName().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::top_unique_op_accounts,
+                              std::string("Top %d unique op accounts in channel %s:")).c_str(),
+                                          OPCOUNT, netChan->getName().c_str());
 else
-  bot->SendTo(theClient, "Found %d unique op accounts in channel %s:",
-	      oCnt, netChan->getName().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::found_unique_op_accounts,
+                              std::string("Found %d unique op accounts in channel %s:")).c_str(),
+                                          oCnt, netChan->getName().c_str());
 
-bot->SendTo(theClient, "Rank Score Account -- Time first opped / Time last opped");
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::rank_score_acc_header,
+                            std::string("Rank Score Account -- Time first opped / Time last opped")).c_str());
 
 unsigned int opCount = 0;
 std::string firstop;

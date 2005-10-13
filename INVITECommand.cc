@@ -26,6 +26,7 @@
 
 #include "gnuworld_config.h"
 #include "Network.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 
 #include "chanfix.h"
@@ -35,7 +36,7 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-void INVITECommand::Exec(iClient* theClient, sqlUser*, const std::string& Message)
+void INVITECommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 
 StringTokenizer st(Message);
@@ -47,22 +48,31 @@ else
   theChannel = Network->findChannel(st[1]);
 
 if (!theChannel) {
-  bot->SendTo(theClient, "Could not find channel %s on the network.", 
-	      st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::cant_find_channel,
+                              std::string("Could not find channel %s on the network.")).c_str(),
+                                          st[1].c_str());
   return;
 }
 
 ChannelUser* theBot = theChannel->findUser(bot->getInstance());
 if (!theBot) {
-  bot->SendTo(theClient, "I am not in %s.", 
-	      theChannel->getName().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::chanfix_not_in_chan,
+                              std::string("I am not in %s.")).c_str(),
+                                          theChannel->getName().c_str());
   return;
 }
 
 ChannelUser* theChannelUser = theChannel->findUser(theClient);
 if (theChannelUser) {
-  bot->SendTo(theClient, "You are already in %s!", 
-	      theChannel->getName().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::already_in_channel,
+                              std::string("You are already in %s!")).c_str(),
+                                          theChannel->getName().c_str());
   return;
 }
 

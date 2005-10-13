@@ -28,6 +28,7 @@
 #include "Network.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlChannel.h"
 #include "sqlUser.h"
@@ -37,35 +38,53 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-void INFOCommand::Exec(iClient* theClient, sqlUser*, const std::string& Message)
+void INFOCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
 if (!theChan) {
-  bot->SendTo(theClient, "No information on %s in the database.",
-	      st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_info_for_chan,
+                              std::string("No information on %s in the database.")).c_str(),
+                                          st[1].c_str());
   return;
 }
 
-bot->SendTo(theClient, "Information on %s:",
-	    theChan->getChannel().c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::information_on,
+                            std::string("Information on %s:")).c_str(),
+                                        theChan->getChannel().c_str());
 
 if (theChan->getFlag(sqlChannel::F_BLOCKED))
-  bot->SendTo(theClient, "%s is BLOCKED.",
-	      theChan->getChannel().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::info_chan_blocked,
+                              std::string("%s is BLOCKED.")).c_str(),
+                                          theChan->getChannel().c_str());
 else if (theChan->getFlag(sqlChannel::F_ALERT))
-  bot->SendTo(theClient, "%s is ALERTED.",
-	      theChan->getChannel().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::info_chan_alerted,
+                              std::string("%s is ALERTED.")).c_str(),
+                                          theChan->getChannel().c_str());
 
 Channel* netChan = Network->findChannel(st[1]);
 if (netChan) {
   if (bot->isBeingChanFixed(netChan))
-    bot->SendTo(theClient, "%s is being chanfixed.",
-		theChan->getChannel().c_str());
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::info_chan_being_fixed,
+                                std::string("%s is being chanfixed.")).c_str(),
+                                            theChan->getChannel().c_str());
   if (bot->isBeingAutoFixed(netChan))
-    bot->SendTo(theClient, "%s is being autofixed.",
-		theChan->getChannel().c_str());
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::info_chan_being_autofixed,
+                                std::string("%s is being autofixed.")).c_str(),
+                                            theChan->getChannel().c_str());
 }
 
 /*
@@ -88,14 +107,20 @@ if( PGRES_TUPLES_OK != status )
 		<< bot->SQLDb->ErrorMessage()
 		<< std::endl;
 
-	bot->SendTo(theClient, "An unknown error occurred while reading this channel's notes.");
+        bot->SendTo(theClient,
+                    bot->getResponse(theUser,
+                                    language::error_occured_notes,
+                                    std::string("An unknown error occurred while reading this channel's notes.")).c_str());
 	return ;
 	}
 
 unsigned int noteCount = bot->SQLDb->Tuples();
 
 if (noteCount > 0) {
-  bot->SendTo(theClient, "Notes (%d):", noteCount);
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::info_notes_count,
+                              std::string("Notes (%d):")).c_str(), noteCount);
 
   for (unsigned int i = 0; i < noteCount; i++) {
     unsigned int note_id = atoi(bot->SQLDb->GetValue(i,0));
@@ -104,15 +129,21 @@ if (noteCount > 0) {
     unsigned short event = atoi(bot->SQLDb->GetValue(i,3));
     std::string theMessage = bot->SQLDb->GetValue(i,4);
 
-    bot->SendTo(theClient, "[%d:%s] %s \002%s\002%s%s",
-		note_id, from.c_str(),
-		bot->tsToDateTime(when, true).c_str(),
-		bot->getEventName(event).c_str(),
-		(!theMessage.empty()) ? " " : "", theMessage.c_str());
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::info_notes,
+                                std::string("[%d:%s] %s \002%s\002%s%s")).c_str(),
+                                            note_id, from.c_str(),
+                                            bot->tsToDateTime(when, true).c_str(),
+                                            bot->getEventName(event).c_str(),
+                                            (!theMessage.empty()) ? " " : "", theMessage.c_str());
   }
 }
 
-bot->SendTo(theClient, "End of information.");
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::end_of_information,
+                            std::string("End of information.")).c_str());
 
 return;
 }

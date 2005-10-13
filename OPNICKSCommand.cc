@@ -28,6 +28,7 @@
 #include "Network.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 
 RCSTAG("$Id$");
@@ -35,19 +36,25 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-void OPNICKSCommand::Exec(iClient* theClient, sqlUser*, const std::string& Message)
+void OPNICKSCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 
 Channel* netChan = Network->findChannel(st[1]);
 if (!netChan) {
-  bot->SendTo(theClient, "No such channel %s.", st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_such_channel,
+                              std::string("No such channel %s.")).c_str(), st[1].c_str());
   return;
 }
 
 /* Send list of opped clients. */
-bot->SendTo(theClient, "Opped clients on channel %s:", 
-	    netChan->getName().c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::opped_clients_on,
+                            std::string("Opped clients on channel %s:")).c_str(),
+                                        netChan->getName().c_str());
 
 ChannelUser* curUser;
 std::string oppedUsers;
@@ -69,11 +76,17 @@ if (numOppedUsers)
   bot->SendTo(theClient, "%s", oppedUsers.c_str());
 
 if (numOppedUsers == 1)
-  bot->SendTo(theClient, "I see 1 opped client in %s.", 
-	      netChan->getName().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::one_opped_client,
+                              std::string("I see 1 opped client in %s.")).c_str(),
+                                          netChan->getName().c_str());
 else
-  bot->SendTo(theClient, "I see %u opped clients in %s.",
-	      numOppedUsers, netChan->getName().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::opped_clients,
+                              std::string("I see %u opped clients in %s.")).c_str(),
+                                          numOppedUsers, netChan->getName().c_str());
 
 /* Log command */
 /* ... */

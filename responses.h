@@ -119,6 +119,48 @@ namespace gnuworld
 		const int chan_manual_fix		= 66;
 		const int end_of_list			= 67;
 
+		/* INFO */
+		const int no_info_for_chan		= 68;
+		const int information_on		= 69;
+		const int info_chan_blocked		= 70;
+		const int info_chan_being_fixed		= 71;
+		const int info_chan_being_autofixed	= 72;
+		const int info_notes_count		= 73;
+		const int end_of_information		= 74;
+		const int info_chan_alerted		= 75;
+		const int info_notes			= 76;
+
+		/* INVITE */
+		const int cant_find_channel		= 77;
+		const int chanfix_not_in_chan		= 78;
+		const int already_in_channel		= 79;
+
+		/* OPLIST */
+		const int top_unique_op_accounts	= 80;
+		const int found_unique_op_accounts	= 81;
+		const int rank_score_acc_header		= 82;
+
+		/* OPNICKS */
+		const int opped_clients_on		= 83;
+		const int one_opped_client		= 84;
+		const int opped_clients			= 85;
+
+		/* REHASH */
+		const int reloaded_help			= 86;
+		const int reloaded_conf			= 87;
+
+		/* RELOAD */
+		const int reloading_client		= 88;
+
+		/* SCORE */
+		const int score_for_channel		= 89;
+		const int compact_no_such_nick		= 90;
+		const int no_such_nick			= 91;
+		const int score_none			= 92;
+		const int top_scores_for_chan		= 93;
+		const int top_scores_for_ops		= 94;
+		const int top_scores_for_nonops		= 95;
+
 		/* USET */
 		const int lang_set_to			= 122;
 		const int send_notices			= 123;

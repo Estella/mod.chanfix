@@ -30,6 +30,7 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
+#include	"responses.h"
 
 RCSTAG("$Id$");
 
@@ -40,7 +41,10 @@ void RELOADCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string
 {
 StringTokenizer st(Message);
 
-bot->SendTo(theClient, "Reloading client...see you on the flip side");
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::reloading_client,
+                            std::string("Reloading client...see you on the flip side")).c_str());
 bot->logAdminMessage("%s (%s) is reloading the chanfix module.",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str());
