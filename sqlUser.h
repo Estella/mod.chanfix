@@ -71,6 +71,9 @@ public:
 	inline const std::string& getLastUpdatedBy() const
 		{ return last_updated_by; }
 
+	inline const unsigned int&	getLanguageId() const
+		{ return language_id ; }
+
 	inline const std::string& getGroup() const
 		{ return group; }
 
@@ -89,13 +92,7 @@ public:
 	inline const hostListType& getHostList() const
 		{ return hostList; }
 
-	inline const unsigned int&      getLanguageId() const
-		{ return language_id ; }
-
 	/* Mutators */
-
-	inline void setLanguageId( const unsigned int& _language_id )
-		{ language_id = _language_id; }
 
 	inline void setUserName(const std::string& _user_name)
 		{ user_name = _user_name; }
@@ -111,6 +108,9 @@ public:
 
 	inline void setLastUpdatedBy(const std::string& _last_updated_by)
 		{ last_updated_by = _last_updated_by; }
+
+	inline void setLanguageId(const unsigned int _language_id)
+		{ language_id = _language_id; }
 
 	inline void setGroup(const std::string& _group)
 		{ group = string_lower(_group); }

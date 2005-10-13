@@ -39,12 +39,21 @@ void REHASHCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string
 
 StringTokenizer st(Message);
 
+std::string option = string_upper(st[1]);
+
+if (option == "HELP") {
+  bot->helpTable.clear();
+  bot->loadHelpTable();
+  bot->SendTo(theClient, "Successfully reloaded help tables.");
+  bot->logAdminMessage("%s (%s) rehashed the chanfix help tables.",
+		       theUser->getUserName().c_str(),
+		       theClient->getRealNickUserHost().c_str());
+  return;
+}
+
 bot->readConfigFile(bot->getConfigFileName());
 
-bot->helpTable.clear();
-bot->loadHelpTable();
-
-bot->SendTo(theClient, "Successfully rehashed configuration file and reloaded help.");
+bot->SendTo(theClient, "Successfully rehashed configuration file.");
 bot->logAdminMessage("%s (%s) rehashed the chanfix module.",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str());

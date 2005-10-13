@@ -16,11 +16,11 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
  * USA.
  *
- * $Id: responses.h,v 1.17 2003/06/28 01:21:20 dan_karrels Exp $
+ * $Id$
  */
 
 #ifndef __RESPONSES_H
-#define __RESPONSES_H "$Id: responses.h,v 1.17 2003/06/28 01:21:20 dan_karrels Exp $"
+#define __RESPONSES_H "$Id$"
 
 namespace gnuworld
 	{
@@ -70,4 +70,4 @@ namespace gnuworld
 	}
 }
 
-#endif
+#endif /* __RESPONSES_H */

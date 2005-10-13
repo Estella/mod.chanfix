@@ -513,8 +513,9 @@ void chanfix::OnPrivateMessage( iClient* theClient,
 if (!theClient->isOper())
   return;
 
+sqlUser* theUser = isAuthed(theClient->getAccount());
+
 if (currentState == BURST) {
-  sqlUser* theUser = isAuthed(theClient->getAccount());
   SendTo(theClient,
          getResponse(theUser,
                      language::no_commands_during_burst,
@@ -529,7 +530,6 @@ if ( st.empty() )
 const std::string Command = string_upper(st[0]);
 
 commandMapType::iterator commHandler = commandMap.find(Command);
-sqlUser* theUser = isAuthed(theClient->getAccount());
 if (commHandler == commandMap.end()) {
   SendTo(theClient,
          getResponse(theUser,

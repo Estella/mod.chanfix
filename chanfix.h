@@ -364,6 +364,22 @@ public:
 	typedef std::list< sqlChanOp* >	queueListType;
 	queueListType			userUpdateQueue;
 
+	typedef std::map < std::pair <int, std::string>, std::string > helpTableType;
+	helpTableType	helpTable;
+
+	void loadHelpTable();
+	const std::string getHelpMessage(sqlUser*, std::string);
+
+	typedef std::map < std::string, std::pair <int, std::string> > languageTableType;
+	languageTableType	languageTable;
+
+	typedef std::map < std::pair <int, int>, std::string > translationTableType ;
+	translationTableType	translationTable;
+
+	void loadTranslationTable();
+
+	const std::string getResponse(sqlUser*, int, std::string = std::string());
+
 	std::string	consoleChan;
 	std::string	operChan;
 	std::string	supportChan;
@@ -463,23 +479,6 @@ public:
 		{ enableChannelBlocking = _enableChannelBlocking; }
 	inline void	setCurrentDay()
 		{ currentDay = currentTime() / 86400 % DAYSAMPLES; }
-
-
-	typedef std::map < std::pair <int, std::string>, std::string > helpTableType;
-	helpTableType helpTable;
-
-	void loadHelpTable();
-	const std::string getHelpMessage(sqlUser*, std::string);
-
-	typedef std::map < std::string, std::pair <int, std::string> > languageTableType;
-	languageTableType languageTable;
-
-	typedef std::map < std::pair <int, int>, std::string > translationTableType ;
-	translationTableType translationTable;
-
-	void loadTranslationTable();
-
-	const std::string getResponse( sqlUser*, int , std::string = std::string() );
 
 }; // class chanfix
 

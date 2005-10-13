@@ -73,28 +73,26 @@ if (option == "NOTICE") {
 
 if (option == "LANG")
 {
-	chanfix::languageTableType::iterator ptr = bot->languageTable.find(value);
-	if (ptr != bot->languageTable.end())
-	{
-		std::string lang = ptr->second.second;
-                theUser->setLanguageId(ptr->second.first);
-		theUser->commit();
-		bot->SendTo(theClient,
-		    bot->getResponse(theUser,
-			    language::lang_set_to,
-			    std::string("Language is set to %s.")).c_str(), lang.c_str());
-		return;
-	}
+  chanfix::languageTableType::iterator ptr = bot->languageTable.find(value);
+  if (ptr != bot->languageTable.end()) {
+    std::string lang = ptr->second.second;
+    theUser->setLanguageId(ptr->second.first);
+    theUser->commit();
+    bot->SendTo(theClient,
+		bot->getResponse(theUser,
+			language::lang_set_to,
+			std::string("Language is set to %s.")).c_str(), lang.c_str());
+    return;
+  }
 
-	bot->SendTo(theClient,
-		"ERROR: Invalid language selection.");
-	return;
+  bot->SendTo(theClient, "ERROR: Invalid language selection.");
+  return;
 }
 
 bot->SendTo(theClient,
-            bot->getResponse(theUser,
-                            language::usetting_doesnt_exist,
-                            std::string("This setting does not exist.")).c_str());
+	    bot->getResponse(theUser,
+			     language::usetting_doesnt_exist,
+			     std::string("This setting does not exist.")).c_str());
 
 return;
 }

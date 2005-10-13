@@ -12,7 +12,6 @@ CREATE TABLE languages (
         PRIMARY KEY(id)
 );
 
-
 CREATE TABLE translations (
         language_id INT4 CONSTRAINT translations_language_id_ref REFERENCES languages ( id ),
         response_id INT4 NOT NULL DEFAULT '0',
@@ -71,7 +70,7 @@ CREATE TABLE users (
 	last_seen INT4 NOT NULL DEFAULT 0,
 	last_updated INT4 NOT NULL DEFAULT 0,
 	last_updated_by VARCHAR(128) NOT NULL,
-	language_id INT4 CONSTRAINT language_channel_id_ref REFERENCES languages (id),
+	language_id INT4 CONSTRAINT language_id_ref REFERENCES languages (id),
 	faction VARCHAR(128) NOT NULL DEFAULT 'undernet.org',
 	flags INT2 NOT NULL DEFAULT 0,
 	-- 0x01 - server admin (limited access to +u commands)

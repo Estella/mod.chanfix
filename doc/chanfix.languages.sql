@@ -1,6 +1,6 @@
 -- Use this file to populate the 'languages' table.
 --
--- $Id: chanfix.sql 1344 2005-10-10 16:33:26Z sirvulcan $
+-- $Id$
 
 DELETE FROM languages;
 COPY "languages" FROM stdin;

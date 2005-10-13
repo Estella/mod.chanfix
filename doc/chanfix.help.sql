@@ -1,6 +1,6 @@
 -- Help information.
 --
--- $Id: cservice.help.sql,v 1.3 2002/08/30 10:18:44 nighty Exp $
+-- $Id$
 
 DELETE FROM help;
 
@@ -13,7 +13,7 @@ BLOCK	1	/msg C BLOCK <channel> <reason>\nBlocks a channel from being fixed, both
 CHECK	1	/msg C CHECK <channel>\nShows the number of ops and total clients in <channel>.
 CSCORE	1	/msg C CSCORE <channel> [nick|hostmask]\nShows the same as SCORE, but in a compact output. See /msg C HELP SCORE.
 CHANFIX	1	/msg C CHANFIX <channel> [override]\nPerforms a manual fix on <channel>. Append OVERRIDE, YES or an exclamation mark (!) to force this manual fix.\nThis command requires flag f.
-DELFLAG	1	/msg C DELFLAG<user> <flag>\nRemoves this flag from the user. See /msg C HELP ADDFLAG.\nThis command requires one of these flags: ua.
+DELFLAG	1	/msg C DELFLAG <user> <flag>\nRemoves this flag from the user. See /msg C HELP ADDFLAG.\nThis command requires one of these flags: ua.
 DELHOST	1	/msg C DELHOST <user> <hostmask>\nDeletes this hostmask from the user's list of hostmasks.\nThis command requires one of these flags: ua.
 DELNOTE	1	/msg C DELNOTE <channel> <note_id>\nDeletes the note with this note_id from the channel. You can only delete notes you added yourself.\nThis command requires flag c.
 DELUSER	1	/msg C DELUSER <user>\nDeletes this user.\nThis command requires one of these flags: ua.
@@ -30,7 +30,7 @@ SET	1	/msg C SET <setting> <value>\nSets <setting> to value <value>.\nBoolean se
 STATUS	1	/msg C STATUS\nShows current status.
 SUSPEND	1	/msg C SUSPEND <username>\nSuspends the specified user.\nThis command requires one of these flags: ua.
 UNBLOCK	1	/msg C UNBLOCK <channel>\nRemoves the block on a channel.\nThis command requires flag b.
-USET	1	/msg C USET <setting> <value>\nSets options on your account. Possible settings:\nNOTICE - recieve notices, if no then PRIVMSG's will be sent.\nLANG - What language Chanfix will communicate with you in, Available languages: EN - English.
+USET	1	/msg C USET <setting> <value>\nSets options on your account. Possible settings:\nNOTICE - receive notices, if no then PRIVMSG's will be sent.\nLANG - What language Chanfix will communicate with you in, Available languages: EN - English.
 WHOIS	1	/msg C WHOIS <user>\nShows information about this user.
 SETGROUP	1	/msg C SETGROUP <user> <group>\nSets the group for the specified user.
 SHUTDOWN	1	/msg C SHUTDOWN\nShuts down Chanfix.\nThis command requires flag o.

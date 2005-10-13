@@ -66,7 +66,6 @@ if (st.size() < 2) {
     bot->SendTo(theClient, "\002User Manager (+u)\002: ADDUSER DELUSER ADDHOST DELHOST ADDFLAG DELFLAG SETGROUP WHOGROUP SUSPEND UNSUSPEND");
 
 } else {
-  sqlUser* theUser = bot->isAuthed(theClient->getAccount());
   std::string msg = bot->getHelpMessage(theUser, string_upper(st.assemble(1)));
 
   if (!msg.empty())
@@ -76,5 +75,5 @@ if (st.size() < 2) {
 
 }
 
-} //helpcommand::exec
+} //HELPCommand::Exec
 } //namespace gnuworld
