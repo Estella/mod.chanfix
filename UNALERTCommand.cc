@@ -27,6 +27,7 @@
 #include "gnuworld_config.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlChannel.h"
 #include "sqlUser.h"
@@ -42,14 +43,20 @@ StringTokenizer st(Message);
 
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
 if (!theChan) {
-  bot->SendTo(theClient, "There is no entry in the database for %s.",
-	      st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_entry_in_db,
+                              std::string("There is no entry in the database for %s.")).c_str(),
+                                          st[1].c_str());
   return;
 }
 
 if (!theChan->getFlag(sqlChannel::F_ALERT)) {
-  bot->SendTo(theClient, "The channel %s does not have the ALERT flag.",
-	      theChan->getChannel().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_alert_set,
+                              std::string("The channel %s does not have the ALERT flag.")).c_str(),
+                                          theChan->getChannel().c_str());
   return;
 }
 
@@ -59,8 +66,11 @@ theChan->commit();
 /* Add note to the channel about this command */
 theChan->addNote(sqlChannel::EV_UNALERT, theUser, "");
 
-bot->SendTo(theClient, "ALERT flag removed from channel %s",
-	    theChan->getChannel().c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::alert_removed,
+                            std::string("ALERT flag removed from channel %s")).c_str(),
+                                        theChan->getChannel().c_str());
 
 return;
 }

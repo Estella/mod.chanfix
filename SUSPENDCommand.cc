@@ -27,6 +27,7 @@
 #include "gnuworld_config.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlUser.h"
 
@@ -41,7 +42,10 @@ StringTokenizer st(Message);
 
 sqlUser* targetUser = bot->isAuthed(st[1]);
 if (!targetUser) {
-  bot->SendTo(theClient, "No such user %s.", st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_such_user,
+                              std::string("No such user %s.")).c_str(), st[1].c_str());
   return;
 }
 
@@ -49,14 +53,20 @@ if (!targetUser) {
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
     !theUser->getFlag(sqlUser::F_USERMANAGER)) {
   if (targetUser->getGroup() != theUser->getGroup()) {
-    bot->SendTo(theClient, "You cannot suspend a user in a different group.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::cant_suspend_diff_group,
+                                std::string("You cannot suspend a user in a different group.")).c_str());
     return;
   }
 }
 
 if (targetUser->getIsSuspended()) {
-  bot->SendTo(theClient, "User %s is already suspended.", 
-	      targetUser->getUserName().c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::user_already_suspended,
+                              std::string("User %s is already suspended.")).c_str(),
+                                          targetUser->getUserName().c_str());
   return;
 }
 
@@ -68,8 +78,11 @@ targetUser->setLastUpdatedBy( std::string( "("
 	+ theClient->getRealNickUserHost() ) );
 targetUser->commit();
 
-bot->SendTo(theClient, "Suspended user %s indefinitely.",
-	    targetUser->getUserName().c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::user_suspended,
+                            std::string("Suspended user %s indefinitely.")).c_str(),
+                                        targetUser->getUserName().c_str());
 bot->logAdminMessage("%s (%s) suspended user %s indefinitely.",
 	    theUser->getUserName().c_str(),
 	    theClient->getRealNickUserHost().c_str(),

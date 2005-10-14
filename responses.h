@@ -161,22 +161,85 @@ namespace gnuworld
 		const int top_scores_for_ops		= 94;
 		const int top_scores_for_nonops		= 95;
 
+		/* SET */
+		const int num_server_syntax		= 96;
+		const int num_servers_set		= 97;
+		const int enabled_autofix		= 98;
+		const int disabled_autofix		= 99;
+		const int enable_autofix_syntax		= 100;
+		const int enabled_manual_chanfix	= 101;
+		const int disabled_manual_chanfix	= 102;
+		const int enable_chanfix_syntax		= 103;
+		const int enabled_chan_blocking		= 104;
+		const int disabled_chan_blocking	= 105;
+		const int enable_chan_blocking_syntax	= 106;
+		const int setting_doesnt_exist		= 107;
+
+		/* SETGROUP */
+		const int user_already_in_group		= 108;
+		const int set_group_for_user		= 109;
+
+		/* SHUTDOWN */
+		const int shutting_down			= 110;
+
+		/* STATUS */
+		const int status_uptime			= 111;
+		const int status_auto_fixing		= 112;
+		const int status_manual_fixing		= 113;
+		const int status_chan_blocking		= 114;
+		const int status_servers_amount		= 115;
+		const int status_splitmode_enabled	= 116;
+		const int status_splitmode_disabled	= 117;
+
+		/* SUSPEND */
+		const int cant_suspend_diff_group	= 118;
+		const int user_already_suspended	= 119;
+		const int user_suspended		= 120;
+
+		/* UNALERT */
+		const int no_alert_set			= 121;
+		const int alert_removed			= 122;
+
+		/* UNBLOCK */
+		const int channel_not_blocked		= 123;
+		const int channel_unblocked		= 124;
+
+		/* UNSUSPEND */
+		const int cant_unsuspend_diff_group	= 125;
+		const int user_not_suspended		= 126;
+		const int user_unsuspended		= 127;
+
 		/* USET */
-		const int lang_set_to			= 122;
-		const int send_notices			= 123;
-		const int send_privmsgs			= 124;
-		const int uset_notice_on_off		= 125;
-		const int usetting_doesnt_exist		= 126;
+		const int lang_set_to			= 128;
+		const int send_notices			= 129;
+		const int send_privmsgs			= 130;
+		const int uset_notice_on_off		= 131;
+		const int usetting_doesnt_exist		= 132;
+
+		/* WHOGROUP */
+		const int whogroup_your_group		= 134;
+		const int users_with_group		= 135;
+		const int number_of_users		= 136;
+
+		/* WHOIS */
+		const int list_of_all_users		= 137;
+		const int user_flags_group		= 138;
+		const int end_of_user_list		= 139;
+		const int whois_user			= 140;
+		const int whois_hosts			= 141;
+		const int whois_group			= 142;
+		const int whois_flags_none		= 143;
+		const int whois_flags			= 144;
 
 		/* chanfix.cc */
-		const int no_commands_during_burst	= 127;
-		const int unknown_command		= 128;
-		const int access_suspended		= 129;
-		const int host_not_matching		= 130;
-		const int need_to_auth			= 131;
-		const int requires_flag			= 132;
-		const int requires_flags		= 133;
-		const int syntax			= 134;
+		const int no_commands_during_burst	= 145;
+		const int unknown_command		= 146;
+		const int access_suspended		= 147;
+		const int host_not_matching		= 148;
+		const int need_to_auth			= 149;
+		const int requires_flag			= 150;
+		const int requires_flags		= 151;
+		const int syntax			= 152;
 	}
 }
 

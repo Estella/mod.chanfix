@@ -27,6 +27,7 @@
 #include "gnuworld_config.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlUser.h"
 
@@ -43,13 +44,19 @@ StringTokenizer st(Message);
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
     !theUser->getFlag(sqlUser::F_USERMANAGER)) {
   if (string_lower(st[1]) != theUser->getGroup()) {
-    bot->SendTo(theClient, "You can only WHOGROUP on your group.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::whogroup_your_group,
+                                std::string("You can only WHOGROUP on your group.")).c_str());
     return;
   }
 }
 
-bot->SendTo(theClient, "Users with group %s [username (flags)]:", 
-	    st[1].c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::users_with_group,
+                            std::string("Users with group %s [username (flags)]:")).c_str(),
+                                        st[1].c_str());
 
 std::string groupUsers;
 unsigned int numUsersInGroup = 0;
@@ -74,7 +81,10 @@ while (ptr != bot->usersMap_end()) {
 if (!groupUsers.empty())
   bot->SendTo(theClient, "%s", groupUsers.c_str());
 
-bot->SendTo(theClient, "Number of users: %d.", numUsersInGroup);
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::number_of_users,
+                            std::string("Number of users: %d.")).c_str(), numUsersInGroup);
 
 return;
 } //WHOGROUPCommand::Exec

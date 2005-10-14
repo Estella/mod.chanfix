@@ -30,6 +30,7 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
+#include	"responses.h"
 #include	"Network.h"
 
 RCSTAG("$Id$");
@@ -56,12 +57,18 @@ while ((pos = option.find('_', 0)) != std::string::npos)
 if (option == "NUMSERVERS") {
   int setting = atoi(value.c_str());
   if (setting < 0) {
-    bot->SendTo(theClient, "Please use SET NUM_SERVERS <integer number>.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::num_server_syntax,
+                                std::string("Please use SET NUM_SERVERS <integer number>.")).c_str());
     return;
   }
 
   bot->setNumServers(setting);
-  bot->SendTo(theClient, "NUM_SERVERS is now %d.", setting);
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::num_servers_set,
+                              std::string("NUM_SERVERS is now %d.")).c_str(), setting);
   bot->logAdminMessage("%s (%s) changed NUM_SERVERS to %d.",
 		       theUser->getUserName().c_str(),
 		       theClient->getRealNickUserHost().c_str(),
@@ -73,20 +80,29 @@ if (option == "NUMSERVERS") {
 if (option == "ENABLEAUTOFIX") {
   if (value == "ON" || value == "1") {
     bot->setDoAutoFix(true);
-    bot->SendTo(theClient, "Enabled autofix.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::enabled_autofix,
+                                std::string("Enabled autofix.")).c_str());
     bot->logAdminMessage("%s (%s) enabled autofix.",
 			 theUser->getUserName().c_str(),
 			 theClient->getRealNickUserHost().c_str());
     return;
   } else if (value == "OFF" || value == "0") {
     bot->setDoAutoFix(false);
-    bot->SendTo(theClient, "Disabled autofix.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::disabled_autofix,
+                                std::string("Disabled autofix.")).c_str());
     bot->logAdminMessage("%s (%s) disabled autofix.",
 			 theUser->getUserName().c_str(),
 			 theClient->getRealNickUserHost().c_str());
     return;
   } else {
-    bot->SendTo(theClient, "Please use SET ENABLE_AUTOFIX <on/off>.");
+    bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                                language::enable_autofix_syntax,
+                                std::string("Please use SET ENABLE_AUTOFIX <on/off>.")).c_str());
     return;
   }
 }
@@ -94,20 +110,29 @@ if (option == "ENABLEAUTOFIX") {
 if (option == "ENABLECHANFIX") {
   if (value == "ON" || value == "1") {
     bot->setDoChanFix(true);
-    bot->SendTo(theClient, "Enabled manual chanfix.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::enabled_manual_chanfix,
+                                std::string("Enabled manual chanfix.")).c_str());
     bot->logAdminMessage("%s (%s) enabled manual chanfix.",
 			 theUser->getUserName().c_str(),
 			 theClient->getRealNickUserHost().c_str());
     return;
   } else if (value == "OFF" || value == "0") {
     bot->setDoChanFix(false);
-    bot->SendTo(theClient, "Disabled manual chanfix.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::disabled_manual_chanfix,
+                                std::string("Disabled manual chanfix.")).c_str());
     bot->logAdminMessage("%s (%s) disabled manual chanfix.",
 			 theUser->getUserName().c_str(),
 			 theClient->getRealNickUserHost().c_str());
     return;
   } else {
-    bot->SendTo(theClient, "Please use SET ENABLE_CHANFIX <on/off>.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::enable_chanfix_syntax,
+                                std::string("Please use SET ENABLE_CHANFIX <on/off>.")).c_str());
     return;
   }
 }
@@ -115,25 +140,37 @@ if (option == "ENABLECHANFIX") {
 if (option == "ENABLECHANNELBLOCKING") {
   if (value == "ON" || value == "1") {
     bot->setDoChanBlocking(true);
-    bot->SendTo(theClient, "Enabled channel blocking.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::enabled_chan_blocking,
+                                std::string("Enabled channel blocking.")).c_str());
     bot->logAdminMessage("%s (%s) enabled channel blocking.",
 			 theUser->getUserName().c_str(),
 			 theClient->getRealNickUserHost().c_str());
     return;
   } else if (value == "OFF" || value == "0") {
     bot->setDoChanBlocking(false);
-    bot->SendTo(theClient, "Disabled channel blocking.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::disabled_chan_blocking,
+                                std::string("Disabled channel blocking.")).c_str());
     bot->logAdminMessage("%s (%s) disabled channel blocking.",
 			 theUser->getUserName().c_str(),
 			 theClient->getRealNickUserHost().c_str());
     return;
   } else {
-    bot->SendTo(theClient, "Please use SET ENABLE_CHANNEL_BLOCKING <on/off>.");
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::enable_chan_blocking_syntax,
+                                std::string("Please use SET ENABLE_CHANNEL_BLOCKING <on/off>.")).c_str());
     return;
   }
 }
 
-bot->SendTo(theClient, "This setting does not exist.");
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::setting_doesnt_exist,
+                            std::string("This setting does not exist.")).c_str());
 
 return;
 }

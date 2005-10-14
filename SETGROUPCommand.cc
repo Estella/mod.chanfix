@@ -27,6 +27,7 @@
 #include "gnuworld_config.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlUser.h"
 
@@ -41,13 +42,19 @@ StringTokenizer st(Message);
 
 sqlUser* targetUser = bot->isAuthed(st[1]);
 if (!targetUser) {
-  bot->SendTo(theClient, "No such user %s.", st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_such_user,
+                              std::string("No such user %s.")).c_str(), st[1].c_str());
   return;
 }
 
 if (targetUser->getGroup() == string_lower(st[2])) {
-  bot->SendTo(theClient, "User %s is already in group %s.", 
-	      targetUser->getUserName().c_str(), st[2].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::user_already_in_group,
+                              std::string("User %s is already in group %s.")).c_str(),
+                                          targetUser->getUserName().c_str(), st[2].c_str());
   return;
 }
 
@@ -59,8 +66,11 @@ targetUser->setLastUpdatedBy( std::string( "("
 	+ theClient->getRealNickUserHost() ) );
 targetUser->commit();
 
-bot->SendTo(theClient, "Set group %s for user %s.", st[2].c_str(), 
-	    targetUser->getUserName().c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::set_group_for_user,
+                            std::string("Set group %s for user %s.")).c_str(),
+                                        st[2].c_str(), targetUser->getUserName().c_str());
 bot->logAdminMessage("%s (%s) set the group of user %s to %s.",
 	    theUser->getUserName().c_str(),
 	    theClient->getRealNickUserHost().c_str(),

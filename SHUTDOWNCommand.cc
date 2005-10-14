@@ -30,6 +30,7 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
+#include	"responses.h"
 
 RCSTAG("$Id$");
 
@@ -41,7 +42,10 @@ void SHUTDOWNCommand::Exec(iClient* theClient, sqlUser* theUser, const std::stri
 
 StringTokenizer st(Message);
 
-bot->SendTo(theClient, "Shutting down the server as per your request.");
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::shutting_down,
+                            std::string("Shutting down the server as per your request.")).c_str());
 bot->logAdminMessage("%s (%s) is shutting me down.",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str());

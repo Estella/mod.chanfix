@@ -27,6 +27,7 @@
 #include "gnuworld_config.h"
 
 #include "chanfix.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlUser.h"
 
@@ -35,40 +36,61 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-void WHOISCommand::Exec(iClient* theClient, sqlUser*, const std::string& Message)
+void WHOISCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 
 if (st[1] == "*") {
-  bot->SendTo(theClient, "List of all users:");
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::list_of_all_users,
+                              std::string("List of all users:")).c_str());
   chanfix::usersIterator ptr = bot->usersMap_begin();
   while (ptr != bot->usersMap_end()) {
     sqlUser* tmpUser = ptr->second;
-    bot->SendTo(theClient, "User: %s, Flags: %s, Group: %s",
-		tmpUser->getUserName().c_str(), (tmpUser->getFlags()) ?
-		std::string("+" + bot->getFlagsString(tmpUser->getFlags())).c_str() : "None", 
-		tmpUser->getGroup().c_str());
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::user_flags_group,
+                                std::string("User: %s, Flags: %s, Group: %s")).c_str(),
+                                            tmpUser->getUserName().c_str(), (tmpUser->getFlags()) ?
+                                            std::string("+" + bot->getFlagsString(tmpUser->getFlags())).c_str() : "None", 
+                                            tmpUser->getGroup().c_str());
     ptr++;
   }
-  bot->SendTo(theClient, "End of user list.");
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::end_of_user_list,
+                              std::string("End of user list.")).c_str());
   return;
 }
 
-sqlUser* theUser = bot->isAuthed(st[1]);
-if (!theUser) 
+sqlUser* theUser2 = bot->isAuthed(st[1]);
+if (!theUser2) 
 { 
-  bot->SendTo(theClient, "No such user %s.", st[1].c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::no_such_user,
+                              std::string("No such user %s.")).c_str());
   return;
 }
 
-bot->SendTo(theClient, "User: %s", theUser->getUserName().c_str());
-if (!theUser->getFlags())
-  bot->SendTo(theClient, "Flags: none.");
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::whois_user,
+                            std::string("User: %s")).c_str(), theUser2->getUserName().c_str());
+if (!theUser2->getFlags())
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::whois_flags_none,
+                              std::string("Flags: none.")).c_str());
 else
-  bot->SendTo(theClient, "Flags: +%s",
-	      bot->getFlagsString(theUser->getFlags()).c_str());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::whois_flags,
+                              std::string("Flags: +%s")).c_str(),
+                                          bot->getFlagsString(theUser2->getFlags()).c_str());
 
-sqlUser::hostListType sqlHostList = theUser->getHostList();
+sqlUser::hostListType sqlHostList = theUser2->getHostList();
 std::stringstream hostlist;
 
 if (sqlHostList.size() > 0) {
@@ -81,8 +103,14 @@ if (sqlHostList.size() > 0) {
     }
 }
 if (hostlist.str() == "") hostlist << "None.";
-bot->SendTo(theClient, "Hosts: %s", hostlist.str().c_str());
-bot->SendTo(theClient, "Group: %s", theUser->getGroup().c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::whois_hosts,
+                            std::string("Hosts: %s")).c_str(), hostlist.str().c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::whois_group,
+                            std::string("Group: %s")).c_str(), theUser2->getGroup().c_str());
 
 return;
 } //whoiscommand::exec

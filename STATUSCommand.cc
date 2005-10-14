@@ -30,6 +30,7 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
+#include	"responses.h"
 #include	"Network.h"
 
 RCSTAG("$Id$");
@@ -37,28 +38,49 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-void STATUSCommand::Exec(iClient* theClient, sqlUser*, const std::string&)
+void STATUSCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string&)
 {
 
 bot->SendTo(theClient, "[evilnet development's GNUWorld chanfix version %s]",
 	    CF_VERSION);
-bot->SendTo(theClient, "Uptime: \002%s\002",
-	    bot->prettyDuration(bot->getUplink()->getStartTime()).c_str());
-bot->SendTo(theClient, "Automatic fixing is: \002%s\002",
-	    bot->doAutoFix() ? "ON" : "OFF");
-bot->SendTo(theClient, "Manual fixing is: \002%s\002",
-	    bot->doChanFix() ? "ON" : "OFF");
-bot->SendTo(theClient, "Channel blocking is: \002%s\002",
-	    bot->doChanBlocking() ? "ON" : "OFF");
-bot->SendTo(theClient, "Required amount of servers linked is %u%% of %u, which is a minimum of %u servers.",
-	    bot->getMinServersPresent(), bot->getNumServers(),
-	    ((bot->getMinServersPresent() * bot->getNumServers()) / 100 + 1));
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::status_uptime,
+                            std::string("Uptime: \002%s\002")).c_str(),
+                                        bot->prettyDuration(bot->getUplink()->getStartTime()).c_str());
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::status_auto_fixing,
+                            std::string("Automatic fixing is: \002%s\002")).c_str(),
+                                        bot->doAutoFix() ? "ON" : "OFF");
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::status_manual_fixing,
+                            std::string("Manual fixing is: \002%s\002")).c_str(),
+                                        bot->doChanFix() ? "ON" : "OFF");
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::status_chan_blocking,
+                            std::string("Channel blocking is: \002%s\002")).c_str(),
+                                        bot->doChanBlocking() ? "ON" : "OFF");
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::status_servers_amount,
+                            std::string("Required amount of servers linked is %u%% of %u, which is a minimum of %u servers.")).c_str(),
+                                        bot->getMinServersPresent(), bot->getNumServers(),
+                                       ((bot->getMinServersPresent() * bot->getNumServers()) / 100 + 1));
 if (bot->getState() == chanfix::SPLIT)
-  bot->SendTo(theClient, "Splitmode enabled: only %i servers linked.", 
-	      Network->serverList_size());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::status_splitmode_enabled,
+                              std::string("Splitmode enabled: only %i servers linked.")).c_str(),
+                                          Network->serverList_size());
 else
-  bot->SendTo(theClient, "Splitmode disabled. There are %i servers linked.",
-	      Network->serverList_size());
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::status_splitmode_disabled,
+                              std::string("Splitmode disabled. There are %i servers linked.")).c_str(),
+                                          Network->serverList_size());
 
 return;
 }
