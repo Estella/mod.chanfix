@@ -40,30 +40,30 @@ void HELPCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& 
 StringTokenizer st(Message);
 
 if (st.size() < 2) {
-  bot->SendTo(theClient, "\002Oper Level\002: SCORE CSCORE HISTORY INFO STATUS");
+  bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXOPER>"));
 
   if (theClient->getAccount() != "")
-    bot->SendTo(theClient, "\002Logged In\002: CHECK USET WHOIS");
+    bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXLOGGEDIN>"));
 
   if (!theUser) return;
 
   if (theUser->getFlag(sqlUser::F_SERVERADMIN))
-    bot->SendTo(theClient, "\002Server Admin (+a)\002: ADDUSER DELUSER ADDHOST DELHOST ADDFLAG DELFLAG WHOGROUP SUSPEND UNSUSPEND");
+    bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXSERVERADMIN>"));
 
   if (theUser->getFlag(sqlUser::F_BLOCK))
-    bot->SendTo(theClient, "\002Blocker (+b)\002: BLOCK UNBLOCK");
+    bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXBLOCK>"));
 
   if (theUser->getFlag(sqlUser::F_CHANNEL))
-    bot->SendTo(theClient, "\002Channel (+c)\002: ADDNOTE DELNOTE ALERT UNALERT");
+    bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXCHANNEL>"));
 
   if (theUser->getFlag(sqlUser::F_CHANFIX))
-    bot->SendTo(theClient, "\002Chanfixer (+f)\002: CHANFIX OPLIST OPNICKS");
+    bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXCHANFIX>"));
 
   if (theUser->getFlag(sqlUser::F_OWNER))
-    bot->SendTo(theClient, "\002Owner (+o)\002: QUOTE REHASH RELOAD SET SHUTDOWN");
+    bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXOWNER>"));
 
   if (theUser->getFlag(sqlUser::F_USERMANAGER))
-    bot->SendTo(theClient, "\002User Manager (+u)\002: ADDUSER DELUSER ADDHOST DELHOST ADDFLAG DELFLAG SETGROUP WHOGROUP SUSPEND UNSUSPEND");
+    bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXUSERADMIN>"));
 
 } else {
   std::string msg = bot->getHelpMessage(theUser, string_upper(st.assemble(1)));
