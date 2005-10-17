@@ -131,6 +131,7 @@ bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::added_flag_to_user,
                             std::string("Added flag %c to user %s.")).c_str(),
+					flag,
                                         chkUser->getUserName().c_str());
 } //ADDFLAGCommand::Exec
 } //Namespace gnuworld

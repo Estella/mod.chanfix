@@ -70,7 +70,7 @@ if (!theUser2)
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::no_such_user,
-                              std::string("No such user %s.")).c_str());
+                              std::string("No such user %s.")).c_str(),st[1].c_str());
   return;
 }
 

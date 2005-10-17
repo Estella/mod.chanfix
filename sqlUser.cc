@@ -40,6 +40,7 @@ const sqlUser::flagType sqlUser::F_CHANFIX =		0x08; /* +f */
 const sqlUser::flagType sqlUser::F_OWNER =		0x10; /* +o */
 const sqlUser::flagType sqlUser::F_USERMANAGER =	0x20; /* +u */
 const sqlUser::flagType sqlUser::F_LOGGEDIN =		0x40;
+const sqlUser::flagType sqlUser::F_NORMALUSER =		0x80; /* +n */
 
 sqlUser::sqlUser(PgDatabase* _SQLDb)
 : id(0),
@@ -183,7 +184,7 @@ queryString	<< "UPDATE users SET "
 		<< "last_seen = " << last_seen << ", "
 		<< "last_updated = " << last_updated << ", "
 		<< "last_updated_by = '" << last_updated_by << "', "
-		<< "language_id = '" << language_id << "', "
+		<< "language_id = " << language_id << ", "
 		<< "faction = '" << group << "', "
 		<< "flags = " << flags << ", "
 		<< "issuspended = " << (isSuspended ? "'t'" : "'f'") << ", "
@@ -223,7 +224,7 @@ insertString	<< "INSERT INTO users "
 		<< last_seen << ", "
 		<< last_updated << ", "
 		<< "'" << last_updated_by << "', "
-		<< "'" << language_id << "', "
+		<< language_id << ", "
 		<< "'" << group << "', "
 		<< flags << ", "
 		<< (isSuspended ? "'t'" : "'f'") << ", "
@@ -239,7 +240,7 @@ elog	<< "sqlUser::Insert> "
 
 ExecStatusType status = SQLDb->Exec(insertString.str().c_str());
 
-if(PGRES_COMMAND_OK != status) {
+if(PGRES_COMMAND_OK == status) {
 	if (!loadData(user_name))
 		return false;
 	return true;

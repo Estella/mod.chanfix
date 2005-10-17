@@ -56,6 +56,7 @@ newUser->setUserName(st[1]);
 newUser->setCreated(bot->currentTime());
 newUser->setLastSeen(0);
 newUser->setLastUpdated(bot->currentTime());
+newUser->setLanguageId(1);
 newUser->setLastUpdatedBy( std::string( "("
 	+ theUser->getUserName()
 	+ ") "
@@ -65,6 +66,9 @@ newUser->setLastUpdatedBy( std::string( "("
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
     !theUser->getFlag(sqlUser::F_USERMANAGER))
   newUser->setGroup(string_lower(theUser->getGroup()));
+else
+  newUser->setGroup("undernet.org");
+
 
 if (newUser->Insert()) {
   bot->usersMap[newUser->getUserName()] = newUser;

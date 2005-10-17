@@ -510,10 +510,15 @@ xClient::OnDisconnect() ;
 void chanfix::OnPrivateMessage( iClient* theClient,
 	const std::string& Message, bool)
 {
-if (!theClient->isOper())
-  return;
 
 sqlUser* theUser = isAuthed(theClient->getAccount());
+if (!theClient->isOper() && !theUser)
+  return;
+
+if (!theClient->isOper() && theUser) {
+  if (!theUser->getFlag(getFlagType('n')))
+    return;
+}
 
 if (currentState == BURST) {
   SendTo(theClient,
@@ -2042,6 +2047,8 @@ char chanfix::getFlagChar(const sqlUser::flagType& whichFlag)
    return 'o';
  else if (whichFlag == sqlUser::F_USERMANAGER)
    return 'u';
+ else if (whichFlag == sqlUser::F_NORMALUSER)
+   return 'n';
  else
    return ' ';
 }
@@ -2061,6 +2068,8 @@ const std::string chanfix::getFlagsString(const sqlUser::flagType& whichFlags)
    flagstr += "o";
  if (whichFlags & sqlUser::F_USERMANAGER)
    flagstr += "u";
+ if (whichFlags & sqlUser::F_NORMALUSER)
+   flagstr += "n";
 return flagstr;
 }
 
@@ -2073,6 +2082,7 @@ switch (whichChar) {
   case 'f': return sqlUser::F_CHANFIX;
   case 'o': return sqlUser::F_OWNER;
   case 'u': return sqlUser::F_USERMANAGER;
+  case 'n': return sqlUser::F_NORMALUSER;
 }
 return 0;
 }

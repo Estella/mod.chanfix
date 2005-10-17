@@ -48,6 +48,7 @@ public:
 	static const flagType F_OWNER; /* +o */
 	static const flagType F_USERMANAGER; /* +u */
 	static const flagType F_LOGGEDIN;
+	static const flagType F_NORMALUSER; /* +n */
 
 	typedef std::list< std::string >	hostListType;
 
