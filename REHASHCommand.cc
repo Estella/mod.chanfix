@@ -37,7 +37,6 @@ namespace gnuworld
 
 void REHASHCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
-
 StringTokenizer st(Message);
 
 std::string option = string_upper(st[1]);
@@ -48,7 +47,7 @@ if (option == "HELP") {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::reloaded_help,
-                              std::string("Successfully reloaded help tables.")).c_str());
+                              std::string("Successfully reloaded help tables. %i entries in table.", bot->helpTable.size())).c_str());
   bot->logAdminMessage("%s (%s) rehashed the chanfix help tables.",
 		       theUser->getUserName().c_str(),
 		       theClient->getRealNickUserHost().c_str());
@@ -67,15 +66,18 @@ if (option == "TRANSLATIONS") {
   return;
 }
 
-bot->readConfigFile(bot->getConfigFileName());
+if (option == "CONFIG" || option.empty()) {
+  bot->readConfigFile(bot->getConfigFileName());
 
-bot->SendTo(theClient,
-            bot->getResponse(theUser,
-                            language::reloaded_conf,
-                            std::string("Successfully rehashed configuration file.")).c_str());
-bot->logAdminMessage("%s (%s) rehashed the chanfix module.",
-		     theUser->getUserName().c_str(),
-		     theClient->getRealNickUserHost().c_str());
+  bot->SendTo(theClient,
+	bot->getResponse(theUser,
+		language::reloaded_conf,
+		std::string("Successfully rehashed configuration file.")).c_str());
+  bot->logAdminMessage("%s (%s) rehashed the chanfix module.",
+		       theUser->getUserName().c_str(),
+		       theClient->getRealNickUserHost().c_str());
+  return;
+}
 
 return;
 }

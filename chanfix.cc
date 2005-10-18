@@ -510,13 +510,10 @@ xClient::OnDisconnect() ;
 void chanfix::OnPrivateMessage( iClient* theClient,
 	const std::string& Message, bool)
 {
-
 sqlUser* theUser = isAuthed(theClient->getAccount());
-if (!theClient->isOper() && !theUser)
-  return;
 
-if (!theClient->isOper() && theUser) {
-  if (!theUser->getFlag(getFlagType('n')))
+if (!theClient->isOper()) {
+  if (!theUser || !theUser->getFlag(sqlUser::F_NORMALUSER))
     return;
 }
 
@@ -528,8 +525,8 @@ if (currentState == BURST) {
   return;
 }
 
-StringTokenizer st(Message) ;
-if ( st.empty() )
+StringTokenizer st(Message);
+if (st.empty())
   return;
 
 const std::string Command = string_upper(st[0]);
@@ -565,6 +562,7 @@ if (theUser) {
   }
 }
 
+/* If you change this code, remember to change it in HELPCommand.cc */
 sqlUser::flagType requiredFlags = commHandler->second->getRequiredFlags();
 if (requiredFlags) {
   if (!theUser) {
@@ -804,50 +802,47 @@ else
 
 bool chanfix::SendFmtTo( const iClient* Target, const std::string& Message )
 {
-	bool returnMe = false ;
+char buffer[512] = { 0 };
+char *b = buffer ;
+const char *m = 0 ;
 
-        char buffer[512] = { 0 };
-        char *b = buffer ;
-        const char *m = 0 ;
+sqlUser* theUser = isAuthed(Target->getAccount());
 
-	sqlUser* theUser = isAuthed(Target->getAccount());
+for (m = Message.c_str(); *m != 0; m++) {
+  if (*m == '\n' || *m == '\r') {
+    *b='\0';
+    if (theUser) {
+      if (!theUser->getUseNotice())
+	MyUplink->Write("%s P %s :%s\r\n",
+		getCharYYXXX().c_str(),
+		Target->getCharYYXXX().c_str(),
+		buffer);
+      else
+	MyUplink->Write("%s O %s :%s\r\n",
+		getCharYYXXX().c_str(),
+		Target->getCharYYXXX().c_str(),
+		buffer);
+    }
+    b=buffer;
+  }
+  else if (b < buffer + 509)
+    *(b++)=*m;
+  *b='\0';
+  if (theUser) {
+    if (!theUser->getUseNotice())
+      return MyUplink->Write("%s P %s :%s\r\n",
+		getCharYYXXX().c_str(),
+		Target->getCharYYXXX().c_str(),
+		buffer);
+    else
+      return MyUplink->Write("%s O %s :%s\r\n",
+		getCharYYXXX().c_str(),
+		Target->getCharYYXXX().c_str(),
+		buffer);
+  }
+}
 
-        for (m=Message.c_str();*m!=0;m++)
-                {
-                if (*m == '\n' || *m == '\r')
-                        {
-                        *b='\0';
-			if (theUser && !theUser->getUseNotice())
-                        	MyUplink->Write( "%s P %s :%s\r\n",
-                                	getCharYYXXX().c_str(),
-                                	Target->getCharYYXXX().c_str(),
-                                	buffer ) ;
-			else if (theUser && theUser->getUseNotice())
-                        	MyUplink->Write( "%s O %s :%s\r\n",
-                                	getCharYYXXX().c_str(),
-                                	Target->getCharYYXXX().c_str(),
-                                	buffer ) ;				
-                        b=buffer;
-                        }
-                else
-                        {
-                        if (b<buffer+509)
-                          *(b++)=*m;
-                        }
-
-                }
-        *b='\0';
-	if (theUser && !theUser->getUseNotice())
-	        returnMe = MyUplink->Write( "%s P %s :%s\r\n",
-        	        getCharYYXXX().c_str(),
-                	Target->getCharYYXXX().c_str(),
-	                buffer ) ;
-	else if (theUser && theUser->getUseNotice())
-	        returnMe = MyUplink->Write( "%s O %s :%s\r\n",
-        	        getCharYYXXX().c_str(),
-                	Target->getCharYYXXX().c_str(),
-	                buffer ) ;
-	return returnMe;
+return 0;
 }
 
 void chanfix::SendTo(iClient* theClient, const char *Msg, ...)
@@ -1675,6 +1670,19 @@ if (theChan->banList_size() ||
 return false;
 }
 
+bool chanfix::canScoreChan(Channel* theChan)
+{
+if (theChan->getMode(Channel::MODE_A))
+  return false;
+
+for (Channel::const_userIterator ptr = theChan->userList_begin();
+     ptr != theChan->userList_end(); ++ptr)
+   if (ptr->second->getClient()->getMode(iClient::MODE_SERVICES))
+     return false;
+
+return true;
+}
+
 void chanfix::processQueue()
 {
 /* If there are too many servers split, don't process queue. */
@@ -1978,15 +1986,13 @@ ScoredOpsMapType::iterator scOpiter;
 for (xNetwork::channelIterator ptr = Network->channels_begin();
      ptr != Network->channels_end(); ptr++) {
   thisChan = ptr->second;
-  if (thisChan->getMode(Channel::MODE_A))
+  if (!canScoreChan(thisChan))
     continue; // Exit the loop and go to the next chan
   if (thisChan->size() >= minClients && !isBeingFixed(thisChan)) {
     scoredOpsList.clear();
     for (Channel::userIterator ptr = thisChan->userList_begin();
 	 ptr != thisChan->userList_end(); ptr++) {
       ChannelUser* curUser = ptr->second;
-      if (curUser->getClient()->getMode(iClient::MODE_SERVICES))
-	break; // Exit the loop fully, and go to the next chan
       if (curUser->isModeO() && curUser->getClient()->getAccount() != "") {
 	//Ok hes an op
 	//Grab an iClient for curUser
@@ -2015,21 +2021,21 @@ if (!myOps.empty()) return;
 typedef std::map<std::string,bool> ScoredOpsMapType;
 ScoredOpsMapType scoredOpsList;
 ScoredOpsMapType::iterator scOpiter;
-if (theChan->getMode(Channel::MODE_A)) return;
-  for (Channel::userIterator ptr = theChan->userList_begin();
-       ptr != theChan->userList_end(); ptr++) {
-    ChannelUser* curUser = ptr->second;
-    if (curUser->getClient()->getMode(iClient::MODE_SERVICES))
-      break;
-    if (curUser->isModeO() && curUser->getClient()->getAccount() != "") {
-      scOpiter = scoredOpsList.find(curUser->getClient()->getAccount());
-      if (scOpiter == scoredOpsList.end()) {
-	gotOpped(theChan, curUser->getClient());
-	scoredOpsList.insert(make_pair(curUser->getClient()->getAccount(), true));
-      }
+if (!canScoreChan(theChan))
+  return;
+for (Channel::userIterator ptr = theChan->userList_begin();
+     ptr != theChan->userList_end(); ptr++) {
+  ChannelUser* curUser = ptr->second;
+  if (curUser->isModeO() && curUser->getClient()->getAccount() != "") {
+    scOpiter = scoredOpsList.find(curUser->getClient()->getAccount());
+    if (scOpiter == scoredOpsList.end()) {
+      gotOpped(theChan, curUser->getClient());
+      scoredOpsList.insert(make_pair(curUser->getClient()->getAccount(), true));
     }
   }
-  scoredOpsList.clear();
+}
+scoredOpsList.clear();
+
 return;
 }
 
@@ -2043,12 +2049,12 @@ char chanfix::getFlagChar(const sqlUser::flagType& whichFlag)
    return 'c';
  else if (whichFlag == sqlUser::F_CHANFIX)
    return 'f';
+ else if (whichFlag == sqlUser::F_NORMALUSER)
+   return 'n';
  else if (whichFlag == sqlUser::F_OWNER)
    return 'o';
  else if (whichFlag == sqlUser::F_USERMANAGER)
    return 'u';
- else if (whichFlag == sqlUser::F_NORMALUSER)
-   return 'n';
  else
    return ' ';
 }
@@ -2064,12 +2070,12 @@ const std::string chanfix::getFlagsString(const sqlUser::flagType& whichFlags)
    flagstr += "c";
  if (whichFlags & sqlUser::F_CHANFIX)
    flagstr += "f";
+ if (whichFlags & sqlUser::F_NORMALUSER)
+   flagstr += "n";
  if (whichFlags & sqlUser::F_OWNER)
    flagstr += "o";
  if (whichFlags & sqlUser::F_USERMANAGER)
    flagstr += "u";
- if (whichFlags & sqlUser::F_NORMALUSER)
-   flagstr += "n";
 return flagstr;
 }
 
@@ -2080,9 +2086,9 @@ switch (whichChar) {
   case 'b': return sqlUser::F_BLOCK;
   case 'c': return sqlUser::F_CHANNEL;
   case 'f': return sqlUser::F_CHANFIX;
+  case 'n': return sqlUser::F_NORMALUSER;
   case 'o': return sqlUser::F_OWNER;
   case 'u': return sqlUser::F_USERMANAGER;
-  case 'n': return sqlUser::F_NORMALUSER;
 }
 return 0;
 }
@@ -2109,20 +2115,20 @@ else
 
 const std::string chanfix::getHelpMessage(sqlUser* theUser, std::string topic)
 {
-	int lang_id = 1;
+int lang_id = 1;
 
-	if (theUser)
-		lang_id = theUser->getLanguageId();
+if (theUser)
+  lang_id = theUser->getLanguageId();
 
-	std::pair <int, std::string> thePair(lang_id, topic);
-	helpTableType::iterator ptr = helpTable.find(thePair);
-	if (ptr != helpTable.end())
-		return ptr->second;
+std::pair <int, std::string> thePair(lang_id, topic);
+helpTableType::iterator ptr = helpTable.find(thePair);
+if (ptr != helpTable.end())
+  return ptr->second;
 
-	if (lang_id != 1)
-		return getHelpMessage(theUser, topic);
+if (lang_id != 1)
+  return getHelpMessage(theUser, topic);
 
-	return std::string("");
+return std::string("");
 }
 
 void chanfix::loadHelpTable()
@@ -2132,39 +2138,37 @@ ExecStatusType status;
 status = SQLDb->Exec("SELECT language_id,topic,contents FROM help");
 
 if (PGRES_TUPLES_OK == status)
-	for (int i = 0; i < SQLDb->Tuples(); i++)
-		helpTable.insert(helpTableType::value_type(std::make_pair(
-			atoi(SQLDb->GetValue(i, 0)),
-			SQLDb->GetValue(i, 1)),
-			SQLDb->GetValue(i, 2)));
+  for (int i = 0; i < SQLDb->Tuples(); i++)
+    helpTable.insert(helpTableType::value_type(
+		     std::make_pair(atoi(SQLDb->GetValue(i, 0)),
+				    SQLDb->GetValue(i, 1)),
+		     SQLDb->GetValue(i, 2)));
 
-        elog    << "*** [Chanfix::loadHelpTable]: Loaded "
-                        << helpTable.size()
-                        << " help messages."
-                        << std::endl;
+    elog	<< "*** [chanfix::loadHelpTable]: Loaded "
+		<< helpTable.size()
+		<< " help messages."
+		<< std::endl;
 
+return;
 }
 
-const std::string chanfix::getResponse( sqlUser* theUser, int response_id,
-        std::string msg )
+const std::string chanfix::getResponse( sqlUser* theUser,
+	int response_id, std::string msg )
 {
 
 // Language defaults to English
 int lang_id = 1;
 
 if (theUser)
-        {
-        lang_id = theUser->getLanguageId();
-        }
+  lang_id = theUser->getLanguageId();
 
 std::pair<int, int> thePair( lang_id, response_id );
 
 translationTableType::iterator ptr = translationTable.find(thePair);
-if(ptr != translationTable.end())
-        {
-        /* Found something! */
-        return ptr->second ;
-        }
+if (ptr != translationTable.end()) {
+  /* Found something! */
+  return ptr->second ;
+}
 
 /*
  * Can't find this response Id within a valid language.
@@ -2173,19 +2177,15 @@ if(ptr != translationTable.end())
  * can't find an english variant. (Carrying on here could corrupt
  * numerous varg lists, and will most likely segfault anyway).
  */
-if (lang_id != 1)
-        {
-        std::pair<int, int> thePair( 1, response_id );
-        translationTableType::iterator ptr = translationTable.find(thePair);
-        if(ptr != translationTable.end())
-                return ptr->second ;
+if (lang_id != 1) {
+  std::pair<int, int> thePair( 1, response_id );
+  translationTableType::iterator ptr = translationTable.find(thePair);
+  if (ptr != translationTable.end())
+    return ptr->second ;
+}
 
-        }
-
-if( !msg.empty() )
-        {
-        return msg;
-        }
+if (!msg.empty())
+  return msg;
 
 return std::string( "Unable to retrieve response. Please contact a chanfix "
         "administrator." ) ;
@@ -2198,43 +2198,42 @@ ExecStatusType status;
 status = SQLDb->Exec("SELECT id,code,name FROM languages");
 
 if (PGRES_TUPLES_OK == status)
-        for (int i = 0; i < SQLDb->Tuples(); i++)
-                languageTable.insert(languageTableType::value_type(SQLDb->GetValue(i, 1),
-                        std::make_pair(atoi(SQLDb->GetValue(i, 0)),
-                                SQLDb->GetValue(i, 2))));
+  for (int i = 0; i < SQLDb->Tuples(); i++)
+    languageTable.insert(languageTableType::value_type(SQLDb->GetValue(i, 1),
+			 std::make_pair(atoi(SQLDb->GetValue(i, 0)),
+					SQLDb->GetValue(i, 2))));
 
-        elog    << "*** [Chanfix::loadTranslationTable]: Loaded "
-                        << languageTable.size()
-                        << " languages."
-                        << std::endl;
+    elog	<< "*** [chanfix::loadTranslationTable]: Loaded "
+		<< languageTable.size()
+		<< " languages."
+		<< std::endl;
 
 status = SQLDb->Exec(
         "SELECT language_id,response_id,text FROM translations" ) ;
 
-if( PGRES_TUPLES_OK == status )
-        {
-        for (int i = 0 ; i < SQLDb->Tuples(); i++)
-                {
-                /*
-                 *  Add to our translations table.
-                 */
+if (PGRES_TUPLES_OK == status) {
+  for (int i = 0 ; i < SQLDb->Tuples(); i++) {
+    /*
+     *  Add to our translations table.
+     */
 
-                int lang_id = atoi(SQLDb->GetValue( i, 0 ));
-                int resp_id = atoi(SQLDb->GetValue( i, 1 ));
+    int lang_id = atoi(SQLDb->GetValue( i, 0 ));
+    int resp_id = atoi(SQLDb->GetValue( i, 1 ));
 
-                std::pair<int, int> thePair( lang_id, resp_id ) ;
+    std::pair<int, int> thePair( lang_id, resp_id ) ;
 
-                translationTable.insert(
-                        translationTableType::value_type(
-                                thePair, SQLDb->GetValue( i, 2 )) );
-                }
-        }
+    translationTable.insert(
+			translationTableType::value_type(
+			thePair, SQLDb->GetValue( i, 2 )) );
+  }
+}
 
-        elog    << "*** [Chanfix::loadTranslationTable]: Loaded "
-                << translationTable.size()
-                << " translations."
-                << std::endl;
+elog	<< "*** [chanfix::loadTranslationTable]: Loaded "
+	<< translationTable.size()
+	<< " translations."
+	<< std::endl;
 
+return;
 }
 
 void chanfix::updatePoints()

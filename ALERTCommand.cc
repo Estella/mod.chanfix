@@ -71,7 +71,7 @@ theChan->addNote(sqlChannel::EV_ALERT, theUser, "");
 bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::alert_flag_added,
-                            std::string("ALERT flag added from channel %s")).c_str(),
+                            std::string("ALERT flag added to channel %s")).c_str(),
                                         theChan->getChannel().c_str());
 
 return;

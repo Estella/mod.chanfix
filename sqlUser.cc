@@ -37,10 +37,10 @@ const sqlUser::flagType sqlUser::F_SERVERADMIN =	0x01; /* +a */
 const sqlUser::flagType sqlUser::F_BLOCK =		0x02; /* +b */
 const sqlUser::flagType sqlUser::F_CHANNEL =		0x04; /* +c */
 const sqlUser::flagType sqlUser::F_CHANFIX =		0x08; /* +f */
-const sqlUser::flagType sqlUser::F_OWNER =		0x10; /* +o */
-const sqlUser::flagType sqlUser::F_USERMANAGER =	0x20; /* +u */
-const sqlUser::flagType sqlUser::F_LOGGEDIN =		0x40;
-const sqlUser::flagType sqlUser::F_NORMALUSER =		0x80; /* +n */
+const sqlUser::flagType sqlUser::F_NORMALUSER =		0x10; /* +n */
+const sqlUser::flagType sqlUser::F_OWNER =		0x20; /* +o */
+const sqlUser::flagType sqlUser::F_USERMANAGER =	0x40; /* +u */
+const sqlUser::flagType sqlUser::F_LOGGEDIN =		0x80;
 
 sqlUser::sqlUser(PgDatabase* _SQLDb)
 : id(0),

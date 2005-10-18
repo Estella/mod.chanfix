@@ -257,6 +257,8 @@ public:
 
 	bool needsModesRemoved(Channel*);
 
+	bool canScoreChan(Channel*);
+
 	void startTimers();
 
 	void processQueue();
@@ -313,6 +315,12 @@ public:
 	 * PostgreSQL Database
 	 */
 	cmDatabase* SQLDb;
+
+	/**
+	 * Commands map
+	 */
+	typedef std::map< std::string, Command*, noCaseCompare> commandMapType;
+	commandMapType commandMap;
 
 	/**
 	 * ChannelOp map
@@ -386,12 +394,6 @@ public:
 
 protected:
 	/**
-	 * Commands map
-	 */
-	typedef std::map< std::string, Command*, noCaseCompare> commandMapType;
-	commandMapType commandMap;
-
-	/**
 	 *  Time of the last cache
 	 */
 	std::map < std::string , time_t > lastUpdated;
@@ -426,8 +428,7 @@ protected:
 	std::string	sqlPort;
 	std::string	sqlUsername;
 	std::string	sqlPass;
-	std::string	sqlDB;
-	
+	std::string	sqlDB;	
 
 	/**
 	 * State variable

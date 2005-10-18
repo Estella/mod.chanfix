@@ -27,6 +27,8 @@
 #include "gnuworld_config.h"
 
 #include "chanfix.h"
+#include "chanfixCommands.h"
+#include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlUser.h"
 
@@ -45,7 +47,8 @@ if (st.size() < 2) {
   if (theClient->getAccount() != "")
     bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXLOGGEDIN>"));
 
-  if (!theUser) return;
+  if (!theUser)
+    return;
 
   if (theUser->getFlag(sqlUser::F_SERVERADMIN))
     bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXSERVERADMIN>"));
@@ -68,9 +71,41 @@ if (st.size() < 2) {
 } else {
   std::string msg = bot->getHelpMessage(theUser, string_upper(st.assemble(1)));
 
-  if (!msg.empty())
+  if (!msg.empty()) {
+    bool real = true;
+    const std::string Command = string_upper(st[1]);
+
+    chanfix::commandMapType::iterator commHandler = bot->commandMap.find(Command);
+    if (commHandler == bot->commandMap.end())
+      real = false;
+
+    bot->SendTo(theClient, "\002%s\002", real ? commHandler->second->getInfo().c_str() : Command.c_str());
+
     bot->SendFmtTo(theClient, msg);
-  else
+
+    if (real) {
+      /* If you change this code, remember to change it in chanfix.cc */
+      sqlUser::flagType requiredFlags = commHandler->second->getRequiredFlags();
+      if (requiredFlags) {
+	bot->SendTo(theClient, "This command requires authentication.");
+
+	if (requiredFlags != sqlUser::F_LOGGEDIN) {
+	  if (bot->getFlagChar(requiredFlags) != ' ')
+	    bot->SendTo(theClient,
+			bot->getResponse(theUser,
+				language::requires_flag,
+				std::string("This command requires flag '%c'.")).c_str(),
+					bot->getFlagChar(requiredFlags));
+	  else
+	    bot->SendTo(theClient,
+			bot->getResponse(theUser,
+				language::requires_flags,
+				std::string("This command requires one of these flags: \"%s\".")).c_str(),
+					bot->getFlagsString(requiredFlags).c_str());
+	}
+      }
+    }
+  } else
     bot->SendTo(theClient, "There is no help available for that topic.");
 
 }
