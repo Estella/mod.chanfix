@@ -800,49 +800,51 @@ else
   Notice(theClient, theMessage);
 }
 
-bool chanfix::SendFmtTo( const iClient* Target, const std::string& Message )
+void chanfix::SendFmtTo(iClient* theClient, const std::string& theMessage)
 {
 char buffer[512] = { 0 };
 char *b = buffer ;
 const char *m = 0 ;
 
-sqlUser* theUser = isAuthed(Target->getAccount());
+sqlUser* theUser = isAuthed(theClient->getAccount());
 
-for (m = Message.c_str(); *m != 0; m++) {
+for (m = theMessage.c_str(); *m != 0; m++) {
   if (*m == '\n' || *m == '\r') {
     *b='\0';
     if (theUser) {
       if (!theUser->getUseNotice())
 	MyUplink->Write("%s P %s :%s\r\n",
 		getCharYYXXX().c_str(),
-		Target->getCharYYXXX().c_str(),
+		theClient->getCharYYXXX().c_str(),
 		buffer);
       else
 	MyUplink->Write("%s O %s :%s\r\n",
 		getCharYYXXX().c_str(),
-		Target->getCharYYXXX().c_str(),
+		theClient->getCharYYXXX().c_str(),
 		buffer);
     }
     b=buffer;
   }
   else if (b < buffer + 509)
     *(b++)=*m;
-  *b='\0';
-  if (theUser) {
-    if (!theUser->getUseNotice())
-      return MyUplink->Write("%s P %s :%s\r\n",
-		getCharYYXXX().c_str(),
-		Target->getCharYYXXX().c_str(),
-		buffer);
-    else
-      return MyUplink->Write("%s O %s :%s\r\n",
-		getCharYYXXX().c_str(),
-		Target->getCharYYXXX().c_str(),
-		buffer);
-  }
 }
 
-return 0;
+*b='\0'; // What's this for? 'b' isn't used anymore.
+
+if (theUser) {
+  if (!theUser->getUseNotice())
+    MyUplink->Write("%s P %s :%s\r\n",
+		    getCharYYXXX().c_str(),
+		    theClient->getCharYYXXX().c_str(),
+		    buffer);
+  else
+    MyUplink->Write("%s O %s :%s\r\n",
+		    getCharYYXXX().c_str(),
+		    theClient->getCharYYXXX().c_str(),
+		    buffer);
+}
+
+return;
 }
 
 void chanfix::SendTo(iClient* theClient, const char *Msg, ...)
@@ -864,13 +866,14 @@ else
 
 void chanfix::doSqlError(const std::string& theQuery, const std::string& theError)
 {
-	/* First, log it to error out */
-	elog	<< "SQL> Whilst executing: "
-		<< theQuery
-		<< std::endl;
-	elog	<< "SQL> "
-		<< theError
-		<< std::endl;
+/* First, log it to error out */
+elog	<< "SQL> Whilst executing: "
+	<< theQuery
+	<< std::endl;
+elog	<< "SQL> "
+	<< theError
+	<< std::endl;
+return;
 }
 
 void chanfix::preloadChanOpsCache()

@@ -87,20 +87,20 @@ if (st.size() < 2) {
       /* If you change this code, remember to change it in chanfix.cc */
       sqlUser::flagType requiredFlags = commHandler->second->getRequiredFlags();
       if (requiredFlags) {
-	bot->SendTo(theClient, "This command requires authentication.");
-
-	if (requiredFlags != sqlUser::F_LOGGEDIN) {
+	if (requiredFlags == sqlUser::F_LOGGEDIN)
+	  bot->SendTo(theClient, "This command requires authentication.");
+	else {
 	  if (bot->getFlagChar(requiredFlags) != ' ')
 	    bot->SendTo(theClient,
 			bot->getResponse(theUser,
-				language::requires_flag,
-				std::string("This command requires flag '%c'.")).c_str(),
+				language::requires_auth_and_flag,
+				std::string("This command requires authentication and flag '%c'.")).c_str(),
 					bot->getFlagChar(requiredFlags));
 	  else
 	    bot->SendTo(theClient,
 			bot->getResponse(theUser,
-				language::requires_flags,
-				std::string("This command requires one of these flags: \"%s\".")).c_str(),
+				language::requires_auth_and_flags,
+				std::string("This command requires authentication and one of these flags: \"%s\".")).c_str(),
 					bot->getFlagsString(requiredFlags).c_str());
 	}
       }

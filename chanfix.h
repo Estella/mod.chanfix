@@ -197,8 +197,6 @@ public:
 
 	virtual void OnCTCP( iClient*, const std::string&, const std::string&, bool ) ;
 
-	virtual bool SendFmtTo( const iClient* Target, const std::string& ) ;
-
 	/**
 	 * Our functions.
 	 */
@@ -296,6 +294,8 @@ public:
 	 */
 	void SendTo( iClient*, const char*, ... );
 	void SendTo( iClient*, const std::string& );
+
+	void SendFmtTo(iClient*, const std::string&);
 
 	/* Admin message logs */
 	bool logAdminMessage(const char*, ... );

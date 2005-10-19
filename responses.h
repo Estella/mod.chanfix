@@ -239,7 +239,9 @@ namespace gnuworld
 		const int need_to_auth			= 149;
 		const int requires_flag			= 150;
 		const int requires_flags		= 151;
-		const int syntax			= 152;
+		const int requires_auth_and_flag	= 152;
+		const int requires_auth_and_flags	= 153;
+		const int syntax			= 154;
 	}
 }
 
