@@ -85,17 +85,13 @@ if (netChan->getMode(Channel::MODE_A) && !override) {
   return;
 }
 
-ChannelUser* curUser;
-for (Channel::userIterator ptr = netChan->userList_begin(); ptr != netChan->userList_end(); ptr++) {
-   curUser = ptr->second;
-   if (curUser->getClient()->getMode(iClient::MODE_SERVICES)) {
-     bot->SendTo(theClient,
-                 bot->getResponse(theUser,
-                                 language::registered_channel,
-                                 std::string("%s is a registered channel.")).c_str(),
-                                             netChan->getName().c_str());
-     return;
-   }
+if (!bot->canScoreChan(netChan, false)) {
+  bot->SendTo(theClient,
+	      bot->getResponse(theUser,
+			       language::registered_channel,
+			       std::string("%s is a registered channel.")).c_str(),
+			       netChan->getName().c_str());
+  return;
 }
 
 /* Only allow chanfixes for channels that are in the database. */

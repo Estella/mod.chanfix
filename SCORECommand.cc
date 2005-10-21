@@ -68,21 +68,16 @@ if (!netChan) {
   return;
 }
 
-ChannelUser* curUser;
-for (Channel::userIterator ptr = netChan->userList_begin();
-     ptr != netChan->userList_end(); ptr++) {
-  curUser = ptr->second;
-  if (curUser->getClient()->getMode(iClient::MODE_SERVICES)) {
-    if (compact)
-      bot->SendTo(theClient, "~! %s", netChan->getName().c_str());
-    else
-      bot->SendTo(theClient,
-                  bot->getResponse(theUser,
-                                  language::registered_channel,
-                                  std::string("%s is a registered channel.")).c_str(),
-                                              netChan->getName().c_str());
-     return;
-  }
+if (!bot->canScoreChan(netChan, false)) {
+  if (compact)
+    bot->SendTo(theClient, "~! %s", netChan->getName().c_str());
+  else
+    bot->SendTo(theClient,
+		bot->getResponse(theUser,
+				 language::registered_channel,
+				 std::string("%s is a registered channel.")).c_str(),
+				 netChan->getName().c_str());
+  return;
 }
 
 chanfix::chanOpsType myOps = bot->getMyOps(netChan);

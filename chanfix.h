@@ -255,7 +255,7 @@ public:
 
 	bool needsModesRemoved(Channel*);
 
-	bool canScoreChan(Channel*);
+	bool canScoreChan(Channel*, bool);
 
 	void startTimers();
 

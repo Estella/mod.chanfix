@@ -679,7 +679,11 @@ void chanfix::OnChannelModeO( Channel* theChan, ChannelUser*,
 {
 /* if (currentState != RUN) return; */
 
-if (theChan->size() < minClients) return;
+if (theChan->size() < minClients)
+  return;
+
+if (!canScoreChan(theChan, true))
+  return;
 
 for (xServer::opVectorType::const_iterator ptr = theTargets.begin();
      ptr != theTargets.end(); ++ptr) {
@@ -1236,13 +1240,11 @@ void chanfix::gotOpped(Channel* thisChan, iClient* thisClient)
 if (clientNeedsIdent && !hasIdent(thisClient))
   return;
 
-if (thisClient->getAccount() != "" &&
-    !thisClient->getMode(iClient::MODE_SERVICES) &&
-    !thisChan->getMode(Channel::MODE_A)) {
+if (thisClient->getAccount() != "") {
   elog	<< "chanfix::gotOpped> DEBUG: " << thisClient->getAccount()
 	<< " got opped on " << thisChan->getName()
 	<< std::endl;
-	    
+
   sqlChanOp* thisOp = findChanOp(thisChan, thisClient);
   if (!thisOp) {
     if (countMyOps(thisChan) >= MAXOPCOUNT)
@@ -1673,9 +1675,9 @@ if (theChan->banList_size() ||
 return false;
 }
 
-bool chanfix::canScoreChan(Channel* theChan)
+bool chanfix::canScoreChan(Channel* theChan, bool oplevels)
 {
-if (theChan->getMode(Channel::MODE_A))
+if (oplevels && theChan->getMode(Channel::MODE_A))
   return false;
 
 for (Channel::const_userIterator ptr = theChan->userList_begin();
@@ -1989,7 +1991,7 @@ ScoredOpsMapType::iterator scOpiter;
 for (xNetwork::channelIterator ptr = Network->channels_begin();
      ptr != Network->channels_end(); ptr++) {
   thisChan = ptr->second;
-  if (!canScoreChan(thisChan))
+  if (!canScoreChan(thisChan, true))
     continue; // Exit the loop and go to the next chan
   if (thisChan->size() >= minClients && !isBeingFixed(thisChan)) {
     scoredOpsList.clear();
@@ -2024,7 +2026,7 @@ if (!myOps.empty()) return;
 typedef std::map<std::string,bool> ScoredOpsMapType;
 ScoredOpsMapType scoredOpsList;
 ScoredOpsMapType::iterator scOpiter;
-if (!canScoreChan(theChan))
+if (!canScoreChan(theChan, true))
   return;
 for (Channel::userIterator ptr = theChan->userList_begin();
      ptr != theChan->userList_end(); ptr++) {
