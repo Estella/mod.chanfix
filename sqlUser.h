@@ -31,13 +31,14 @@ namespace gnuworld
 {
 
 class iClient;
+class sqlManager;
 
 class sqlUser
 {
 
 public:
 
-	sqlUser(PgDatabase*);
+	sqlUser(sqlManager*);
 	virtual ~sqlUser();
 
 	typedef unsigned short int	flagType ;
@@ -132,12 +133,13 @@ public:
 		{ hostList.push_back(_theHost); }
 
 	/* Methods to alter our SQL status */
-	bool loadData(unsigned int);
-	bool loadData(const std::string&);
-	void setAllMembers(int);
-	bool commit();
-	bool Insert();
-	bool Delete();
+	void setAllMembers(PgDatabase*, int);
+	void commit();
+	void Insert();
+	void Delete();
+
+	/** Static member for keeping track of max user id */
+	static unsigned long int maxUserId;
 
 	void loadHostList();
 	void delHost(const std::string&);		
@@ -159,7 +161,7 @@ private:
 	bool		useNotice;
 	hostListType	hostList;
 
-	PgDatabase*	SQLDb;
+	sqlManager*	myManager;
 }; // class sqlUser
 
 } // namespace gnuworld

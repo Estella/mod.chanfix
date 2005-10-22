@@ -74,15 +74,6 @@ inline bool operator()( const std::pair<std::string, std::string>& lhs, const st
 } ;
 
 
-class cmDatabase : public PgDatabase
-{
-public:
-	cmDatabase(const std::string& conninfo)
-	 : PgDatabase(conninfo.c_str()) {}
-	virtual ~cmDatabase() {}
-
-};
-
 class chanfix : public xClient {
 
 public:
@@ -310,11 +301,6 @@ public:
 	 * Our sqlManager instance for DB communication
 	 */
 	sqlManager* theManager;
-	
-	/**
-	 * PostgreSQL Database
-	 */
-	cmDatabase* SQLDb;
 
 	/**
 	 * Commands map

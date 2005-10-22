@@ -94,32 +94,6 @@ std::string dbString = "host=" + sqlHost + " dbname=" + sqlDB
 
 theManager = sqlManager::getInstance(dbString, commitCount);
 
-elog	<< "chanfix::chanfix> Attempting to connect to "
-	<< sqlHost << " at port " << sqlPort
-	<< " as User " << sqlUsername << " to database: "
-	<< sqlDB
-	<< std::endl;
-
-SQLDb = new (std::nothrow) cmDatabase( dbString.c_str() ) ;
-assert( SQLDb != 0 ) ;
-//-- Make sure we connected to the SQL database; if
-// we didn't we exit entirely.
-if (SQLDb->ConnectionBad ())
-	{
-	elog	<< "chanfix::chanfix> Unable to connect to SQL server."
-		<< std::endl
-		<< "chanfix::chanfix> PostgreSQL error message: "
-		<< SQLDb->ErrorMessage()
-		<< std::endl;
-
-	::exit( 0 ) ;
-	}
-else
-	{
-	elog	<< "chanfix::chanfix> Connection established to SQL server"
-		<< std::endl;
-	}
-
 /* Register the commands we want to use */
 RegisterCommand(new ADDFLAGCommand(this, "ADDFLAG",
 	"<username> <flag>",
@@ -473,9 +447,6 @@ void chanfix::OnDetach( const std::string& reason )
 {
 /* Delete our config */
 delete chanfixConfig; chanfixConfig = 0;
-
-/* Delete our connection to the database */
-delete SQLDb; SQLDb = 0;
 
 /* Delete our timer */
 delete theTimer; theTimer = 0;
@@ -882,37 +853,39 @@ return;
 
 void chanfix::preloadChanOpsCache()
 {
-	std::stringstream theQuery;
-	theQuery	<< "SELECT channel,account,last_seen_as,ts_firstopped,ts_lastopped,day0,day1,day2,day3,day4,day5,day6,day7,day8,day9,day10,day11,day12,day13 FROM chanOps"
-			;
+elog << "*** [chanfix:preloadChanOpsCache] Precaching chanops." << std::endl;
 
-	elog		<< "*** [chanfix::preloadChanOpsCache]: Loading chanOps and their points ..." 
-			<< std::endl;
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = theManager->getConnection();
 
-	ExecStatusType status = SQLDb->Exec(theQuery.str().c_str()) ;
+/* Retrieve the list of chanops */
+std::stringstream theQuery;
+theQuery	<< "SELECT channel,account,last_seen_as,ts_firstopped,ts_lastopped,day0,day1,day2,day3,day4,day5,day6,day7,day8,day9,day10,day11,day12,day13 FROM chanOps"
+		;
 
-	if( PGRES_TUPLES_OK == status )
-	{
-		for (int i = 0 ; i < SQLDb->Tuples(); i++)
-		{
-			sqlChanOp* newOp = new (std::nothrow) sqlChanOp(SQLDb);
-			assert( newOp != 0 ) ;
+elog		<< "*** [chanfix::preloadChanOpsCache]: Loading chanOps and their points ..." 
+		<< std::endl;
 
-			newOp->setAllMembers(i);
-			std::pair<std::string, std::string> thePair (newOp->getChannel(), newOp->getAccount());
-			sqlChanOps.insert(sqlChanOpsType::value_type(thePair, newOp));
-		}
-	} else	{
-		elog << "[chanfix::preloadChanOpsCache] Something went wrong: "
-			<< SQLDb->ErrorMessage()
-			<< std::endl;
-		exit(0);
-	}
+if (cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
+  for (int i = 0 ; i < cacheCon->Tuples(); i++) {
+     sqlChanOp* newOp = new (std::nothrow) sqlChanOp(theManager);
+     assert( newOp != 0 ) ;
 
-	elog	<< "*** [chanfix::preloadChanOpsCache]: Done. Loaded "
-			<< SQLDb->Tuples()
-			<< " chanops."
-			<< std::endl;
+     newOp->setAllMembers(cacheCon, i);
+     std::pair<std::string, std::string> thePair (newOp->getChannel(), newOp->getAccount());
+     sqlChanOps.insert(sqlChanOpsType::value_type(thePair, newOp));
+  }
+} else {
+  elog << "*** [chanfix::preloadChanOpsCache] Error executing query: "
+    << cacheCon->ErrorMessage()
+    << std::endl;
+  ::exit(0);
+}
+
+elog	<< "*** [chanfix::preloadChanOpsCache]: Done. Loaded "
+	<< sqlChanOps.size()
+	<< " chanops."
+	<< std::endl;
 }
 
 void chanfix::preloadChannelCache()

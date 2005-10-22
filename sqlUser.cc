@@ -42,6 +42,8 @@ const sqlUser::flagType sqlUser::F_OWNER =		0x20; /* +o */
 const sqlUser::flagType sqlUser::F_USERMANAGER =	0x40; /* +u */
 const sqlUser::flagType sqlUser::F_LOGGEDIN =		0x80;
 
+unsigned long int sqlUser::maxUserId = 0;
+
 sqlUser::sqlUser(PgDatabase* _SQLDb)
 : id(0),
   user_name(),
@@ -53,134 +55,32 @@ sqlUser::sqlUser(PgDatabase* _SQLDb)
   group(),
   flags(0),
   isSuspended(false),
-  useNotice(true),
-  SQLDb(_SQLDb)
-{};
-
-/*
- *  Load all data for this user from the backend. (Key: userID)
- */
-
-bool sqlUser::loadData(unsigned int userID)
+  useNotice(true)
 {
-/*
- *  With the open database handle 'SQLDb', retrieve information about
- *  'userID' and fill our member variables.
- */
-
-#ifdef LOG_DEBUG
-	elog	<< "sqlUser::loadData> Attempting to load data for user-id: "
-		<< userID
-		<< std::endl;
-#endif
-
-std::stringstream queryString;
-queryString	<< "SELECT "
-		<< "id, user_name, created, last_seen, last_updated, last_updated_by, language_id, faction, flags, issuspended, usenotice"
-		<< " FROM users WHERE id = "
-		<< userID
-		;
-
-#ifdef LOG_SQL
-	elog	<< "sqlUser::loadData> "
-		<< queryString.str()
-		<< std::endl;
-#endif
-
-ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
-
-if( PGRES_TUPLES_OK == status )
-	{
-	/*
-	 *  If the user doesn't exist, we won't get any rows back.
-	 */
-
-	if(SQLDb->Tuples() < 1)
-		{
-		return (false);
-		}
-
-	setAllMembers(0);
-
-	return (true);
-	}
-
-return (false);
-}
-
-bool sqlUser::loadData(const std::string& userName)
-{
-/*
- *  With the open database handle 'SQLDb', retrieve information about
- *  'userID' and fill our member variables.
- */
-
-#ifdef LOG_DEBUG
-	elog	<< "sqlUser::loadData> Attempting to load data for user-name: "
-		<< userName
-		<< std::endl;
-#endif
-
-std::stringstream queryString;
-queryString	<< "SELECT "
-		<< "id, user_name, created, last_seen, last_updated, last_updated_by, language_id, faction, flags, issuspended, usenotice"
-		<< " FROM users WHERE lower(user_name) = '"
-		<< escapeSQLChars(string_lower(userName))
-		<< "'"
-		;
-
-#ifdef LOG_SQL
-	elog	<< "sqlUser::loadData> "
-		<< queryString.str()
-		<< std::endl;
-#endif
-
-ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
-
-if( PGRES_TUPLES_OK == status )
-	{
-	/*
-	 *  If the user doesn't exist, we won't get any rows back.
-	 */
-
-	if(SQLDb->Tuples() < 1)
-		{
-		return (false);
-		}
-
-	setAllMembers(0);
-
-	return (true);
-	}
-
-return (false);
-}
-
-void sqlUser::setAllMembers(int row) 
-{
-  id = atoi(SQLDb->GetValue(row, 0));
-  user_name = SQLDb->GetValue(row, 1);
-  created = atoi(SQLDb->GetValue(row, 2));
-  last_seen = atoi(SQLDb->GetValue(row, 3));
-  last_updated = atoi(SQLDb->GetValue(row, 4));
-  last_updated_by = SQLDb->GetValue(row, 5);
-  language_id = atoi(SQLDb->GetValue(row, 6));
-  group = SQLDb->GetValue(row, 7);
-  flags = atoi(SQLDb->GetValue(row, 8));
-  isSuspended = (!strcasecmp(SQLDb->GetValue(row,9),"t") ? true : false);
-  useNotice = (!strcasecmp(SQLDb->GetValue(row,10),"t") ? true : false);
+  myManager = _myManager;
 };
 
-bool sqlUser::commit()
+void sqlUser::setAllMembers(PgDatabase* theDB, int row)
 {
+  id = atoi(theDB->GetValue(row, 0));
+  user_name = theDB->GetValue(row, 1);
+  created = atoi(theDB->GetValue(row, 2));
+  last_seen = atoi(theDB->GetValue(row, 3));
+  last_updated = atoi(theDB->GetValue(row, 4));
+  last_updated_by = theDB->GetValue(row, 5);
+  language_id = atoi(theDB->GetValue(row, 6));
+  group = theDB->GetValue(row, 7);
+  flags = atoi(theDB->GetValue(row, 8));
+  isSuspended = (!strcasecmp(theDB->GetValue(row,9),"t") ? true : false);
+  useNotice = (!strcasecmp(theDB->GetValue(row,10),"t") ? true : false);
 
-/* Special case if we have no SQLDb
- * ie if we are a fake user
- */
-if( !SQLDb ) { return true; }
+  if (id > maxUserId) maxUserId = id;
+};
 
-std::stringstream queryString;
-queryString	<< "UPDATE users SET "
+void sqlUser::commit()
+{
+std::stringstream userCommit;
+userCommit	<< "UPDATE users SET "
 		<< "last_seen = " << last_seen << ", "
 		<< "last_updated = " << last_updated << ", "
 		<< "last_updated_by = '" << last_updated_by << "', "
@@ -192,96 +92,48 @@ queryString	<< "UPDATE users SET "
 		<< " WHERE "
 		<< "id = " << id
 		;
-
-#ifdef LOG_SQL
-elog	<< "sqlUser::commit> "
-	<< queryString.str()
-	<< std::endl;
-#endif
-
-ExecStatusType status = SQLDb->Exec(queryString.str().c_str());
-
-if(PGRES_COMMAND_OK != status) {
-	elog	<< "sqlUser::commit> "
-		<< SQLDb->ErrorMessage()
-		<< std::endl;
-	return false;
+myManager->queueCommit(userCommit.str());
 }
 
-return true;
-
-}
-
-bool sqlUser::Insert()
+/**
+ * This function inserts a brand new user into the DB.
+ * It is a slight fudge, in that it first creates a blank record then
+ * calls commit() to update the data fields for that record. This is done
+ * so that any new fields added will automatically be dealt with in commit()
+ * instead of in 50 different functions.
+ */
+void sqlUser::Insert()
 {
+/* Grab the next available user id */
+id = ++maxUserId;
+
 std::stringstream insertString;
 insertString	<< "INSERT INTO users "
-		<< "(user_name, created, last_seen, last_updated, last_updated_by, language_id, faction, flags, issuspended, usenotice) "
+		<< "(id, user_name) "
 		<< "VALUES "
 		<< "("
-		<< "'" << user_name << "', "
-		<< created << ", "
-		<< last_seen << ", "
-		<< last_updated << ", "
-		<< "'" << last_updated_by << "', "
-		<< language_id << ", "
-		<< "'" << group << "', "
-		<< flags << ", "
-		<< (isSuspended ? "'t'" : "'f'") << ", "
-		<< (useNotice ? "'t'" : "'f'")
+		<< id << ", "
+		<< "'" << user_name << "'"
 		<< ")"
 		;
 
-#ifdef LOG_SQL
-elog	<< "sqlUser::Insert> "
-	<< insertString.str()
-	<< std::endl;
-#endif
-
-ExecStatusType status = SQLDb->Exec(insertString.str().c_str());
-
-if(PGRES_COMMAND_OK == status) {
-	if (!loadData(user_name))
-		return false;
-	return true;
-}
-
-elog << "sqlUser::Insert> " << SQLDb->ErrorMessage();
-return false;
+myManager->queueCommit(insertString.str());
+commit();
 } // sqlUser::Insert()
 
-bool sqlUser::Delete()
+void sqlUser::Delete()
 {
 std::stringstream deleteString;
 deleteString	<< "DELETE FROM users "
 		<< "WHERE id = '" << id << "'"
 		;
-
-ExecStatusType status = SQLDb->Exec(deleteString.str().c_str());
-
-if(PGRES_COMMAND_OK != status) {
-	elog	<< "sqlUser::Delete> "
-		<< SQLDb->ErrorMessage()
-		<< std::endl;
-	return false;
-}
+myManager->queueCommit(deleteString.str());
 
 std::stringstream hostString;
 hostString	<< "DELETE FROM hosts "
 		<< "WHERE user_id = " << id
 		;
-
-status = SQLDb->Exec(hostString.str().c_str());
-
-if(PGRES_COMMAND_OK != status) {
-	elog	<< "sqlUser::Delete (hosts)> "
-		<< SQLDb->ErrorMessage()
-		<< std::endl;
-	return false;
-}
-
-return true;
-
+myManager->queueCommit(hostString.str());
 }
 
 void sqlUser::loadHostList()

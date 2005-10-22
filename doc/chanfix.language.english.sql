@@ -159,7 +159,7 @@ COPY "translations" FROM stdin;
 1	149	You need to authenticate to use this command.	31337	0
 1	150	This command requires flag '%c'.	31337	0
 1	151	This command requires one of these flags: \"%s\".	31337	0
-1	152	SYNTAX: 	31337	0
+1	152	This command requires authentication and flag '%c'.	31337	0
+1	153	This command requires authentication and one of these flags: \"%s\".	31337	0
+1	154	SYNTAX: 	31337	0
 \.
-				
-							
