@@ -205,9 +205,9 @@ public:
 
 	sqlUser* chanfix::isAuthed(const std::string);
 
-	void preloadChanOpsCache();
-	void preloadChannelCache();
-	void preloadUserCache();
+	void precacheChanOps();
+	void precacheChannels();
+	void precacheUsers();
 
 	void changeState(STATE);
 

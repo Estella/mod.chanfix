@@ -274,16 +274,16 @@ RegisterCommand(new WHOISCommand(this, "WHOIS",
 /* Set our current day. */
 setCurrentDay();
 
-/* Preload the ChanOps cache */
-preloadChanOpsCache();
+/* Precache our chanOps. */
+precacheChanOps();
 
-/* Preload the Channels cache */
-preloadChannelCache();
+/* Precache our channels. */
+precacheChannels();
 
-/* Preload the user access cache */
-preloadUserCache();
+/* Precache our staff. */
+precacheUsers();
 
-/* Load help messages */
+/* Load help messages. */
 loadHelpTable();
 
 /* Load our translation tables. */
@@ -851,9 +851,9 @@ elog	<< "SQL> "
 return;
 }
 
-void chanfix::preloadChanOpsCache()
+void chanfix::precacheChanOps()
 {
-elog << "*** [chanfix:preloadChanOpsCache] Precaching chanops." << std::endl;
+elog << "*** [chanfix::precacheChanOps] Precaching chanops." << std::endl;
 
 /* Get a connection instance to our backend */
 PgDatabase* cacheCon = theManager->getConnection();
@@ -863,7 +863,7 @@ std::stringstream theQuery;
 theQuery	<< "SELECT channel,account,last_seen_as,ts_firstopped,ts_lastopped,day0,day1,day2,day3,day4,day5,day6,day7,day8,day9,day10,day11,day12,day13 FROM chanOps"
 		;
 
-elog		<< "*** [chanfix::preloadChanOpsCache]: Loading chanOps and their points ..." 
+elog		<< "*** [chanfix::precacheChanOps]: Loading chanOps and their points ..." 
 		<< std::endl;
 
 if (cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
@@ -876,92 +876,115 @@ if (cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
      sqlChanOps.insert(sqlChanOpsType::value_type(thePair, newOp));
   }
 } else {
-  elog << "*** [chanfix::preloadChanOpsCache] Error executing query: "
+  elog << "*** [chanfix::precacheChanOps] Error executing query: "
     << cacheCon->ErrorMessage()
     << std::endl;
   ::exit(0);
 }
 
-elog	<< "*** [chanfix::preloadChanOpsCache]: Done. Loaded "
+
+elog	<< "*** [chanfix::precacheChanOps]: Done. Loaded "
 	<< sqlChanOps.size()
 	<< " chanops."
 	<< std::endl;
+
+/* Dispose of our connection instance */
+theManager->removeConnection(cacheCon);
+
+return;
 }
 
-void chanfix::preloadChannelCache()
+void chanfix::precacheChannels()
 {
-	std::stringstream theQuery;
-	theQuery	<< "SELECT id, channel, flags FROM channels"
-			;
+elog << "*** [chanfix::precacheChannels] Precaching channels." << std::endl;
 
-	elog		<< "*** [chanfix::preloadChannelCache]: Loading channels ..."
-			<< std::endl;
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = theManager->getConnection();
 
-	ExecStatusType status = SQLDb->Exec(theQuery.str().c_str()) ;
+/* Retrieve the list of channels */
+std::stringstream theQuery;
+theQuery	<< "SELECT id, channel, flags FROM channels"
+		;
 
-	if( PGRES_TUPLES_OK == status )
-	{
-		for (int i = 0 ; i < SQLDb->Tuples(); i++)
-		{
-			sqlChannel* newChan = new (std::nothrow) sqlChannel(SQLDb);
-			assert( newChan != 0 ) ;
+elog		<< "*** [chanfix::precacheChannels]: Loading channels ..."
+		<< std::endl;
 
-			newChan->setAllMembers(i);
-			sqlChanCache.insert(sqlChannelCacheType::value_type(newChan->getChannel(), newChan));
-		}
-	} else  {
-		elog	<< "[chanfix::preloadChannelCache] Something went wrong: "
-			<< SQLDb->ErrorMessage()
-			<< std::endl;
-		exit(0);
-	}
+if (cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
+  for (int i = 0; i < cacheCon->Tuples(); i++) {
+     sqlChannel* newChan = new (std::nothrow) sqlChannel(theManager);
+     assert( newChan != 0 ) ;
 
-	elog	<< "*** [chanfix::preloadChannelCache]: Done. Loaded "
-			<< SQLDb->Tuples()
-			<< " channels."
-			<< std::endl;
+     newChan->setAllMembers(cacheCon, i);
+     sqlChanCache.insert(sqlChannelCacheType::value_type(newChan->getChannel(), newChan));
+  }
+} else {
+  elog << "*** [chanfix::precacheChannels] Error executing query: "
+    << cacheCon->ErrorMessage()
+    << std::endl;
+  ::exit(0);
 }
 
-void chanfix::preloadUserCache()
+elog	<< "*** [chanfix::precacheChannels]: Done. Loaded "
+	<< sqlChanCache.size()
+	<< " channels."
+	<< std::endl;
+
+/* Dispose of our connection instance */
+theManager->removeConnection(cacheCon);
+
+return;
+}
+
+void chanfix::precacheUsers()
 {
-	std::stringstream theQuery;
-	theQuery	<< "SELECT id, user_name, created, last_seen, last_updated, last_updated_by, language_id, faction, flags, issuspended, usenotice "
-			<< "FROM users"
-			;
+elog << "*** [chanfix::precacheUsers] Precaching users." << std::endl;
 
-	ExecStatusType status = SQLDb->Exec(theQuery.str().c_str());
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = theManager->getConnection();
 
-	if(PGRES_TUPLES_OK == status) {
-		/* First we need to clear the current cache. */
-		for(usersMapType::iterator itr = usersMap.begin() ;
-		    itr != usersMap.end() ; ++itr) {
-			delete itr->second;
-		}
-		usersMap.clear();
+/* Retrieve the list of chanops */
+std::stringstream theQuery;
+theQuery	<< "SELECT id, user_name, created, last_seen, last_updated, last_updated_by, language_id, faction, flags, issuspended, usenotice "
+		<< "FROM users"
+		;
 
-		for(int i = 0; i < SQLDb->Tuples(); ++i) {
-			sqlUser *newUser = new sqlUser(SQLDb);
-			assert(newUser != 0);
+if (cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
+  /* First we need to clear the current cache. */
+  for (usersMapType::iterator itr = usersMap.begin();
+       itr != usersMap.end(); ++itr) {
+    delete itr->second;
+  }
+  usersMap.clear();
 
-			newUser->setAllMembers(i);
-			usersMap.insert(usersMapType::value_type(newUser->getUserName(), newUser));
-		}
-	} else {
-		elog	<< "chanfix::preloadUserCache> "
-			<< SQLDb->ErrorMessage()
-			<< std::endl;
-	}
+  for (int i = 0; i < cacheCon->Tuples(); ++i) {
+    sqlUser *newUser = new sqlUser(theManager);
+    assert(newUser != 0);
 
-	/* Load up the host cache */
-	for (usersMapType::iterator itr = usersMap.begin();
-	  itr != usersMap.end(); ++itr) {
-	    itr->second->loadHostList();
-	}
+    newUser->setAllMembers(cacheCon, i);
+    usersMap.insert(usersMapType::value_type(newUser->getUserName(), newUser));
+  }
+} else {
+  elog << "*** [chanfix::precacheUsers] Error executing query: "
+    << cacheCon->ErrorMessage()
+    << std::endl;
+  ::exit(0);
+}
+
+/* Load up the host cache */
+for (usersMapType::iterator itr = usersMap.begin();
+     itr != usersMap.end(); ++itr) {
+  itr->second->loadHostList();
+}
 	
-	elog	<< "chanfix::preloadUserCache> Loaded "
-		<< usersMap.size()
-		<< " users."
-		<< std::endl ;
+elog	<< "chanfix::precacheUsers> Loaded "
+	<< usersMap.size()
+	<< " users."
+	<< std::endl;
+
+/* Dispose of our connection instance */
+theManager->removeConnection(cacheCon);
+
+return;
 }
 
 void chanfix::changeState(STATE newState)
@@ -1049,7 +1072,7 @@ return 0;
 
 sqlChanOp* chanfix::newChanOp(const std::string& channel, const std::string& account)
 {
-sqlChanOp* newOp = new (std::nothrow) sqlChanOp(SQLDb);
+sqlChanOp* newOp = new (std::nothrow) sqlChanOp(theManager);
 assert( newOp != 0 ) ;
 
 sqlChanOps.insert(sqlChanOpsType::value_type(std::pair<std::string,std::string>(channel, account), newOp));
@@ -1109,6 +1132,10 @@ return countMyOps(theChan->getName());
 
 const std::string chanfix::getHostList( sqlUser* User)
 {
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = theManager->getConnection();
+
+/* Grab the user's host list */
 static const char* queryHeader
 	= "SELECT host FROM hosts WHERE user_id =  ";
 
@@ -1117,26 +1144,27 @@ theQuery	<< queryHeader
 		<< User->getID()
 		;
 
-ExecStatusType status = SQLDb->Exec( theQuery.str().c_str() ) ;
-
-if( PGRES_TUPLES_OK != status )
-	{
-	elog	<< "getHostList> SQL Error: "
-		<< SQLDb->ErrorMessage()
-		<< std::endl ;
-	return NULL ;
-	}
+if (!cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
+  elog	<< "chanfix::getHostList> SQL Error: "
+	<< cacheCon->ErrorMessage()
+	<< std::endl;
+  return 0;
+}
 
 // SQL Query succeeded
 std::stringstream hostlist;
-for (int i = 0 ; i < SQLDb->Tuples(); i++)
+for (int i = 0 ; i < cacheCon->Tuples(); i++)
 	{
 	if (!i)
-	  hostlist << SQLDb->GetValue(i, 0);
+	  hostlist << cacheCon->GetValue(i, 0);
 	else
-	  hostlist << ", " << SQLDb->GetValue(i, 0);
+	  hostlist << ", " << cacheCon->GetValue(i, 0);
 	}
 if (hostlist.str() == "") hostlist << "None.";
+
+/* Dispose of our connection instance */
+theManager->removeConnection(cacheCon);
+
 return hostlist.str();
 }
 
@@ -1584,7 +1612,7 @@ return getChannelRecord(theChan->getName());
 
 sqlChannel* chanfix::newChannelRecord(const std::string& Channel)
 {
-sqlChannel* newChan = new (std::nothrow) sqlChannel(SQLDb);
+sqlChannel* newChan = new (std::nothrow) sqlChannel(theManager);
 assert( newChan != 0 ) ;
 
 newChan->setChannel(Channel);
@@ -1605,8 +1633,7 @@ return newChannelRecord(theChan->getName());
 
 bool chanfix::deleteChannelRecord(sqlChannel* sqlChan)
 {
-if (!sqlChan->Delete())
-  return false;
+sqlChan->Delete();
 sqlChanCache.erase(sqlChan->getChannel());
 delete sqlChan; sqlChan = 0;
 
@@ -1916,16 +1943,9 @@ for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
   curOp->calcTotalPoints();
   if (curOp->getPoints() <= 0 && maxFirstOppedTS > curOp->getTimeFirstOpped()) {
     sqlChanOps.erase(ptr);
-    if (!curOp->Delete()) {
-      elog	<< "chanfix::rotateDB> Error: Could not delete op "
-		<< curOp->getLastSeenAs()
-		<< " "
-		<< curOp->getChannel()
-		<< std::endl;
-    } else {
-      numOpsLeft--;
-      delete curOp; curOp = 0;
-    }
+    curOp->Delete();
+    numOpsLeft--;
+    delete curOp; curOp = 0;
   }
 #ifndef REMEMBER_CHANNELS_WITH_NOTES_OR_FLAGS
   if (!numOpsLeft) {
@@ -2111,21 +2131,28 @@ return std::string("");
 
 void chanfix::loadHelpTable()
 {
-ExecStatusType status;
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = theManager->getConnection();
 
-status = SQLDb->Exec("SELECT language_id,topic,contents FROM help");
+/* Grab the help table */
+std::stringstream theQuery;
+theQuery	<< "SELECT language_id,topic,contents FROM help"
+		;
 
-if (PGRES_TUPLES_OK == status)
-  for (int i = 0; i < SQLDb->Tuples(); i++)
+if (cacheCon->ExecTuplesOk(theQuery.str().c_str()))
+  for (int i = 0; i < cacheCon->Tuples(); i++)
     helpTable.insert(helpTableType::value_type(
-		     std::make_pair(atoi(SQLDb->GetValue(i, 0)),
-				    SQLDb->GetValue(i, 1)),
-		     SQLDb->GetValue(i, 2)));
+		     std::make_pair(atoi(cacheCon->GetValue(i, 0)),
+				    cacheCon->GetValue(i, 1)),
+		     cacheCon->GetValue(i, 2)));
 
-    elog	<< "*** [chanfix::loadHelpTable]: Loaded "
-		<< helpTable.size()
-		<< " help messages."
-		<< std::endl;
+elog	<< "*** [chanfix::loadHelpTable]: Loaded "
+	<< helpTable.size()
+	<< " help messages."
+	<< std::endl;
+
+/* Dispose of our connection instance */
+theManager->removeConnection(cacheCon);
 
 return;
 }
@@ -2171,38 +2198,44 @@ return std::string( "Unable to retrieve response. Please contact a chanfix "
 
 void chanfix::loadTranslationTable()
 {
-ExecStatusType status;
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = theManager->getConnection();
 
-status = SQLDb->Exec("SELECT id,code,name FROM languages");
+/* Grab the languages table */
+std::stringstream langQuery;
+langQuery	<< "SELECT id,code,name FROM languages"
+		;
 
-if (PGRES_TUPLES_OK == status)
-  for (int i = 0; i < SQLDb->Tuples(); i++)
-    languageTable.insert(languageTableType::value_type(SQLDb->GetValue(i, 1),
-			 std::make_pair(atoi(SQLDb->GetValue(i, 0)),
-					SQLDb->GetValue(i, 2))));
+if (cacheCon->ExecTuplesOk(langQuery.str().c_str()))
+  for (int i = 0; i < cacheCon->Tuples(); i++)
+    languageTable.insert(languageTableType::value_type(cacheCon->GetValue(i, 1),
+			 std::make_pair(atoi(cacheCon->GetValue(i, 0)),
+					cacheCon->GetValue(i, 2))));
 
-    elog	<< "*** [chanfix::loadTranslationTable]: Loaded "
-		<< languageTable.size()
-		<< " languages."
-		<< std::endl;
+elog	<< "*** [chanfix::loadTranslationTable]: Loaded "
+	<< languageTable.size()
+	<< " languages."
+	<< std::endl;
 
-status = SQLDb->Exec(
-        "SELECT language_id,response_id,text FROM translations" ) ;
+/* Grab the translations table */
+std::stringstream transQuery;
+transQuery	<< "SELECT language_id,response_id,text FROM translations"
+		;
 
-if (PGRES_TUPLES_OK == status) {
-  for (int i = 0 ; i < SQLDb->Tuples(); i++) {
+if (cacheCon->ExecTuplesOk(transQuery.str().c_str())) {
+  for (int i = 0 ; i < cacheCon->Tuples(); i++) {
     /*
      *  Add to our translations table.
      */
 
-    int lang_id = atoi(SQLDb->GetValue( i, 0 ));
-    int resp_id = atoi(SQLDb->GetValue( i, 1 ));
+    int lang_id = atoi(cacheCon->GetValue( i, 0 ));
+    int resp_id = atoi(cacheCon->GetValue( i, 1 ));
 
     std::pair<int, int> thePair( lang_id, resp_id ) ;
 
     translationTable.insert(
 			translationTableType::value_type(
-			thePair, SQLDb->GetValue( i, 2 )) );
+			thePair, cacheCon->GetValue( i, 2 )) );
   }
 }
 
@@ -2210,6 +2243,9 @@ elog	<< "*** [chanfix::loadTranslationTable]: Loaded "
 	<< translationTable.size()
 	<< " translations."
 	<< std::endl;
+
+/* Dispose of our connection instance */
+theManager->removeConnection(cacheCon);
 
 return;
 }
@@ -2228,22 +2264,22 @@ for(chanOpsType::iterator ptr = opList.begin(); ptr != opList.end(); ptr++) {
 
 /*void chanfix::checkDBConnection()
 {
-if (SQLDb->Status() == CONNECTION_BAD) { //Check if the connection has died
-  delete(SQLDb);
+if (cacheCon->Status() == CONNECTION_BAD) { //Check if the connection has died
+  delete(cacheCon);
   dbConnected = false;
-  updateSqldb(NULL);
+  updateSQLDb(NULL);
   MsgChanLog("PANIC! - The Connection With The Db Was Lost\n");
   MsgChanLog("Attempting to reconnect, Attempt %d out of %d\n",
 	     connectCount+1,connectRetry+1);
-  std::string Query = "host=" + sqlHost + " dbname=" + sqlDb + " port=" + sqlPort;
+  std::string Query = "host=" + sqlHost + " dbname=" + sqlDB + " port=" + sqlPort;
   if (strcasecmp(sqlUser,"''"))
     Query += (" user=" + sqlUser);
   if (strcasecmp(sqlPass,"''"))
     Query += (" password=" + sqlPass);
-  SQLDb = new (std::nothrow) cmDatabase(Query.c_str());
-  assert(SQLDb != NULL);
+  theManager = new (std::nothrow) cmDatabase(Query.c_str());
+  assert(theManager != NULL);
 
-  if (SQLDb->ConnectionBad()) {
+  if (theManager->ConnectionBad()) {
     ++connectCount;
     if (connectCount > connectRetry) {
       MsgChanLog("Cant connect to the database, quiting\n");
@@ -2254,7 +2290,7 @@ if (SQLDb->Status() == CONNECTION_BAD) { //Check if the connection has died
   } else {
     dbConnected = true;
     MsgChanLog("The PANIC is over, db connection restored\n");
-    updateSqldb(SQLDb);
+    updateSqldb(theManager);
     connectCount = 0;
   }
 }

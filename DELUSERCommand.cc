@@ -77,22 +77,18 @@ if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
   }
 }
 
-if (chkUser->Delete()) {
-  bot->usersMap.erase(bot->usersMap.find(chkUser->getUserName()));
-  bot->SendTo(theClient,
-              bot->getResponse(theUser,
-                              language::deleted_user,
-                              std::string("Deleted user %s.")).c_str(), chkUser->getUserName().c_str());
-  bot->logAdminMessage("%s (%s) deleted user %s.",
-		       theClient->getAccount().c_str(),
-		       theClient->getRealNickUserHost().c_str(),
-		       chkUser->getUserName().c_str());
-  delete chkUser; chkUser = 0;
-} else {
-  bot->SendTo(theClient,
-              bot->getResponse(theUser,
-                              language::error_deleting_user,
-                              std::string("Error deleting user %s.")).c_str(), st[1].c_str());
-}
+chkUser->Delete();
+bot->usersMap.erase(bot->usersMap.find(chkUser->getUserName()));
+bot->SendTo(theClient,
+	    bot->getResponse(theUser,
+			language::deleted_user,
+			std::string("Deleted user %s.")).c_str(), chkUser->getUserName().c_str());
+bot->logAdminMessage("%s (%s) deleted user %s.",
+		     theClient->getAccount().c_str(),
+		     theClient->getRealNickUserHost().c_str(),
+		     chkUser->getUserName().c_str());
+delete chkUser; chkUser = 0;
+
+return;
 } //DELUSERCommand::exec
 } //Namespace gnuworld

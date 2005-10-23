@@ -62,6 +62,10 @@ if (theChan->countNotes(0) <= 0) {
 
 unsigned int messageId = atoi(st[2].c_str());
 
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = bot->theManager->getConnection();
+
+/* Retrieve the note */
 std::stringstream noteCheckQuery;
 noteCheckQuery	<< "SELECT channelID, userID, event "
 		<< "FROM notes "
@@ -69,22 +73,23 @@ noteCheckQuery	<< "SELECT channelID, userID, event "
 		<< messageId
 		;
 
-ExecStatusType status = bot->SQLDb->Exec( noteCheckQuery.str().c_str() ) ;
+if (!cacheCon->ExecTuplesOk(noteCheckQuery.str().c_str())) {
+  elog	<< "DELNOTECommand> SQL Error: "
+	<< cacheCon->ErrorMessage()
+	<< std::endl ;
 
-if( PGRES_TUPLES_OK != status )
-	{
-	elog	<< "DELNOTECommand> SQL Error: "
-		<< bot->SQLDb->ErrorMessage()
-		<< std::endl ;
+  bot->SendTo(theClient,
+		bot->getResponse(theUser,
+				language::error_checking_noteid,
+				std::string("An unknown error occured while checking the note id.")).c_str());
 
-        bot->SendTo(theClient,
-                    bot->getResponse(theUser,
-                                    language::error_checking_noteid,
-                                    std::string("An unknown error occured while checking the note id.")).c_str());
-	return;
-	}
+  /* Dispose of our connection instance */
+  bot->theManager->removeConnection(cacheCon);
 
-if (bot->SQLDb->Tuples() != 1) {
+  return;
+}
+
+if (cacheCon->Tuples() != 1) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::no_note_with_id,
@@ -92,9 +97,12 @@ if (bot->SQLDb->Tuples() != 1) {
   return;
 }
 
-unsigned int channelID = atoi(bot->SQLDb->GetValue(0,0));
-unsigned int userID = atoi(bot->SQLDb->GetValue(0,1));
-unsigned short eventType = atoi(bot->SQLDb->GetValue(0,2));
+unsigned int channelID = atoi(cacheCon->GetValue(0,0));
+unsigned int userID = atoi(cacheCon->GetValue(0,1));
+unsigned short eventType = atoi(cacheCon->GetValue(0,2));
+
+/* Dispose of our connection instance */
+bot->theManager->removeConnection(cacheCon);
 
 if (channelID != theChan->getID()) {
   bot->SendTo(theClient,
@@ -123,8 +131,7 @@ if (eventType != sqlChannel::EV_NOTE && !theUser->getFlag(sqlUser::F_OWNER)) {
   return;
 }
 
-if (!theChan->deleteNote(messageId))
-  return;
+theChan->deleteNote(messageId);
 
 bot->SendTo(theClient,
             bot->getResponse(theUser,

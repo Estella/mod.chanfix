@@ -1,8 +1,24 @@
 /**
+ * sqlChanOp.h
+ *
  * Author: Matthias Crauwels <ultimate_@wol.be>
  *
- * Class to keep channel-op points
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
  *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * USA.
+ *
+ * $Id$
  */
 
 #ifndef __SQLCHANOP_H
@@ -15,11 +31,13 @@
 namespace gnuworld
 {
 
+class sqlManager;
+
 class sqlChanOp {
 
 public:
-	sqlChanOp(PgDatabase*) ;
-	virtual ~sqlChanOp() ;
+	sqlChanOp(sqlManager*);
+	virtual ~sqlChanOp();
 
 
 	/*
@@ -75,10 +93,10 @@ public:
 	inline void	setDay(int _dayval, short _pointsval)
 		{ day[_dayval] = _pointsval ; }
 
-	bool Insert();
-	bool Delete();
-	bool commit();
-	void setAllMembers(int);
+	void Insert();
+	void Delete();
+	void commit();
+	void setAllMembers(PgDatabase*, int);
 	void calcTotalPoints();
 
 private:
@@ -90,8 +108,8 @@ private:
 	time_t		ts_firstopped;
 	time_t		ts_lastopped;
 	short		day[DAYSAMPLES];
-	PgDatabase*	SQLDb;
 
+	sqlManager*	myManager;
 }; // class
 
 } // namespace gnuworld

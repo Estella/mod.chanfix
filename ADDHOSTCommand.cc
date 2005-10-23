@@ -70,27 +70,6 @@ if (targetUser->matchHost(st[2].c_str())) {
   return;
 }
 
-std::stringstream insertString;
-insertString	<< "INSERT INTO hosts "
-		<< "(user_id, host) VALUES "
-		<< "("
-		<< targetUser->getID()
-		<< ", '"
-		<< st[2].c_str()
-		<< "')"
-		;
-
-ExecStatusType status = bot->SQLDb->Exec(insertString.str().c_str());
-
-if (PGRES_COMMAND_OK != status) {
-  bot->SendTo(theClient,
-              bot->getResponse(theUser,
-                              language::failed_adding_hostmask,
-                              std::string("Failed adding hostmask %s to user %s.")).c_str(),
-                                          st[2].c_str(), targetUser->getUserName().c_str());
-  return;
-}
-  
 targetUser->addHost(st[2].c_str());
 targetUser->setLastUpdated(bot->currentTime());
 targetUser->setLastUpdatedBy( std::string( "("

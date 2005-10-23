@@ -1,8 +1,24 @@
 /**
+ * sqlChanOp.cc
+ *
  * Author: Matthias Crauwels <ultimate_@wol.be>
  *
- * Class to keep channel-op points
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
  *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * USA.
+ *
+ * $Id$
  */
 
 #include	<sstream>
@@ -19,39 +35,40 @@
 namespace gnuworld
 {
 
-sqlChanOp::sqlChanOp(PgDatabase* _SQLDb)
-: channel(""),
+sqlChanOp::sqlChanOp(sqlManager* _myManager) :
+  channel(""),
   account(""),
   nickUserHost(""),
   points(0),
   ts_firstopped(0),
   ts_lastopped(0),
-  day(),
-  SQLDb(_SQLDb)
-{};
-	
-void sqlChanOp::setAllMembers(int row) 
+  day()
 {
-channel = SQLDb->GetValue(row, 0);
-account = SQLDb->GetValue(row, 1);
-nickUserHost = SQLDb->GetValue(row, 2);
-ts_firstopped = atoi(SQLDb->GetValue(row, 3));
-ts_lastopped = atoi(SQLDb->GetValue(row, 4));
-day[0] = atoi(SQLDb->GetValue(row, 5));
-day[1] = atoi(SQLDb->GetValue(row, 6));
-day[2] = atoi(SQLDb->GetValue(row, 7));
-day[3] = atoi(SQLDb->GetValue(row, 8));
-day[4] = atoi(SQLDb->GetValue(row, 9));
-day[5] = atoi(SQLDb->GetValue(row, 10));
-day[6] = atoi(SQLDb->GetValue(row, 11));
-day[7] = atoi(SQLDb->GetValue(row, 12));
-day[8] = atoi(SQLDb->GetValue(row, 13));
-day[9] = atoi(SQLDb->GetValue(row, 14));
-day[10] = atoi(SQLDb->GetValue(row, 15));
-day[11] = atoi(SQLDb->GetValue(row, 16));
-day[12] = atoi(SQLDb->GetValue(row, 17));
-day[13] = atoi(SQLDb->GetValue(row, 18));
-calcTotalPoints();
+  myManager = _myManager;
+};
+	
+void sqlChanOp::setAllMembers(PgDatabase* theDB, int row)
+{
+  channel = theDB->GetValue(row, 0);
+  account = theDB->GetValue(row, 1);
+  nickUserHost = theDB->GetValue(row, 2);
+  ts_firstopped = atoi(theDB->GetValue(row, 3));
+  ts_lastopped = atoi(theDB->GetValue(row, 4));
+  day[0] = atoi(theDB->GetValue(row, 5));
+  day[1] = atoi(theDB->GetValue(row, 6));
+  day[2] = atoi(theDB->GetValue(row, 7));
+  day[3] = atoi(theDB->GetValue(row, 8));
+  day[4] = atoi(theDB->GetValue(row, 9));
+  day[5] = atoi(theDB->GetValue(row, 10));
+  day[6] = atoi(theDB->GetValue(row, 11));
+  day[7] = atoi(theDB->GetValue(row, 12));
+  day[8] = atoi(theDB->GetValue(row, 13));
+  day[9] = atoi(theDB->GetValue(row, 14));
+  day[10] = atoi(theDB->GetValue(row, 15));
+  day[11] = atoi(theDB->GetValue(row, 16));
+  day[12] = atoi(theDB->GetValue(row, 17));
+  day[13] = atoi(theDB->GetValue(row, 18));
+  calcTotalPoints();
 };
 
 
@@ -64,12 +81,12 @@ void sqlChanOp::calcTotalPoints()
   }
 }
 
-bool sqlChanOp::Insert()
+void sqlChanOp::Insert()
 {
-static const char* queryHeader = "INSERT INTO chanOps (channel, account, last_seen_as, ts_firstopped, ts_lastopped, day0, day1, day2, day3, day4, day5, day6, day7, day8, day9, day10, day11, day12, day13) VALUES (";
+static const char* insertHeader = "INSERT INTO chanOps (channel, account, last_seen_as, ts_firstopped, ts_lastopped, day0, day1, day2, day3, day4, day5, day6, day7, day8, day9, day10, day11, day12, day13) VALUES (";
 
-std::stringstream queryString;
-queryString	<< queryHeader << "'"
+std::stringstream insertString;
+insertString	<< insertHeader << "'"
 		<< escapeSQLChars(channel) << "','"
 		<< escapeSQLChars(account) << "','"
 		<< escapeSQLChars(nickUserHost) << "',"
@@ -91,69 +108,30 @@ queryString	<< queryHeader << "'"
 		<< day[13] << ")"
 		;
 
-//#ifdef LOG_SQL
-	elog	<< "sqlChanOp::Insert> "
-		<< queryString.str().c_str()
-		<< std::endl;
-//#endif
-
-ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
-
-if( PGRES_COMMAND_OK != status )
-	{
-	// TODO: Log to msgchan here.
-	elog	<< "sqlChanOp::Insert> Something went wrong: "
-		<< SQLDb->ErrorMessage()
-		<< std::endl;
-
-	return false;
-	}
-
-return true;
-
+myManager->queueCommit(insertString.str());
+commit();
 };
 
-bool sqlChanOp::Delete()
+void sqlChanOp::Delete()
 {
 static const char* queryHeader =    "DELETE FROM chanOps ";
 
-std::stringstream queryString;
-queryString	<< queryHeader << "WHERE lower(channel) = '"
+std::stringstream deleteString;
+deleteString	<< queryHeader << "WHERE lower(channel) = '"
 		<< string_lower(escapeSQLChars(channel))
 		<< "' AND lower(account) = '"
 		<< string_lower(escapeSQLChars(account)) << "'"
 		;
-
-//#ifdef LOG_SQL
-	elog	<< "chanfix::sqlChanOp::Delete> "
-		<< queryString.str().c_str()
-		<< std::endl;
-//#endif
-
-ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
-
-if( PGRES_COMMAND_OK != status )
-	{
-	// TODO: Log to msgchan here.
-	elog	<< "chanfix::sqlChanOp::Delete> Something went wrong: "
-		<< SQLDb->ErrorMessage()
-		<< std::endl;
-
-	return false;
-	}
-
-return true;
-
+myManager->queueCommit(deleteString.str());
 };
 
-bool sqlChanOp::commit()
+void sqlChanOp::commit()
 {
-static const char* queryHeader =    "UPDATE chanOps ";
-
 elog	<< "chanfix::sqlChanOp::commit> " << account << " && " << channel << std::endl;
 
-std::stringstream queryString;
-queryString	<< queryHeader << "SET last_seen_as = "<< "'"
+std::stringstream chanOpCommit;
+chanOpCommit	<< "UPDATE chanOps "
+		<< "SET last_seen_as = " << "'"
 		<< escapeSQLChars(nickUserHost)
 		<< "', ts_firstopped = " << ts_firstopped
 		<< ", ts_lastopped = " << ts_lastopped
@@ -176,27 +154,7 @@ queryString	<< queryHeader << "SET last_seen_as = "<< "'"
 		<< "' AND lower(account) = '"
 		<< string_lower(escapeSQLChars(account)) << "'"
 		;
-
-//#ifdef LOG_SQL
-	elog	<< "chanfix::sqlChanOp::commit> "
-		<< queryString.str().c_str()
-		<< std::endl;
-//#endif
-
-ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
-
-if( PGRES_COMMAND_OK != status )
-	{
-	// TODO: Log to msgchan here.
-	elog	<< "chanfix::sqlChanOp::commit> Something went wrong: "
-		<< SQLDb->ErrorMessage()
-		<< std::endl;
-
-	return false;
-	}
-
-return true;
-
+myManager->queueCommit(chanOpCommit.str());
 };
 
 sqlChanOp::~sqlChanOp()

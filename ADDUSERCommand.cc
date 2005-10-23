@@ -50,7 +50,7 @@ if (chkUser) {
   return;
 }
 
-sqlUser *newUser = new sqlUser(bot->SQLDb);
+sqlUser *newUser = new sqlUser(bot->theManager);
 assert(newUser != 0);
 newUser->setUserName(st[1]);
 newUser->setCreated(bot->currentTime());
@@ -70,63 +70,28 @@ else
   newUser->setGroup("undernet.org");
 
 
-if (newUser->Insert()) {
-  bot->usersMap[newUser->getUserName()] = newUser;
-  ExecStatusType status;
-  if (st.size() > 2) {
-    std::stringstream insertString;
-    insertString	<< "INSERT INTO hosts "
-			<< "(user_id, host) VALUES "
-			<< "("
-			<< newUser->getID()
-			<< ", '"
-			<< st[2].c_str()
-			<< "')"
-			;
-
-#ifdef LOG_SQL
-    elog	<< "chanfix::ADDUSERCommand> "
-		<< insertString.str()
-		<< std::endl;
-#endif
-	  
-    status = bot->SQLDb->Exec(insertString.str().c_str());
-
-    if (PGRES_COMMAND_OK != status)
-      bot->SendTo(theClient,
-                  bot->getResponse(theUser,
-                                  language::failed_adding_hostmask,
-                                  std::string("Failed adding hostmask %s to user %s.")).c_str(),
-                                              st[2].c_str(), newUser->getUserName().c_str());
-    else
-      newUser->addHost(st[2].c_str());
-  }
-  if (st.size() > 2 && PGRES_COMMAND_OK == status) {
-    bot->SendTo(theClient,
-                bot->getResponse(theUser,
-                                language::created_user_w_host,
-                                std::string("Created user %s (%s).")).c_str(),
-                                            st[1].c_str(), st[2].c_str());
-    bot->logAdminMessage("%s (%s) added user %s (%s).",
-			 theUser->getUserName().c_str(), 
-			 theClient->getRealNickUserHost().c_str(),
-			 st[1].c_str(), st[2].c_str());
-  } else {
-    bot->SendTo(theClient,
-                bot->getResponse(theUser,
-                                language::created_user_wo_host,
-                                std::string("Created user %s.")).c_str(), st[1].c_str());
-    bot->logAdminMessage("%s (%s) added user %s.",
-			 theUser->getUserName().c_str(), 
-			 theClient->getRealNickUserHost().c_str(),
-			 st[1].c_str());
-  }
+newUser->Insert();
+bot->usersMap[newUser->getUserName()] = newUser;
+if (st.size() > 2) {
+  newUser->addHost(st[2].c_str());
+  bot->SendTo(theClient,
+		bot->getResponse(theUser,
+				language::created_user_w_host,
+				std::string("Created user %s (%s).")).c_str(),
+				st[1].c_str(), st[2].c_str());
+  bot->logAdminMessage("%s (%s) added user %s (%s).",
+		       theUser->getUserName().c_str(), 
+		       theClient->getRealNickUserHost().c_str(),
+		       st[1].c_str(), st[2].c_str());
 } else {
   bot->SendTo(theClient,
-              bot->getResponse(theUser,
-                              language::error_creating_user,
-                              std::string("Error creating user %s. (Insertion failed)")).c_str(),
-                                          st[1].c_str());
+		bot->getResponse(theUser,
+				language::created_user_wo_host,
+				std::string("Created user %s.")).c_str(), st[1].c_str());
+  bot->logAdminMessage("%s (%s) added user %s.",
+		       theUser->getUserName().c_str(), 
+		       theClient->getRealNickUserHost().c_str(),
+		       st[1].c_str());
 }
 
 return;

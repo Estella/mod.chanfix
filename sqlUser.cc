@@ -44,8 +44,8 @@ const sqlUser::flagType sqlUser::F_LOGGEDIN =		0x80;
 
 unsigned long int sqlUser::maxUserId = 0;
 
-sqlUser::sqlUser(PgDatabase* _SQLDb)
-: id(0),
+sqlUser::sqlUser(sqlManager* _myManager) :
+  id(0),
   user_name(),
   created(0),
   last_seen(0),
@@ -138,41 +138,62 @@ myManager->queueCommit(hostString.str());
 
 void sqlUser::loadHostList()
 {
-  static const char* queryHeader
-	= "SELECT host FROM hosts WHERE user_id = ";
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = myManager->getConnection();
 
-  std::stringstream theQuery;
-  theQuery	<< queryHeader 
+/* Retrieve the hosts */
+std::stringstream theQuery;
+theQuery	<< "SELECT host FROM hosts WHERE user_id = "
 		<< id
 		;
-// DEBUG
-elog	<< "sqlUser::loadHostList> "
-	<< theQuery.str()
-	<< std::endl;
-//END DEBUG
-  ExecStatusType status = SQLDb->Exec( theQuery.str().c_str() ) ;
 
-  if( PGRES_TUPLES_OK != status )
-	{
-	elog	<< "sqlUser::loadHostList> SQL Error: "
-		<< SQLDb->ErrorMessage()
-		<< std::endl ;
-	return;
-	}
-
-// SQL Query succeeded
-  for (int i = 0 ; i < SQLDb->Tuples(); i++) {
-    hostList.push_back(SQLDb->GetValue(i, 0));
+if (cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
+  // SQL Query succeeded
+  for (int i = 0 ; i < cacheCon->Tuples(); i++) {
+    hostList.push_back(cacheCon->GetValue(i, 0));
   }
-  
-};
+}
+
+/* Dispose of our connection instance */
+myManager->removeConnection(cacheCon);
+
+return; 
+}
+
+void sqlUser::addHost(const std::string& _theHost)
+{
+std::stringstream insertString;
+insertString    << "INSERT INTO hosts "
+                << "(user_id, host) VALUES "
+                << "("
+                << id
+                << ", '"
+                << _theHost.c_str()
+                << "')"
+                ;
+myManager->queueCommit(insertString.str());
+
+hostList.push_back(_theHost);
+
+return;
+}
 
 void sqlUser::delHost(const std::string& _theHost)
 {
-  if (hostList.size() < 1) return;
-  hostListType::iterator ptr = find( hostList.begin(), hostList.end(), string_lower(_theHost) );
-  if (ptr == hostList.end()) return;
-  hostList.erase(ptr);
+std::stringstream deleteString;
+deleteString	<< "DELETE FROM hosts "
+		<< "WHERE user_id = "
+		<< id
+		<< " AND lower(host) = '"
+		<< string_lower(_theHost.c_str())
+		<< "'"
+		;
+myManager->queueCommit(deleteString.str());
+
+if (hostList.size() < 1) return;
+hostListType::iterator ptr = find( hostList.begin(), hostList.end(), string_lower(_theHost) );
+if (ptr == hostList.end()) return;
+hostList.erase(ptr);
 }
 
 bool sqlUser::matchHost(const std::string& _host)

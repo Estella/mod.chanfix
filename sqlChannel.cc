@@ -1,6 +1,24 @@
 /**
+ * sqlChannel.cc
+ *
  * Author: Matthias Crauwels <ultimate_@wol.be>
  *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * USA.
+ *
+ * $Id$
  */
 
 #include	<sstream>
@@ -28,211 +46,75 @@ const int sqlChannel::EV_UNBLOCK	= 5 ; /* Channel unblock */
 const int sqlChannel::EV_ALERT		= 6 ; /* Channel alert */
 const int sqlChannel::EV_UNALERT	= 7 ; /* Channel unalert */
 
-sqlChannel::sqlChannel(PgDatabase* _SQLDb)
-: id(0),
+unsigned long int sqlChannel::maxUserId = 0;
+
+sqlChannel::sqlChannel(sqlManager* _myManager) :
+  id(0),
   channel(),
   last(0),
   start(0),
   maxScore(0),
   modesRemoved(false),
-  flags(0),
-  SQLDb(_SQLDb)
-{};
-
-bool sqlChannel::loadData(const std::string& channelName)
+  flags(0)
 {
-/*
- *  With the open database handle 'SQLDb', retrieve information about
- *  'channelName' and fill our member variables.
+  myManager = _myManager;
+};
+
+void sqlChannel::setAllMembers(PgDatabase* theDB, int row)
+{
+  id = atoi(theDB->GetValue(row, 0));
+  channel = theDB->GetValue(row, 1);
+  flags = atoi(theDB->GetValue(row, 2));
+
+  if (id > maxUserId) maxUserId = id;
+};
+
+/**
+ * This function inserts a brand new channel into the DB.
+ * It is a slight fudge, in that it first creates a blank record then
+ * calls commit() to update the data fields for that record. This is done
+ * so that any new fields added will automatically be dealt with in commit()
+ * instead of in 50 different functions.
  */
+void sqlChannel::Insert()
+{
+/* Grab the next available user id */
+id = ++maxUserId;
 
-#ifdef LOG_DEBUG
-	elog	<< "sqlChannel::loadData> Attempting to load data for"
-		<< " channel-name: "
-		<< channelName
-		<< std::endl;
-#endif
-
-std::stringstream queryString;
-queryString	<< "SELECT "
-		<< "id, channel, flags"
-		<< " FROM channels WHERE lower(channel) = '"
-		<< escapeSQLChars(string_lower(channelName))
-		<< "'"
+std::stringstream insertString;
+insertString    << "INSERT INTO channels "
+                << "(id, channel) "
+                << "VALUES "
+                << "("
+                << id << ", "
+		<< "'" << escapeSQLChars(channel) << "',"
+		<< ")"
 		;
 
-#ifdef LOG_SQL
-	elog	<< "sqlChannel::loadData> "
-		<< queryString.str()
-		<< std::endl;
-#endif
+myManager->queueCommit(insertString.str());
+commit();
+} // sqlChannel::Insert()
 
-ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
+void sqlChannel::Delete()
+{
+std::stringstream deleteString;
+deleteString    << "DELETE FROM channels "
+		<< "WHERE id = '" << id << "'"
+		;
 
-if( PGRES_TUPLES_OK == status )
-	{
-	/*
-	 *  If the channel doesn't exist, we won't get any rows back.
-	 */
-
-	if(SQLDb->Tuples() < 1)
-		{
-		return (false);
-		}
-
-	setAllMembers(0);
-	return (true);
-	}
-return (false);
+myManager->queueCommit(deleteString.str());
 }
 
-bool sqlChannel::loadData(unsigned int channelID)
+void sqlChannel::commit()
 {
-/*
- *  With the open database handle 'SQLDb', retrieve information about
- *  'channelID' and fill our member variables.
- */
-
-#ifdef LOG_DEBUG
-	elog	<< "sqlChannel::loadData> Attempting to load data for "
-		<< "channel-id: "
-		<< channelID
-		<< std::endl;
-#endif
-
-std::stringstream queryString;
-queryString	<< "SELECT "
-		<< "id, channel, flags"
-		<< " FROM channels WHERE id = "
-		<< channelID
+std::stringstream chanCommit;
+chanCommit	<< "UPDATE channels SET "
+		<< "flags = " << flags
+		<< " WHERE "
+		<< "id = " << id
 		;
-
-#ifdef LOG_SQL
-	elog	<< "sqlChannel::loadData> "
-		<< queryString.str()
-		<< endl;
-#endif
-
-ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
-
-if( PGRES_TUPLES_OK == status )
-	{
-	/*
-	 *  If the channel doesn't exist, we won't get any rows back.
-	 */
-
-	if(SQLDb->Tuples() < 1)
-		{
-		return (false);
-		}
-
-	setAllMembers(0);
-	return (true);
-	}
-
-return (false);
+myManager->queueCommit(chanCommit.str());
 }
-
-void sqlChannel::setAllMembers(int row) 
-{
-id = atoi(SQLDb->GetValue(row, 0));
-channel = SQLDb->GetValue(row, 1);
-flags = atoi(SQLDb->GetValue(row, 2));
-};
-
-bool sqlChannel::Insert()
-{
-static const char* queryHeader = "INSERT INTO channels (channel, flags) VALUES (";
-
-std::stringstream queryString;
-queryString	<< queryHeader << "'"
-		<< escapeSQLChars(channel) << "',"
-		<< flags << ")"
-		;
-
-//#ifdef LOG_SQL
-	elog	<< "sqlChannel::Insert> "
-		<< queryString.str()
-		<< std::endl;
-//#endif
-
-ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
-
-if( PGRES_COMMAND_OK == status )
-	{
-	if (!loadData(channel))
-		return false;
-	return true;
-	}
-
-// TODO: Log to msgchan here.
-elog	<< "sqlChannel::Insert> Something went wrong: "
-	<< SQLDb->ErrorMessage()
-	<< std::endl;
-
-return false;
-};
-
-bool sqlChannel::Delete()
-{
-static const char* queryHeader =    "DELETE FROM channels ";
-
-std::stringstream queryString;
-queryString	<< queryHeader << "WHERE id = " << id
-		;
-
-//#ifdef LOG_SQL
-	elog	<< "sqlChannel::Delete> "
-		<< queryString.str()
-		<< std::endl;
-//#endif
-
-ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
-
-if( PGRES_COMMAND_OK != status )
-	{
-	// TODO: Log to msgchan here.
-	elog	<< "chanfix::sqlChannel::Delete> Something went wrong: "
-		<< SQLDb->ErrorMessage()
-		<< std::endl;
-
-	return false;
-	}
-
-return true;
-
-};
-
-bool sqlChannel::commit()
-{
-static const char* queryHeader =    "UPDATE channels ";
-
-std::stringstream queryString;
-queryString	<< queryHeader << "SET flags = "
-		<< flags << " WHERE id = " << id
-		;
-
-//#ifdef LOG_SQL
-	elog	<< "sqlChannel::commit> "
-		<< queryString.str()
-		<< std::endl;
-//#endif
-
-ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
-
-if( PGRES_COMMAND_OK != status )
-	{
-	// TODO: Log to msgchan here.
-	elog	<< "chanfix::sqlChannel::commit> Something went wrong: "
-		<< SQLDb->ErrorMessage()
-		<< std::endl;
-
-	return false;
-	}
-
-return true;
-
-};
 
 /**
  * This method writes a 'notes' record, recording an event that has
@@ -265,163 +147,101 @@ theLog	<< "INSERT INTO notes (ts, channelID, userID, event, message) "
 	<< "')"
 	;
 
-#ifdef LOG_SQL
-	elog	<< "sqlChannel::addNote> "
-		<< theLog.str()
-		<< std::endl;
-#endif
-
-SQLDb->ExecCommandOk(theLog.str().c_str());
+myManager->queueCommit(theLog.str());
 }
 
 const std::string sqlChannel::getLastNote(unsigned short eventType, time_t& eventTime)
 {
+std::string retval;
+
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = myManager->getConnection();
+
+/* Retrieve the last note */
 std::stringstream queryString;
-
 queryString	<< "SELECT message,ts"
-			<< " FROM notes WHERE channelID = "
-			<< id
-			<< " AND event = "
-			<< eventType
-			<< " ORDER BY ts DESC LIMIT 1"
-			;
+		<< " FROM notes WHERE channelID = "
+		<< id
+		<< " AND event = "
+		<< eventType
+		<< " ORDER BY ts DESC LIMIT 1"
+		;
 
-#ifdef LOG_SQL
-	elog	<< "sqlChannel::getLastNote> "
-			<< queryString.str()
-			<< std::endl;
-#endif
-
-ExecStatusType status = SQLDb->Exec(queryString.str().c_str()) ;
-
-if( PGRES_TUPLES_OK == status )
-	{
-
-	if(SQLDb->Tuples() < 1)
-		{
-		return("");
-		}
-
-	std::string note = SQLDb->GetValue(0, 0);
-	eventTime = atoi(SQLDb->GetValue(0, 1));
-
-	return (note);
-	}
-
-return ("");
+if (cacheCon->ExecTuplesOk(queryString.str().c_str())) {
+  if (cacheCon->Tuples() > 0) {
+    std::string note = cacheCon->GetValue(0, 0);
+    eventTime = atoi(cacheCon->GetValue(0, 1));
+    retval = note;
+  }
 }
 
-bool sqlChannel::deleteNote(unsigned int messageId)
+/* Dispose of our connection instance */
+myManager->removeConnection(cacheCon);
+
+return retval;
+}
+
+void sqlChannel::deleteNote(unsigned int messageId)
 {
-std::stringstream queryString;
-queryString	<< "DELETE FROM notes WHERE channelID = "
+std::stringstream deleteString;
+deleteString	<< "DELETE FROM notes WHERE channelID = "
 		<< id
 		<< " AND id = "
 		<< messageId
 		;
-
-#ifdef LOG_SQL
-	elog	<< "sqlChannel::deleteNote> "
-		<< queryString.str()
-		<< std::endl;
-#endif
-
-ExecStatusType status = SQLDb->Exec(queryString.str().c_str());
-
-if( PGRES_COMMAND_OK != status )
-	{
-	elog	<< "sqlChannel::deleteNote> Something went wrong: "
-		<< SQLDb->ErrorMessage()
-		<< std::endl;
-	return false;
-	}
-
-return true;
+myManager->queueCommit(deleteString.str());
 }
 
 bool sqlChannel::deleteOldestNote()
 {
-std::stringstream queryString;
-queryString	<< "SELECT id FROM notes WHERE channelID = "
+bool retval = false;
+
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = myManager->getConnection();
+
+/* Retrieve the id of the oldest note */
+std::stringstream selectString;
+selectString	<< "SELECT id FROM notes WHERE channelID = "
 		<< id
 		<< " ORDER BY ts ASC LIMIT 1"
 		;
 
-#ifdef LOG_SQL
-	elog	<< "sqlChannel::deleteOldestNote> "
-		<< queryString.str()
-		<< std::endl;
-#endif
+if (cacheCon->ExecTuplesOk(selectString.str().c_str())) {
+  if (cacheCon->Tuples() > 0) {
+    unsigned int note_id = atoi(cacheCon->GetValue(0, 0));
 
-ExecStatusType queryStatus = SQLDb->Exec(queryString.str().c_str());
+    std::stringstream deleteString;
+    deleteString	<< "DELETE FROM notes WHERE id = "
+			<< note_id
+			;
 
-if( PGRES_TUPLES_OK != queryStatus )
-	{
-	elog	<< "sqlChannel::deleteOldestNote> Something went wrong with select: "
-		<< SQLDb->ErrorMessage()
-		<< std::endl;
-	return false;
-	}
-
-if(SQLDb->Tuples() < 1)
-	{
-	return false;
-	}
-
-unsigned int note_id = atoi(SQLDb->GetValue(0, 0));
-
-std::stringstream deleteString;
-deleteString	<< "DELETE FROM notes WHERE id = "
-		<< note_id
-		;
-
-#ifdef LOG_SQL
-	elog	<< "sqlChannel::deleteOldestNote> "
-		<< deleteString.str()
-		<< std::endl;
-#endif
-
-ExecStatusType deleteStatus = SQLDb->Exec(deleteString.str().c_str());
-
-if( PGRES_COMMAND_OK != deleteStatus )
-	{
-	elog	<< "sqlChannel::deleteOldestNote> Something went wrong with delete: "
-		<< SQLDb->ErrorMessage()
-		<< std::endl;
-	return false;
-	}
-
-return true;
+    if (cacheCon->ExecTuplesOk(deleteString.str().c_str()))
+      retval = true;
+  }
 }
 
-bool sqlChannel::deleteAllNotes()
+/* Dispose of our connection instance */
+myManager->removeConnection(cacheCon);
+
+return retval;
+}
+
+void sqlChannel::deleteAllNotes()
 {
-std::stringstream queryString;
-queryString	<< "DELETE FROM notes WHERE channelID = "
+std::stringstream deleteString;
+deleteString	<< "DELETE FROM notes WHERE channelID = "
 		<< id
 		;
 
-#ifdef LOG_SQL
-	elog	<< "sqlChannel::deleteAllNotes> "
-		<< queryString.str()
-		<< std::endl;
-#endif
-
-ExecStatusType status = SQLDb->Exec(queryString.str().c_str());
-
-if( PGRES_COMMAND_OK != status )
-	{
-	elog	<< "sqlChannel::deleteAllNotes> Something went wrong: "
-		<< SQLDb->ErrorMessage()
-		<< std::endl;
-	return false;
-	}
-
-return true;
+myManager->queueCommit(deleteString.str());
 }
 
 size_t sqlChannel::countNotes(unsigned short eventType)
 {
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = myManager->getConnection();
+
+/* Count the notes */
 std::stringstream queryString;
 if (eventType) {
 queryString	<< "SELECT count(id) FROM notes WHERE channelID = "
@@ -435,28 +255,17 @@ queryString	<< "SELECT count(id) FROM notes WHERE channelID = "
 		;
 }
 
-#ifdef LOG_SQL
-	elog	<< "sqlChannel::countNotes> "
-		<< queryString.str()
-		<< std::endl;
-#endif
+size_t num_notes = 0;
 
-ExecStatusType status = SQLDb->Exec(queryString.str().c_str());
+if (cacheCon->ExecTuplesOk(queryString.str().c_str())) {
+  if (cacheCon->Tuples() > 1)
+    num_notes = atoi(cacheCon->GetValue(0, 0));
+}
 
-if( PGRES_TUPLES_OK == status )
-	{
+/* Dispose of our connection instance */
+myManager->removeConnection(cacheCon);
 
-	if(SQLDb->Tuples() < 1)
-		{
-		return 0;
-		}
-
-	size_t num_notes = atoi(SQLDb->GetValue(0, 0));
-
-	return num_notes;
-	}
-
-return 0;
+return num_notes;
 }
 
 sqlChannel::~sqlChannel()

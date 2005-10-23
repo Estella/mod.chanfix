@@ -70,26 +70,6 @@ if (!targetUser->hasHost(st[2].c_str())) {
   return;
 }
 
-std::stringstream deleteString;
-deleteString	<< "DELETE FROM hosts "
-		<< "WHERE user_id = "
-		<< targetUser->getID()
-		<< " AND lower(host) = '"
-		<< string_lower(st[2].c_str())
-		<< "'"
-		;
-
-ExecStatusType status = bot->SQLDb->Exec(deleteString.str().c_str());
-
-if (PGRES_COMMAND_OK != status) {
-  bot->SendTo(theClient,
-              bot->getResponse(theUser,
-                              language::failed_deleting_host,
-                              std::string("Failed deleting hostmask %s from user %s.")).c_str(),
-                                          st[2].c_str(), targetUser->getUserName().c_str());
-  return;
-}
-
 targetUser->delHost(st[2].c_str());
 targetUser->setLastUpdated(bot->currentTime());
 targetUser->setLastUpdatedBy( std::string( "("

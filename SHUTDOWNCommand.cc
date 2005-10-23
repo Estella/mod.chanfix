@@ -31,6 +31,7 @@
 
 #include	"chanfix.h"
 #include	"responses.h"
+#include	"sqlManager.h"
 
 RCSTAG("$Id$");
 
@@ -49,6 +50,9 @@ bot->SendTo(theClient,
 bot->logAdminMessage("%s (%s) is shutting me down.",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str());
+
+/* Let's save our database. */
+bot->theManager->flush();
 
 if (st.size() < 2) {
   server->UnloadClient(bot, "Quit");

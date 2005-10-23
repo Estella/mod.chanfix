@@ -30,12 +30,13 @@ namespace gnuworld
 {
 
 class sqlUser;
+class sqlManager;
 
 class sqlChannel
 {
 public:
 
-	sqlChannel(PgDatabase*);
+	sqlChannel(sqlManager*);
 	virtual ~sqlChannel();
 
 	typedef unsigned int	flagType ;
@@ -119,17 +120,18 @@ public:
 	inline void	setModesRemoved(bool _modesRemoved)
 		{ modesRemoved = _modesRemoved; }
 
-	bool Insert();
-	bool Delete();
-	bool commit();
-	bool loadData(const std::string&);
-	bool loadData(unsigned int);
-	void setAllMembers(int);
+	void Insert();
+	void Delete();
+	void commit();
+	void setAllMembers(PgDatabase*, int);
+
+	/** Static member for keeping track of max user id */
+	static unsigned long int maxUserId;
 
 	void addNote(unsigned short, sqlUser*, const std::string&);
-	bool deleteNote(unsigned int);
+	void deleteNote(unsigned int);
 	bool deleteOldestNote();
-	bool deleteAllNotes();
+	void deleteAllNotes();
 	size_t countNotes(unsigned short);
 	const std::string getLastNote(unsigned short, time_t&);
 
@@ -143,9 +145,7 @@ protected:
 	bool		modesRemoved;
 	flagType	flags;
 
-	PgDatabase*	SQLDb;
-
-
+	sqlManager*	myManager;
 }; // class sqlChannel
 
 } // namespace gnuworld

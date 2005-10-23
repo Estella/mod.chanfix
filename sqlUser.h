@@ -129,9 +129,6 @@ public:
 	inline void setNotice(const bool _useNotice)
 		{ useNotice = _useNotice; }
 
-	inline void addHost(const std::string& _theHost)
-		{ hostList.push_back(_theHost); }
-
 	/* Methods to alter our SQL status */
 	void setAllMembers(PgDatabase*, int);
 	void commit();
@@ -142,6 +139,7 @@ public:
 	static unsigned long int maxUserId;
 
 	void loadHostList();
+	void addHost(const std::string&);		
 	void delHost(const std::string&);		
 	bool matchHost(const std::string&);
 	bool hasHost(const std::string&);

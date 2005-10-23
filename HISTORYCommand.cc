@@ -51,6 +51,9 @@ if (!theChan) {
   return;
 }
 
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = bot->theManager->getConnection();
+
 /*
  * Perform a query to list the dates/times this channel was last chanfixed.
  */
@@ -64,12 +67,9 @@ chanfixQuery	<< "SELECT ts "
 		<< " ORDER BY ts DESC"
 		;
 
-ExecStatusType status = bot->SQLDb->Exec( chanfixQuery.str().c_str() ) ;
-
-if( PGRES_TUPLES_OK != status )
-	{
+if (!cacheCon->ExecTuplesOk(chanfixQuery.str().c_str())) {
 	elog	<< "HISTORYCommand> SQL Error: "
-		<< bot->SQLDb->ErrorMessage()
+		<< cacheCon->ErrorMessage()
 		<< std::endl;
 
         bot->SendTo(theClient,
@@ -79,7 +79,7 @@ if( PGRES_TUPLES_OK != status )
 	return ;
 	}
 
-unsigned int noteCount = bot->SQLDb->Tuples();
+unsigned int noteCount = cacheCon->Tuples();
 
 if (noteCount <= 0) {
   bot->SendTo(theClient,
@@ -87,6 +87,10 @@ if (noteCount <= 0) {
                               language::chan_no_manual_fixes,
                               std::string("Channel %s has never been manually fixed.")).c_str(),
                                           theChan->getChannel().c_str());
+
+  /* Dispose of our connection instance */
+  bot->theManager->removeConnection(cacheCon);
+
   return;
 }
 
@@ -100,12 +104,15 @@ for (unsigned int i = 0; i < noteCount; i++)
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::chan_manual_fix,
-                              std::string("%s")).c_str(), bot->tsToDateTime(atoi(bot->SQLDb->GetValue(i,0)), true).c_str());
+                              std::string("%s")).c_str(), bot->tsToDateTime(atoi(cacheCon->GetValue(i,0)), true).c_str());
 
 bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::end_of_list,
                             std::string("End of list.")).c_str());
+
+/* Dispose of our connection instance */
+bot->theManager->removeConnection(cacheCon);
 
 return;
 }

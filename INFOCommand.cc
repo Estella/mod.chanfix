@@ -87,6 +87,9 @@ if (netChan) {
                                             theChan->getChannel().c_str());
 }
 
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = bot->theManager->getConnection();
+
 /*
  * Perform a query to list all notes belonging to this channel.
  */
@@ -99,22 +102,23 @@ allNotesQuery	<< "SELECT notes.id, notes.ts, users.user_name, notes.event, notes
 		<< " ORDER BY notes.ts DESC"
 		;
 
-ExecStatusType status = bot->SQLDb->Exec( allNotesQuery.str().c_str() ) ;
+if (!cacheCon->ExecTuplesOk(allNotesQuery.str().c_str())) {
+  elog	<< "INFOCommand> SQL Error: "
+	<< cacheCon->ErrorMessage()
+	<< std::endl;
 
-if( PGRES_TUPLES_OK != status )
-	{
-	elog	<< "INFOCommand> SQL Error: "
-		<< bot->SQLDb->ErrorMessage()
-		<< std::endl;
+  bot->SendTo(theClient,
+		bot->getResponse(theUser,
+				language::error_occured_notes,
+				std::string("An unknown error occurred while reading this channel's notes.")).c_str());
 
-        bot->SendTo(theClient,
-                    bot->getResponse(theUser,
-                                    language::error_occured_notes,
-                                    std::string("An unknown error occurred while reading this channel's notes.")).c_str());
-	return ;
-	}
+  /* Dispose of our connection instance */
+  bot->theManager->removeConnection(cacheCon);
 
-unsigned int noteCount = bot->SQLDb->Tuples();
+  return ;
+}
+
+unsigned int noteCount = cacheCon->Tuples();
 
 if (noteCount > 0) {
   bot->SendTo(theClient,
@@ -123,11 +127,11 @@ if (noteCount > 0) {
                               std::string("Notes (%d):")).c_str(), noteCount);
 
   for (unsigned int i = 0; i < noteCount; i++) {
-    unsigned int note_id = atoi(bot->SQLDb->GetValue(i,0));
-    unsigned int when = atoi(bot->SQLDb->GetValue(i,1));
-    std::string from = bot->SQLDb->GetValue(i,2);
-    unsigned short event = atoi(bot->SQLDb->GetValue(i,3));
-    std::string theMessage = bot->SQLDb->GetValue(i,4);
+    unsigned int note_id = atoi(cacheCon->GetValue(i,0));
+    unsigned int when = atoi(cacheCon->GetValue(i,1));
+    std::string from = cacheCon->GetValue(i,2);
+    unsigned short event = atoi(cacheCon->GetValue(i,3));
+    std::string theMessage = cacheCon->GetValue(i,4);
 
     bot->SendTo(theClient,
                 bot->getResponse(theUser,
@@ -144,6 +148,9 @@ bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::end_of_information,
                             std::string("End of information.")).c_str());
+
+/* Dispose of our connection instance */
+bot->theManager->removeConnection(cacheCon);
 
 return;
 }
