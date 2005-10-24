@@ -67,7 +67,7 @@ void sqlChannel::setAllMembers(PgDatabase* theDB, int row)
   flags = atoi(theDB->GetValue(row, 2));
 
   if (id > maxUserId) maxUserId = id;
-};
+}
 
 /**
  * This function inserts a brand new channel into the DB.

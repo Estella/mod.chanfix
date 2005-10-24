@@ -67,11 +67,12 @@ if (!chkUser) {
   return;
 }
 
-if (flag == bot->getFlagChar(sqlUser::F_OWNER)) {
+if (flag == bot->getFlagChar(sqlUser::F_OWNER) &&
+    !theUser->getFlag(sqlUser::F_OWNER)) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
-                              language::cant_delete_owner_flag,
-                              std::string("You cannot delete an owner flag.")).c_str());
+                              language::only_owner_del_owner_flag,
+                              std::string("Only an owner can delete the owner flag.")).c_str());
   return;
 }
 
@@ -81,6 +82,15 @@ if (flag == bot->getFlagChar(sqlUser::F_USERMANAGER) &&
               bot->getResponse(theUser,
                               language::only_owner_del_user_flag,
                               std::string("Only an owner can delete the user management flag.")).c_str());
+  return;
+}
+
+if (flag == bot->getFlagChar(sqlUser::F_NORMALUSER) &&
+    !theUser->getFlag(sqlUser::F_OWNER)) {
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::only_owner_del_norm_flag,
+                              std::string("Only an owner can delete the normal user flag.")).c_str());
   return;
 }
 
@@ -114,12 +124,12 @@ if (!chkUser->getFlag(bot->getFlagType(flag))) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::user_does_not_have_flag,
-                              std::string("User %s does not have flag %c.")).c_str(),
+                              std::string("User %s does not have flag '%c'.")).c_str(),
                                           chkUser->getUserName().c_str(), flag);
   return;
 }
 
-chkUser->removeFlag(flag);
+chkUser->removeFlag(bot->getFlagType(flag));
 chkUser->setLastUpdated(bot->currentTime());
 chkUser->setLastUpdatedBy( std::string( "("
 	+ theUser->getUserName()
@@ -129,7 +139,7 @@ chkUser->commit();
 bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::deleted_flag,
-                            std::string("Deleted flag %c of user %s.")).c_str(), flag,
+                            std::string("Deleted flag '%c' of user %s.")).c_str(), flag,
                                         chkUser->getUserName().c_str());
 } //DELFLAGCommand::Exec
 } //Namespace gnuworld

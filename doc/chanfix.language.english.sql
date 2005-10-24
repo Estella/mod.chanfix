@@ -11,13 +11,13 @@ DELETE FROM translations;
 COPY "translations" FROM stdin;
 1	1	You may only add one flag per ADDFLAG command.	31337	0
 1	2	No such user %s.	31337	0
-1	3	You cannot add an owner flag.	31337	0
+1	3	Only an owner can add the owner flag.	31337	0
 1	4	Only an owner can add the user management flag.	31337	0
 1	5	You cannot add a flag to a user in a different group.	31337	0
 1	6	You cannot add a block flag.	31337	0
 1	7	You cannot add a serveradmin flag.	31337	0
-1	8	User %s already has flag %c.	31337	0
-1	9	Added flag %c to user %s.	31337	0
+1	8	User %s already has flag \'%c\'.	31337	0
+1	9	Added flag \'%c\' to user %s.	31337	0
 1	10	You cannot add a host to a user in a different group.	31337	0
 1	11	User %s already has hostmask %s.	31337	0
 1	12	Failed adding hostmask %s to user %s.	31337	0
@@ -47,13 +47,13 @@ COPY "translations" FROM stdin;
 1	36	Manual chanfix acknowledged for %s	31337	0
 1	37	I see %d opped out of %d total clients in %s.	31337	0
 1	38	You may only remove one flag per DELFLAG command.	31337	0
-1	39	You cannot delete an owner flag.	31337	0
+1	39	Only an owner can delete the owner flag.	31337	0
 1	40	Only an owner can delete the user management flag.	31337	0
 1	41	You cannot delete a flag from a user in a different group.	31337	0
 1	42	You cannot remove a block flag.	31337	0
 1	43	You cannot remove a serveradmin flag.	31337	0
-1	44	User %s does not have flag %c.	31337	0
-1	45	Deleted flag %c of user %s.	31337	0
+1	44	User %s does not have flag \'%c\'.	31337	0
+1	45	Deleted flag \'%c\' of user %s.	31337	0
 1	46	You cannot delete a host on a user in a different group.	31337	0
 1	47	User %s doesn't have hostmask %s.	31337	0
 1	48	Failed deleting hostmask %s from user %s.	31337	0
@@ -157,9 +157,9 @@ COPY "translations" FROM stdin;
 1	147	Your access to this service is suspended.	31337	0
 1	148	Your current host does not match any registered hosts for your username.	31337	0
 1	149	You need to authenticate to use this command.	31337	0
-1	150	This command requires flag '%c'.	31337	0
+1	150	This command requires flag \'%c\'.	31337	0
 1	151	This command requires one of these flags: \"%s\".	31337	0
-1	152	This command requires authentication and flag '%c'.	31337	0
+1	152	This command requires authentication and flag \'%c\'.	31337	0
 1	153	This command requires authentication and one of these flags: \"%s\".	31337	0
 1	154	SYNTAX: 	31337	0
 \.

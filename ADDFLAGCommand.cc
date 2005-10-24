@@ -68,11 +68,12 @@ if (!chkUser) {
   return;
 }
 
-if (flag == bot->getFlagChar(sqlUser::F_OWNER)) {
+if (flag == bot->getFlagChar(sqlUser::F_OWNER) &&
+    !theUser->getFlag(sqlUser::F_OWNER)) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
-                              language::cant_add_owner_flag,
-                              std::string("You cannot add an owner flag.")).c_str());
+                              language::owner_add_owner_only,
+                              std::string("Only an owner can add the owner flag.")).c_str());
   return;
 }
 
@@ -82,6 +83,15 @@ if (flag == bot->getFlagChar(sqlUser::F_USERMANAGER) &&
               bot->getResponse(theUser,
                               language::user_man_add_owner_only,
                               std::string("Only an owner can add the user management flag.")).c_str());
+  return;
+}
+
+if (flag == bot->getFlagChar(sqlUser::F_NORMALUSER) && 
+    !theUser->getFlag(sqlUser::F_OWNER)) {
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::norm_user_add_owner_only,
+                              std::string("Only an owner can add the normal user flag.")).c_str());
   return;
 }
 
@@ -115,7 +125,7 @@ if (chkUser->getFlag(bot->getFlagType(flag))) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::user_already_has_flag,
-                              std::string("User %s already has flag %c.")).c_str(),
+                              std::string("User %s already has flag '%c'.")).c_str(),
                                           chkUser->getUserName().c_str(), flag);
   return;
 }
@@ -130,7 +140,7 @@ chkUser->commit();
 bot->SendTo(theClient,
 	    bot->getResponse(theUser,
 			     language::added_flag_to_user,
-			     std::string("Added flag %c to user %s.")).c_str(),
+			     std::string("Added flag '%c' to user %s.")).c_str(),
 					 flag,
 					 chkUser->getUserName().c_str());
 } //ADDFLAGCommand::Exec

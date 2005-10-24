@@ -31,7 +31,6 @@
 
 #include	"chanfix.h"
 #include	"responses.h"
-#include	"sqlManager.h"
 
 RCSTAG("$Id$");
 

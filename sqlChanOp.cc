@@ -69,8 +69,7 @@ void sqlChanOp::setAllMembers(PgDatabase* theDB, int row)
   day[12] = atoi(theDB->GetValue(row, 17));
   day[13] = atoi(theDB->GetValue(row, 18));
   calcTotalPoints();
-};
-
+}
 
 void sqlChanOp::calcTotalPoints()
 {
@@ -110,7 +109,7 @@ insertString	<< insertHeader << "'"
 
 myManager->queueCommit(insertString.str());
 commit();
-};
+}
 
 void sqlChanOp::Delete()
 {
@@ -123,7 +122,7 @@ deleteString	<< queryHeader << "WHERE lower(channel) = '"
 		<< string_lower(escapeSQLChars(account)) << "'"
 		;
 myManager->queueCommit(deleteString.str());
-};
+}
 
 void sqlChanOp::commit()
 {
@@ -155,7 +154,7 @@ chanOpCommit	<< "UPDATE chanOps "
 		<< string_lower(escapeSQLChars(account)) << "'"
 		;
 myManager->queueCommit(chanOpCommit.str());
-};
+}
 
 sqlChanOp::~sqlChanOp()
 {

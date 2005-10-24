@@ -77,8 +77,10 @@ CREATE TABLE users (
 	-- 0x02 - can block/unblock channels
 	-- 0x04 - can add/del notes/alerts to channels
 	-- 0x08 - can manual chanfix
-	-- 0x10 - owner
-	-- 0x20 - user management rights
+	-- 0x10 - oper not required
+	-- 0x20 - owner
+	-- 0x40 - user management rights
+	-- 0x80 - requires authentication
 	isSuspended BOOLEAN NOT NULL DEFAULT FALSE,
 	-- currently suspended
 	useNotice BOOLEAN NOT NULL DEFAULT TRUE,

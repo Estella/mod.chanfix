@@ -29,13 +29,14 @@ namespace gnuworld
 		/* ADDFLAG */
 		const int one_flag_per_addflag		= 1;
 		const int no_such_user			= 2;
-		const int cant_add_owner_flag		= 3;
+		const int owner_add_owner_only		= 3;
 		const int user_man_add_owner_only	= 4;
 		const int cant_add_flag_diff_group	= 5;
 		const int cant_add_block_flag		= 6;
 		const int cant_add_serveradmin_flag	= 7;
 		const int user_already_has_flag		= 8;
 		const int added_flag_to_user		= 9;
+		const int norm_user_add_owner_only	= 155;
 
 		/* ADDHOST */
 		const int cant_add_host_diff_group	= 10;
@@ -81,13 +82,14 @@ namespace gnuworld
 
 		/* DELFLAG */
 		const int one_flag_per_delflag		= 38;
-		const int cant_delete_owner_flag	= 39;
+		const int only_owner_del_owner_flag	= 39;
 		const int only_owner_del_user_flag	= 40;
 		const int cant_delete_flag_diff_group	= 41;
 		const int cant_remove_block_flag	= 42;
 		const int cant_remove_server_flag	= 43;
 		const int user_does_not_have_flag	= 44;
 		const int deleted_flag			= 45;
+		const int only_owner_del_norm_flag	= 156;
 
 		/* DELHOST */
 		const int cant_del_host_diff_group	= 46;

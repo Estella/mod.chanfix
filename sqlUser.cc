@@ -75,7 +75,7 @@ void sqlUser::setAllMembers(PgDatabase* theDB, int row)
   useNotice = (!strcasecmp(theDB->GetValue(row,10),"t") ? true : false);
 
   if (id > maxUserId) maxUserId = id;
-};
+}
 
 void sqlUser::commit()
 {
