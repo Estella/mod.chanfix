@@ -33,6 +33,7 @@
 
 #include	"chanfixCommands.h"
 #include	"chanfix_config.h"
+#include	"dbThread.h"
 #include	"sqlChannel.h"
 #include	"Timer.h"
 
@@ -41,12 +42,13 @@ namespace gnuworld
 {
 extern short currentDay;
 }
+
 #include	"sqlChanOp.h"
 #include	"sqlManager.h"
 #include	"sqlUser.h"
 
-class PgDatabase;
 class Timer;
+
 namespace gnuworld
 {
 
@@ -75,6 +77,12 @@ inline bool operator()( const std::pair<std::string, std::string>& lhs, const st
 
 
 class chanfix : public xClient {
+
+	/**
+	 * The database interface thread; this thread performs all db
+	 * related processing including the db communications.
+	 */
+	dbThread	theThread;
 
 public:
 

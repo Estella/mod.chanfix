@@ -38,6 +38,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	USETCommand.cc \
 	WHOGROUPCommand.cc \
 	WHOISCommand.cc \
+	dbThread.cc \
 	sqlChanOp.cc \
 	sqlChannel.cc \
 	sqlManager.cc \
@@ -54,6 +55,7 @@ EXTRA_DIST = chanfix.h \
 	chanfixCommands.h \
 	chanfix_config.h \
 	chanfix_misc.h \
+	dbThread.h \
 	responses.h \
 	sqlChanOp.h \
 	sqlChannel.h \

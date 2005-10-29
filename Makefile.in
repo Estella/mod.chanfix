@@ -88,8 +88,9 @@ am_libchanfix_la_OBJECTS = libchanfix_la-chanfix.lo \
 	libchanfix_la-UNBLOCKCommand.lo \
 	libchanfix_la-UNSUSPENDCommand.lo libchanfix_la-USETCommand.lo \
 	libchanfix_la-WHOGROUPCommand.lo libchanfix_la-WHOISCommand.lo \
-	libchanfix_la-sqlChanOp.lo libchanfix_la-sqlChannel.lo \
-	libchanfix_la-sqlManager.lo libchanfix_la-sqlUser.lo
+	libchanfix_la-dbThread.lo libchanfix_la-sqlChanOp.lo \
+	libchanfix_la-sqlChannel.lo libchanfix_la-sqlManager.lo \
+	libchanfix_la-sqlUser.lo
 libchanfix_la_OBJECTS = $(am_libchanfix_la_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -259,6 +260,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	USETCommand.cc \
 	WHOGROUPCommand.cc \
 	WHOISCommand.cc \
+	dbThread.cc \
 	sqlChanOp.cc \
 	sqlChannel.cc \
 	sqlManager.cc \
@@ -274,6 +276,8 @@ EXTRA_DIST = chanfix.h \
 	chanfixCommands.h \
 	chanfix_config.h \
 	chanfix_misc.h \
+	dbThread.h \
+	responses.h \
 	sqlChanOp.h \
 	sqlChannel.h \
 	sqlManager.h \
@@ -413,6 +417,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-WHOGROUPCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-WHOISCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-chanfix.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-dbThread.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-sqlChanOp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-sqlChannel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-sqlManager.Plo@am__quote@
@@ -683,6 +688,13 @@ libchanfix_la-WHOISCommand.lo: WHOISCommand.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='WHOISCommand.cc' object='libchanfix_la-WHOISCommand.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-WHOISCommand.lo `test -f 'WHOISCommand.cc' || echo '$(srcdir)/'`WHOISCommand.cc
+
+libchanfix_la-dbThread.lo: dbThread.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-dbThread.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-dbThread.Tpo" -c -o libchanfix_la-dbThread.lo `test -f 'dbThread.cc' || echo '$(srcdir)/'`dbThread.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-dbThread.Tpo" "$(DEPDIR)/libchanfix_la-dbThread.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-dbThread.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dbThread.cc' object='libchanfix_la-dbThread.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-dbThread.lo `test -f 'dbThread.cc' || echo '$(srcdir)/'`dbThread.cc
 
 libchanfix_la-sqlChanOp.lo: sqlChanOp.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-sqlChanOp.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-sqlChanOp.Tpo" -c -o libchanfix_la-sqlChanOp.lo `test -f 'sqlChanOp.cc' || echo '$(srcdir)/'`sqlChanOp.cc; \
