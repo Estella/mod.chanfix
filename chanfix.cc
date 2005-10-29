@@ -944,7 +944,7 @@ PgDatabase* cacheCon = theManager->getConnection();
 
 /* Retrieve the list of chanops */
 std::stringstream theQuery;
-theQuery	<< "SELECT id, user_name, created, last_seen, last_updated, last_updated_by, language_id, faction, flags, issuspended, usenotice "
+theQuery	<< "SELECT id, user_name, created, last_seen, last_updated, last_updated_by, language_id, faction, flags, issuspended, usenotice, needoper "
 		<< "FROM users"
 		;
 

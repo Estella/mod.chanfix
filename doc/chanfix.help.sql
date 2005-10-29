@@ -36,7 +36,7 @@ SETGROUP	1	Sets the group for the specified user.
 SHUTDOWN	1	Shuts down Chanfix.
 UNSUSPEND	1	UnSuspends the specified user.
 WHOGROUP	1	Shows all users in the specified group along with their flags.
-<INDEXOPER>	1	\002Oper Level\002: SCORE CSCORE HISTORY INFO STATUS
+<INDEXOPER>	1	\002Staff Level\002: SCORE CSCORE HISTORY INFO STATUS
 <INDEXLOGGEDIN>	1	\002Logged In\002: CHECK USET WHOIS
 <INDEXBLOCK>	1	\002Blocker (+b)\002: BLOCK UNBLOCK
 <INDEXCHANNEL>	1	\002Channel (+c)\002: ADDNOTE DELNOTE ALERT UNALERT
