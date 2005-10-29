@@ -41,8 +41,8 @@ void ADDUSERCommand::Exec(iClient* theClient, sqlUser* theUser, const std::strin
 {
 StringTokenizer st(Message);
 
-sqlUser* chkUser = bot->isAuthed(st[1]);
-if (chkUser) {
+sqlUser* targetUser = bot->isAuthed(st[1]);
+if (targetUser) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::user_already_exists,

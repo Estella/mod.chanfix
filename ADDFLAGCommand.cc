@@ -59,8 +59,8 @@ if (!bot->getFlagType(flag)) {
   return;
 }
 
-sqlUser* chkUser = bot->isAuthed(st[1]);
-if (!chkUser) {
+sqlUser* targetUser = bot->isAuthed(st[1]);
+if (!targetUser) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::no_such_user,
@@ -86,19 +86,10 @@ if (flag == bot->getFlagChar(sqlUser::F_USERMANAGER) &&
   return;
 }
 
-if (flag == bot->getFlagChar(sqlUser::F_NORMALUSER) && 
-    !theUser->getFlag(sqlUser::F_OWNER)) {
-  bot->SendTo(theClient,
-              bot->getResponse(theUser,
-                              language::norm_user_add_owner_only,
-                              std::string("Only an owner can add the normal user flag.")).c_str());
-  return;
-}
-
 /* A serveradmin can only add flags to users on his/her own group. */
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) && 
     !theUser->getFlag(sqlUser::F_USERMANAGER)) {
-  if (chkUser->getGroup() != theUser->getGroup()) {
+  if (targetUser->getGroup() != theUser->getGroup()) {
     bot->SendTo(theClient,
                 bot->getResponse(theUser,
                                 language::cant_add_flag_diff_group,
@@ -121,27 +112,27 @@ if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
   }
 }
 
-if (chkUser->getFlag(bot->getFlagType(flag))) {
+if (targetUser->getFlag(bot->getFlagType(flag))) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::user_already_has_flag,
                               std::string("User %s already has flag '%c'.")).c_str(),
-                                          chkUser->getUserName().c_str(), flag);
+                                          targetUser->getUserName().c_str(), flag);
   return;
 }
 
-chkUser->setFlag(bot->getFlagType(flag));
-chkUser->setLastUpdated(bot->currentTime());
-chkUser->setLastUpdatedBy( std::string( "("
+targetUser->setFlag(bot->getFlagType(flag));
+targetUser->setLastUpdated(bot->currentTime());
+targetUser->setLastUpdatedBy( std::string( "("
 	+ theUser->getUserName()
 	+ ") "
 	+ theClient->getRealNickUserHost() ) );
-chkUser->commit();
+targetUser->commit();
 bot->SendTo(theClient,
 	    bot->getResponse(theUser,
 			     language::added_flag_to_user,
 			     std::string("Added flag '%c' to user %s.")).c_str(),
 					 flag,
-					 chkUser->getUserName().c_str());
+					 targetUser->getUserName().c_str());
 } //ADDFLAGCommand::Exec
 } //Namespace gnuworld

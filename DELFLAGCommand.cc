@@ -58,8 +58,8 @@ if (!bot->getFlagType(flag)) {
   return;
 }
 
-sqlUser* chkUser = bot->isAuthed(st[1]);
-if (!chkUser) {
+sqlUser* targetUser = bot->isAuthed(st[1]);
+if (!targetUser) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::no_such_user,
@@ -85,19 +85,10 @@ if (flag == bot->getFlagChar(sqlUser::F_USERMANAGER) &&
   return;
 }
 
-if (flag == bot->getFlagChar(sqlUser::F_NORMALUSER) &&
-    !theUser->getFlag(sqlUser::F_OWNER)) {
-  bot->SendTo(theClient,
-              bot->getResponse(theUser,
-                              language::only_owner_del_norm_flag,
-                              std::string("Only an owner can delete the normal user flag.")).c_str());
-  return;
-}
-
 /* A serveradmin can only delete flags from users on his/her own group. */
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
     !theUser->getFlag(sqlUser::F_USERMANAGER)) {
-  if (chkUser->getGroup() != theUser->getGroup()) {
+  if (targetUser->getGroup() != theUser->getGroup()) {
     bot->SendTo(theClient,
                 bot->getResponse(theUser,
                                 language::cant_delete_flag_diff_group,
@@ -120,26 +111,26 @@ if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
   }
 }
 
-if (!chkUser->getFlag(bot->getFlagType(flag))) {
+if (!targetUser->getFlag(bot->getFlagType(flag))) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::user_does_not_have_flag,
                               std::string("User %s does not have flag '%c'.")).c_str(),
-                                          chkUser->getUserName().c_str(), flag);
+                                          targetUser->getUserName().c_str(), flag);
   return;
 }
 
-chkUser->removeFlag(bot->getFlagType(flag));
-chkUser->setLastUpdated(bot->currentTime());
-chkUser->setLastUpdatedBy( std::string( "("
+targetUser->removeFlag(bot->getFlagType(flag));
+targetUser->setLastUpdated(bot->currentTime());
+targetUser->setLastUpdatedBy( std::string( "("
 	+ theUser->getUserName()
 	+ ") "
 	+ theClient->getRealNickUserHost() ) );
-chkUser->commit();
+targetUser->commit();
 bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::deleted_flag,
                             std::string("Deleted flag '%c' of user %s.")).c_str(), flag,
-                                        chkUser->getUserName().c_str());
+                                        targetUser->getUserName().c_str());
 } //DELFLAGCommand::Exec
 } //Namespace gnuworld

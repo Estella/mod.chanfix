@@ -85,6 +85,8 @@ CREATE TABLE users (
 	-- currently suspended
 	useNotice BOOLEAN NOT NULL DEFAULT TRUE,
 	-- use notice instead of privmsg
+	needOper BOOLEAN NOT NULL DEFAULT TRUE,
+	-- require operator privileges from staff
 	PRIMARY KEY (id)
 );
 

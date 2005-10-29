@@ -37,10 +37,9 @@ const sqlUser::flagType sqlUser::F_SERVERADMIN =	0x01; /* +a */
 const sqlUser::flagType sqlUser::F_BLOCK =		0x02; /* +b */
 const sqlUser::flagType sqlUser::F_CHANNEL =		0x04; /* +c */
 const sqlUser::flagType sqlUser::F_CHANFIX =		0x08; /* +f */
-const sqlUser::flagType sqlUser::F_NORMALUSER =		0x10; /* +n */
-const sqlUser::flagType sqlUser::F_OWNER =		0x20; /* +o */
-const sqlUser::flagType sqlUser::F_USERMANAGER =	0x40; /* +u */
-const sqlUser::flagType sqlUser::F_LOGGEDIN =		0x80;
+const sqlUser::flagType sqlUser::F_OWNER =		0x10; /* +o */
+const sqlUser::flagType sqlUser::F_USERMANAGER =	0x20; /* +u */
+const sqlUser::flagType sqlUser::F_LOGGEDIN =		0x40;
 
 unsigned long int sqlUser::maxUserId = 0;
 
@@ -55,7 +54,8 @@ sqlUser::sqlUser(sqlManager* _myManager) :
   group(),
   flags(0),
   isSuspended(false),
-  useNotice(true)
+  useNotice(true),
+  needOper(true)
 {
   myManager = _myManager;
 };
@@ -73,6 +73,7 @@ void sqlUser::setAllMembers(PgDatabase* theDB, int row)
   flags = atoi(theDB->GetValue(row, 8));
   isSuspended = (!strcasecmp(theDB->GetValue(row,9),"t") ? true : false);
   useNotice = (!strcasecmp(theDB->GetValue(row,10),"t") ? true : false);
+  needOper = (!strcasecmp(theDB->GetValue(row,11),"t") ? true : false);
 
   if (id > maxUserId) maxUserId = id;
 }
@@ -88,7 +89,8 @@ userCommit	<< "UPDATE users SET "
 		<< "faction = '" << group << "', "
 		<< "flags = " << flags << ", "
 		<< "issuspended = " << (isSuspended ? "'t'" : "'f'") << ", "
-		<< "usenotice = " << (useNotice ? "'t'" : "'f'")
+		<< "usenotice = " << (useNotice ? "'t'" : "'f'") << ", "
+		<< "needoper = " << (needOper ? "'t'" : "'f'")
 		<< " WHERE "
 		<< "id = " << id
 		;

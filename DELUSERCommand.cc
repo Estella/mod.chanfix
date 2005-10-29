@@ -40,8 +40,8 @@ void DELUSERCommand::Exec(iClient* theClient, sqlUser* theUser, const std::strin
 {
 StringTokenizer st(Message);
 
-sqlUser* chkUser = bot->isAuthed(st[1]);
-if (!chkUser) {
+sqlUser* targetUser = bot->isAuthed(st[1]);
+if (!targetUser) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::no_such_user,
@@ -49,7 +49,7 @@ if (!chkUser) {
   return;
 }
 
-if (chkUser->getFlag(sqlUser::F_OWNER)) {
+if (targetUser->getFlag(sqlUser::F_OWNER)) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::cant_delete_an_owner,
@@ -57,7 +57,7 @@ if (chkUser->getFlag(sqlUser::F_OWNER)) {
   return;
 }
 
-if (chkUser->getFlag(sqlUser::F_USERMANAGER) && !theUser->getFlag(sqlUser::F_OWNER)) {
+if (targetUser->getFlag(sqlUser::F_USERMANAGER) && !theUser->getFlag(sqlUser::F_OWNER)) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::cant_delete_manager,
@@ -68,7 +68,7 @@ if (chkUser->getFlag(sqlUser::F_USERMANAGER) && !theUser->getFlag(sqlUser::F_OWN
 /* A serveradmin can only delete users in his/her own group. */
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
     !theUser->getFlag(sqlUser::F_USERMANAGER)) {
-  if (chkUser->getGroup() != theUser->getGroup()) {
+  if (targetUser->getGroup() != theUser->getGroup()) {
     bot->SendTo(theClient,
                 bot->getResponse(theUser,
                                 language::cant_delete_from_diff_group,
@@ -77,17 +77,17 @@ if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
   }
 }
 
-chkUser->Delete();
-bot->usersMap.erase(bot->usersMap.find(chkUser->getUserName()));
+targetUser->Delete();
+bot->usersMap.erase(bot->usersMap.find(targetUser->getUserName()));
 bot->SendTo(theClient,
 	    bot->getResponse(theUser,
 			language::deleted_user,
-			std::string("Deleted user %s.")).c_str(), chkUser->getUserName().c_str());
+			std::string("Deleted user %s.")).c_str(), targetUser->getUserName().c_str());
 bot->logAdminMessage("%s (%s) deleted user %s.",
 		     theClient->getAccount().c_str(),
 		     theClient->getRealNickUserHost().c_str(),
-		     chkUser->getUserName().c_str());
-delete chkUser; chkUser = 0;
+		     targetUser->getUserName().c_str());
+delete targetUser; targetUser = 0;
 
 return;
 } //DELUSERCommand::exec

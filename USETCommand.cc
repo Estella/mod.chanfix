@@ -42,8 +42,46 @@ void USETCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& 
 {
 StringTokenizer st(Message);
 
-std::string option = string_upper(st[1]);
-std::string value = string_upper(st[2]);
+std::string option;
+std::string value;
+
+if (st.size() == 4) {
+  sqlUser* targetUser = bot->isAuthed(st[1]);
+  option = string_upper(st[2]);
+  value = string_upper(st[3]);
+  sqlUser::flagType requiredFlags;
+
+  if (option == "NEEDOPER") {
+    requiredFlags = sqlUser::F_OWNER;
+    if (!theUser->getFlag(requiredFlags)) {
+      bot->SendTo(theClient,
+		  bot->getResponse(theUser,
+			language::requires_flag,
+			std::string("This command requires flag '%c'.")).c_str(),
+				    bot->getFlagChar(requiredFlags));
+      return;
+    }
+    if (value == "ON" || value == "YES" || value == "1") {
+      targetUser->setNeedOper(true);
+      bot->SendTo(theClient, "%s is now required to be an IRC Operator", 
+		  targetUser->getUserName().c_str());
+      targetUser->commit();
+      return;
+    } else if (value == "OFF" || value == "NO" || value == "0") {
+      targetUser->setNeedOper(false);
+      bot->SendTo(theClient, "%s is now not required to be an IRC Operator", 
+		  targetUser->getUserName().c_str());
+      targetUser->commit();
+      return;
+    } else {
+      bot->SendTo(theClient, "Please use USET <username> NEEDOPER <on/off>.");
+      return;
+    }
+  }
+}
+
+option = string_upper(st[1]);
+value = string_upper(st[2]);
 
 if (option == "NOTICE") {
   if (value == "ON" || value == "YES" || value == "1") {

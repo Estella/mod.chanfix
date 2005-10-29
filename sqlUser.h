@@ -46,7 +46,6 @@ public:
 	static const flagType F_BLOCK; /* +b */
 	static const flagType F_CHANNEL; /* +c */
 	static const flagType F_CHANFIX; /* +f */
-	static const flagType F_NORMALUSER; /* +n */
 	static const flagType F_OWNER; /* +o */
 	static const flagType F_USERMANAGER; /* +u */
 	static const flagType F_LOGGEDIN;
@@ -90,6 +89,9 @@ public:
 
 	inline const bool getUseNotice() const
 		{ return useNotice; }
+
+	inline const bool getNeedOper() const
+		{ return needOper; }
 		
 	inline const hostListType& getHostList() const
 		{ return hostList; }
@@ -129,6 +131,9 @@ public:
 	inline void setNotice(const bool _useNotice)
 		{ useNotice = _useNotice; }
 
+	inline void setNeedOper(const bool _needOper)
+		{ needOper = _needOper; }
+
 	/* Methods to alter our SQL status */
 	void setAllMembers(PgDatabase*, int);
 	void commit();
@@ -157,6 +162,7 @@ private:
 	flagType	flags;
 	bool		isSuspended;
 	bool		useNotice;
+	bool		needOper;
 	hostListType	hostList;
 
 	sqlManager*	myManager;

@@ -256,7 +256,7 @@ RegisterCommand(new UNSUSPENDCommand(this, "UNSUSPEND",
 	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
 	));
 RegisterCommand(new USETCommand(this, "USET",
-	"<option> <value>",
+	"[username] <option> <value>",
 	3,
 	sqlUser::F_LOGGEDIN
 	));
@@ -484,7 +484,7 @@ void chanfix::OnPrivateMessage( iClient* theClient,
 sqlUser* theUser = isAuthed(theClient->getAccount());
 
 if (!theClient->isOper()) {
-  if (!theUser || !theUser->getFlag(sqlUser::F_NORMALUSER))
+  if (!theUser || theUser->getNeedOper())
     return;
 }
 
@@ -2047,8 +2047,6 @@ char chanfix::getFlagChar(const sqlUser::flagType& whichFlag)
    return 'c';
  else if (whichFlag == sqlUser::F_CHANFIX)
    return 'f';
- else if (whichFlag == sqlUser::F_NORMALUSER)
-   return 'n';
  else if (whichFlag == sqlUser::F_OWNER)
    return 'o';
  else if (whichFlag == sqlUser::F_USERMANAGER)
@@ -2068,8 +2066,6 @@ const std::string chanfix::getFlagsString(const sqlUser::flagType& whichFlags)
    flagstr += "c";
  if (whichFlags & sqlUser::F_CHANFIX)
    flagstr += "f";
- if (whichFlags & sqlUser::F_NORMALUSER)
-   flagstr += "n";
  if (whichFlags & sqlUser::F_OWNER)
    flagstr += "o";
  if (whichFlags & sqlUser::F_USERMANAGER)
@@ -2084,7 +2080,6 @@ switch (whichChar) {
   case 'b': return sqlUser::F_BLOCK;
   case 'c': return sqlUser::F_CHANNEL;
   case 'f': return sqlUser::F_CHANFIX;
-  case 'n': return sqlUser::F_NORMALUSER;
   case 'o': return sqlUser::F_OWNER;
   case 'u': return sqlUser::F_USERMANAGER;
 }
