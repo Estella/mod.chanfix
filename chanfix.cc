@@ -35,12 +35,14 @@
 #include	<string>
 #include	<utility>
 #include	<vector>
+#include	<boost/shared_ptr.hpp>
 
 #include	"libpq++.h"
 
 #include	"gnuworld_config.h"
 #include	"client.h"
 #include	"EConfig.h"
+#include	"gThread.h"
 #include	"Network.h"
 #include	"server.h"
 #include	"StringTokenizer.h"
@@ -73,7 +75,7 @@ extern "C"
   }
 
 } 
- 
+
 /**
  * This constructor calls the base class constructor.  The xClient
  * constructor will open the configuration file given and retrieve
@@ -1232,6 +1234,31 @@ bool chanfix::removeFromUpdateQueue(sqlChanOp* userToRemove)
   return true;
 }
 
+class subThread1 : public gThread
+{
+public:
+	subThread1(chanfix& cf) : cf_(cf) {}
+
+        virtual void Exec()
+	{
+		if (cf_.userUpdateQueue.empty()) return;
+		elog	<< "chanfix::processUserUpdateQueue> Processing queue of " << cf_.userUpdateQueue.size() << " users."
+			<< std::endl;
+		sqlChanOp* curOp;
+		for(unsigned int i = 0; i< (cf_.userUpdateQueue.size() > cf_.updatesPerCycle ? cf_.updatesPerCycle : cf_.userUpdateQueue.size());++i)
+		{
+			curOp = cf_.userUpdateQueue.front();
+			cf_.userUpdateQueue.pop_front();
+			curOp->commit();
+		}
+	}
+
+private:
+	chanfix& cf_;
+};
+
+boost::shared_ptr<subThread1> t1;
+
 void chanfix::gotOpped(Channel* thisChan, iClient* thisClient)
 {
 //Not enough users, forget about it.
@@ -1892,16 +1919,8 @@ elog	<< "chanfix::startTimers> Started all timers."
 
 void chanfix::processUserUpdateQueue()
 {
-  if (userUpdateQueue.empty()) return;
-  elog	<< "chanfix::processUserUpdateQueue> Processing queue of " << userUpdateQueue.size() << " users."
-	<< std::endl;
-  sqlChanOp* curOp;
-  for(unsigned int i = 0; i< (userUpdateQueue.size() > updatesPerCycle ? updatesPerCycle : userUpdateQueue.size());++i)
-  {
-    curOp = userUpdateQueue.front();
-    userUpdateQueue.pop_front();
-    curOp->commit();
-  }
+	t1 = boost::shared_ptr<subThread1>(new subThread1(*this));
+	t1->Start();
 }
 
 void chanfix::rotateDB()

@@ -386,17 +386,6 @@ public:
 	std::string	operChan;
 	std::string	supportChan;
 
-protected:
-	/**
-	 *  Time of the last cache
-	 */
-	std::map < std::string , time_t > lastUpdated;
-
-	/**
-	 * Configuration file.
-	 */
-	EConfig*	chanfixConfig;
-
 	/**
 	 * Configuration variables
 	 */
@@ -423,6 +412,17 @@ protected:
 	std::string	sqlUsername;
 	std::string	sqlPass;
 	std::string	sqlDB;	
+
+protected:
+	/**
+	 *  Time of the last cache
+	 */
+	std::map < std::string , time_t > lastUpdated;
+
+	/**
+	 * Configuration file.
+	 */
+	EConfig*	chanfixConfig;
 
 	/**
 	 * State variable
