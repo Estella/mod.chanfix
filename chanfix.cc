@@ -1234,10 +1234,10 @@ bool chanfix::removeFromUpdateQueue(sqlChanOp* userToRemove)
   return true;
 }
 
-class subThread1 : public gThread
+class UserUpdateQueue : public gThread
 {
 public:
-	subThread1(chanfix& cf) : cf_(cf) {}
+	UserUpdateQueue(chanfix& cf) : cf_(cf) {}
 
         virtual void Exec()
 	{
@@ -1257,7 +1257,7 @@ private:
 	chanfix& cf_;
 };
 
-boost::shared_ptr<subThread1> t1;
+boost::shared_ptr<UserUpdateQueue> uq;
 
 void chanfix::gotOpped(Channel* thisChan, iClient* thisClient)
 {
@@ -1919,8 +1919,8 @@ elog	<< "chanfix::startTimers> Started all timers."
 
 void chanfix::processUserUpdateQueue()
 {
-	t1 = boost::shared_ptr<subThread1>(new subThread1(*this));
-	t1->Start();
+	uq = boost::shared_ptr<UserUpdateQueue>(new UserUpdateQueue(*this));
+	uq->Start();
 }
 
 void chanfix::rotateDB()
