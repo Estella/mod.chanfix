@@ -105,7 +105,7 @@ public:
 
         virtual void Exec()
         {
-		for(sq_.CommitQueueItr ptr = sq_.commitQueue.begin(); ptr != sq_.commitQueue.end(); ++ptr) {
+		for(sqlManager::CommitQueueItr ptr = sq_.commitQueue.begin(); ptr != sq_.commitQueue.end(); ++ptr) {
 			std::string statement = *ptr;
 
 #ifdef LOG_SQL
