@@ -1085,8 +1085,9 @@ newOp->setChannel(channel);
 newOp->setAccount(account);
 newOp->setTimeFirstOpped(currentTime());
 newOp->setTimeLastOpped(currentTime());
-newOp->Insert();
-
+newOp->setIsNewUser(true);
+userUpdateQueue.push_back(newOp);
+	
 return newOp;
 }
 

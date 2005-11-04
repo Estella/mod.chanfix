@@ -108,7 +108,7 @@ insertString	<< insertHeader << "'"
 		;
 
 myManager->queueCommit(insertString.str());
-commit();
+isNewUser = false;
 }
 
 void sqlChanOp::Delete()
@@ -126,34 +126,38 @@ myManager->queueCommit(deleteString.str());
 
 void sqlChanOp::commit()
 {
-elog	<< "chanfix::sqlChanOp::commit> " << account << " && " << channel << std::endl;
 
 std::stringstream chanOpCommit;
-chanOpCommit	<< "UPDATE chanOps "
-		<< "SET last_seen_as = " << "'"
-		<< escapeSQLChars(nickUserHost)
-		<< "', ts_firstopped = " << ts_firstopped
-		<< ", ts_lastopped = " << ts_lastopped
-		<< ", day0 = " << day[0]
-		<< ", day1 = " << day[1]
-		<< ", day2 = " << day[2]
-		<< ", day3 = " << day[3]
-		<< ", day4 = " << day[4]
-		<< ", day5 = " << day[5]
-		<< ", day6 = " << day[6]
-		<< ", day7 = " << day[7]
-		<< ", day8 = " << day[8]
-		<< ", day9 = " << day[9]
-		<< ", day10 = " << day[10]
-		<< ", day11 = " << day[11]
-		<< ", day12 = " << day[12]
-		<< ", day13 = " << day[13]
-		<< " WHERE lower(channel) = '"
-		<< string_lower(escapeSQLChars(channel))
-		<< "' AND lower(account) = '"
-		<< string_lower(escapeSQLChars(account)) << "'"
-		;
-myManager->queueCommit(chanOpCommit.str());
+/* Check to see if they're a new op, if so, INSERT instead */
+if (isNewUser) {
+	Insert();
+} else {
+	chanOpCommit	<< "UPDATE chanOps "
+			<< "SET last_seen_as = " << "'"
+			<< escapeSQLChars(nickUserHost)
+			<< "', ts_firstopped = " << ts_firstopped
+			<< ", ts_lastopped = " << ts_lastopped
+			<< ", day0 = " << day[0]
+			<< ", day1 = " << day[1]
+			<< ", day2 = " << day[2]
+			<< ", day3 = " << day[3]
+			<< ", day4 = " << day[4]
+			<< ", day5 = " << day[5]
+			<< ", day6 = " << day[6]
+			<< ", day7 = " << day[7]
+			<< ", day8 = " << day[8]
+			<< ", day9 = " << day[9]
+			<< ", day10 = " << day[10]
+			<< ", day11 = " << day[11]
+			<< ", day12 = " << day[12]
+			<< ", day13 = " << day[13]
+			<< " WHERE lower(channel) = '"
+			<< string_lower(escapeSQLChars(channel))
+			<< "' AND lower(account) = '"
+			<< string_lower(escapeSQLChars(account)) << "'"
+			;
+	myManager->queueCommit(chanOpCommit.str());
+}
 }
 
 sqlChanOp::~sqlChanOp()
