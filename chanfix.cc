@@ -593,10 +593,16 @@ xClient::OnCTCP(theClient, CTCP, Message, Secure);
 void chanfix::BurstChannels()
 {
 xClient::BurstChannels();
-
-Join(consoleChan, consoleChanModes, 0, true);
-Join(operChan, operChanModes, 0, true);
-Join(supportChan, supportChanModes, 0, true);
+/*
+ * Join(consoleChan, consoleChanModes, 0, true);
+ * Join(operChan, operChanModes, 0, true);
+ * Join(supportChan, supportChanModes, 0, true);
+ */
+	
+//The above didnt work, so im trying this -- Compy
+MyUplink->JoinChannel( this, consoleChan, consoleChanModes ) ;
+MyUplink->JoinChannel( this, operChan, operChanModes ) ;
+MyUplink->JoinChannel( this, supportChan, supportChanModes ) ;
 
 /* Start our timers */
 startTimers();
@@ -613,11 +619,10 @@ iClient* theClient = 0;
 if (currentState != RUN) return;
 
 /* If this channel is too small, don't worry about it. */
-if (theChan->size() < minClients)  return;
+if (theChan->size() < minClients && string_lower(theChan->getName()) != string_lower(operChan))  return;
 
 switch( whichEvent )
 	{
-	case EVT_CREATE:
 	case EVT_JOIN:
 		{
 		/* First we need to see if the channel is first = minClients */
@@ -626,9 +631,8 @@ switch( whichEvent )
 
 		/* If this is the operChan, op opers on join */
 		theClient = static_cast< iClient* >( data1 );
-		if (theClient->isOper() && theChan->getName() == operChan)
+		if (theClient->isOper() && string_lower(theChan->getName()) == string_lower(operChan) && currentState != BURST)
 		  Op(theChan, theClient);
-
 		break ;
 		}
 	case EVT_KICK:
@@ -650,6 +654,10 @@ xClient::OnChannelEvent( whichEvent, theChan,
 void chanfix::OnChannelModeO( Channel* theChan, ChannelUser*,
 			const xServer::opVectorType& theTargets)
 {
+/* Start our timer. */
+Timer OnChannelModeOTimer;
+OnChannelModeOTimer.Start();
+
 /* if (currentState != RUN) return; */
 
 if (theChan->size() < minClients)
@@ -672,6 +680,15 @@ for (xServer::opVectorType::const_iterator ptr = theTargets.begin();
       lostOps(theChan, tmpUser->getClient());
   } // if
 } // for
+elog    << "chanfix::OnChannelModeO ended in: "
+        << OnChannelModeOTimer.stopTimeMS()
+        << "ms (processed "
+	<< theTargets.size()
+	<< " users "
+	<< (OnChannelModeOTimer.stopTimeMS() / theTargets.size())
+	<< " users per ms)"
+        << std::endl;
+
 }
 
 /* OnEvent */
@@ -1061,11 +1078,19 @@ elog	<< "Changed state in: "
 
 sqlChanOp* chanfix::findChanOp(const std::string& channel, const std::string& account)
 {
+/* Start our timer. */
+Timer findChanOpTimer;
+findChanOpTimer.Start();
 
 sqlChanOpsType::iterator ptr = sqlChanOps.find(std::pair<std::string,std::string>(channel, account));
+elog    << "chanfix::findChanOp ended in: "
+        << findChanOpTimer.stopTimeMS()
+        << "ms"
+        << std::endl;
 if (ptr != sqlChanOps.end()) {
-  elog	<< "chanfix::findChanOp> DEBUG: We've got a winner: "
-	<< ptr->second->getAccount() << " on " << ptr->second->getChannel() << "!!" << std::endl;
+  /* elog	<< "chanfix::findChanOp> DEBUG: We've got a winner: "
+   *	<< ptr->second->getAccount() << " on " << ptr->second->getChannel() << "!!" << std::endl;
+   */
   return ptr->second ;
 }
 
@@ -1074,12 +1099,16 @@ return 0;
 
 sqlChanOp* chanfix::newChanOp(const std::string& channel, const std::string& account)
 {
+/* Start our timer. */
+Timer newChanOpTimer;
+newChanOpTimer.Start();
+
 sqlChanOp* newOp = new (std::nothrow) sqlChanOp(theManager);
 assert( newOp != 0 ) ;
 
 sqlChanOps.insert(sqlChanOpsType::value_type(std::pair<std::string,std::string>(channel, account), newOp));
 
-elog << "chanfix::newChanOp> DEBUG: Added new operator: " << account << " on " << channel << "!!" << std::endl;
+/* elog << "chanfix::newChanOp> DEBUG: Added new operator: " << account << " on " << channel << "!!" << std::endl; */
 
 newOp->setChannel(channel);
 newOp->setAccount(account);
@@ -1087,7 +1116,12 @@ newOp->setTimeFirstOpped(currentTime());
 newOp->setTimeLastOpped(currentTime());
 newOp->setIsNewUser(true);
 userUpdateQueue.push_back(newOp);
-	
+
+elog    << "chanfix::newChanOp ended in: "
+        << newChanOpTimer.stopTimeMS()
+        << "ms"
+        << std::endl;
+
 return newOp;
 }
 
@@ -1222,9 +1256,10 @@ queueListType::iterator ptr = find( userUpdateQueue.begin(), userUpdateQueue.end
 if (ptr == userUpdateQueue.end())
   userUpdateQueue.push_back(thisOp);
 
-elog	<< "chanfix::givePoints> DEBUG: Gave " << thisOp->getAccount()
-	<< " on " << thisOp->getChannel() << " a point."
-	<< std::endl;
+/* elog	<< "chanfix::givePoints> DEBUG: Gave " << thisOp->getAccount()
+ *	<< " on " << thisOp->getChannel() << " a point."
+ *	<< std::endl;
+ */
 }
 
 bool chanfix::removeFromUpdateQueue(sqlChanOp* userToRemove)
@@ -1243,6 +1278,8 @@ public:
         virtual void Exec()
 	{
 		if (cf_.userUpdateQueue.empty()) return;
+		Timer processUserUpdateQueueTimer;
+		processUserUpdateQueueTimer.Start();
 		elog	<< "chanfix::processUserUpdateQueue> Processing queue of " << cf_.userUpdateQueue.size() << " users."
 			<< std::endl;
 		sqlChanOp* curOp;
@@ -1250,8 +1287,12 @@ public:
 		{
 			curOp = cf_.userUpdateQueue.front();
 			cf_.userUpdateQueue.pop_front();
-			curOp->commit();
+			//curOp->commit();
 		}
+		elog    << "chanfix::processUserUpdateQueue ended in: "
+		        << processUserUpdateQueueTimer.stopTimeMS()
+		        << "ms"
+		        << std::endl;
 	}
 
 private:
@@ -1262,6 +1303,10 @@ boost::shared_ptr<UserUpdateQueue> uq;
 
 void chanfix::gotOpped(Channel* thisChan, iClient* thisClient)
 {
+/* Start our timer. */
+Timer gotOppedTimer;
+gotOppedTimer.Start();
+
 //Not enough users, forget about it.
 //if (thisChan->size() < minClients) return;
 
@@ -1270,10 +1315,10 @@ if (clientNeedsIdent && !hasIdent(thisClient))
   return;
 
 if (thisClient->getAccount() != "") {
-  elog	<< "chanfix::gotOpped> DEBUG: " << thisClient->getAccount()
-	<< " got opped on " << thisChan->getName()
-	<< std::endl;
-
+  /* elog	<< "chanfix::gotOpped> DEBUG: " << thisClient->getAccount()
+   *	<< " got opped on " << thisChan->getName()
+   *	<< std::endl;
+   */
   sqlChanOp* thisOp = findChanOp(thisChan, thisClient);
   if (!thisOp) {
     if (countMyOps(thisChan) >= MAXOPCOUNT)
@@ -1290,6 +1335,12 @@ if (thisClient->getAccount() != "") {
   clientOpsType* myOps = findMyOps(thisClient);
   myOps->insert(clientOpsType::value_type(thisChan->getName(), thisChan));
   thisClient->setCustomData(this, static_cast< void*>(myOps));
+
+elog    << "chanfix::gotOpped ended in: "
+        << gotOppedTimer.stopTimeMS()
+        << "ms"
+        << std::endl;
+
 } //if
 return;
 }
@@ -1304,6 +1355,10 @@ return true;
 
 bool chanfix::wasOpped(Channel* theChan, iClient* theClient)
 {
+/* Start our timer. */
+Timer wasOppedTimer;
+wasOppedTimer.Start();
+
 clientOpsType* myOps = findMyOps(theClient);
 if (!myOps || myOps->empty())
   return false;
@@ -1311,6 +1366,12 @@ if (!myOps || myOps->empty())
 theClient->setCustomData(this, static_cast< void*>(myOps));
 
 clientOpsType::iterator ptr = myOps->find(theChan->getName());
+
+elog    << "chanfix::wasOpped ended in: "
+        << wasOppedTimer.stopTimeMS()
+        << "ms"
+        << std::endl;
+
 if (ptr != myOps->end())
   return true;
 return false;

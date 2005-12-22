@@ -69,7 +69,7 @@ CREATE TABLE users (
 	created INT4 NOT NULL DEFAULT 0,
 	last_seen INT4 NOT NULL DEFAULT 0,
 	last_updated INT4 NOT NULL DEFAULT 0,
-	last_updated_by VARCHAR(128) NOT NULL,
+	last_updated_by VARCHAR(128),
 	language_id INT4 CONSTRAINT language_id_ref REFERENCES languages (id) NOT NULL DEFAULT 1,
 	faction VARCHAR(128) NOT NULL DEFAULT 'undernet.org',
 	flags INT2 NOT NULL DEFAULT 0,
