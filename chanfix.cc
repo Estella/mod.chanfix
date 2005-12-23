@@ -1977,9 +1977,9 @@ for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
      ptr != sqlChanOps.end(); ptr++) {
   curOp = ptr->second;
   theLine.clear();
-  theLine	<< curOp->getChannel().c_str() << "\t"
-		<< curOp->getAccount().c_str() << "\t"
-		<< curOp->getLastSeenAs().c_str() << "\t"
+  theLine	<< escapeSQLChars(curOp->getChannel()).c_str() << "\t"
+		<< escapeSQLChars(curOp->getAccount()).c_str() << "\t"
+		<< escapeSQLChars(curOp->getLastSeenAs()).c_str() << "\t"
 		<< curOp->getTimeFirstOpped() << "\t"
 		<< curOp->getTimeLastOpped()
 		;
@@ -1990,10 +1990,17 @@ for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
 		;
   }
 
+  theLine	<< "\n"
+		;
+
   cacheCon->PutLine(theLine.str().c_str());
   chanOpsProcessed++;
 }
 
+/* Send completion string for the end of the data. */
+cacheCon->PutLine("\\.\n");
+
+/* Synchronize with the backend. */
 int copyStatus = cacheCon->EndCopy();
 if (copyStatus != 0) {
   elog	<< "*** [chanfix::updateDB] Error ending copy! Returned: "
