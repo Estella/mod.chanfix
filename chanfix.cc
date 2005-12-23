@@ -1976,7 +1976,7 @@ unsigned int chanOpsProcessed = 0;
 for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
      ptr != sqlChanOps.end(); ptr++) {
   curOp = ptr->second;
-  theLine.clear();
+  theLine.str("");
   theLine	<< escapeSQLChars(curOp->getChannel()).c_str() << "\t"
 		<< escapeSQLChars(curOp->getAccount()).c_str() << "\t"
 		<< escapeSQLChars(curOp->getLastSeenAs()).c_str() << "\t"
@@ -2001,10 +2001,11 @@ for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
 cacheCon->PutLine("\\.\n");
 
 /* Synchronize with the backend. */
+/* Returns 0 on success, 1 on failure */
 int copyStatus = cacheCon->EndCopy();
 if (copyStatus != 0) {
   elog	<< "*** [chanfix::updateDB] Error ending copy! Returned: "
-	<< copyStatus << " instead. " << cacheCon->ErrorMessage()
+	<< copyStatus << " instead."
 	<< std::endl;
   return;
 }
