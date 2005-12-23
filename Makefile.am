@@ -46,9 +46,10 @@ libchanfix_la_SOURCES = chanfix.cc \
 
 libchanfix_la_CXXFLAGS = -I$(PGSQL_INCLUDE) -I${top_srcdir}/include \
 	-I${top_srcdir}/libgnuworld \
-	-DHAVE_NAMESPACE_STD -DHAVE_CXX_STRING_HEADER -DDLLIMPORT=""
+	-DHAVE_NAMESPACE_STD -DHAVE_CXX_STRING_HEADER -DDLLIMPORT="" \
+	-pthread
 
-libchanfix_la_LDFLAGS = -module -export-dynamic -L@PGSQL_LIB@ -lpq++
+libchanfix_la_LDFLAGS = -module -export-dynamic -L@PGSQL_LIB@ -lpq++ -lboost_thread
 
 EXTRA_DIST = chanfix.h \
 	chanfix.example.conf.in \

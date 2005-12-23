@@ -35,6 +35,9 @@
 #include	<string>
 #include	<utility>
 #include	<vector>
+#include	<boost/thread/thread.hpp>
+#include	<boost/bind.hpp>
+#include	<boost/shared_ptr.hpp>
 
 #include	"libpq++.h"
 
@@ -439,7 +442,8 @@ else if (theTimer == tidRotateDB) {
   tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
 }
 else if (theTimer == tidUpdateDB) {
-  updateDB();
+  ClassUpdateDB updateDB(*this);
+  boost::thread pthrd(updateDB);
   
   /* Refresh Timer */
   theTime = time(NULL) + SQL_UPDATE_TIME;
@@ -1933,8 +1937,12 @@ elog	<< "chanfix::startTimers> Started all timers."
 	<< std::endl;
 }
 
-void chanfix::updateDB()
-{
+
+class ClassUpdateDB {
+  public:
+    ClassUpdateDB(chanfix& cf) : cf_(cf) {}
+    void operator()() {
+
 elog << "*** [chanfix::updateDB] Updating the SQL database." << std::endl;
 logAdminMessage("Starting to update the SQL database.");
 
@@ -2038,7 +2046,10 @@ if (actualChanOpsProcessed != chanOpsProcessed) {
 theManager->removeConnection(cacheCon);
 
 return;
-}
+
+private:
+        chanfix& cf_;
+};
 
 void chanfix::rotateDB()
 {
