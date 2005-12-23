@@ -1962,9 +1962,9 @@ std::stringstream theCopy;
 theCopy		<< "COPY chanOps FROM stdin"
 		;
 
-if (!cacheCon->ExecCommandOk(theCopy.str().c_str())) {
-  elog		<< "*** [chanfix::updateDB]: Error starting copy of chanOps table: " 
-		<< cacheCon->ErrorMessage()
+ExecStatusType status = cacheCon->Exec(theCopy.str().c_str());
+if (PGRES_COPY_IN != status) {
+  elog		<< "*** [chanfix::updateDB]: Error starting copy of chanOps table." 
 		<< std::endl;
   return;
 }
@@ -1994,8 +1994,20 @@ for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
   chanOpsProcessed++;
 }
 
-unsigned int actualChanOpsProcessed = cacheCon->EndCopy();
+int copyStatus = cacheCon->EndCopy();
+if (copyStatus != 0) {
+  elog	<< "*** [chanfix::updateDB] Error ending copy! Returned: "
+	<< copyStatus << " instead. " << cacheCon->ErrorMessage()
+	<< std::endl;
+  return;
+}
 
+/* // I'll fix this later
+std::stringstream theCount;
+theCount	<< "SELECT * FROM chanOps"
+		;
+
+unsigned int = cacheCon->
 if (actualChanOpsProcessed != chanOpsProcessed) {
   elog	<< "*** [chanfix::updateDB] Error updating chanOps! "
 	<< "Only " << actualChanOpsProcessed << " of "
@@ -2005,13 +2017,14 @@ if (actualChanOpsProcessed != chanOpsProcessed) {
 		  actualChanOpsProcessed, chanOpsProcessed,
 		  updateDBTimer.stopTimeMS());
 } else {
+*/
   elog	<< "*** [chanfix::updateDB]: Done. Copied "
-	<< actualChanOpsProcessed
+	<< chanOpsProcessed
 	<< " chanops to the SQL database."
 	<< std::endl;
   logAdminMessage("Synched %d users to the SQL database in %u ms.",
-		  actualChanOpsProcessed, updateDBTimer.stopTimeMS());
-}
+		  chanOpsProcessed, updateDBTimer.stopTimeMS());
+/* } */
 
 /* Dispose of our connection instance */
 theManager->removeConnection(cacheCon);
