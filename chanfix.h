@@ -33,7 +33,6 @@
 
 #include	"chanfixCommands.h"
 #include	"chanfix_config.h"
-#include	"dbThread.h"
 #include	"sqlChannel.h"
 #include	"Timer.h"
 
@@ -77,12 +76,6 @@ inline bool operator()( const std::pair<std::string, std::string>& lhs, const st
 
 
 class chanfix : public xClient {
-
-	/**
-	 * The database interface thread; this thread performs all db
-	 * related processing including the db communications.
-	 */
-	dbThread	theThread;
 
 public:
 
@@ -261,6 +254,7 @@ public:
 	void processQueue();
 	
 	void rotateDB();
+	void updateDB();
 
 	bool isBeingFixed(Channel*);
 	bool isBeingAutoFixed(Channel*);
@@ -301,10 +295,6 @@ public:
 
 	void doSqlError(const std::string&, const std::string&);
 	
-	bool removeFromUpdateQueue(sqlChanOp*);
-	
-	void processUserUpdateQueue();
-
 	/**
 	 * Our sqlManager instance for DB communication
 	 */
@@ -321,19 +311,19 @@ public:
 	 */
 	//typedef std::map< std::pair<std::string, std::string>, sqlChanOp*, noCaseComparePair> sqlChanOpsType;
 	typedef std::map< std::pair<std::string, std::string>, sqlChanOp*> sqlChanOpsType;
-	sqlChanOpsType	sqlChanOps;
+	sqlChanOpsType		sqlChanOps;
 
 	typedef std::map <std::string, sqlChannel*, noCaseCompare> sqlChannelCacheType;
 	sqlChannelCacheType	sqlChanCache;
 
 	typedef std::map <std::string, Channel*, noCaseCompare> clientOpsType;
-	clientOpsType*	findMyOps(iClient*);
+	clientOpsType*		findMyOps(iClient*);
 
 	typedef std::list< sqlChanOp* > chanOpsType;
-	chanOpsType	getMyOps(Channel*);
+	chanOpsType		getMyOps(Channel*);
 
 	typedef std::map <std::string, bool> ScoredOpsMapType;
-	ScoredOpsMapType scoredOpsList;
+	ScoredOpsMapType	scoredOpsList;
 	
 	/**
 	 * The db clients map
@@ -343,7 +333,7 @@ public:
 	/**
 	 * Holds the authenticated user list
 	 */
-	usersMapType	usersMap;
+	usersMapType		usersMap;
 	
 	typedef usersMapType::iterator	usersIterator;
 
@@ -362,9 +352,6 @@ public:
 
 	typedef std::vector< iClient* > acctListType; //For reopping all logged in users to an acct.
 	acctListType findAccount(Channel*, const std::string&);
-
-	typedef std::list< sqlChanOp* >	queueListType;
-	queueListType			userUpdateQueue;
 
 	typedef std::map < std::pair <int, std::string>, std::string > helpTableType;
 	helpTableType	helpTable;
@@ -389,9 +376,9 @@ public:
 	/**
 	 * Configuration variables
 	 */
-	std::string		consoleChanModes;
-	std::string		operChanModes;
-	std::string		supportChanModes;
+	std::string	consoleChanModes;
+	std::string	operChanModes;
+	std::string	supportChanModes;
 	bool		enableAutoFix;
 	bool		enableChanFix;
 	bool		enableChannelBlocking;
@@ -415,11 +402,6 @@ public:
 
 protected:
 	/**
-	 *  Time of the last cache
-	 */
-	std::map < std::string , time_t > lastUpdated;
-
-	/**
 	 * Configuration file.
 	 */
 	EConfig*	chanfixConfig;
@@ -432,14 +414,12 @@ protected:
 	/**
 	 * Timer declarations
 	 */
-	xServer::timerID tidCheckOps;
-	xServer::timerID tidAutoFix;
-	xServer::timerID tidUpdateDB;
-	xServer::timerID tidFixQ;
 	xServer::timerID tidCheckDB;
+	xServer::timerID tidAutoFix;
+	xServer::timerID tidFixQ;
 	xServer::timerID tidGivePoints;
 	xServer::timerID tidRotateDB;
-	xServer::timerID tidProcessQueue;
+	xServer::timerID tidUpdateDB;
 
 	/**
 	 * Internal timer

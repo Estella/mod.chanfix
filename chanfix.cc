@@ -35,14 +35,12 @@
 #include	<string>
 #include	<utility>
 #include	<vector>
-#include	<boost/shared_ptr.hpp>
 
 #include	"libpq++.h"
 
 #include	"gnuworld_config.h"
 #include	"client.h"
 #include	"EConfig.h"
-#include	"gThread.h"
 #include	"Network.h"
 #include	"server.h"
 #include	"StringTokenizer.h"
@@ -435,12 +433,12 @@ else if (theTimer == tidRotateDB) {
   theTime = time(NULL) + getSecsTilMidnight();
   tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
 }
-else if (theTimer == tidProcessQueue) {
-  processUserUpdateQueue();
+else if (theTimer == tidUpdateDB) {
+  updateDB();
   
   /* Refresh Timer */
-  theTime = time(NULL) + updateCycleInterval;
-  tidProcessQueue = MyUplink->RegisterTimer(theTime, this, NULL);
+  theTime = time(NULL) + SQL_UPDATE_TIME;
+  tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
 }
 }
 
@@ -584,6 +582,8 @@ if (Command == "DCC") {
   DoCTCP(theClient, CTCP, Message);
 } else if (Command == "VERSION") {
   DoCTCP(theClient, CTCP, "evilnet development - GNUWorld chanfix v" CF_VERSION);
+} else if (Command == "WHODUNIT?") {
+  DoCTCP(theClient, CTCP, "reed, ULtimaTe_, Compy, SiRVulcaN");
 }
 
 xClient::OnCTCP(theClient, CTCP, Message, Secure);
@@ -593,16 +593,10 @@ xClient::OnCTCP(theClient, CTCP, Message, Secure);
 void chanfix::BurstChannels()
 {
 xClient::BurstChannels();
-/*
- * Join(consoleChan, consoleChanModes, 0, true);
- * Join(operChan, operChanModes, 0, true);
- * Join(supportChan, supportChanModes, 0, true);
- */
-	
-//The above didnt work, so im trying this -- Compy
-MyUplink->JoinChannel( this, consoleChan, consoleChanModes ) ;
-MyUplink->JoinChannel( this, operChan, operChanModes ) ;
-MyUplink->JoinChannel( this, supportChan, supportChanModes ) ;
+
+MyUplink->JoinChannel(this, consoleChan, consoleChanModes);
+MyUplink->JoinChannel(this, operChan, operChanModes);
+MyUplink->JoinChannel(this, supportChan, supportChanModes);
 
 /* Start our timers */
 startTimers();
@@ -619,7 +613,7 @@ iClient* theClient = 0;
 if (currentState != RUN) return;
 
 /* If this channel is too small, don't worry about it. */
-if (theChan->size() < minClients && string_lower(theChan->getName()) != string_lower(operChan))  return;
+if (theChan->size() < minClients)  return;
 
 switch( whichEvent )
 	{
@@ -631,7 +625,7 @@ switch( whichEvent )
 
 		/* If this is the operChan, op opers on join */
 		theClient = static_cast< iClient* >( data1 );
-		if (theClient->isOper() && string_lower(theChan->getName()) == string_lower(operChan) && currentState != BURST)
+		if (theClient->isOper() && string_lower(theChan->getName()) == string_lower(operChan))
 		  Op(theChan, theClient);
 		break ;
 		}
@@ -1114,8 +1108,6 @@ newOp->setChannel(channel);
 newOp->setAccount(account);
 newOp->setTimeFirstOpped(currentTime());
 newOp->setTimeLastOpped(currentTime());
-newOp->setIsNewUser(true);
-userUpdateQueue.push_back(newOp);
 
 elog    << "chanfix::newChanOp ended in: "
         << newChanOpTimer.stopTimeMS()
@@ -1251,55 +1243,12 @@ if (!thisOp) {
 
 thisOp->addPoint();
 thisOp->setTimeLastOpped(currentTime()); //Update the time they were last opped
-//thisOp->commit();
-queueListType::iterator ptr = find( userUpdateQueue.begin(), userUpdateQueue.end(), thisOp );
-if (ptr == userUpdateQueue.end())
-  userUpdateQueue.push_back(thisOp);
 
 /* elog	<< "chanfix::givePoints> DEBUG: Gave " << thisOp->getAccount()
  *	<< " on " << thisOp->getChannel() << " a point."
  *	<< std::endl;
  */
 }
-
-bool chanfix::removeFromUpdateQueue(sqlChanOp* userToRemove)
-{
-  queueListType::iterator ptr = find( userUpdateQueue.begin(), userUpdateQueue.end(), userToRemove );
-  if (ptr == userUpdateQueue.end()) return false;
-  ptr = userUpdateQueue.erase(ptr);
-  return true;
-}
-
-class UserUpdateQueue : public gThread
-{
-public:
-	UserUpdateQueue(chanfix& cf) : cf_(cf) {}
-
-        virtual void Exec()
-	{
-		if (cf_.userUpdateQueue.empty()) return;
-		Timer processUserUpdateQueueTimer;
-		processUserUpdateQueueTimer.Start();
-		elog	<< "chanfix::processUserUpdateQueue> Processing queue of " << cf_.userUpdateQueue.size() << " users."
-			<< std::endl;
-		sqlChanOp* curOp;
-		for(unsigned int i = 0; i< (cf_.userUpdateQueue.size() > cf_.updatesPerCycle ? cf_.updatesPerCycle : cf_.userUpdateQueue.size());++i)
-		{
-			curOp = cf_.userUpdateQueue.front();
-			cf_.userUpdateQueue.pop_front();
-			//curOp->commit();
-		}
-		elog    << "chanfix::processUserUpdateQueue ended in: "
-		        << processUserUpdateQueueTimer.stopTimeMS()
-		        << "ms"
-		        << std::endl;
-	}
-
-private:
-	chanfix& cf_;
-};
-
-boost::shared_ptr<UserUpdateQueue> uq;
 
 void chanfix::gotOpped(Channel* thisChan, iClient* thisClient)
 {
@@ -1973,16 +1922,96 @@ theTime = time(NULL) + POINTS_UPDATE_TIME;
 tidGivePoints = MyUplink->RegisterTimer(theTime, this, NULL);
 theTime = time(NULL) + getSecsTilMidnight();
 tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
-theTime = time(NULL) + updateCycleInterval;
-tidProcessQueue = MyUplink->RegisterTimer(theTime, this, NULL);
+theTime = time(NULL) + SQL_UPDATE_TIME;
+tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
 elog	<< "chanfix::startTimers> Started all timers."
 	<< std::endl;
 }
 
-void chanfix::processUserUpdateQueue()
+void chanfix::updateDB()
 {
-	uq = boost::shared_ptr<UserUpdateQueue>(new UserUpdateQueue(*this));
-	uq->Start();
+elog << "*** [chanfix::updateDB] Updating the SQL database." << std::endl;
+logAdminMessage("Starting to update the SQL database.");
+
+/* Start our timer */
+Timer updateDBTimer;
+updateDBTimer.Start();
+
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = theManager->getConnection();
+
+/* Delete the current chanOps table. */
+std::stringstream theDelete;
+theDelete	<< "DELETE FROM chanOps"
+		;
+
+if (!cacheCon->ExecCommandOk(theDelete.str().c_str())) {
+  elog		<< "*** [chanfix::updateDB]: Error deleting current chanOps table: " 
+		<< cacheCon->ErrorMessage()
+		<< std::endl;
+  return;
+}
+
+/* Copy the current chanOps to SQL. */
+std::stringstream theCopy;
+theCopy		<< "COPY chanOps FROM stdin"
+		;
+
+if (!cacheCon->ExecCommandOk(theCopy.str().c_str())) {
+  elog		<< "*** [chanfix::updateDB]: Error starting copy of chanOps table: " 
+		<< cacheCon->ErrorMessage()
+		<< std::endl;
+  return;
+}
+
+sqlChanOp* curOp;
+std::stringstream theLine;
+unsigned int chanOpsProcessed = 0;
+
+for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
+     ptr != sqlChanOps.end(); ptr++) {
+  curOp = ptr->second;
+  theLine.clear();
+  theLine	<< curOp->getChannel().c_str() << "\t"
+		<< curOp->getAccount().c_str() << "\t"
+		<< curOp->getLastSeenAs().c_str() << "\t"
+		<< curOp->getTimeFirstOpped() << "\t"
+		<< curOp->getTimeLastOpped()
+		;
+
+  int i;
+  for (i = 0; i < DAYSAMPLES; i++) {
+    theLine	<< "\t" << curOp->getDay(i)
+		;
+  }
+
+  cacheCon->PutLine(theLine.str().c_str());
+  chanOpsProcessed++;
+}
+
+unsigned int actualChanOpsProcessed = cacheCon->EndCopy();
+
+if (actualChanOpsProcessed != chanOpsProcessed) {
+  elog	<< "*** [chanfix::updateDB] Error updating chanOps! "
+	<< "Only " << actualChanOpsProcessed << " of "
+	<< chanOpsProcessed << " chanops were copied to the SQL database."
+	<< std::endl;
+  logAdminMessage("ERROR: Only %d of %d chanops were updated in %u ms.",
+		  actualChanOpsProcessed, chanOpsProcessed,
+		  updateDBTimer.stopTimeMS());
+} else {
+  elog	<< "*** [chanfix::updateDB]: Done. Copied "
+	<< actualChanOpsProcessed
+	<< " chanops to the SQL database."
+	<< std::endl;
+  logAdminMessage("Synched %d users to the SQL database in %u ms.",
+		  actualChanOpsProcessed, updateDBTimer.stopTimeMS());
+}
+
+/* Dispose of our connection instance */
+theManager->removeConnection(cacheCon);
+
+return;
 }
 
 void chanfix::rotateDB()
@@ -2024,7 +2053,6 @@ for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
   curOp->calcTotalPoints();
   if (curOp->getPoints() <= 0 && maxFirstOppedTS > curOp->getTimeFirstOpped()) {
     sqlChanOps.erase(ptr);
-    curOp->Delete();
     numOpsLeft--;
     delete curOp; curOp = 0;
   }

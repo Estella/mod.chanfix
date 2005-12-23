@@ -121,6 +121,12 @@
 #define DBROTATE_CHECK_TIME	3600
 
 /**
+ * Interval between two consecutive SQL updates.
+ * Default: every 12 hours
+ */
+#define SQL_UPDATE_TIME		43200
+
+/**
  * Interval between two consecutive checks for opless channels.
  */
 #define CHECK_CHANS_TIME	10

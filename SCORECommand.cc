@@ -55,7 +55,6 @@ iClient* curClient = 0;
 chanfix::acctListType acctToScore;
 chanfix::acctListType acctToShow;
 bool compact = (string_upper(st[0]) == "CSCORE");
-elog << "SCORECommand: Test1" << std::endl;
 Channel* netChan = Network->findChannel(st[1]);
 if (!netChan) {
   if (compact)
@@ -67,7 +66,6 @@ if (!netChan) {
                                 std::string("No such channel %s.")).c_str(), st[1].c_str());
   return;
 }
-elog << "SCORECommand: Test2" << std::endl;
 if (!bot->canScoreChan(netChan, false)) {
   if (compact)
     bot->SendTo(theClient, "~! %s", netChan->getName().c_str());
@@ -79,7 +77,6 @@ if (!bot->canScoreChan(netChan, false)) {
 				 netChan->getName().c_str());
   return;
 }
-elog << "SCORECommand: Test3" << std::endl;
 chanfix::chanOpsType myOps = bot->getMyOps(netChan);
 if (myOps.empty()) {
   if (compact)
@@ -92,19 +89,15 @@ if (myOps.empty()) {
                                             netChan->getName().c_str());
   return;
 }
-elog << "SCORECommand: Test4" << std::endl;
 if (st.size() > 2) {
   const char* scUser = st[2].c_str();
   if (st[2][0] == '*') {
     //Account
     ++scUser;
-    elog << "SCORECommand: Test5" << std::endl;
-    for (chanfix::chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end(); opPtr++) {
-	elog << "SCORECommand: Test6" << std::endl;
+    for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
+	 opPtr != myOps.end(); opPtr++) {
       curOp = *opPtr;
-	elog << "SCORECommand: Test7" << std::endl;
       if (string_lower(curOp->getAccount()) == string_lower(scUser)) {
-	elog << "SCORECommand: Test8" << std::endl;
 	if (compact)
 	  bot->SendTo(theClient, "~U %s %s %u", netChan->getName().c_str(), curOp->getAccount().c_str(), curOp->getPoints());
 	else
@@ -127,21 +120,21 @@ if (st.size() > 2) {
 	return;
       }
     }
-	/* TODO: No such nick is inappropriate for it */
-    elog << "SCORECommand: Test9" << std::endl;
-       bot->SendTo(theClient,
-                   bot->getResponse(theUser,
-                                   language::no_such_nick,
-                                   std::string("No such nick %s.")).c_str(), scUser);
-    elog << "SCORECommand: Test10" << std::endl;
+    if (compact)
+      bot->SendTo(theClient,
+		  bot->getResponse(theUser,
+				   language::compact_no_such_account,
+				   std::string("~U %s no@such.account 0")).c_str(), netChan->getName().c_str());
+    else
+      bot->SendTo(theClient,
+		  bot->getResponse(theUser,
+				   language::no_such_account,
+				   std::string("No such account %s.")).c_str(), scUser);
     return;
   } else {
    //Nickname
-   elog << "SCORECommand: Test11" << std::endl;
    curClient = Network->findNick(scUser);
-   elog << "SCORECommand: Test12" << std::endl;
    if (!curClient) {
-     elog << "SCORECommand: Test13" << std::endl;
      if (compact)
        bot->SendTo(theClient,
                    bot->getResponse(theUser,
@@ -154,20 +147,13 @@ if (st.size() > 2) {
                                    std::string("No such nick %s.")).c_str(), scUser);
      return;
    } else {
-	elog << "SCORECommand: Test14" << std::endl;
      iClient* curClientOp;
-	elog << "SCORECommand: Test15" << std::endl;
      for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
 	  opPtr != myOps.end(); opPtr++) {
-	elog << "SCORECommand: Test16" << std::endl;
 	curOp = *opPtr;
-	elog << "SCORECommand: Test17" << std::endl;
 	acctToScore = bot->findAccount(netChan, curOp->getAccount());
-	elog << "SCORECommand: Test18" << std::endl;
 	std::vector< iClient* >::const_iterator acctPtr = acctToScore.begin();
-	elog << "SCORECommand: Test19" << std::endl;
 	if (acctPtr == acctToScore.end()) {
-	  elog << "SCORECommand: Test20" << std::endl;
 	  if (compact)
             bot->SendTo(theClient,
                         bot->getResponse(theUser,
@@ -180,20 +166,13 @@ if (st.size() > 2) {
                                         std::string("No such nick %s.")).c_str(), scUser);
 	  return;
 	}
-	elog << "SCORECommand: Test21" << std::endl;
 	while (acctPtr != acctToScore.end()) {
-		elog << "SCORECommand: Test22" << std::endl;
 		curClientOp = *acctPtr;
-		elog << "SCORECommand: Test23" << std::endl;
-		if (curClientOp && (string_lower(curClientOp->getNickName()) == string_lower(scUser))) {
-			elog << "SCORECommand: Test24" << std::endl;
-			break;
-		}
+		if (curClientOp && (string_lower(curClientOp->getNickName()) == string_lower(scUser)))
+		  break;
 		++acctPtr;
 	}
-	elog << "SCORECommand: Test25" << std::endl;
 	if (curClientOp && (string_lower(curClientOp->getNickName()) == string_lower(scUser))) {
-	  elog << "SCORECommand: Test26" << std::endl;
 	  //Score for "reed@local.host" in channel "#coder-com": 4.
 	  //Do it like they do on OCF, baby.
 	  if (compact) {
@@ -215,9 +194,7 @@ if (st.size() > 2) {
 	  return;
 	}
       }
-      elog << "SCORECommand: Test27" << std::endl;
       acctToScore.clear();
-      elog << "SCORECommand: Test28" << std::endl;
       if (compact)
         bot->SendTo(theClient,
                     bot->getResponse(theUser,

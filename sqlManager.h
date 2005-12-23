@@ -51,7 +51,7 @@ class sqlManager {
     /** Add a statement to the commit queue */
     void queueCommit(const std::string&);
 
-//  protected:
+  protected:
     /**
      * Disable the default constructor so that instances can only be gotten
      * through getInstance()

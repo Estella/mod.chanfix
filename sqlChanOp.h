@@ -64,9 +64,6 @@ public:
 
 	inline const short&	getDay(int _dayval) const
 		{ return day[_dayval] ; }
-		
-	inline const bool&	getIsNewUser() const
-		{ return isNewUser ; }
 
 	/*
 	 *  Methods to set data attributes.
@@ -92,16 +89,10 @@ public:
 
 	inline void	setTimeLastOpped(time_t _ts_lastopped)
 		{ ts_lastopped = _ts_lastopped ; }
-		
+
 	inline void	setDay(int _dayval, short _pointsval)
 		{ day[_dayval] = _pointsval ; }
-		
-	inline void	setIsNewUser(bool _boolisnew)
-		{ isNewUser = _boolisnew ; }
 
-	void Insert();
-	void Delete();
-	void commit();
 	void setAllMembers(PgDatabase*, int);
 	void calcTotalPoints();
 
@@ -114,7 +105,6 @@ private:
 	time_t		ts_firstopped;
 	time_t		ts_lastopped;
 	short		day[DAYSAMPLES];
-	bool		isNewUser;
 
 	sqlManager*	myManager;
 }; // class

@@ -23,13 +23,11 @@
 
 #include <new>
 #include <iostream>
-#include <boost/shared_ptr.hpp>
-	
+
 #include <cassert>
 
 #include "gnuworld_config.h"
 #include "ELog.h"
-#include "gThread.h"
 #include "sqlManager.h"
 
 namespace gnuworld {
@@ -98,39 +96,6 @@ elog << "*** [sqlManager:removeConnection] Removing DB connection." << std::endl
 delete tempCon;
 }
 
-class SQLQueue : public gThread
-{
-public:
-        SQLQueue(sqlManager& sq) : sq_(sq) {}
-
-        virtual void Exec()
-        {
-		for(sqlManager::CommitQueueItr ptr = sq_.commitQueue.begin(); ptr != sq_.commitQueue.end(); ++ptr) {
-			std::string statement = *ptr;
-
-#ifdef LOG_SQL
-			elog << "*** [sqlManager:flush] Executing: " << statement << std::endl;
-#endif
-			if(!sq_.SQLDb->ExecCommandOk(statement.c_str())) {
-				std::string error = std::string(sq_.SQLDb->ErrorMessage());
-
-#ifndef LOG_SQL
-				/* Make sure people without LOG_SQL still see what statement failed */
-				elog << "*** [sqlManager:flush] Executing: " << statement << std::endl;
-#endif
-				elog << "*** [sqlManager:flush] Error: " << error << std::endl;
-				// TODO: Log error
-			}
-		}
-		sq_.commitQueue.clear();
-        }
-
-private:
-        sqlManager& sq_;
-};
-
-boost::shared_ptr<SQLQueue> sqs;
-
 
 /**
  * This method simply processes all statements in the queue, executing
@@ -139,8 +104,24 @@ boost::shared_ptr<SQLQueue> sqs;
  */
 void sqlManager::flush()
 {
-        sqs = boost::shared_ptr<SQLQueue>(new SQLQueue(*this));
-        sqs->Start();
+  for(CommitQueueItr ptr = commitQueue.begin(); ptr != commitQueue.end(); ++ptr) {
+    std::string statement = *ptr;
+
+#ifdef LOG_SQL
+    elog << "*** [sqlManager:flush] Executing: " << statement << std::endl;
+#endif
+    if(!SQLDb->ExecCommandOk(statement.c_str())) {
+      std::string error = std::string(SQLDb->ErrorMessage());
+#ifndef LOG_SQL
+      /* Make sure people without LOG_SQL still see what statement failed */
+      elog << "*** [sqlManager:flush] Executing: " << statement << std::endl;
+#endif
+      elog << "*** [sqlManager:flush] Error: " << error << std::endl;
+      // TODO: Log error
+    }
+  }
+
+  commitQueue.clear();
 }
 
 
