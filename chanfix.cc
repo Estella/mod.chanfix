@@ -328,7 +328,6 @@ minServersPresent = atoi((chanfixConfig->Require("minServersPresent")->second).c
 numTopScores = atoi((chanfixConfig->Require("numTopScores")->second).c_str()) ;
 minClients = atoi((chanfixConfig->Require("minClients")->second).c_str()) ;
 clientNeedsIdent = atob(chanfixConfig->Require("clientNeedsIdent")->second) ;
-clientNeedsReverse = atob(chanfixConfig->Require("clientNeedsReverse")->second) ;
 connectCheckFreq = atoi((chanfixConfig->Require("connectCheckFreq")->second).c_str()) ;
 updatesPerCycle = atoi((chanfixConfig->Require("updatesPerCycle")->second).c_str());
 updateCycleInterval = atoi((chanfixConfig->Require("updateCycleInterval")->second).c_str());
@@ -657,10 +656,6 @@ xClient::OnChannelEvent( whichEvent, theChan,
 void chanfix::OnChannelModeO( Channel* theChan, ChannelUser*,
 			const xServer::opVectorType& theTargets)
 {
-/* Start our timer. */
-Timer OnChannelModeOTimer;
-OnChannelModeOTimer.Start();
-
 /* if (currentState != RUN) return; */
 
 if (theChan->size() < minClients)
@@ -683,15 +678,6 @@ for (xServer::opVectorType::const_iterator ptr = theTargets.begin();
       lostOps(theChan, tmpUser->getClient());
   } // if
 } // for
-elog    << "chanfix::OnChannelModeO ended in: "
-        << OnChannelModeOTimer.stopTimeMS()
-        << "ms (processed "
-	<< theTargets.size()
-	<< " users "
-	<< (OnChannelModeOTimer.stopTimeMS() / theTargets.size())
-	<< " users per ms)"
-        << std::endl;
-
 }
 
 /* OnEvent */
@@ -1081,15 +1067,7 @@ elog	<< "Changed state in: "
 
 sqlChanOp* chanfix::findChanOp(const std::string& channel, const std::string& account)
 {
-/* Start our timer. */
-Timer findChanOpTimer;
-findChanOpTimer.Start();
-
 sqlChanOpsType::iterator ptr = sqlChanOps.find(std::pair<std::string,std::string>(channel, account));
-elog    << "chanfix::findChanOp ended in: "
-        << findChanOpTimer.stopTimeMS()
-        << "ms"
-        << std::endl;
 if (ptr != sqlChanOps.end()) {
   /* elog	<< "chanfix::findChanOp> DEBUG: We've got a winner: "
    *	<< ptr->second->getAccount() << " on " << ptr->second->getChannel() << "!!" << std::endl;
@@ -1102,10 +1080,6 @@ return 0;
 
 sqlChanOp* chanfix::newChanOp(const std::string& channel, const std::string& account)
 {
-/* Start our timer. */
-Timer newChanOpTimer;
-newChanOpTimer.Start();
-
 sqlChanOp* newOp = new (std::nothrow) sqlChanOp(theManager);
 assert( newOp != 0 ) ;
 
@@ -1117,11 +1091,6 @@ newOp->setChannel(channel);
 newOp->setAccount(account);
 newOp->setTimeFirstOpped(currentTime());
 newOp->setTimeLastOpped(currentTime());
-
-elog    << "chanfix::newChanOp ended in: "
-        << newChanOpTimer.stopTimeMS()
-        << "ms"
-        << std::endl;
 
 return newOp;
 }
@@ -1261,10 +1230,6 @@ thisOp->setTimeLastOpped(currentTime()); //Update the time they were last opped
 
 void chanfix::gotOpped(Channel* thisChan, iClient* thisClient)
 {
-/* Start our timer. */
-Timer gotOppedTimer;
-gotOppedTimer.Start();
-
 //Not enough users, forget about it.
 //if (thisChan->size() < minClients) return;
 
@@ -1293,12 +1258,6 @@ if (thisClient->getAccount() != "") {
   clientOpsType* myOps = findMyOps(thisClient);
   myOps->insert(clientOpsType::value_type(thisChan->getName(), thisChan));
   thisClient->setCustomData(this, static_cast< void*>(myOps));
-
-elog    << "chanfix::gotOpped ended in: "
-        << gotOppedTimer.stopTimeMS()
-        << "ms"
-        << std::endl;
-
 } //if
 return;
 }
@@ -1313,10 +1272,6 @@ return true;
 
 bool chanfix::wasOpped(Channel* theChan, iClient* theClient)
 {
-/* Start our timer. */
-Timer wasOppedTimer;
-wasOppedTimer.Start();
-
 clientOpsType* myOps = findMyOps(theClient);
 if (!myOps || myOps->empty())
   return false;
@@ -1324,11 +1279,6 @@ if (!myOps || myOps->empty())
 theClient->setCustomData(this, static_cast< void*>(myOps));
 
 clientOpsType::iterator ptr = myOps->find(theChan->getName());
-
-elog    << "chanfix::wasOpped ended in: "
-        << wasOppedTimer.stopTimeMS()
-        << "ms"
-        << std::endl;
 
 if (ptr != myOps->end())
   return true;
@@ -1943,109 +1893,116 @@ class ClassUpdateDB {
     ClassUpdateDB(chanfix& cf) : cf_(cf) {}
     void operator()() {
 
-elog << "*** [chanfix::updateDB] Updating the SQL database." << std::endl;
-logAdminMessage("Starting to update the SQL database.");
+    elog << "*** [chanfix::updateDB] Updating the SQL database." << std::endl;
+    logAdminMessage("Starting to update the SQL database.");
 
-/* Start our timer */
-Timer updateDBTimer;
-updateDBTimer.Start();
+    /* Start our timer */
+    Timer updateDBTimer;
+    updateDBTimer.Start();
 
-/* Get a connection instance to our backend */
-PgDatabase* cacheCon = theManager->getConnection();
+    /* Get a connection instance to our backend */
+    PgDatabase* cacheCon = theManager->getConnection();
 
-/* Delete the current chanOps table. */
-std::stringstream theDelete;
-theDelete	<< "DELETE FROM chanOps"
+    /* Delete the current chanOps table. */
+    std::stringstream theDelete;
+    theDelete	<< "DELETE FROM chanOps"
 		;
 
-if (!cacheCon->ExecCommandOk(theDelete.str().c_str())) {
-  elog		<< "*** [chanfix::updateDB]: Error deleting current chanOps table: " 
+    if (!cacheCon->ExecCommandOk(theDelete.str().c_str())) {
+      elog	<< "*** [chanfix::updateDB]: Error deleting current chanOps table: " 
 		<< cacheCon->ErrorMessage()
 		<< std::endl;
-  return;
-}
+      return;
+    }
 
-/* Copy the current chanOps to SQL. */
-std::stringstream theCopy;
-theCopy		<< "COPY chanOps FROM stdin"
+    /* Copy the current chanOps to SQL. */
+    std::stringstream theCopy;
+    theCopy	<< "COPY chanOps FROM stdin"
 		;
 
-ExecStatusType status = cacheCon->Exec(theCopy.str().c_str());
-if (PGRES_COPY_IN != status) {
-  elog		<< "*** [chanfix::updateDB]: Error starting copy of chanOps table." 
+    ExecStatusType status = cacheCon->Exec(theCopy.str().c_str());
+    if (PGRES_COPY_IN != status) {
+      elog	<< "*** [chanfix::updateDB]: Error starting copy of chanOps table."
 		<< std::endl;
-  return;
-}
+      return;
+    }
 
-sqlChanOp* curOp;
-std::stringstream theLine;
-unsigned int chanOpsProcessed = 0;
+    sqlChanOp* curOp;
+    std::stringstream theLine;
+    unsigned int chanOpsProcessed = 0;
 
-for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
-     ptr != sqlChanOps.end(); ptr++) {
-  curOp = ptr->second;
-  theLine.str("");
-  theLine	<< escapeSQLChars(curOp->getChannel()).c_str() << "\t"
+    for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
+	 ptr != sqlChanOps.end(); ptr++) {
+      curOp = ptr->second;
+      theLine.str("");
+      theLine	<< escapeSQLChars(curOp->getChannel()).c_str() << "\t"
 		<< escapeSQLChars(curOp->getAccount()).c_str() << "\t"
 		<< escapeSQLChars(curOp->getLastSeenAs()).c_str() << "\t"
 		<< curOp->getTimeFirstOpped() << "\t"
 		<< curOp->getTimeLastOpped()
 		;
 
-  int i;
-  for (i = 0; i < DAYSAMPLES; i++) {
-    theLine	<< "\t" << curOp->getDay(i)
+      int i;
+      for (i = 0; i < DAYSAMPLES; i++) {
+        theLine	<< "\t" << curOp->getDay(i)
 		;
-  }
+      }
 
-  theLine	<< "\n"
-		;
-
-  cacheCon->PutLine(theLine.str().c_str());
-  chanOpsProcessed++;
-}
-
-/* Send completion string for the end of the data. */
-cacheCon->PutLine("\\.\n");
-
-/* Synchronize with the backend. */
-/* Returns 0 on success, 1 on failure */
-int copyStatus = cacheCon->EndCopy();
-if (copyStatus != 0) {
-  elog	<< "*** [chanfix::updateDB] Error ending copy! Returned: "
-	<< copyStatus << " instead."
-	<< std::endl;
-  return;
-}
-
-/* // I'll fix this later
-std::stringstream theCount;
-theCount	<< "SELECT * FROM chanOps"
+      theLine	<< "\n"
 		;
 
-unsigned int = cacheCon->
-if (actualChanOpsProcessed != chanOpsProcessed) {
-  elog	<< "*** [chanfix::updateDB] Error updating chanOps! "
-	<< "Only " << actualChanOpsProcessed << " of "
-	<< chanOpsProcessed << " chanops were copied to the SQL database."
-	<< std::endl;
-  logAdminMessage("ERROR: Only %d of %d chanops were updated in %u ms.",
-		  actualChanOpsProcessed, chanOpsProcessed,
-		  updateDBTimer.stopTimeMS());
-} else {
-*/
-  elog	<< "*** [chanfix::updateDB]: Done. Copied "
-	<< chanOpsProcessed
-	<< " chanops to the SQL database."
-	<< std::endl;
-  logAdminMessage("Synched %d users to the SQL database in %u ms.",
-		  chanOpsProcessed, updateDBTimer.stopTimeMS());
-/* } */
+      cacheCon->PutLine(theLine.str().c_str());
+      chanOpsProcessed++;
+    }
 
-/* Dispose of our connection instance */
-theManager->removeConnection(cacheCon);
+    /* Send completion string for the end of the data. */
+    cacheCon->PutLine("\\.\n");
 
-return;
+    /**
+     * Synchronize with the backend.
+     * Returns 0 on success, 1 on failure
+     */
+    int copyStatus = cacheCon->EndCopy();
+    if (copyStatus != 0) {
+      elog	<< "*** [chanfix::updateDB] Error ending copy! Returned "
+	<< copyStatus << " instead (should be 0 for success)."
+	<< std::endl;
+      return;
+    }
+
+    std::stringstream theCount;
+    theCount	<< "SELECT count(*) FROM chanOps"
+		;
+
+    if (!cacheCon->ExecTuplesOk(theCount.str().c_str())) {
+      elog	<< "*** [chanfix::updateDB]: Error counting rows in chanOps table: " 
+		<< cacheCon->ErrorMessage()
+		<< std::endl;
+      return;
+    }
+
+    unsigned int actualChanOpsProcessed = cacheCon->Tuples();
+    if (actualChanOpsProcessed != chanOpsProcessed) {
+      elog	<< "*** [chanfix::updateDB] Error updating chanOps! "
+		<< "Only " << actualChanOpsProcessed << " of "
+		<< chanOpsProcessed << " chanops were copied to the SQL database."
+		<< std::endl;
+      logAdminMessage("ERROR: Only %d of %d chanops were updated in %u ms.",
+		      actualChanOpsProcessed, chanOpsProcessed,
+		      updateDBTimer.stopTimeMS());
+    } else {
+      elog	<< "*** [chanfix::updateDB]: Done. Copied "
+		<< actualChanOpsProcessed
+		<< " chanops to the SQL database."
+		<< std::endl;
+      logAdminMessage("Synched %d users to the SQL database in %u ms.",
+		      actualChanOpsProcessed, updateDBTimer.stopTimeMS());
+    }
+
+    /* Dispose of our connection instance */
+    theManager->removeConnection(cacheCon);
+
+    return;
 
 private:
         chanfix& cf_;

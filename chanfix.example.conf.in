@@ -89,9 +89,6 @@ minClients = 4
 # Client needs to be idented (no ~ before username)
 clientNeedsIdent = true
 
-# Client needs to have a reversed hostname
-clientNeedsReverse = false
-
 # ---------------------------------------------------------------------
 # Miscellaneous settings
 
