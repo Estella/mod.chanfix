@@ -255,6 +255,11 @@ RegisterCommand(new UNSUSPENDCommand(this, "UNSUSPEND",
 	2,
 	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
 	));
+RegisterCommand(new UPDATECommand(this, "UPDATE",
+	"",
+	1,
+	sqlUser::F_OWNER
+	));
 RegisterCommand(new USETCommand(this, "USET",
 	"[username] <option> <value>",
 	3,
