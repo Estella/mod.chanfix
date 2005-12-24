@@ -147,7 +147,7 @@ COPY "translations" FROM stdin;
 1	137	List of all users:	31337	0
 1	138	User: %s, Flags: %s, Group: %s	31337	0
 1	139	End of user list.	31337	0
-1	140	User: %s	31337	0
+1	140	--SUSPENDED--	31337	0
 1	141	Hosts: %s	31337	0
 1	142	Group: %s	31337	0
 1	143	Flags: none.	31337	0
@@ -162,4 +162,5 @@ COPY "translations" FROM stdin;
 1	152	This command requires authentication and flag \'%c\'.	31337	0
 1	153	This command requires authentication and one of these flags: \"%s\".	31337	0
 1	154	SYNTAX: 	31337	0
+1	155	Language: %s (%s)	31337	0
 \.

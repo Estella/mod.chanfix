@@ -84,9 +84,9 @@ std::stringstream userCommit;
 userCommit	<< "UPDATE users SET "
 		<< "last_seen = " << last_seen << ", "
 		<< "last_updated = " << last_updated << ", "
-		<< "last_updated_by = '" << last_updated_by << "', "
+		<< "last_updated_by = '" << escapeSQLChars(last_updated_by) << "', "
 		<< "language_id = " << language_id << ", "
-		<< "faction = '" << group << "', "
+		<< "faction = '" << escapeSQLChars(group) << "', "
 		<< "flags = " << flags << ", "
 		<< "issuspended = " << (isSuspended ? "'t'" : "'f'") << ", "
 		<< "usenotice = " << (useNotice ? "'t'" : "'f'") << ", "
@@ -115,7 +115,7 @@ insertString	<< "INSERT INTO users "
 		<< "VALUES "
 		<< "("
 		<< id << ", "
-		<< "'" << user_name << "'"
+		<< "'" << escapeSQLChars(user_name) << "'"
 		<< ")"
 		;
 
@@ -170,7 +170,7 @@ insertString    << "INSERT INTO hosts "
                 << "("
                 << id
                 << ", '"
-                << _theHost.c_str()
+                << escapeSQLChars(_theHost).c_str()
                 << "')"
                 ;
 myManager->queueCommit(insertString.str());
@@ -187,7 +187,7 @@ deleteString	<< "DELETE FROM hosts "
 		<< "WHERE user_id = "
 		<< id
 		<< " AND lower(host) = '"
-		<< string_lower(_theHost.c_str())
+		<< escapeSQLChars(string_lower(_theHost)).c_str()
 		<< "'"
 		;
 myManager->queueCommit(deleteString.str());

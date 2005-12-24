@@ -35,9 +35,6 @@
 #include	<string>
 #include	<utility>
 #include	<vector>
-#include	<boost/thread/thread.hpp>
-#include	<boost/bind.hpp>
-#include	<boost/shared_ptr.hpp>
 
 #include	"libpq++.h"
 
@@ -95,7 +92,7 @@ currentState = INIT;
 std::string dbString = "host=" + sqlHost + " dbname=" + sqlDB
   + " port=" + sqlPort + " user=" + sqlUsername + " password=" + sqlPass;
 
-theManager = sqlManager::getInstance(dbString, commitCount);
+theManager = sqlManager::getInstance(dbString, commitQueueMax, commitTimeMax);
 
 /* Register the commands we want to use */
 RegisterCommand(new ADDFLAGCommand(this, "ADDFLAG",
@@ -329,10 +326,8 @@ numTopScores = atoi((chanfixConfig->Require("numTopScores")->second).c_str()) ;
 minClients = atoi((chanfixConfig->Require("minClients")->second).c_str()) ;
 clientNeedsIdent = atob(chanfixConfig->Require("clientNeedsIdent")->second) ;
 connectCheckFreq = atoi((chanfixConfig->Require("connectCheckFreq")->second).c_str()) ;
-updatesPerCycle = atoi((chanfixConfig->Require("updatesPerCycle")->second).c_str());
-updateCycleInterval = atoi((chanfixConfig->Require("updateCycleInterval")->second).c_str());
-commitFreq = atoi(chanfixConfig->Require("commitFreq")->second.c_str());
-commitCount = atoi(chanfixConfig->Require("commitCount")->second.c_str());
+commitTimeMax = atoi((chanfixConfig->Require("commitTimeMax")->second).c_str()) ;
+commitQueueMax = atoi((chanfixConfig->Require("commitQueueMax")->second).c_str()) ;
 
 /* Database processing */
 sqlHost = chanfixConfig->Require("sqlHost")->second;
@@ -399,126 +394,6 @@ MyUplink->RegisterChannelEvent( xServer::CHANNEL_ALL, this );
 xClient::OnAttach() ;
 }
 
-class ClassUpdateDB {
-  public:
-    ClassUpdateDB(chanfix& cf) : cf_(cf) {}
-    void operator()() {
-
-    elog << "*** [chanfix::updateDB] Updating the SQL database." << std::endl;
-    cf_.logAdminMessage("Starting to update the SQL database.");
-
-    /* Start our timer */
-    Timer updateDBTimer;
-    updateDBTimer.Start();
-
-    /* Get a connection instance to our backend */
-    PgDatabase* cacheCon = cf_.theManager->getConnection();
-
-    /* Delete the current chanOps table. */
-    std::stringstream theDelete;
-    theDelete	<< "DELETE FROM chanOps"
-		;
-
-    if (!cacheCon->ExecCommandOk(theDelete.str().c_str())) {
-      elog	<< "*** [chanfix::updateDB]: Error deleting current chanOps table: " 
-		<< cacheCon->ErrorMessage()
-		<< std::endl;
-      return;
-    }
-
-    /* Copy the current chanOps to SQL. */
-    std::stringstream theCopy;
-    theCopy	<< "COPY chanOps FROM stdin"
-		;
-
-    ExecStatusType status = cacheCon->Exec(theCopy.str().c_str());
-    if (PGRES_COPY_IN != status) {
-      elog	<< "*** [chanfix::updateDB]: Error starting copy of chanOps table."
-		<< std::endl;
-      return;
-    }
-
-    sqlChanOp* curOp;
-    std::stringstream theLine;
-    unsigned int chanOpsProcessed = 0;
-
-    for (cf_.sqlChanOpsType::iterator ptr = cf_.sqlChanOps.begin(); ptr != cf_.sqlChanOps.end(); ptr++) {
-      curOp = ptr->second;
-      theLine.str("");
-      theLine	<< escapeSQLChars(curOp->getChannel()).c_str() << "\t"
-		<< escapeSQLChars(curOp->getAccount()).c_str() << "\t"
-		<< escapeSQLChars(curOp->getLastSeenAs()).c_str() << "\t"
-		<< curOp->getTimeFirstOpped() << "\t"
-		<< curOp->getTimeLastOpped()
-		;
-
-      int i;
-      for (i = 0; i < DAYSAMPLES; i++) {
-        theLine	<< "\t" << curOp->getDay(i)
-		;
-      }
-
-      theLine	<< "\n"
-		;
-
-      cacheCon->PutLine(theLine.str().c_str());
-      chanOpsProcessed++;
-    }
-
-    /* Send completion string for the end of the data. */
-    cacheCon->PutLine("\\.\n");
-
-    /**
-     * Synchronize with the backend.
-     * Returns 0 on success, 1 on failure
-     */
-    int copyStatus = cacheCon->EndCopy();
-    if (copyStatus != 0) {
-      elog	<< "*** [chanfix::updateDB] Error ending copy! Returned "
-	<< copyStatus << " instead (should be 0 for success)."
-	<< std::endl;
-      return;
-    }
-
-    std::stringstream theCount;
-    theCount	<< "SELECT count(*) FROM chanOps"
-		;
-
-    if (!cacheCon->ExecTuplesOk(theCount.str().c_str())) {
-      elog	<< "*** [chanfix::updateDB]: Error counting rows in chanOps table: " 
-		<< cacheCon->ErrorMessage()
-		<< std::endl;
-      return;
-    }
-
-    unsigned int actualChanOpsProcessed = cacheCon->Tuples();
-    if (actualChanOpsProcessed != chanOpsProcessed) {
-      elog	<< "*** [chanfix::updateDB] Error updating chanOps! "
-		<< "Only " << actualChanOpsProcessed << " of "
-		<< chanOpsProcessed << " chanops were copied to the SQL database."
-		<< std::endl;
-      cf_.logAdminMessage("ERROR: Only %d of %d chanops were updated in %u ms.",
-		      actualChanOpsProcessed, chanOpsProcessed,
-		      updateDBTimer.stopTimeMS());
-    } else {
-      elog	<< "*** [chanfix::updateDB]: Done. Copied "
-		<< actualChanOpsProcessed
-		<< " chanops to the SQL database."
-		<< std::endl;
-      cf_.logAdminMessage("Synched %d users to the SQL database in %u ms.",
-		      actualChanOpsProcessed, updateDBTimer.stopTimeMS());
-    }
-
-    /* Dispose of our connection instance */
-    cf_.theManager->removeConnection(cacheCon);
-
-    return;
-  }
-
-private:
-        chanfix& cf_;
-};
-
 /* OnTimer */
 void chanfix::OnTimer(const gnuworld::xServer::timerID& theTimer, void*)
 {
@@ -561,9 +436,8 @@ else if (theTimer == tidRotateDB) {
   tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
 }
 else if (theTimer == tidUpdateDB) {
-  ClassUpdateDB updateDB(*this);
-  boost::thread pthrd(updateDB);
-  
+  updateDB();
+
   /* Refresh Timer */
   theTime = time(NULL) + SQL_UPDATE_TIME;
   tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
@@ -1738,7 +1612,7 @@ newChan->setLastAttempt(0);
 newChan->Insert();
 
 sqlChanCache.insert(sqlChannelCacheType::value_type(Channel, newChan));
-elog << "chanfix::getChannelRecord> DEBUG: Added new channel: " << Channel << std::endl;
+elog << "chanfix::newChannelRecord> DEBUG: Added new channel: " << Channel << std::endl;
 
 return newChan;
 }
@@ -1991,7 +1865,8 @@ return myOps;
  */
 void chanfix::startTimers()
 {
-time_t theTime = time(NULL) + connectCheckFreq;
+time_t theTime;
+theTime = time(NULL) + connectCheckFreq;
 tidCheckDB = MyUplink->RegisterTimer(theTime, this, NULL);
 theTime = time(NULL) + CHECK_CHANS_TIME;
 tidAutoFix = MyUplink->RegisterTimer(theTime, this, NULL);
@@ -2007,6 +1882,108 @@ elog	<< "chanfix::startTimers> Started all timers."
 	<< std::endl;
 }
 
+void chanfix::updateDB()
+{
+  elog << "*** [chanfix::updateDB] Updating the SQL database." << std::endl;
+  logAdminMessage("Starting to update the SQL database.");
+
+  /* Start our timer */
+  Timer updateDBTimer;
+  updateDBTimer.Start();
+
+  /* Get a connection instance to our backend */
+  PgDatabase* cacheCon = theManager->getConnection();
+
+  /* Delete the current chanOps table. */
+  if (!cacheCon->ExecCommandOk("DELETE FROM chanOps")) {
+    elog	<< "*** [chanfix::updateDB]: Error deleting current chanOps table: " 
+		<< cacheCon->ErrorMessage()
+		<< std::endl;
+    return;
+  }
+
+  /* Copy the current chanOps to SQL. */
+  ExecStatusType status = cacheCon->Exec("COPY chanOps FROM stdin");
+  if (PGRES_COPY_IN != status) {
+    elog	<< "*** [chanfix::updateDB]: Error starting copy of chanOps table."
+		<< std::endl;
+    return;
+  }
+
+  sqlChanOp* curOp;
+  std::stringstream theLine;
+  int chanOpsProcessed = 0;
+
+  for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
+       ptr != sqlChanOps.end(); ptr++) {
+    curOp = ptr->second;
+    theLine.str("");
+    theLine	<< escapeSQLChars(curOp->getChannel()).c_str() << "\t"
+		<< escapeSQLChars(curOp->getAccount()).c_str() << "\t"
+		<< escapeSQLChars(curOp->getLastSeenAs()).c_str() << "\t"
+		<< curOp->getTimeFirstOpped() << "\t"
+		<< curOp->getTimeLastOpped()
+		;
+
+    int i;
+    for (i = 0; i < DAYSAMPLES; i++) {
+      theLine	<< "\t" << curOp->getDay(i)
+		;
+    }
+
+    theLine	<< "\n"
+		;
+
+    cacheCon->PutLine(theLine.str().c_str());
+    chanOpsProcessed++;
+  }
+
+  /* Send completion string for the end of the data. */
+  cacheCon->PutLine("\\.\n");
+
+  /**
+   * Synchronize with the backend.
+   * Returns 0 on success, 1 on failure
+   */
+  int copyStatus = cacheCon->EndCopy();
+  if (copyStatus != 0) {
+    elog	<< "*** [chanfix::updateDB] Error ending copy! Returned "
+		<< copyStatus << " instead (should be 0 for success)."
+		<< std::endl;
+    return;
+  }
+
+  /* Count the rows to see if the cache == number of rows in table. */
+  if (!cacheCon->ExecTuplesOk("SELECT count(*) FROM chanOps")) {
+    elog	<< "*** [chanfix::updateDB]: Error counting rows in chanOps table: " 
+		<< cacheCon->ErrorMessage()
+		<< std::endl;
+    return;
+  }
+
+  int actualChanOpsProcessed = atoi(cacheCon->GetValue(0, 0));
+  if (actualChanOpsProcessed != chanOpsProcessed) {
+    elog	<< "*** [chanfix::updateDB] Error updating chanOps! "
+		<< "Only " << actualChanOpsProcessed << " of "
+		<< chanOpsProcessed << " chanops were copied to the SQL database."
+		<< std::endl;
+    logAdminMessage("ERROR: Only %d of %d chanops were updated in %u ms.",
+		    actualChanOpsProcessed, chanOpsProcessed,
+		    updateDBTimer.stopTimeMS());
+  } else {
+    elog	<< "*** [chanfix::updateDB]: Done. Copied "
+		<< actualChanOpsProcessed
+		<< " chanops to the SQL database."
+		<< std::endl;
+    logAdminMessage("Synched %d users to the SQL database in %u ms.",
+		    actualChanOpsProcessed, updateDBTimer.stopTimeMS());
+  }
+
+  /* Dispose of our connection instance */
+  theManager->removeConnection(cacheCon);
+
+  return;
+}
 
 void chanfix::rotateDB()
 {

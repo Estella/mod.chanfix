@@ -32,7 +32,7 @@
 
 namespace gnuworld {
 
-/* Initialise our static data members */
+/* Initialize our static data members */
 sqlManager* sqlManager::theManager = 0;
 
 /*********************************
@@ -45,13 +45,13 @@ sqlManager* sqlManager::theManager = 0;
  * initialise must be called prior to attempted to obtain an instance.
  * This method is static.
  */
-sqlManager* sqlManager::getInstance(const std::string& _dbString, int _commitQueueMax)
+sqlManager* sqlManager::getInstance(const std::string& _dbString, int _commitQueueMax, int _commitTimeMax)
 {
 if(theManager) return theManager;
 
 /* There is currently no sqlManager instance */
-return new sqlManager(_dbString, _commitQueueMax);
-} // static sqlManager* sqlManager::getInstance(const std::string&)
+return new sqlManager(_dbString, _commitQueueMax, _commitTimeMax);
+} // static sqlManager* sqlManager::getInstance(const std::string&, int, int)
 
 
 
@@ -134,9 +134,13 @@ void sqlManager::queueCommit(const std::string& theStatement)
 {
   commitQueue.push_back(theStatement);
 
-  if(commitQueue.size() >= commitQueueMax) {
+  unsigned int now = time(NULL);
+
+  if ((commitQueue.size() >= commitQueueMax)
+      || (lastQueued >= now + commitTimeMax))
     flush();
-  }
+
+  lastQueued = now;
 }
 
 
@@ -147,14 +151,15 @@ void sqlManager::queueCommit(const std::string& theStatement)
 /**
  * This is our constructor that initialises DB communications
  * and any of the queues that will be used
- * It is only ever called from initialise()
+ * It is only ever called from initialize()
  */
-sqlManager::sqlManager(const std::string& _dbString, int _commitQueueMax)
+sqlManager::sqlManager(const std::string& _dbString, int _commitQueueMax, int _commitTimeMax)
 {
 /* Construct our DB object and initialise queues */
 dbString = _dbString;
 SQLDb = getConnection();
 commitQueueMax = _commitQueueMax;
+commitTimeMax = _commitTimeMax;
 } // sqlManager::sqlManager
 
 

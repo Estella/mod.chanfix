@@ -37,7 +37,7 @@ class sqlManager {
      * Implement sqlManager as a singleton
      * Only way to get a reference to the manager is through this method
      */
-    static sqlManager* getInstance(const std::string&, int);
+    static sqlManager* getInstance(const std::string&, int, int);
 
     /** Allow checking out of database connections */
     PgDatabase* getConnection();
@@ -57,7 +57,7 @@ class sqlManager {
      * through getInstance()
      * @see #getInstance
      */
-    sqlManager(const std::string&, int);
+    sqlManager(const std::string&, int, int);
 
     /**
      * Disable the default destructor so that other objects cannot destruct
@@ -81,7 +81,13 @@ class sqlManager {
     commitQueueType commitQueue;
 
     /** Max commit queue size before autocommit */
-    unsigned long int commitQueueMax;
+    unsigned int commitQueueMax;
+
+    /** Max time passed before autocommit */
+    unsigned int commitTimeMax;
+
+    /** Time of last addition to queue */
+    unsigned int lastQueued;
 
     /** The current instance of sqlManager */
     static sqlManager* theManager;

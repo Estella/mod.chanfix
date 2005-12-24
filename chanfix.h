@@ -217,6 +217,7 @@ public:
 	time_t getSecsTilMidnight() { return 86400 - (currentTime() % 86400); }
 
 	void updatePoints();
+	void giveAllOpsPoints();
 
 	void givePoints(Channel*, iClient*);
 	void gotOpped(Channel*, iClient*);
@@ -226,7 +227,6 @@ public:
 	bool hasIdent(iClient*);
 
 	void checkNetwork();
-	void chanfix::giveAllOpsPoints();
 
 	void autoFix();
 	void manualFix(Channel*);
@@ -388,12 +388,9 @@ public:
 	unsigned int	numTopScores;
 	unsigned int	minClients;
 	bool		clientNeedsIdent;
-	bool		clientNeedsReverse;
 	unsigned int	connectCheckFreq;
-	unsigned int	updatesPerCycle;
-	unsigned int	updateCycleInterval;
-	unsigned int	commitCount;
-	unsigned int	commitFreq;
+	unsigned int	commitTimeMax;
+	unsigned int	commitQueueMax;
 	std::string	sqlHost;
 	std::string	sqlPort;
 	std::string	sqlUsername;

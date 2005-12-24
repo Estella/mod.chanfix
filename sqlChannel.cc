@@ -38,7 +38,7 @@ namespace gnuworld
 const sqlChannel::flagType sqlChannel::F_BLOCKED	= 0x00000001 ;
 const sqlChannel::flagType sqlChannel::F_ALERT		= 0x00000002 ;
 
-const int sqlChannel::EV_MISC		= 1 ; /* Uncategorised event */
+const int sqlChannel::EV_MISC		= 1 ; /* Uncategorized event */
 const int sqlChannel::EV_NOTE		= 2 ; /* Miscellaneous notes */
 const int sqlChannel::EV_CHANFIX	= 3 ; /* Manual chanfixes */
 const int sqlChannel::EV_BLOCK		= 4 ; /* Channel block */
@@ -71,10 +71,6 @@ void sqlChannel::setAllMembers(PgDatabase* theDB, int row)
 
 /**
  * This function inserts a brand new channel into the DB.
- * It is a slight fudge, in that it first creates a blank record then
- * calls commit() to update the data fields for that record. This is done
- * so that any new fields added will automatically be dealt with in commit()
- * instead of in 50 different functions.
  */
 void sqlChannel::Insert()
 {
@@ -83,16 +79,16 @@ id = ++maxUserId;
 
 std::stringstream insertString;
 insertString    << "INSERT INTO channels "
-                << "(id, channel) "
+                << "(id, channel, flags) "
                 << "VALUES "
                 << "("
                 << id << ", "
-		<< "'" << escapeSQLChars(channel) << "',"
+		<< "'" << escapeSQLChars(channel) << "', "
+		<< flags
 		<< ")"
 		;
 
 myManager->queueCommit(insertString.str());
-commit();
 } // sqlChannel::Insert()
 
 void sqlChannel::Delete()
@@ -243,24 +239,19 @@ PgDatabase* cacheCon = myManager->getConnection();
 
 /* Count the notes */
 std::stringstream queryString;
-if (eventType) {
 queryString	<< "SELECT count(id) FROM notes WHERE channelID = "
 		<< id
-		<< " AND event = "
-		<< eventType
 		;
-} else {
-queryString	<< "SELECT count(id) FROM notes WHERE channelID = "
-		<< id
+if (eventType) {
+queryString	<< " AND event = "
+		<< eventType
 		;
 }
 
 size_t num_notes = 0;
 
-if (cacheCon->ExecTuplesOk(queryString.str().c_str())) {
-  if (cacheCon->Tuples() > 1)
-    num_notes = atoi(cacheCon->GetValue(0, 0));
-}
+if (cacheCon->ExecTuplesOk(queryString.str().c_str()))
+  num_notes = atoi(cacheCon->GetValue(0, 0));
 
 /* Dispose of our connection instance */
 myManager->removeConnection(cacheCon);

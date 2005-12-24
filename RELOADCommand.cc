@@ -51,6 +51,7 @@ bot->logAdminMessage("%s (%s) is reloading the chanfix module.",
 
 /* Let's save our database. */
 bot->theManager->flush();
+bot->updateDB();
 
 if (st.size() < 2) {
   server->UnloadClient(bot, "Reloading...");

@@ -229,11 +229,12 @@ namespace gnuworld
 		const int list_of_all_users		= 137;
 		const int user_flags_group		= 138;
 		const int end_of_user_list		= 139;
-		const int whois_user			= 140;
+		const int whois_suspended		= 140;
 		const int whois_hosts			= 141;
 		const int whois_group			= 142;
 		const int whois_flags_none		= 143;
 		const int whois_flags			= 144;
+		const int whois_lang			= 155;
 
 		/* chanfix.cc */
 		const int no_commands_during_burst	= 145;

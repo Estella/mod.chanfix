@@ -70,14 +70,19 @@ if (!theUser2)
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::no_such_user,
-                              std::string("No such user %s.")).c_str(),st[1].c_str());
+                              std::string("No such user %s.")).c_str(),
+			      st[1].c_str());
   return;
 }
 
-bot->SendTo(theClient,
-            bot->getResponse(theUser,
-                            language::whois_user,
-                            std::string("User: %s")).c_str(), theUser2->getUserName().c_str());
+bot->SendTo(theClient, "*** \002%s\002 ***", theUser2->getUserName().c_str()); 
+
+if (theUser2->getIsSuspended())
+  bot->SendTo(theClient,
+	      bot->getResponse(theUser,
+			       language::whois_suspended,
+			       std::string("--SUSPENDED--")).c_str());
+
 if (!theUser2->getFlags())
   bot->SendTo(theClient,
               bot->getResponse(theUser,
@@ -106,12 +111,38 @@ if (hostlist.str() == "") hostlist << "None.";
 bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::whois_hosts,
-                            std::string("Hosts: %s")).c_str(), hostlist.str().c_str());
+                            std::string("Hosts: %s")).c_str(),
+			    hostlist.str().c_str());
 bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::whois_group,
-                            std::string("Group: %s")).c_str(), theUser2->getGroup().c_str());
+                            std::string("Group: %s")).c_str(),
+			    theUser2->getGroup().c_str());
+
+std::string langName = "Unknown";
+std::string langCode = "UN";
+for( chanfix::languageTableType::iterator ptr = bot->languageTable.begin() ;
+  ptr != bot->languageTable.end() ; ++ptr )
+  {
+	if ((unsigned int)ptr->second.first == theUser2->getLanguageId())
+	{
+	  langName = ptr->second.second;
+	  langCode = ptr->first;
+	  break;
+	}
+}
+
+bot->SendTo(theClient,
+	    bot->getResponse(theUser,
+			    language::whois_lang,
+			    std::string("Language: %s (%s)")).c_str(),
+			    langName.c_str(), langCode.c_str());
+
+if (theUser2->getNeedOper())
+  bot->SendTo(theClient, "NeedOper: Yes");
+else
+  bot->SendTo(theClient, "NeedOper: No");
 
 return;
-} //whoiscommand::exec
+} //WHOISCommand::Exec
 } //namespace gnuworld

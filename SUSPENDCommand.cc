@@ -49,6 +49,12 @@ if (!targetUser) {
   return;
 }
 
+/* TODO: This needs a language reply. */
+if (theUser == targetUser) {
+  bot->SendTo(theClient, "Suspending yourself is not a very wise thing to do.");
+  return;
+}
+
 /* A serveradmin can only suspend users in his/her own group. */
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
     !theUser->getFlag(sqlUser::F_USERMANAGER)) {

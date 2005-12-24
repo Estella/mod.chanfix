@@ -105,9 +105,6 @@ if (myOps.empty()) {
   return;
 }
 
-sqlChannel* theChan = bot->getChannelRecord(st[1]);
-if (!theChan) theChan = bot->newChannelRecord(st[1]);
-
 /* Don't fix a channel being chanfixed. */
 if (bot->isBeingChanFixed(netChan)) {
   bot->SendTo(theClient,
@@ -117,6 +114,9 @@ if (bot->isBeingChanFixed(netChan)) {
                                           netChan->getName().c_str());
   return;
 }
+
+sqlChannel* theChan = bot->getChannelRecord(st[1]);
+if (!theChan) theChan = bot->newChannelRecord(st[1]);
 
 /* Check if the highest score is high enough for a fix. */
 if (myOps.begin() != myOps.end())
@@ -185,7 +185,7 @@ bot->SendTo(theClient,
                             language::manual_chanfix_ack,
                             std::string("Manual chanfix acknowledged for %s")).c_str(),
                                         netChan->getName().c_str());
-bot->logAdminMessage("%s (%s) requested manual fix for %s",
+bot->logAdminMessage("%s (%s) requested a manual fix for %s",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str(),
 		     netChan->getName().c_str());
