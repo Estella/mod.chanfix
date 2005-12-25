@@ -155,11 +155,12 @@ namespace gnuworld
 		const int reloading_client		= 88;
 
 		/* SCORE */
-		const int score_for_channel		= 89;
+		const int score_for_channel_nick	= 89;
+		const int score_for_channel_account	= 158;
 		const int compact_no_such_nick		= 90;
 		const int no_such_nick			= 91;
-		const int compact_no_such_account	= 155;
-		const int no_such_account		= 156;
+		const int compact_no_such_account	= 156;
+		const int no_such_account		= 157;
 		const int score_none			= 92;
 		const int top_scores_for_chan		= 93;
 		const int top_scores_for_ops		= 94;

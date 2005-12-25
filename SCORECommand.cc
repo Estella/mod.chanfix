@@ -101,18 +101,10 @@ if (st.size() > 2) {
 	if (compact)
 	  bot->SendTo(theClient, "~U %s %s %u", netChan->getName().c_str(), curOp->getAccount().c_str(), curOp->getPoints());
 	else
-         /* bot->SendTo(theClient,
-                      bot->getResponse(theUser,
-                                      language::score_for_channel,
-                                      std::string("Score for %s in channel %s: %u.")).c_str(),
-                                                  curOp->getAccount().c_str(), netChan->getName().c_str(),
-                                                  curOp->getPoints());
-	*/
 	  bot->SendTo(theClient,
 		bot->getResponse(theUser,
-			language::score_for_channel,
-			std::string("Score for %s (%s) in channel %s: %u.")).c_str(),
-				curOp->getAccount().c_str(),
+			language::score_for_channel_account,
+			std::string("Score for account %s in channel %s: %u.")).c_str(),
 				curOp->getAccount().c_str(),
 				netChan->getName().c_str(),
 				curOp->getPoints());
@@ -184,7 +176,7 @@ if (st.size() > 2) {
 	  } else {
             bot->SendTo(theClient,
                         bot->getResponse(theUser,
-                                        language::score_for_channel,
+                                        language::score_for_channel_nick,
                                         std::string("Score for %s (%s) in channel %s: %u.")).c_str(),
                                                     curClientOp->getNickName().c_str(),
                                                     curOp->getAccount().c_str(),

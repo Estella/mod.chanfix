@@ -163,4 +163,7 @@ COPY "translations" FROM stdin;
 1	153	This command requires authentication and one of these flags: \"%s\".	31337	0
 1	154	SYNTAX: 	31337	0
 1	155	Language: %s (%s)	31337	0
+1	156	~U %s no@such.account 0	31337	0
+1	157	No such account %s.	31337	0
+1	158	Score for account %s in channel %s: %u.	31337	0
 \.
