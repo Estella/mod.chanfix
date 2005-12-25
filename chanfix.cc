@@ -4,6 +4,7 @@
  * Copyright (C) 2003	Reed Loden <reed@reedloden.com>
  *			Matthias Crauwels <ultimate_@wol.be>
  *			Jimmy Lipham <music0m@alltel.net>
+ *			Neil Spierling <sirvulcan@gmail.com>
  *
  * Automatically and manually fix opless and taken over channels
  *
@@ -35,6 +36,7 @@
 #include	<string>
 #include	<utility>
 #include	<vector>
+#include	<boost/thread/thread.hpp>
 
 #include	"libpq++.h"
 
@@ -394,6 +396,23 @@ MyUplink->RegisterChannelEvent( xServer::CHANNEL_ALL, this );
 xClient::OnAttach() ;
 }
 
+
+/**
+ * Thread class only used for score updates, updates on reload and shutdown are not threaded
+ */
+class ClassUpdateDB {
+  public:
+    ClassUpdateDB(chanfix& cf) : cf_(cf) {}
+    void operator()() {
+      cf_.updateDB(1);
+      return;
+    }
+
+private:
+        chanfix& cf_;
+};
+
+
 /* OnTimer */
 void chanfix::OnTimer(const gnuworld::xServer::timerID& theTimer, void*)
 {
@@ -436,7 +455,8 @@ else if (theTimer == tidRotateDB) {
   tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
 }
 else if (theTimer == tidUpdateDB) {
-  updateDB();
+  ClassUpdateDB updateDB(*this);
+  boost::thread pthrd(updateDB);
 
   /* Refresh Timer */
   theTime = time(NULL) + SQL_UPDATE_TIME;
@@ -1882,9 +1902,13 @@ elog	<< "chanfix::startTimers> Started all timers."
 	<< std::endl;
 }
 
-void chanfix::updateDB()
+/**
+ * Note: Only threaded if called via the ClassUpdateDB function with boost::thread
+ */
+void chanfix::updateDB(int threaded)
 {
-  elog << "*** [chanfix::updateDB] Updating the SQL database." << std::endl;
+  elog << "*** [chanfix::updateDB] Updating the SQL database " << (threaded ? "(threaded)." : "(unthreaded).")
+								 << std::endl;
   logAdminMessage("Starting to update the SQL database.");
 
   /* Start our timer */

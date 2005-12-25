@@ -41,7 +41,7 @@ void UPDATECommand::Exec(iClient* theClient, sqlUser* theUser, const std::string
 bot->logAdminMessage("%s (%s) ordered a manual DB update.",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str());
-bot->updateDB();
+bot->updateDB(0);
 return;
 }
 

@@ -52,7 +52,7 @@ bot->logAdminMessage("%s (%s) is shutting me down.",
 
 /* Let's save our database. */
 bot->theManager->flush();
-bot->updateDB();
+bot->updateDB(0);
 
 if (st.size() < 2) {
   server->UnloadClient(bot, "Quit");
