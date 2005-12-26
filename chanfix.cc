@@ -1905,7 +1905,7 @@ elog	<< "chanfix::startTimers> Started all timers."
 /**
  * Note: Only threaded if called via the ClassUpdateDB function with boost::thread
  */
-void chanfix::updateDB(int threaded)
+void chanfix::updateDB(bool threaded)
 {
   elog << "*** [chanfix::updateDB] Updating the SQL database " << (threaded ? "(threaded)." : "(unthreaded).")
 								 << std::endl;
@@ -1999,7 +1999,7 @@ void chanfix::updateDB(int threaded)
 		<< actualChanOpsProcessed
 		<< " chanops to the SQL database."
 		<< std::endl;
-    logAdminMessage("Synched %d users to the SQL database in %u ms.",
+    logAdminMessage("Synched %d members to the SQL database in %u ms.",
 		    actualChanOpsProcessed, updateDBTimer.stopTimeMS());
   }
 
