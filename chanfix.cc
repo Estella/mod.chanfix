@@ -412,6 +412,18 @@ private:
         chanfix& cf_;
 };
 
+class ClassRotateDB {
+  public:
+    ClassRotateDB(chanfix& cf) : cf_(cf) {}
+    void operator()() {
+      cf_.rotateDB(1);
+      return;
+    }
+
+private:
+        chanfix& cf_;
+};
+
 
 /* OnTimer */
 void chanfix::OnTimer(const gnuworld::xServer::timerID& theTimer, void*)
@@ -448,7 +460,8 @@ else if (theTimer == tidFixQ) {
 }
 else if (theTimer == tidRotateDB) {
   /* Clean-up the database if its 00 GMT */
-  rotateDB();
+  ClassRotateDB rotateDB(*this);
+  boost::thread pthrd(rotateDB);
 
   /* Refresh Timer */
   theTime = time(NULL) + getSecsTilMidnight();
@@ -2009,7 +2022,7 @@ void chanfix::updateDB(bool threaded)
   return;
 }
 
-void chanfix::rotateDB()
+void chanfix::rotateDB(bool threaded)
 {
 /* 
  * CODER NOTES:
@@ -2019,7 +2032,7 @@ void chanfix::rotateDB()
  * cache: acct,chan
  */
 
-logAdminMessage("Beginning database rotation.");
+logAdminMessage("Beginning database rotation (%s).", (threaded ? "threaded" : "unthreaded"));
 
 /* Start our timer */
 Timer rotateDBTimer;

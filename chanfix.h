@@ -253,7 +253,7 @@ public:
 
 	void processQueue();
 	
-	void rotateDB();
+	void rotateDB(bool);
 	void updateDB(bool);
 
 	bool isBeingFixed(Channel*);

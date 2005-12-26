@@ -41,7 +41,7 @@ void ROTATECommand::Exec(iClient* theClient, sqlUser* theUser, const std::string
 bot->logAdminMessage("%s (%s) ordered a manual DB rotation.",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str());
-bot->rotateDB();
+bot->rotateDB(0);
 return;
 }
 

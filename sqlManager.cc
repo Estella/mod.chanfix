@@ -25,6 +25,7 @@
 #include <iostream>
 
 #include <cassert>
+#include <boost/thread/thread.hpp>
 
 #include "gnuworld_config.h"
 #include "ELog.h"
@@ -102,27 +103,35 @@ delete tempCon;
  * them against the database.
  * TODO: Should this be inside a transaction?
  */
-void sqlManager::flush()
-{
-  for(CommitQueueItr ptr = commitQueue.begin(); ptr != commitQueue.end(); ++ptr) {
-    std::string statement = *ptr;
+class ClassFlush {
+  public:
+    ClassFlush(sqlManager& sm) : sm_(sm) {}
+    void operator()() {
+      for(sqlManager::CommitQueueItr ptr = sm_.commitQueue.begin(); ptr != sm_.commitQueue.end(); ++ptr) {
+        std::string statement = *ptr;
 
 #ifdef LOG_SQL
-    elog << "*** [sqlManager:flush] Executing: " << statement << std::endl;
+        elog << "*** [sqlManager:flush] Executing: " << statement << std::endl;
 #endif
-    if(!SQLDb->ExecCommandOk(statement.c_str())) {
-      std::string error = std::string(SQLDb->ErrorMessage());
+        if(!sm_.SQLDb->ExecCommandOk(statement.c_str())) {
+          std::string error = std::string(sm_.SQLDb->ErrorMessage());
 #ifndef LOG_SQL
-      /* Make sure people without LOG_SQL still see what statement failed */
-      elog << "*** [sqlManager:flush] Executing: " << statement << std::endl;
+          /* Make sure people without LOG_SQL still see what statement failed */
+          elog << "*** [sqlManager:flush] Executing: " << statement << std::endl;
 #endif
-      elog << "*** [sqlManager:flush] Error: " << error << std::endl;
-      // TODO: Log error
-    }
-  }
+          elog << "*** [sqlManager:flush] Error: " << error << std::endl;
+          // TODO: Log error
+        }
+      }
 
-  commitQueue.clear();
-}
+      sm_.commitQueue.clear();
+      return;
+    }
+
+private:
+        sqlManager& sm_;
+};
+
 
 
 /**
@@ -137,8 +146,10 @@ void sqlManager::queueCommit(const std::string& theStatement)
   unsigned int now = time(NULL);
 
   if ((commitQueue.size() >= commitQueueMax)
-      || (lastQueued >= now + commitTimeMax))
-    flush();
+      || (lastQueued >= now + commitTimeMax)) {
+    ClassFlush flush(*this);
+    boost::thread pthrd(flush);
+  }
 
   lastQueued = now;
 }

@@ -51,6 +51,18 @@ class sqlManager {
     /** Add a statement to the commit queue */
     void queueCommit(const std::string&);
 
+    /** The type used for the commit queue */
+    typedef std::vector< std::string > commitQueueType;
+
+    /** Allow iteration over the commit queue */
+    typedef commitQueueType::iterator CommitQueueItr;
+
+    /** Our commit queue */
+    commitQueueType commitQueue;
+
+    /** Our PgDatabase instance */
+    PgDatabase* SQLDb;
+
   protected:
     /**
      * Disable the default constructor so that instances can only be gotten
@@ -67,18 +79,6 @@ class sqlManager {
 
     /** The string storing our DB connection path */
     std::string dbString;
-
-    /** Our PgDatabase instance */
-    PgDatabase* SQLDb;
-
-    /** The type used for the commit queue */
-    typedef std::vector< std::string > commitQueueType;
-
-    /** Allow iteration over the commit queue */
-    typedef commitQueueType::iterator CommitQueueItr;
-
-    /** Our commit queue */
-    commitQueueType commitQueue;
 
     /** Max commit queue size before autocommit */
     unsigned int commitQueueMax;
