@@ -166,4 +166,5 @@ COPY "translations" FROM stdin;
 1	156	~U %s no@such.account 0	31337	0
 1	157	No such account %s.	31337	0
 1	158	Score for account %s in channel %s: %u.	31337	0
+1	159	Suspending yourself is not a very wise thing to do.	31337	0
 \.

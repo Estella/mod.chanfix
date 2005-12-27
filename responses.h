@@ -200,6 +200,7 @@ namespace gnuworld
 		const int cant_suspend_diff_group	= 118;
 		const int user_already_suspended	= 119;
 		const int user_suspended		= 120;
+		const int user_cant_suspend_self	= 159;
 
 		/* UNALERT */
 		const int no_alert_set			= 121;

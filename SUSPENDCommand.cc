@@ -51,7 +51,10 @@ if (!targetUser) {
 
 /* TODO: This needs a language reply. */
 if (theUser == targetUser) {
-  bot->SendTo(theClient, "Suspending yourself is not a very wise thing to do.");
+  bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::user_cant_suspend_self,
+                              std::string("Suspending yourself is not a very wise thing to do.")).c_str());
   return;
 }
 
