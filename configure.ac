@@ -4,7 +4,7 @@ echo
 AC_REVISION($Revision$)
 AC_INIT
 AC_CONFIG_SRCDIR([chanfix.cc])
-AM_INIT_AUTOMAKE(chanfix,1.0)
+AM_INIT_AUTOMAKE(chanfix,1.0.0)
 AC_CONFIG_HEADERS(defs_chanfix.h)
 
 AC_DISABLE_STATIC
@@ -26,6 +26,46 @@ AC_LIBTOOL_DLOPEN
 
 dnl Configure libtool
 AM_PROG_LIBTOOL
+
+AC_MSG_CHECKING([whether to detect pthread libraries])
+
+AC_ARG_ENABLE([threads],
+    AC_HELP_STRING([--disable-threads],
+    [disable the linking of the pthread library (default = no)]),
+    [check_threadLib=$enable_threads],
+    [check_threadLib=yes])
+
+AC_MSG_RESULT([$check_threadLib])
+
+dnl Do we need an explicit lib for the pthreads?
+gcc_support_pthread=no
+if test "$check_threadLib" = yes; then
+	dnl usually, gcc needs -pthread
+
+	AC_MSG_CHECKING([whether gcc accepts the -pthread option])
+	pthreadtest=`$CXX -pthread 2>&1 | grep -c unrecognized`
+
+	if [ test "x$pthreadtest" = "x0" ]; then
+		gcc_support_pthread=yes
+		AC_SUBST(threadLib)
+		threadLib=-pthread
+	else
+		gcc_support_pthread=no
+	fi
+	AC_MSG_RESULT([$gcc_support_pthread])
+fi
+
+if [ test x"$gcc_support_pthread" = xno ]; then   
+	pthread_found=no
+	AC_CHECK_LIB(pthread, pthread_create, pthread_found=yes)
+	if [ test x"$pthread_found" = xyes ]; then
+		AC_SUBST(threadLib)
+		threadLib=-lpthread
+	else
+		AC_CHECK_LIB(c_r, pthread_create,threadLib=-lc_r)
+		AC_CHECK_LIB(gcc_r, main, threadLib=-gcc_r)
+	fi
+fi
 
 CXXFLAGS="-W -Wall -pipe -I$srcdir/../libltdl -I$srcdir/../include"
 CXXFLAGS="$CXXFLAGS -I$srcdir/../libgnuworld"

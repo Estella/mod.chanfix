@@ -120,18 +120,18 @@ public:
 	inline void	setModesRemoved(bool _modesRemoved)
 		{ modesRemoved = _modesRemoved; }
 
-	void Insert();
-	void Delete();
-	void commit();
+	bool Insert();
+	bool Delete();
+	bool commit();
 	void setAllMembers(PgDatabase*, int);
 
 	/** Static member for keeping track of max user id */
 	static unsigned long int maxUserId;
 
 	void addNote(unsigned short, sqlUser*, const std::string&);
-	void deleteNote(unsigned int);
+	bool deleteNote(unsigned int);
 	bool deleteOldestNote();
-	void deleteAllNotes();
+	bool deleteAllNotes();
 	size_t countNotes(unsigned short);
 	const std::string getLastNote(unsigned short, time_t&);
 

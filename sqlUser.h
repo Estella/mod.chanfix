@@ -136,16 +136,16 @@ public:
 
 	/* Methods to alter our SQL status */
 	void setAllMembers(PgDatabase*, int);
-	void commit();
-	void Insert();
-	void Delete();
+	bool commit();
+	bool Insert();
+	bool Delete();
 
 	/** Static member for keeping track of max user id */
 	static unsigned long int maxUserId;
 
 	void loadHostList();
-	void addHost(const std::string&);		
-	void delHost(const std::string&);		
+	bool addHost(const std::string&);		
+	bool delHost(const std::string&);		
 	bool matchHost(const std::string&);
 	bool hasHost(const std::string&);
 

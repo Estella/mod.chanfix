@@ -94,7 +94,7 @@ currentState = INIT;
 std::string dbString = "host=" + sqlHost + " dbname=" + sqlDB
   + " port=" + sqlPort + " user=" + sqlUsername + " password=" + sqlPass;
 
-theManager = sqlManager::getInstance(dbString, commitQueueMax, commitTimeMax);
+theManager = sqlManager::getInstance(dbString);
 
 /* Register the commands we want to use */
 RegisterCommand(new ADDFLAGCommand(this, "ADDFLAG",
@@ -328,8 +328,6 @@ numTopScores = atoi((chanfixConfig->Require("numTopScores")->second).c_str()) ;
 minClients = atoi((chanfixConfig->Require("minClients")->second).c_str()) ;
 clientNeedsIdent = atob(chanfixConfig->Require("clientNeedsIdent")->second) ;
 connectCheckFreq = atoi((chanfixConfig->Require("connectCheckFreq")->second).c_str()) ;
-commitTimeMax = atoi((chanfixConfig->Require("commitTimeMax")->second).c_str()) ;
-commitQueueMax = atoi((chanfixConfig->Require("commitQueueMax")->second).c_str()) ;
 
 /* Database processing */
 sqlHost = chanfixConfig->Require("sqlHost")->second;
@@ -404,7 +402,7 @@ class ClassUpdateDB {
   public:
     ClassUpdateDB(chanfix& cf) : cf_(cf) {}
     void operator()() {
-      cf_.updateDB(1);
+      cf_.updateDB(true);
       return;
     }
 
@@ -416,7 +414,7 @@ class ClassRotateDB {
   public:
     ClassRotateDB(chanfix& cf) : cf_(cf) {}
     void operator()() {
-      cf_.rotateDB(1);
+      cf_.rotateDB(true);
       return;
     }
 
@@ -1916,12 +1914,15 @@ elog	<< "chanfix::startTimers> Started all timers."
 }
 
 /**
- * Note: Only threaded if called via the ClassUpdateDB function with boost::thread
+ * updateDB - Copies the contents of sqlChanOps to the SQL database
+ * Note: Only threaded if called via the ClassUpdateDB function with
+ * boost::thread
  */
 void chanfix::updateDB(bool threaded)
 {
-  elog << "*** [chanfix::updateDB] Updating the SQL database " << (threaded ? "(threaded)." : "(unthreaded).")
-								 << std::endl;
+  elog	<< "*** [chanfix::updateDB] Updating the SQL database "
+	<< (threaded ? "(threaded)." : "(unthreaded).")
+	<< std::endl;
   logAdminMessage("Starting to update the SQL database.");
 
   /* Start our timer */

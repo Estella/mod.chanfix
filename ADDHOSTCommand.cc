@@ -70,7 +70,15 @@ if (targetUser->matchHost(st[2].c_str())) {
   return;
 }
 
-targetUser->addHost(st[2].c_str());
+if (!targetUser->addHost(st[2].c_str())) {
+  bot->SendTo(theClient,
+	      bot->getResponse(theUser,
+			language::failed_adding_hostmask,
+			std::string("Failed adding hostmask %s to user %s.")).c_str(),
+			st[2].c_str(), targetUser->getUserName().c_str());
+  return;
+}
+
 targetUser->setLastUpdated(bot->currentTime());
 targetUser->setLastUpdatedBy( std::string( "("
 	+ theUser->getUserName()

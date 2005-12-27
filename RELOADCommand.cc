@@ -49,9 +49,8 @@ bot->logAdminMessage("%s (%s) is reloading the chanfix module.",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str());
 
-/* Let's save our database. */
-bot->theManager->flush();
-bot->updateDB(0);
+/* Let's save our chanops database. */
+bot->updateDB(false);
 
 if (st.size() < 2) {
   server->UnloadClient(bot, "Reloading...");

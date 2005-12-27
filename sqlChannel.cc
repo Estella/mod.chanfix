@@ -72,11 +72,17 @@ void sqlChannel::setAllMembers(PgDatabase* theDB, int row)
 /**
  * This function inserts a brand new channel into the DB.
  */
-void sqlChannel::Insert()
+bool sqlChannel::Insert()
 {
+bool retval = false;
+
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = myManager->getConnection();
+
 /* Grab the next available user id */
 id = ++maxUserId;
 
+/* Create the INSERT statement */
 std::stringstream insertString;
 insertString    << "INSERT INTO channels "
                 << "(id, channel, flags) "
@@ -88,28 +94,74 @@ insertString    << "INSERT INTO channels "
 		<< ")"
 		;
 
-myManager->queueCommit(insertString.str());
+if (!cacheCon->ExecCommandOk(insertString.str().c_str())) {
+  elog	<< "sqlChannel::Insert> Something went wrong: "
+	<< cacheCon->ErrorMessage()
+	<< std::endl;
+  retval = false;
+} else
+  retval = true;
+
+/* Dispose of our connection instance */
+myManager->removeConnection(cacheCon);
+
+return retval;
 } // sqlChannel::Insert()
 
-void sqlChannel::Delete()
+bool sqlChannel::Delete()
 {
+bool retval = false;
+
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = myManager->getConnection();
+
+/* Create the DELETE statement */
 std::stringstream deleteString;
 deleteString    << "DELETE FROM channels "
 		<< "WHERE id = '" << id << "'"
 		;
 
-myManager->queueCommit(deleteString.str());
+if (!cacheCon->ExecCommandOk(deleteString.str().c_str())) {
+  elog	<< "sqlChannel::Delete> Something went wrong: "
+	<< cacheCon->ErrorMessage()
+	<< std::endl;
+  retval = false;
+} else
+  retval = true;
+
+/* Dispose of our connection instance */
+myManager->removeConnection(cacheCon);
+
+return retval;
 }
 
-void sqlChannel::commit()
+bool sqlChannel::commit()
 {
+bool retval = false;
+
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = myManager->getConnection();
+
+/* Create the UPDATE statement */
 std::stringstream chanCommit;
 chanCommit	<< "UPDATE channels SET "
 		<< "flags = " << flags
 		<< " WHERE "
 		<< "id = " << id
 		;
-myManager->queueCommit(chanCommit.str());
+
+if (!cacheCon->ExecCommandOk(chanCommit.str().c_str())) {
+  elog	<< "sqlChannel::commit> Something went wrong: "
+	<< cacheCon->ErrorMessage()
+	<< std::endl;
+  retval = false;
+} else
+  retval = true;
+
+/* Dispose of our connection instance */
+myManager->removeConnection(cacheCon);
+
+return retval;
 }
 
 /**
@@ -127,6 +179,10 @@ while (num_notes >= MAXNOTECOUNT) {
   num_notes--;
 }
 
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = myManager->getConnection();
+
+/* Create the INSERT statement */
 std::stringstream theLog;
 theLog	<< "INSERT INTO notes (ts, channelID, userID, event, message) "
 	<< "VALUES ("
@@ -143,7 +199,16 @@ theLog	<< "INSERT INTO notes (ts, channelID, userID, event, message) "
 	<< "')"
 	;
 
-myManager->queueCommit(theLog.str());
+if (!cacheCon->ExecCommandOk(theLog.str().c_str())) {
+  elog	<< "sqlChannel::addNote> Something went wrong: "
+	<< cacheCon->ErrorMessage()
+	<< std::endl;
+}
+
+/* Dispose of our connection instance */
+myManager->removeConnection(cacheCon);
+
+return;
 }
 
 const std::string sqlChannel::getLastNote(unsigned short eventType, time_t& eventTime)
@@ -177,15 +242,33 @@ myManager->removeConnection(cacheCon);
 return retval;
 }
 
-void sqlChannel::deleteNote(unsigned int messageId)
+bool sqlChannel::deleteNote(unsigned int messageId)
 {
+bool retval = false;
+
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = myManager->getConnection();
+
+/* Create the DELETE statement */
 std::stringstream deleteString;
 deleteString	<< "DELETE FROM notes WHERE channelID = "
 		<< id
 		<< " AND id = "
 		<< messageId
 		;
-myManager->queueCommit(deleteString.str());
+
+if (!cacheCon->ExecCommandOk(deleteString.str().c_str())) {
+  elog	<< "sqlChannel::deleteNote> Something went wrong: "
+	<< cacheCon->ErrorMessage()
+	<< std::endl;
+  retval = false;
+} else
+  retval = true;
+
+/* Dispose of our connection instance */
+myManager->removeConnection(cacheCon);
+
+return retval;
 }
 
 bool sqlChannel::deleteOldestNote()
@@ -222,14 +305,31 @@ myManager->removeConnection(cacheCon);
 return retval;
 }
 
-void sqlChannel::deleteAllNotes()
+bool sqlChannel::deleteAllNotes()
 {
+bool retval = false;
+
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = myManager->getConnection();
+
+/* Create the DELETE statement */
 std::stringstream deleteString;
 deleteString	<< "DELETE FROM notes WHERE channelID = "
 		<< id
 		;
 
-myManager->queueCommit(deleteString.str());
+if (!cacheCon->ExecCommandOk(deleteString.str().c_str())) {
+  elog	<< "sqlChannel::deleteAllNotes> Something went wrong: "
+	<< cacheCon->ErrorMessage()
+	<< std::endl;
+  retval = false;
+} else
+  retval = true;
+
+/* Dispose of our connection instance */
+myManager->removeConnection(cacheCon);
+
+return retval;
 }
 
 size_t sqlChannel::countNotes(unsigned short eventType)

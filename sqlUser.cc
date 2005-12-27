@@ -78,8 +78,14 @@ void sqlUser::setAllMembers(PgDatabase* theDB, int row)
   if (id > maxUserId) maxUserId = id;
 }
 
-void sqlUser::commit()
+bool sqlUser::commit()
 {
+bool retval = false;
+
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = myManager->getConnection();
+
+/* Create the UPDATE statement */
 std::stringstream userCommit;
 userCommit	<< "UPDATE users SET "
 		<< "last_seen = " << last_seen << ", "
@@ -94,7 +100,19 @@ userCommit	<< "UPDATE users SET "
 		<< " WHERE "
 		<< "id = " << id
 		;
-myManager->queueCommit(userCommit.str());
+
+if (!cacheCon->ExecCommandOk(userCommit.str().c_str())) {
+  elog	<< "sqlUser::commit> Something went wrong: "
+	<< cacheCon->ErrorMessage()
+	<< std::endl;
+  retval = false;
+} else
+  retval = true;
+
+/* Dispose of our connection instance */
+myManager->removeConnection(cacheCon);
+
+return retval;
 }
 
 /**
@@ -104,11 +122,17 @@ myManager->queueCommit(userCommit.str());
  * so that any new fields added will automatically be dealt with in commit()
  * instead of in 50 different functions.
  */
-void sqlUser::Insert()
+bool sqlUser::Insert()
 {
+bool retval = false;
+
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = myManager->getConnection();
+
 /* Grab the next available user id */
 id = ++maxUserId;
 
+/* Create the INSERT statement */
 std::stringstream insertString;
 insertString	<< "INSERT INTO users "
 		<< "(id, user_name) "
@@ -119,23 +143,61 @@ insertString	<< "INSERT INTO users "
 		<< ")"
 		;
 
-myManager->queueCommit(insertString.str());
+if (!cacheCon->ExecCommandOk(insertString.str().c_str())) {
+  elog	<< "sqlUser::Insert> Something went wrong: "
+	<< cacheCon->ErrorMessage()
+	<< std::endl;
+  retval = false;
+} else
+  retval = true;
+
+/* Dispose of our connection instance */
+myManager->removeConnection(cacheCon);
+
 commit();
+
+return retval;
 } // sqlUser::Insert()
 
-void sqlUser::Delete()
+bool sqlUser::Delete()
 {
+bool retval = false;
+
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = myManager->getConnection();
+
+/* Create the DELETE statement */
 std::stringstream deleteString;
 deleteString	<< "DELETE FROM users "
 		<< "WHERE id = '" << id << "'"
 		;
-myManager->queueCommit(deleteString.str());
 
+if (!cacheCon->ExecCommandOk(deleteString.str().c_str())) {
+  elog	<< "sqlUser::Delete> Something went wrong: "
+	<< cacheCon->ErrorMessage()
+	<< std::endl;
+  retval = false;
+} else
+  retval = true;
+
+/* Create the DELETE statement */
 std::stringstream hostString;
 hostString	<< "DELETE FROM hosts "
 		<< "WHERE user_id = " << id
 		;
-myManager->queueCommit(hostString.str());
+
+if (!cacheCon->ExecCommandOk(hostString.str().c_str())) {
+  elog	<< "sqlUser::Delete> Something went wrong: "
+	<< cacheCon->ErrorMessage()
+	<< std::endl;
+  retval = false;
+} else
+  retval = true;
+
+/* Dispose of our connection instance */
+myManager->removeConnection(cacheCon);
+
+return retval;
 }
 
 void sqlUser::loadHostList()
@@ -162,8 +224,14 @@ myManager->removeConnection(cacheCon);
 return; 
 }
 
-void sqlUser::addHost(const std::string& _theHost)
+bool sqlUser::addHost(const std::string& _theHost)
 {
+bool retval = false;
+
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = myManager->getConnection();
+
+/* Create the INSERT statement */
 std::stringstream insertString;
 insertString    << "INSERT INTO hosts "
                 << "(user_id, host) VALUES "
@@ -173,15 +241,31 @@ insertString    << "INSERT INTO hosts "
                 << escapeSQLChars(_theHost).c_str()
                 << "')"
                 ;
-myManager->queueCommit(insertString.str());
+
+if (!cacheCon->ExecCommandOk(insertString.str().c_str())) {
+  elog	<< "sqlUser::addHost> Something went wrong: "
+	<< cacheCon->ErrorMessage()
+	<< std::endl;
+  retval = false;
+} else
+  retval = true;
+
+/* Dispose of our connection instance */
+myManager->removeConnection(cacheCon);
 
 hostList.push_back(_theHost);
 
-return;
+return retval;
 }
 
-void sqlUser::delHost(const std::string& _theHost)
+bool sqlUser::delHost(const std::string& _theHost)
 {
+bool retval = false;
+
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = myManager->getConnection();
+
+/* Create the DELETE statement */
 std::stringstream deleteString;
 deleteString	<< "DELETE FROM hosts "
 		<< "WHERE user_id = "
@@ -190,12 +274,24 @@ deleteString	<< "DELETE FROM hosts "
 		<< escapeSQLChars(string_lower(_theHost)).c_str()
 		<< "'"
 		;
-myManager->queueCommit(deleteString.str());
 
-if (hostList.size() < 1) return;
+if (!cacheCon->ExecCommandOk(deleteString.str().c_str())) {
+  elog	<< "sqlUser::delHost> Something went wrong: "
+	<< cacheCon->ErrorMessage()
+	<< std::endl;
+  retval = false;
+} else
+  retval = true;
+
+/* Dispose of our connection instance */
+myManager->removeConnection(cacheCon);
+
+if (hostList.size() < 1) return false;
 hostListType::iterator ptr = find( hostList.begin(), hostList.end(), string_lower(_theHost) );
-if (ptr == hostList.end()) return;
+if (ptr == hostList.end()) return false;
 hostList.erase(ptr);
+
+return retval;
 }
 
 bool sqlUser::matchHost(const std::string& _host)

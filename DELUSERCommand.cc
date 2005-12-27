@@ -77,18 +77,24 @@ if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
   }
 }
 
-targetUser->Delete();
-bot->usersMap.erase(bot->usersMap.find(targetUser->getUserName()));
-bot->SendTo(theClient,
-	    bot->getResponse(theUser,
+if (targetUser->Delete()) {
+  bot->usersMap.erase(bot->usersMap.find(targetUser->getUserName()));
+  bot->SendTo(theClient,
+	      bot->getResponse(theUser,
 			language::deleted_user,
 			std::string("Deleted user %s.")).c_str(), targetUser->getUserName().c_str());
-bot->logAdminMessage("%s (%s) deleted user %s.",
-		     theClient->getAccount().c_str(),
-		     theClient->getRealNickUserHost().c_str(),
-		     targetUser->getUserName().c_str());
-delete targetUser; targetUser = 0;
+  bot->logAdminMessage("%s (%s) deleted user %s.",
+		       theClient->getAccount().c_str(),
+		       theClient->getRealNickUserHost().c_str(),
+		       targetUser->getUserName().c_str());
+  delete targetUser; targetUser = 0;
+} else {
+  bot->SendTo(theClient,
+	      bot->getResponse(theUser,
+			language::error_deleting_user,
+			std::string("Error deleting user %s.")).c_str(), st[1].c_str());
+}
 
 return;
-} //DELUSERCommand::exec
-} //Namespace gnuworld
+} //DELUSERCommand::Exec
+} //namespace gnuworld

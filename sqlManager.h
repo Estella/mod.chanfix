@@ -37,7 +37,7 @@ class sqlManager {
      * Implement sqlManager as a singleton
      * Only way to get a reference to the manager is through this method
      */
-    static sqlManager* getInstance(const std::string&, int, int);
+    static sqlManager* getInstance(const std::string&);
 
     /** Allow checking out of database connections */
     PgDatabase* getConnection();
@@ -45,31 +45,13 @@ class sqlManager {
     /** Allow checking in of database connections */
     void removeConnection(PgDatabase*);
 
-    /** Flush the current commit queue to the database */
-    void flush();
-
-    /** Add a statement to the commit queue */
-    void queueCommit(const std::string&);
-
-    /** The type used for the commit queue */
-    typedef std::vector< std::string > commitQueueType;
-
-    /** Allow iteration over the commit queue */
-    typedef commitQueueType::iterator CommitQueueItr;
-
-    /** Our commit queue */
-    commitQueueType commitQueue;
-
-    /** Our PgDatabase instance */
-    PgDatabase* SQLDb;
-
   protected:
     /**
      * Disable the default constructor so that instances can only be gotten
      * through getInstance()
      * @see #getInstance
      */
-    sqlManager(const std::string&, int, int);
+    sqlManager(const std::string&);
 
     /**
      * Disable the default destructor so that other objects cannot destruct
@@ -80,14 +62,8 @@ class sqlManager {
     /** The string storing our DB connection path */
     std::string dbString;
 
-    /** Max commit queue size before autocommit */
-    unsigned int commitQueueMax;
-
-    /** Max time passed before autocommit */
-    unsigned int commitTimeMax;
-
-    /** Time of last addition to queue */
-    unsigned int lastQueued;
+    /** Our PgDatabase instance */
+    PgDatabase* SQLDb;
 
     /** The current instance of sqlManager */
     static sqlManager* theManager;

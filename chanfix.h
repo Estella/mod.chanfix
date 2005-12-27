@@ -389,8 +389,6 @@ public:
 	unsigned int	minClients;
 	bool		clientNeedsIdent;
 	unsigned int	connectCheckFreq;
-	unsigned int	commitTimeMax;
-	unsigned int	commitQueueMax;
 	std::string	sqlHost;
 	std::string	sqlPort;
 	std::string	sqlUsername;

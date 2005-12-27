@@ -25,7 +25,6 @@
 #include <iostream>
 
 #include <cassert>
-#include <boost/thread/thread.hpp>
 
 #include "gnuworld_config.h"
 #include "ELog.h"
@@ -46,13 +45,13 @@ sqlManager* sqlManager::theManager = 0;
  * initialise must be called prior to attempted to obtain an instance.
  * This method is static.
  */
-sqlManager* sqlManager::getInstance(const std::string& _dbString, int _commitQueueMax, int _commitTimeMax)
+sqlManager* sqlManager::getInstance(const std::string& _dbString)
 {
 if(theManager) return theManager;
 
 /* There is currently no sqlManager instance */
-return new sqlManager(_dbString, _commitQueueMax, _commitTimeMax);
-} // static sqlManager* sqlManager::getInstance(const std::string&, int, int)
+return new sqlManager(_dbString);
+} // static sqlManager* sqlManager::getInstance(const std::string&)
 
 
 
@@ -98,69 +97,6 @@ delete tempCon;
 }
 
 
-/**
- * This method simply processes all statements in the queue, executing
- * them against the database.
- * TODO: Should this be inside a transaction?
- */
-class ClassFlush {
-  public:
-    ClassFlush(sqlManager& sm) : sm_(sm) {}
-    void operator()() {
-      sm_.flush();
-      return;
-    }
-
-private:
-        sqlManager& sm_;
-};
-
-
-void sqlManager::flush()
-{
-  for(CommitQueueItr ptr = commitQueue.begin(); ptr != commitQueue.end(); ++ptr) {
-    std::string statement = *ptr;
-
-#ifdef LOG_SQL
-    elog << "*** [sqlManager:flush] Executing: " << statement << std::endl;
-#endif
-    if(!SQLDb->ExecCommandOk(statement.c_str())) {
-      std::string error = std::string(SQLDb->ErrorMessage());
-#ifndef LOG_SQL
-      /* Make sure people without LOG_SQL still see what statement failed */
-      elog << "*** [sqlManager:flush] Executing: " << statement << std::endl;
-#endif
-      elog << "*** [sqlManager:flush] Error: " << error << std::endl;
-      // TODO: Log error
-    }
-  }
-
-  commitQueue.clear();
-  return;
-}
-
-
-/**
- * This method allows a caller to add a statement to the commit queue.
- * The statement will be executed against the database when the next commit
- * interval occurs.
- */
-void sqlManager::queueCommit(const std::string& theStatement)
-{
-  commitQueue.push_back(theStatement);
-
-  unsigned int now = time(NULL);
-
-  if ((commitQueue.size() >= commitQueueMax)
-      || (lastQueued >= now + commitTimeMax)) {
-    ClassFlush flush(*this);
-    boost::thread pthrd(flush);
-  }
-
-  lastQueued = now;
-}
-
-
 /*****************************************************
  ** C O N S T R U C T O R   &   D E S T R U C T O R **
  *****************************************************/
@@ -170,13 +106,11 @@ void sqlManager::queueCommit(const std::string& theStatement)
  * and any of the queues that will be used
  * It is only ever called from initialize()
  */
-sqlManager::sqlManager(const std::string& _dbString, int _commitQueueMax, int _commitTimeMax)
+sqlManager::sqlManager(const std::string& _dbString)
 {
 /* Construct our DB object and initialise queues */
 dbString = _dbString;
 SQLDb = getConnection();
-commitQueueMax = _commitQueueMax;
-commitTimeMax = _commitTimeMax;
 } // sqlManager::sqlManager
 
 

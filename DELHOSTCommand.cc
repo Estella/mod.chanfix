@@ -70,7 +70,15 @@ if (!targetUser->hasHost(st[2].c_str())) {
   return;
 }
 
-targetUser->delHost(st[2].c_str());
+if (!targetUser->delHost(st[2].c_str())) {
+  bot->SendTo(theClient,
+	      bot->getResponse(theUser,
+			language::failed_deleting_host,
+			std::string("Failed deleting hostmask %s from user %s.")).c_str(),
+			st[2].c_str(), targetUser->getUserName().c_str());
+  return;
+}
+
 targetUser->setLastUpdated(bot->currentTime());
 targetUser->setLastUpdatedBy( std::string( "("
 	+ theUser->getUserName()
