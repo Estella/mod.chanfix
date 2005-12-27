@@ -107,24 +107,7 @@ class ClassFlush {
   public:
     ClassFlush(sqlManager& sm) : sm_(sm) {}
     void operator()() {
-      for(sqlManager::CommitQueueItr ptr = sm_.commitQueue.begin(); ptr != sm_.commitQueue.end(); ++ptr) {
-        std::string statement = *ptr;
-
-#ifdef LOG_SQL
-        elog << "*** [sqlManager:flush] Executing: " << statement << std::endl;
-#endif
-        if(!sm_.SQLDb->ExecCommandOk(statement.c_str())) {
-          std::string error = std::string(sm_.SQLDb->ErrorMessage());
-#ifndef LOG_SQL
-          /* Make sure people without LOG_SQL still see what statement failed */
-          elog << "*** [sqlManager:flush] Executing: " << statement << std::endl;
-#endif
-          elog << "*** [sqlManager:flush] Error: " << error << std::endl;
-          // TODO: Log error
-        }
-      }
-
-      sm_.commitQueue.clear();
+      sm_.flush();
       return;
     }
 
@@ -132,6 +115,29 @@ private:
         sqlManager& sm_;
 };
 
+
+void sqlManager::flush()
+{
+  for(CommitQueueItr ptr = commitQueue.begin(); ptr != commitQueue.end(); ++ptr) {
+    std::string statement = *ptr;
+
+#ifdef LOG_SQL
+    elog << "*** [sqlManager:flush] Executing: " << statement << std::endl;
+#endif
+    if(!SQLDb->ExecCommandOk(statement.c_str())) {
+      std::string error = std::string(SQLDb->ErrorMessage());
+#ifndef LOG_SQL
+      /* Make sure people without LOG_SQL still see what statement failed */
+      elog << "*** [sqlManager:flush] Executing: " << statement << std::endl;
+#endif
+      elog << "*** [sqlManager:flush] Error: " << error << std::endl;
+      // TODO: Log error
+    }
+  }
+
+  commitQueue.clear();
+  return;
+}
 
 
 /**
