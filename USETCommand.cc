@@ -129,7 +129,7 @@ if (option == "LANG")
 
 bot->SendTo(theClient,
 	    bot->getResponse(theUser,
-			     language::usetting_doesnt_exist,
+			     language::setting_doesnt_exist,
 			     std::string("This setting does not exist.")).c_str());
 
 return;

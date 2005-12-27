@@ -16,8 +16,8 @@ COPY "translations" FROM stdin;
 1	5	You cannot add a flag to a user in a different group.	31337	0
 1	6	You cannot add a block flag.	31337	0
 1	7	You cannot add a serveradmin flag.	31337	0
-1	8	User %s already has flag \'%c\'.	31337	0
-1	9	Added flag \'%c\' to user %s.	31337	0
+1	8	User %s already has flag '%c'.	31337	0
+1	9	Added flag '%c' to user %s.	31337	0
 1	10	You cannot add a host to a user in a different group.	31337	0
 1	11	User %s already has hostmask %s.	31337	0
 1	12	Failed adding hostmask %s to user %s.	31337	0
@@ -29,7 +29,7 @@ COPY "translations" FROM stdin;
 1	18	Created user %s.	31337	0
 1	19	Error creating user %s. (Insertion failed)	31337	0
 1	20	The channel %s already has the ALERT flag.	31337	0
-1	21	ALERT flag added from channel %s	31337	0
+1	21	ALERT flag added to channel %s	31337	0
 1	22	Channel blocking is disabled.	31337	0
 1	23	The channel %s is already blocked.	31337	0
 1	24	The channel %s has been blocked.	31337	0
@@ -52,8 +52,8 @@ COPY "translations" FROM stdin;
 1	41	You cannot delete a flag from a user in a different group.	31337	0
 1	42	You cannot remove a block flag.	31337	0
 1	43	You cannot remove a serveradmin flag.	31337	0
-1	44	User %s does not have flag \'%c\'.	31337	0
-1	45	Deleted flag \'%c\' of user %s.	31337	0
+1	44	User %s does not have flag '%c'.	31337	0
+1	45	Deleted flag '%c' of user %s.	31337	0
 1	46	You cannot delete a host on a user in a different group.	31337	0
 1	47	User %s doesn't have hostmask %s.	31337	0
 1	48	Failed deleting hostmask %s from user %s.	31337	0
@@ -94,7 +94,7 @@ COPY "translations" FROM stdin;
 1	83	Opped clients on channel %s:	31337	0
 1	84	I see 1 opped client in %s.	31337	0
 1	85	I see %u opped clients in %s.	31337	0
-1	86	Successfully reloaded help tables.	31337	0
+1	86	Successfully reloaded help tables. %i entries in table.	31337	0
 1	87	Successfully rehashed configuration file.	31337	0
 1	88	Reloading client...see you on the flip side	31337	0
 1	89	Score for %s (%s) in channel %s: %u.	31337	0
@@ -140,7 +140,6 @@ COPY "translations" FROM stdin;
 1	129	I will now send you notices.	31337	0
 1	130	I will now send you privmsgs.	31337	0
 1	131	Please use USET NOTICE <on/off>.	31337	0
-1	132	This setting does not exist.	31337	0
 1	134	You can only WHOGROUP on your group.	31337	0
 1	135	Users with group %s [username (flags)]:	31337	0
 1	136	Number of users: %d.	31337	0
@@ -157,9 +156,9 @@ COPY "translations" FROM stdin;
 1	147	Your access to this service is suspended.	31337	0
 1	148	Your current host does not match any registered hosts for your username.	31337	0
 1	149	You need to authenticate to use this command.	31337	0
-1	150	This command requires flag \'%c\'.	31337	0
+1	150	This command requires flag '%c'.	31337	0
 1	151	This command requires one of these flags: \"%s\".	31337	0
-1	152	This command requires authentication and flag \'%c\'.	31337	0
+1	152	This command requires authentication and flag '%c'.	31337	0
 1	153	This command requires authentication and one of these flags: \"%s\".	31337	0
 1	154	SYNTAX: 	31337	0
 1	155	Language: %s (%s)	31337	0

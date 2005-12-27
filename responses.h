@@ -220,7 +220,6 @@ namespace gnuworld
 		const int send_notices			= 129;
 		const int send_privmsgs			= 130;
 		const int uset_notice_on_off		= 131;
-		const int usetting_doesnt_exist		= 132;
 
 		/* WHOGROUP */
 		const int whogroup_your_group		= 134;
