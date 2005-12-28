@@ -66,7 +66,7 @@ theChan->setFlag(sqlChannel::F_ALERT);
 theChan->commit();
 
 /* Add note to the channel about this command */
-theChan->addNote(sqlChannel::EV_ALERT, theUser, "");
+theChan->addNote(sqlChannel::EV_ALERT, theUser, (st.size() > 2) ? st.assemble(2) : "");
 
 bot->SendTo(theClient,
             bot->getResponse(theUser,

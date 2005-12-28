@@ -95,24 +95,6 @@ else
                               std::string("Flags: +%s")).c_str(),
                                           bot->getFlagsString(theUser2->getFlags()).c_str());
 
-sqlUser::hostListType sqlHostList = theUser2->getHostList();
-std::stringstream hostlist;
-
-if (sqlHostList.size() > 0) {
-  for(sqlUser::hostListType::iterator itr = sqlHostList.begin() ;
-    itr != sqlHostList.end() ; ++itr) {
-      if (hostlist.str() == "")
-        hostlist << *itr;
-      else
-	hostlist << ", " << *itr;
-    }
-}
-if (hostlist.str() == "") hostlist << "None.";
-bot->SendTo(theClient,
-            bot->getResponse(theUser,
-                            language::whois_hosts,
-                            std::string("Hosts: %s")).c_str(),
-			    hostlist.str().c_str());
 bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::whois_group,
@@ -153,9 +135,9 @@ if (st.size() > 2 && string_upper(st[2]) == "-MODIF")
   bot->SendTo(theClient,
 	      bot->getResponse(theUser,
 			language::whois_modif,
-			std::string("Last modified: %s ago by %s")).c_str(),
-			bot->prettyDuration(theUser2->getLastUpdated()).c_str(),
-			theUser2->getLastUpdatedBy().c_str());
+			std::string("Last modified: %s (%s ago)")).c_str(),
+			theUser2->getLastUpdatedBy().c_str(),
+			bot->prettyDuration(theUser2->getLastUpdated()).c_str());
 
 return;
 } //WHOISCommand::Exec

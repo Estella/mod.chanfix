@@ -137,6 +137,11 @@ namespace gnuworld
 		const int chanfix_not_in_chan		= 78;
 		const int already_in_channel		= 79;
 
+		/* LISTHOSTS */
+		const int cant_view_hosts_diff_group	= 163;
+		const int host_list_header		= 164;
+		const int host_list_footer		= 165;
+
 		/* OPLIST */
 		const int top_unique_op_accounts	= 80;
 		const int found_unique_op_accounts	= 81;
@@ -231,7 +236,6 @@ namespace gnuworld
 		const int user_flags_group		= 138;
 		const int end_of_user_list		= 139;
 		const int whois_suspended		= 140;
-		const int whois_hosts			= 141;
 		const int whois_group			= 142;
 		const int whois_flags_none		= 143;
 		const int whois_flags			= 144;

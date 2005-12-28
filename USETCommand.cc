@@ -56,8 +56,8 @@ if (st.size() == 4) {
     if (!theUser->getFlag(requiredFlags)) {
       bot->SendTo(theClient,
 		  bot->getResponse(theUser,
-			language::requires_flag,
-			std::string("This command requires flag '%c'.")).c_str(),
+			language::requires_auth_and_flag,
+			std::string("This command requires authentication and flag '%c'.")).c_str(),
 				    bot->getFlagChar(requiredFlags));
       return;
     }

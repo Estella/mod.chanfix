@@ -130,7 +130,7 @@ targetUser->commit();
 bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::deleted_flag,
-                            std::string("Deleted flag '%c' of user %s.")).c_str(), flag,
+                            std::string("Deleted flag '%c' from user %s.")).c_str(), flag,
                                         targetUser->getUserName().c_str());
 } //DELFLAGCommand::Exec
 } //Namespace gnuworld

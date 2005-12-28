@@ -78,11 +78,13 @@ am_libchanfix_la_OBJECTS = libchanfix_la-chanfix.lo \
 	libchanfix_la-DELNOTECommand.lo \
 	libchanfix_la-DELUSERCommand.lo libchanfix_la-HELPCommand.lo \
 	libchanfix_la-HISTORYCommand.lo libchanfix_la-INFOCommand.lo \
-	libchanfix_la-INVITECommand.lo libchanfix_la-OPLISTCommand.lo \
-	libchanfix_la-OPNICKSCommand.lo libchanfix_la-QUOTECommand.lo \
-	libchanfix_la-REHASHCommand.lo libchanfix_la-RELOADCommand.lo \
-	libchanfix_la-ROTATECommand.lo libchanfix_la-SCORECommand.lo \
-	libchanfix_la-SETCommand.lo libchanfix_la-SETGROUPCommand.lo \
+	libchanfix_la-INVITECommand.lo \
+	libchanfix_la-LISTHOSTSCommand.lo \
+	libchanfix_la-OPLISTCommand.lo libchanfix_la-OPNICKSCommand.lo \
+	libchanfix_la-QUOTECommand.lo libchanfix_la-REHASHCommand.lo \
+	libchanfix_la-RELOADCommand.lo libchanfix_la-ROTATECommand.lo \
+	libchanfix_la-SCORECommand.lo libchanfix_la-SETCommand.lo \
+	libchanfix_la-SETGROUPCommand.lo \
 	libchanfix_la-SHUTDOWNCommand.lo \
 	libchanfix_la-STATUSCommand.lo libchanfix_la-SUSPENDCommand.lo \
 	libchanfix_la-UNALERTCommand.lo \
@@ -245,6 +247,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	HISTORYCommand.cc \
 	INFOCommand.cc \
 	INVITECommand.cc \
+	LISTHOSTSCommand.cc \
 	OPLISTCommand.cc \
 	OPNICKSCommand.cc \
 	QUOTECommand.cc \
@@ -403,6 +406,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-HISTORYCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-INFOCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-INVITECommand.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-LISTHOSTSCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-OPLISTCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-OPNICKSCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-QUOTECommand.Plo@am__quote@
@@ -567,6 +571,13 @@ libchanfix_la-INVITECommand.lo: INVITECommand.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='INVITECommand.cc' object='libchanfix_la-INVITECommand.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-INVITECommand.lo `test -f 'INVITECommand.cc' || echo '$(srcdir)/'`INVITECommand.cc
+
+libchanfix_la-LISTHOSTSCommand.lo: LISTHOSTSCommand.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-LISTHOSTSCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-LISTHOSTSCommand.Tpo" -c -o libchanfix_la-LISTHOSTSCommand.lo `test -f 'LISTHOSTSCommand.cc' || echo '$(srcdir)/'`LISTHOSTSCommand.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-LISTHOSTSCommand.Tpo" "$(DEPDIR)/libchanfix_la-LISTHOSTSCommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-LISTHOSTSCommand.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='LISTHOSTSCommand.cc' object='libchanfix_la-LISTHOSTSCommand.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-LISTHOSTSCommand.lo `test -f 'LISTHOSTSCommand.cc' || echo '$(srcdir)/'`LISTHOSTSCommand.cc
 
 libchanfix_la-OPLISTCommand.lo: OPLISTCommand.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-OPLISTCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-OPLISTCommand.Tpo" -c -o libchanfix_la-OPLISTCommand.lo `test -f 'OPLISTCommand.cc' || echo '$(srcdir)/'`OPLISTCommand.cc; \

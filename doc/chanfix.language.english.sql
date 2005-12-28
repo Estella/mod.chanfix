@@ -53,7 +53,7 @@ COPY "translations" FROM stdin;
 1	42	You cannot remove a block flag.	31337	0
 1	43	You cannot remove a serveradmin flag.	31337	0
 1	44	User %s does not have flag '%c'.	31337	0
-1	45	Deleted flag '%c' of user %s.	31337	0
+1	45	Deleted flag '%c' from user %s.	31337	0
 1	46	You cannot delete a host on a user in a different group.	31337	0
 1	47	User %s doesn't have hostmask %s.	31337	0
 1	48	Failed deleting hostmask %s from user %s.	31337	0
@@ -147,7 +147,6 @@ COPY "translations" FROM stdin;
 1	138	User: %s, Flags: %s, Group: %s	31337	0
 1	139	End of user list.	31337	0
 1	140	--SUSPENDED--	31337	0
-1	141	Hosts: %s	31337	0
 1	142	Group: %s	31337	0
 1	143	Flags: none.	31337	0
 1	144	Flags: +%s	31337	0
@@ -166,7 +165,10 @@ COPY "translations" FROM stdin;
 1	157	No such account %s.	31337	0
 1	158	Score for account %s in channel %s: %u.	31337	0
 1	159	Suspending yourself is not a very wise thing to do.	31337	0
-1	160	Last modified: %s ago by %s	31337	0
+1	160	Last modified: %s (%s ago)	31337	0
 1	161	NeedOper: Yes	31337	0
 1	162	NeedOper: No	31337	0
+1	163	You cannot view hosts of a user in a different group.	31337	0
+1	164	Host list for %s:	31337	0
+1	165	End of host list.	31337	0
 \.

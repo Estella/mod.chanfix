@@ -110,7 +110,7 @@ RegisterCommand(new ADDHOSTCommand(this, "ADDHOST",
 RegisterCommand(new ADDNOTECommand(this, "ADDNOTE",
 	"<#channel> <reason>",
 	3,
-	sqlUser::F_CHANNEL
+	sqlUser::F_COMMENT
 	));
 RegisterCommand(new ADDUSERCommand(this, "ADDUSER",
 	"<username> [host]",
@@ -118,9 +118,9 @@ RegisterCommand(new ADDUSERCommand(this, "ADDUSER",
 	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
 	));
 RegisterCommand(new ALERTCommand(this, "ALERT",
-	"<#channel>",
+	"<#channel> [reason]",
 	2,
-	sqlUser::F_CHANNEL
+	sqlUser::F_COMMENT
 	));
 RegisterCommand(new BLOCKCommand(this, "BLOCK",
 	"<#channel> <reason>",
@@ -150,7 +150,7 @@ RegisterCommand(new DELHOSTCommand(this, "DELHOST",
 RegisterCommand(new DELNOTECommand(this, "DELNOTE",
 	"<#channel> <note_id>",
 	3,
-	sqlUser::F_CHANNEL
+	sqlUser::F_COMMENT
 	));
 RegisterCommand(new DELUSERCommand(this, "DELUSER",
 	"<username>",
@@ -176,6 +176,11 @@ RegisterCommand(new INVITECommand(this, "INVITE",
 	"",
 	1,
 	sqlUser::F_OWNER
+	));
+RegisterCommand(new LISTHOSTSCommand(this, "LISTHOSTS",
+	"[username]",
+	1,
+	sqlUser::F_LOGGEDIN
 	));
 RegisterCommand(new OPLISTCommand(this, "OPLIST",
 	"<#channel>",
@@ -245,7 +250,7 @@ RegisterCommand(new SUSPENDCommand(this, "SUSPEND",
 RegisterCommand(new UNALERTCommand(this, "UNALERT",
 	"<#channel>",
 	2,
-	sqlUser::F_CHANNEL
+	sqlUser::F_COMMENT
 	));
 RegisterCommand(new UNBLOCKCommand(this, "UNBLOCK",
 	"<#channel>",
@@ -273,7 +278,7 @@ RegisterCommand(new WHOGROUPCommand(this, "WHOGROUP",
 	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
 	));
 RegisterCommand(new WHOISCommand(this, "WHOIS",
-	"<username> [-modif]",
+	"<username|*> [-modif]",
 	2,
 	sqlUser::F_LOGGEDIN
 	));
@@ -656,10 +661,13 @@ switch( whichEvent )
 		if (theChan->size() == minClients)
 		  startScoringChan(theChan);
 
-		/* If this is the operChan, op opers on join */
+		/* If this is the operChan or supportChan, op opers on join */
 		theClient = static_cast< iClient* >( data1 );
-		if (theClient->isOper() && string_lower(theChan->getName()) == string_lower(operChan))
-		  Op(theChan, theClient);
+		if (theClient->isOper()) {
+		  if ((string_lower(theChan->getName()) == string_lower(operChan))
+		      || (string_lower(theChan->getName()) == string_lower(supportChan)))
+		    Op(theChan, theClient);
+		}
 		break ;
 		}
 	case EVT_KICK:
@@ -2162,7 +2170,7 @@ char chanfix::getFlagChar(const sqlUser::flagType& whichFlag)
    return 'a';
  else if (whichFlag == sqlUser::F_BLOCK)
    return 'b';
- else if (whichFlag == sqlUser::F_CHANNEL)
+ else if (whichFlag == sqlUser::F_COMMENT)
    return 'c';
  else if (whichFlag == sqlUser::F_CHANFIX)
    return 'f';
@@ -2181,7 +2189,7 @@ const std::string chanfix::getFlagsString(const sqlUser::flagType& whichFlags)
    flagstr += "a";
  if (whichFlags & sqlUser::F_BLOCK)
    flagstr += "b";
- if (whichFlags & sqlUser::F_CHANNEL)
+ if (whichFlags & sqlUser::F_COMMENT)
    flagstr += "c";
  if (whichFlags & sqlUser::F_CHANFIX)
    flagstr += "f";
@@ -2197,7 +2205,7 @@ sqlUser::flagType chanfix::getFlagType(const char whichChar)
 switch (whichChar) {
   case 'a': return sqlUser::F_SERVERADMIN;
   case 'b': return sqlUser::F_BLOCK;
-  case 'c': return sqlUser::F_CHANNEL;
+  case 'c': return sqlUser::F_COMMENT;
   case 'f': return sqlUser::F_CHANFIX;
   case 'o': return sqlUser::F_OWNER;
   case 'u': return sqlUser::F_USERMANAGER;

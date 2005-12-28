@@ -55,8 +55,8 @@ if (st.size() < 2) {
   if (theUser->getFlag(sqlUser::F_BLOCK))
     bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXBLOCK>"));
 
-  if (theUser->getFlag(sqlUser::F_CHANNEL))
-    bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXCHANNEL>"));
+  if (theUser->getFlag(sqlUser::F_COMMENT))
+    bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXCOMMENT>"));
 
   if (theUser->getFlag(sqlUser::F_CHANFIX))
     bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXCHANFIX>"));

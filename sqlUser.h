@@ -44,7 +44,7 @@ public:
 	typedef unsigned short int	flagType ;
 	static const flagType F_SERVERADMIN; /* +a */
 	static const flagType F_BLOCK; /* +b */
-	static const flagType F_CHANNEL; /* +c */
+	static const flagType F_COMMENT; /* +c */
 	static const flagType F_CHANFIX; /* +f */
 	static const flagType F_OWNER; /* +o */
 	static const flagType F_USERMANAGER; /* +u */

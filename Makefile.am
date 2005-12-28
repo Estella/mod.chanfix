@@ -20,6 +20,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	HISTORYCommand.cc \
 	INFOCommand.cc \
 	INVITECommand.cc \
+	LISTHOSTSCommand.cc \
 	OPLISTCommand.cc \
 	OPNICKSCommand.cc \
 	QUOTECommand.cc \
