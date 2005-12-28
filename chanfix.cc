@@ -1655,7 +1655,8 @@ return newChannelRecord(theChan->getName());
 
 bool chanfix::deleteChannelRecord(sqlChannel* sqlChan)
 {
-sqlChan->Delete();
+if (sqlChan->Delete())
+  return false;
 sqlChanCache.erase(sqlChan->getChannel());
 delete sqlChan; sqlChan = 0;
 

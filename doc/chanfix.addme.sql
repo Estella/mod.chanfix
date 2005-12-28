@@ -11,4 +11,7 @@
 INSERT INTO users (user_name,created,last_updated,last_updated_by,language_id,flags)
 VALUES ('Admin',now()::abstime::int4,now()::abstime::int4,'(added via addme script)',1,16);
 
+INSERT INTO hosts (user_id,host)
+VALUES (1,'*!*@*');
+
 -- END HERE

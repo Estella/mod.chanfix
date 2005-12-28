@@ -64,7 +64,7 @@ CREATE UNIQUE INDEX channels_name_idx ON channels(LOWER(channel));
 
 CREATE TABLE users (
 	id SERIAL,
-	user_name TEXT NOT NULL,
+	user_name TEXT NOT NULL UNIQUE,
 	created INT4 NOT NULL DEFAULT 0,
 	last_seen INT4 NOT NULL DEFAULT 0,
 	last_updated INT4 NOT NULL DEFAULT 0,

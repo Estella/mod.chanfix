@@ -67,8 +67,8 @@ while (ptr != bot->usersMap_end()) {
     if (numUsersInGroup++ && !groupUsers.empty())
       groupUsers += " ";
     groupUsers += tmpUser->getUserName();
-    groupUsers += " (";
-    groupUsers += (tmpUser->getFlags()) ? std::string("+" + bot->getFlagsString(tmpUser->getFlags())) : "";
+    groupUsers += " (+";
+    groupUsers += (tmpUser->getFlags()) ? bot->getFlagsString(tmpUser->getFlags()) : "";
     groupUsers += ")";
     if (groupUsers.size() > 460) {
       bot->SendTo(theClient, "%s", groupUsers.c_str());

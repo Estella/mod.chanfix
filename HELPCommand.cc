@@ -44,11 +44,10 @@ StringTokenizer st(Message);
 if (st.size() < 2) {
   bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXOPER>"));
 
-  if (theClient->getAccount() != "")
-    bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXLOGGEDIN>"));
-
   if (!theUser)
     return;
+
+  bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXLOGGEDIN>"));
 
   if (theUser->getFlag(sqlUser::F_SERVERADMIN))
     bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXSERVERADMIN>"));

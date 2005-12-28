@@ -62,10 +62,10 @@ COPY "translations" FROM stdin;
 1	51	The channel %s does not have any notes.	31337	0
 1	52	An unknown error occured while checking the note id.	31337	0
 1	53	There is no such note with that note_id.	31337	0
-1	54	No such note %d for channel %s.	31337	0
-1	55	Note %d for channel %s was not added by you. You can only delete notes that you added.	31337	0
-1	56	Note %d for channel %s is not a manually added note. You can only delete notes that were manually added.	31337	0
-1	57	Note %d for channel %s deleted.	31337	0
+1	54	No such note #%d for channel %s.	31337	0
+1	55	Note #%d for channel %s was not added by you. You can only delete notes that you added.	31337	0
+1	56	Note #%d for channel %s is not a manually added note. You can only delete notes that were manually added.	31337	0
+1	57	Note #%d for channel %s deleted.	31337	0
 1	58	You cannot delete an owner.	31337	0
 1	59	You cannot delete a user manager.	31337	0
 1	60	You cannot delete a user in a different group.	31337	0
@@ -166,7 +166,7 @@ COPY "translations" FROM stdin;
 1	157	No such account %s.	31337	0
 1	158	Score for account %s in channel %s: %u.	31337	0
 1	159	Suspending yourself is not a very wise thing to do.	31337	0
-1	160	Last Modified By: %s on %s	31337	0
+1	160	Last modified: %s ago by %s	31337	0
 1	161	NeedOper: Yes	31337	0
 1	162	NeedOper: No	31337	0
 \.

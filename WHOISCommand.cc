@@ -40,12 +40,6 @@ void WHOISCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string&
 {
 StringTokenizer st(Message);
 	
-bool modif = false;
-
-if (st.size() > 1 && string_upper(st[2]) == "-MODIF") {
-  modif = true;
-}
-	
 if (st[1] == "*") {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
@@ -55,13 +49,12 @@ if (st[1] == "*") {
   while (ptr != bot->usersMap_end()) {
     sqlUser* tmpUser = ptr->second;
     bot->SendTo(theClient,
-                bot->getResponse(theUser,
-                                language::user_flags_group,
-                                std::string("User: %s, Flags: %s, Group: %s")).c_str(),
-                                            tmpUser->getUserName().c_str(), (tmpUser->getFlags()) ?
-                                            std::string("+" + bot->getFlagsString(tmpUser->getFlags())).c_str() : "None", 
-                                            tmpUser->getGroup().c_str());
-    
+		bot->getResponse(theUser,
+			language::user_flags_group,
+			std::string("User: %s, Flags: %s, Group: %s")).c_str(),
+				tmpUser->getUserName().c_str(),
+				(tmpUser->getFlags()) ? std::string("+" + bot->getFlagsString(tmpUser->getFlags())).c_str() : "None",
+				tmpUser->getGroup().c_str());
     ptr++;
   }
   bot->SendTo(theClient,
@@ -156,13 +149,13 @@ else
                             language::whois_needoper_no,
                             std::string("NeedOper: No")).c_str());
 
-if (st.size() > 1 && string_upper(st[2]) == "-MODIF")
+if (st.size() > 2 && string_upper(st[2]) == "-MODIF")
   bot->SendTo(theClient,
-            bot->getResponse(theUser,
-                            language::whois_modif,
-                            std::string("Last Modified By: %s on %s")).c_str(),
-			    theUser2->getLastUpdatedBy().c_str(),
-			    bot->tsToDateTime(theUser2->getLastUpdated(),true).c_str());
+	      bot->getResponse(theUser,
+			language::whois_modif,
+			std::string("Last modified: %s ago by %s")).c_str(),
+			bot->prettyDuration(theUser2->getLastUpdated()).c_str(),
+			theUser2->getLastUpdatedBy().c_str());
 
 return;
 } //WHOISCommand::Exec

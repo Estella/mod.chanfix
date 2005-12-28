@@ -30,8 +30,7 @@ AM_PROG_LIBTOOL
 AC_MSG_CHECKING([whether to detect pthread libraries])
 
 AC_ARG_ENABLE([threads],
-    AC_HELP_STRING([--disable-threads],
-    [disable the linking of the pthread library (default = no)]),
+    AS_HELP_STRING(--disable-threads,disable the linking of the pthread library (default = no)),
     [check_threadLib=$enable_threads],
     [check_threadLib=yes])
 
@@ -67,6 +66,9 @@ if [ test x"$gcc_support_pthread" = xno ]; then
 	fi
 fi
 
+dnl This calls a macro in ax_boost_thread.m4
+AX_BOOST_THREAD
+
 CXXFLAGS="-W -Wall -pipe -I$srcdir/../libltdl -I$srcdir/../include"
 CXXFLAGS="$CXXFLAGS -I$srcdir/../libgnuworld"
 CFLAGS="$CXXFLAGS"
@@ -96,53 +98,46 @@ AC_TYPE_SIZE_T
 AC_TYPE_UID_T
 
 AC_ARG_WITH(debug,
-	AC_HELP_STRING([--without-debug],
-		       [Disable debugging in the executables]),
+	AS_HELP_STRING(--without-debug,Disable debugging in the executables),
 	[dummy=true],
 	[CXXFLAGS="$CXXFLAGS -g"]
 )
 
 AC_ARG_WITH(pedantic,
-	AC_HELP_STRING([--with-pedantic],
-			[Add -pedantic to compile options]),
+	AS_HELP_STRING(--with-pedantic,Add -pedantic to compile options),
 	[CXXFLAGS="$CXXFLAGS -pedantic"]
 )
 
 AC_ARG_WITH(optimization,
-	AC_HELP_STRING([--with-optimization],
-			[Optimize the executables]),
+	AS_HELP_STRING(--with-optimization,Optimize the executables),
 	[CXXFLAGS="$CXXFLAGS -O2"],
 	[CXXFLAGS="$CXXFLAGS -O0"]
 )
 
 AC_ARG_WITH(prof,
-	AC_HELP_STRING([--with-prof],
-			[Generate profiling information]),
+	AS_HELP_STRING(--with-prof,Generate profiling information),
 	[CXXFLAGS="$CXXFLAGS -pg"]
 )
 
 check_pgsql=yes
 AC_ARG_WITH(pgsql,
-	AC_HELP_STRING([--without-pgsql],
-			[Do not check for pgsql.  This will cause \
-several modules to be uncompilable]),
+	AS_HELP_STRING(--without-pgsql,Do not check for pgsql.  This will cause \
+several modules to be uncompilable),
 	[check_pgsql=$withval]
 )
 
 PGSQL_LIB=/usr/local/pgsql/lib
 AC_ARG_WITH(pgsql-lib,
-	AC_HELP_STRING([--with-pgsql-lib=PGSQLLIBDIR],
-			[Specify location to find libpq++.so, default is \
-/usr/local/pgsql/lib]),
+	AS_HELP_STRING(--with-pgsql-lib=PGSQLLIBDIR,Specify location to find libpq++.so, default is \
+/usr/local/pgsql/lib),
 	[PGSQL_LIB=$withval]
 )
 dnl echo PGSQL_LIB: $PGSQL_LIB
 
 PGSQL_INCLUDE=/usr/local/pgsql/include
 AC_ARG_WITH(pgsql-include,
-	AC_HELP_STRING([--with-pgsql-include=PGSQLINCLUDEDIR],
-			[Specify location to find libpq++.h, default is \
-/usr/local/pgsql/include]),
+	AS_HELP_STRING(--with-pgsql-include=PGSQLINCLUDEDIR,Specify location to find libpq++.h, default is \
+/usr/local/pgsql/include),
 	[PGSQL_INCLUDE=$withval]
 )
 dnl echo PGSQL_INCLUDE: $PGSQL_INCLUDE

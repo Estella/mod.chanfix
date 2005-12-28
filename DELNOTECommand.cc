@@ -108,7 +108,7 @@ if (channelID != theChan->getID()) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::no_note_id_for_chan,
-                              std::string("No such note %d for channel %s.")).c_str(),
+                              std::string("No such note #%d for channel %s.")).c_str(),
                                           messageId, theChan->getChannel().c_str());
   return;
 }
@@ -117,7 +117,7 @@ if (userID != theUser->getID() && !theUser->getFlag(sqlUser::F_OWNER)) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::note_not_added_by_you,
-                              std::string("Note %d for channel %s was not added by you. You can only delete notes that you added.")).c_str(),
+                              std::string("Note #%d for channel %s was not added by you. You can only delete notes that you added.")).c_str(),
                                           messageId, theChan->getChannel().c_str());
   return;
 }
@@ -126,7 +126,7 @@ if (eventType != sqlChannel::EV_NOTE && !theUser->getFlag(sqlUser::F_OWNER)) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::note_not_manually_added,
-                              std::string("Note %d for channel %s is not a manually added note. You can only delete notes that were manually added.")).c_str(),
+                              std::string("Note #%d for channel %s is not a manually added note. You can only delete notes that were manually added.")).c_str(),
                                           messageId, theChan->getChannel().c_str());
   return;
 }
@@ -136,7 +136,7 @@ theChan->deleteNote(messageId);
 bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::note_deleted,
-                            std::string("Note %d for channel %s deleted.")).c_str(),
+                            std::string("Note #%d for channel %s deleted.")).c_str(),
                                         messageId, theChan->getChannel().c_str());
 
 return;

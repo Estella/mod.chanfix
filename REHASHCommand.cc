@@ -59,6 +59,7 @@ if (option == "CONFIG" || option.empty()) {
 if (option == "HELP") {
   bot->helpTable.clear();
   bot->loadHelpTable();
+
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::reloaded_help,
@@ -73,6 +74,7 @@ if (option == "TRANSLATIONS") {
   bot->languageTable.clear();
   bot->translationTable.clear();
   bot->loadTranslationTable();
+
   bot->SendTo(theClient, "Successfully reloaded translation tables. %i entries in table.",
               bot->translationTable.size());
   bot->logAdminMessage("%s (%s) rehashed the chanfix translation tables.",

@@ -87,7 +87,7 @@ minClients = 4
 
 # Which clients score a point if they are opped?
 # Client needs to be idented (no ~ before username)
-clientNeedsIdent = true
+clientNeedsIdent = false
 
 # ---------------------------------------------------------------------
 # Miscellaneous settings
