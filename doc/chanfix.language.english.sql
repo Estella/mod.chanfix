@@ -166,4 +166,7 @@ COPY "translations" FROM stdin;
 1	157	No such account %s.	31337	0
 1	158	Score for account %s in channel %s: %u.	31337	0
 1	159	Suspending yourself is not a very wise thing to do.	31337	0
+1	160	Last Modified By: %s on %s	31337	0
+1	161	NeedOper: Yes	31337	0
+1	162	NeedOper: No	31337	0
 \.

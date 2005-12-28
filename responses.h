@@ -236,6 +236,9 @@ namespace gnuworld
 		const int whois_flags_none		= 143;
 		const int whois_flags			= 144;
 		const int whois_lang			= 155;
+		const int whois_modif			= 160;
+		const int whois_needoper_yes		= 161;
+		const int whois_needoper_no		= 162;
 
 		/* chanfix.cc */
 		const int no_commands_during_burst	= 145;

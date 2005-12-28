@@ -39,7 +39,13 @@ namespace gnuworld
 void WHOISCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
+	
+bool modif = false;
 
+if (st.size() > 1 && string_upper(st[2]) == "-MODIF") {
+  modif = true;
+}
+	
 if (st[1] == "*") {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
@@ -55,6 +61,7 @@ if (st[1] == "*") {
                                             tmpUser->getUserName().c_str(), (tmpUser->getFlags()) ?
                                             std::string("+" + bot->getFlagsString(tmpUser->getFlags())).c_str() : "None", 
                                             tmpUser->getGroup().c_str());
+    
     ptr++;
   }
   bot->SendTo(theClient,
@@ -139,9 +146,23 @@ bot->SendTo(theClient,
 			    langName.c_str(), langCode.c_str());
 
 if (theUser2->getNeedOper())
-  bot->SendTo(theClient, "NeedOper: Yes");
+  bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::whois_needoper_yes,
+                            std::string("NeedOper: Yes")).c_str());
 else
-  bot->SendTo(theClient, "NeedOper: No");
+  bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::whois_needoper_no,
+                            std::string("NeedOper: No")).c_str());
+
+if (st.size() > 1 && string_upper(st[2]) == "-MODIF")
+  bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::whois_modif,
+                            std::string("Last Modified By: %s on %s")).c_str(),
+			    theUser2->getLastUpdatedBy().c_str(),
+			    bot->tsToDateTime(theUser2->getLastUpdated(),true).c_str());
 
 return;
 } //WHOISCommand::Exec

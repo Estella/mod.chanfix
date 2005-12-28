@@ -63,10 +63,10 @@ public:
 	inline const int getCreated() const
 		{ return created; }
 
-	inline const unsigned int getLastSeen() const
+	inline const time_t getLastSeen() const
 		{ return last_seen; }
 
-	inline const unsigned int getLastUpdated() const
+	inline const time_t getLastUpdated() const
 		{ return last_updated; }
 
 	inline const std::string& getLastUpdatedBy() const

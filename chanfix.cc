@@ -273,7 +273,7 @@ RegisterCommand(new WHOGROUPCommand(this, "WHOGROUP",
 	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
 	));
 RegisterCommand(new WHOISCommand(this, "WHOIS",
-	"<username>",
+	"<username> [-modif]",
 	2,
 	sqlUser::F_LOGGEDIN
 	));
