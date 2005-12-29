@@ -22,7 +22,7 @@ QUOTE	1	This command should never be used.\nUsing it would be bad.\nHow bad?\nTr
 HELP	1	Shows help about the specified command. With no command specified, all commands that you have access to use are listed.
 HISTORY	1	Shows the times that the specified channel has been manually fixed.
 INFO	1	Shows all notes of the specified channel and whether the channel is actively blocked.
-LISTHOSTS	1	With no username specified, it lists the hostmasks chanfix recognizes you by. Otherwise, it views the specified username's host list.\n\002NOTE:\002 Server admins (+a) can only view host lists of users within their own server group. Users lower than server admin status can only view their own host lists.
+LISTHOSTS	1	With no username specified, it lists the hostmasks chanfix recognizes you by. Otherwise, it views the specified username's host list.\nNOTE: Server admins (+a) can only view host lists of users within their own server group. Users lower than server admin status can only view their own host lists.
 OPLIST	1	Shows the top 10 op accounts and their scores for the specified channel.
 OPNICKS	1	Shows the nicknames currently opped on the specified channel.
 REHASH	1	Reloads the translations, configuration, or help values based on the specified target.

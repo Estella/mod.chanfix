@@ -90,7 +90,9 @@ bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::adding_hostmask_to_user,
                             std::string("Added hostmask %s to user %s.")).c_str(),
-                                        targetUser->getUserName().c_str());
+					st[2].c_str(),
+					targetUser->getUserName().c_str());
+
 bot->logAdminMessage("%s (%s) added hostmask %s to user %s.",
 		     theUser->getUserName().c_str(), 
 		     theClient->getRealNickUserHost().c_str(), 
