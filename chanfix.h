@@ -221,9 +221,7 @@ public:
 
 	void givePoints(Channel*, iClient*);
 	void gotOpped(Channel*, iClient*);
-	void lostOps(Channel*, iClient*);
 
-	bool wasOpped(Channel*, iClient*);
 	bool hasIdent(iClient*);
 
 	void checkNetwork();
@@ -318,6 +316,9 @@ public:
 
 	typedef std::map <std::string, Channel*, noCaseCompare> clientOpsType;
 	clientOpsType*		findMyOps(iClient*);
+
+	clientOpsType*		wasOpped(Channel*, iClient*);
+	void 			lostOps(Channel*, iClient*, clientOpsType*);
 
 	typedef std::list< sqlChanOp* > chanOpsType;
 	chanOpsType		getMyOps(Channel*);

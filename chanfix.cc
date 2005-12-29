@@ -674,8 +674,9 @@ switch( whichEvent )
 	case EVT_PART:
 		{
 		theClient = static_cast< iClient* >( data1 );
-		if (wasOpped(theChan, theClient))
-		  lostOps(theChan, theClient);
+		clientOpsType* myOps = wasOpped(theChan, theClient);
+		if (myOps && !myOps->empty())
+		  lostOps(theChan, theClient, myOps);
 		break ;
 		}
 	default:
@@ -700,15 +701,19 @@ if (!canScoreChan(theChan, true))
 for (xServer::opVectorType::const_iterator ptr = theTargets.begin();
      ptr != theTargets.end(); ++ptr) {
   ChannelUser* tmpUser = ptr->second;
-  bool polarity = ptr->first;
 
+  if (tmpUser->getClient()->getAccount() != "")
+    continue;
+
+  bool polarity = ptr->first;
   if (polarity) {
     // Someone is opped
     gotOpped(theChan, tmpUser->getClient());
   } else {
     // Someone is deopped
-    if (wasOpped(theChan, tmpUser->getClient()))
-      lostOps(theChan, tmpUser->getClient());
+    clientOpsType* myOps = wasOpped(theChan, tmpUser->getClient());
+    if (myOps && !myOps->empty())
+      lostOps(theChan, tmpUser->getClient(), myOps);
   } // if
 } // for
 }
@@ -741,7 +746,7 @@ switch(whichEvent)
 		clientOpsType* myOps = findMyOps(theClient);
 		for (clientOpsType::iterator ptr = myOps->begin();
 		     ptr != myOps->end(); ptr++)
-		  lostOps(ptr->second, theClient);
+		  lostOps(ptr->second, theClient, myOps);
 		break;
 		}
 	}
@@ -1272,28 +1277,27 @@ void chanfix::gotOpped(Channel* thisChan, iClient* thisClient)
 if (clientNeedsIdent && !hasIdent(thisClient))
   return;
 
-if (thisClient->getAccount() != "") {
-  /* elog	<< "chanfix::gotOpped> DEBUG: " << thisClient->getAccount()
-   *	<< " got opped on " << thisChan->getName()
-   *	<< std::endl;
-   */
-  sqlChanOp* thisOp = findChanOp(thisChan, thisClient);
-  if (!thisOp) {
-    if (countMyOps(thisChan) >= MAXOPCOUNT)
-      return; /* No room for new ops */
-    thisOp = newChanOp(thisChan, thisClient);
-  }
+/* elog	<< "chanfix::gotOpped> DEBUG: " << thisClient->getAccount()
+ *	<< " got opped on " << thisChan->getName()
+ *	<< std::endl;
+ */
+sqlChanOp* thisOp = findChanOp(thisChan, thisClient);
+if (!thisOp) {
+  if (countMyOps(thisChan) >= MAXOPCOUNT)
+    return; /* No room for new ops */
+  thisOp = newChanOp(thisChan, thisClient);
+}
 
-  thisOp->setLastSeenAs(thisClient->getRealNickUserHost());
-  thisOp->setTimeLastOpped(currentTime());
+thisOp->setLastSeenAs(thisClient->getRealNickUserHost());
+thisOp->setTimeLastOpped(currentTime());
 
-  if (wasOpped(thisChan, thisClient))
-    return;
+clientOpsType* myOps = wasOpped(thisChan, thisClient);
+if (!myOps || myOps->empty())
+  return;
 
-  clientOpsType* myOps = findMyOps(thisClient);
-  myOps->insert(clientOpsType::value_type(thisChan->getName(), thisChan));
-  thisClient->setCustomData(this, static_cast< void*>(myOps));
-} //if
+myOps->insert(clientOpsType::value_type(thisChan->getName(), thisChan));
+thisClient->setCustomData(this, static_cast< void*>(myOps));
+
 return;
 }
 
@@ -1305,27 +1309,23 @@ if (userName[0] == '~')
 return true;
 }
 
-bool chanfix::wasOpped(Channel* theChan, iClient* theClient)
+chanfix::clientOpsType* chanfix::wasOpped(Channel* theChan, iClient* theClient)
 {
 clientOpsType* myOps = findMyOps(theClient);
 if (!myOps || myOps->empty())
-  return false;
+  return 0;
 
 theClient->setCustomData(this, static_cast< void*>(myOps));
 
 clientOpsType::iterator ptr = myOps->find(theChan->getName());
-
 if (ptr != myOps->end())
-  return true;
-return false;
+  return myOps;
+
+return 0;
 }
 
-void chanfix::lostOps(Channel* theChan, iClient* theClient)
+void chanfix::lostOps(Channel* theChan, iClient* theClient, clientOpsType* myOps)
 {
-clientOpsType* myOps = findMyOps(theClient);
-if (!myOps || myOps->empty())
-  return;
-
 clientOpsType::iterator ptr = myOps->find(theChan->getName());
 if (ptr != myOps->end())
   myOps->erase(theChan->getName());
