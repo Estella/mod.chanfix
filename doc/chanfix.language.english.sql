@@ -171,5 +171,6 @@ COPY "translations" FROM stdin;
 1	163	You cannot view hosts of a user in a different group.	31337	0
 1	164	Host list for %s:	31337	0
 1	165	End of host list.	31337	0
-1	166	No scores on %s for %s.	31337	0
+1	166	No scores for %s on %s.	31337	0
+1	167	~U %s no@scores.for.nick 0	31337	0
 \.

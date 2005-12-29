@@ -83,6 +83,12 @@ bot->SendTo(theClient,
                             std::string("The channel %s has been blocked.")).c_str(),
                                         theChan->getChannel().c_str());
 
+/* Log command */
+bot->logAdminMessage("%s (%s) has added the BLOCK flag to %s",
+		     theUser->getUserName().c_str(),
+		     theClient->getRealNickUserHost().c_str(),
+		     theChan->getChannel().c_str());
+
 return;
 }
 } // namespace gnuworld

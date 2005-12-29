@@ -74,6 +74,12 @@ bot->SendTo(theClient,
                             std::string("ALERT flag added to channel %s")).c_str(),
                                         theChan->getChannel().c_str());
 
+/* Log command */
+bot->logAdminMessage("%s (%s) has added the ALERT flag to %s",
+		     theUser->getUserName().c_str(),
+		     theClient->getRealNickUserHost().c_str(),
+		     theChan->getChannel().c_str());
+
 return;
 }
 } // namespace gnuworld

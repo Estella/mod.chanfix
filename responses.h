@@ -171,6 +171,7 @@ namespace gnuworld
 		const int top_scores_for_ops		= 94;
 		const int top_scores_for_nonops		= 95;
 		const int no_scores_for_nick		= 166;
+		const int compact_no_scores_for_nick	= 167;
 
 		/* SET */
 		const int num_server_syntax		= 96;

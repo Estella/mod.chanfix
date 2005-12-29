@@ -72,6 +72,12 @@ bot->SendTo(theClient,
                             std::string("ALERT flag removed from channel %s")).c_str(),
                                         theChan->getChannel().c_str());
 
+/* Log command */
+bot->logAdminMessage("%s (%s) has removed the ALERT flag from %s",
+		     theUser->getUserName().c_str(),
+		     theClient->getRealNickUserHost().c_str(),
+		     theChan->getChannel().c_str());
+
 return;
 }
 } // namespace gnuworld
