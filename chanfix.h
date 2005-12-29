@@ -324,6 +324,9 @@ public:
 
 	typedef std::map <std::string, bool> ScoredOpsMapType;
 	ScoredOpsMapType	scoredOpsList;
+
+	typedef std::map <std::string, size_t> myOpsCountType;
+	myOpsCountType		myOpsCount;
 	
 	/**
 	 * The db clients map

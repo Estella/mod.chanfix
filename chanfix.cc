@@ -915,6 +915,9 @@ if (cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
      newOp->setAllMembers(cacheCon, i);
      std::pair<std::string, std::string> thePair (newOp->getChannel(), newOp->getAccount());
      sqlChanOps.insert(sqlChanOpsType::value_type(thePair, newOp));
+
+     size_t numMyOps = countMyOps(newOp->getChannel());
+     myOpsCount.insert(myOpsCountType::value_type(newOp->getChannel(), ++numMyOps));
   }
 } else {
   elog << "*** [chanfix::precacheChanOps] Error executing query: "
@@ -1118,6 +1121,9 @@ assert( newOp != 0 ) ;
 
 sqlChanOps.insert(sqlChanOpsType::value_type(std::pair<std::string,std::string>(channel, account), newOp));
 
+size_t numMyOps = countMyOps(channel);
+myOpsCount.insert(myOpsCountType::value_type(channel, ++numMyOps));
+
 /* elog << "chanfix::newChanOp> DEBUG: Added new operator: " << account << " on " << channel << "!!" << std::endl; */
 
 newOp->setChannel(channel);
@@ -1154,15 +1160,11 @@ return myOps;
 
 size_t chanfix::countMyOps(const std::string& channel)
 {
-size_t myOpsCount = 0;
+myOpsCountType::iterator ptr = myOpsCount.find(channel);
+if (ptr != myOpsCount.end())
+  return ptr->second;
 
-for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
-     ptr != sqlChanOps.end(); ptr++) {
-  if (ptr->second->getChannel() == channel)
-    myOpsCount++;
-}
-
-return myOpsCount;
+return 0;
 }
 
 size_t chanfix::countMyOps(Channel* theChan)
@@ -2056,9 +2058,9 @@ else
   nextDay++;
 
 time_t maxFirstOppedTS = currentTime() - 86400;
-unsigned int numOpsLeft = 0;
-std::string curChan;
 sqlChanOp* curOp;
+size_t numOpsLeft = 0;
+std::string curChan;
 
 for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
      ptr != sqlChanOps.end(); ptr++) {
@@ -2071,11 +2073,15 @@ for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
   curOp->calcTotalPoints();
   if (curOp->getPoints() <= 0 && maxFirstOppedTS > curOp->getTimeFirstOpped()) {
     sqlChanOps.erase(ptr);
-    numOpsLeft--;
+    myOpsCount.insert(myOpsCountType::value_type(curChan, --numOpsLeft));
     delete curOp; curOp = 0;
   }
-#ifndef REMEMBER_CHANNELS_WITH_NOTES_OR_FLAGS
   if (!numOpsLeft) {
+    myOpsCountType::iterator myOpsPtr = myOpsCount.find(curChan);
+    if (myOpsPtr != myOpsCount.end())
+      myOpsCount.erase(myOpsPtr);
+
+#ifndef REMEMBER_CHANNELS_WITH_NOTES_OR_FLAGS
     /* Empty channel, start deleting info */
     sqlChannel* sqlChan = getChannelRecord(curChan);
     if (!sqlChan)
@@ -2092,8 +2098,8 @@ for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
 		<< curChan.c_str()
 		<< std::endl;
     }
-  }
 #endif
+  }
 }
 
 logAdminMessage("Completed database rotation in %u ms.",
