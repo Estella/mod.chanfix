@@ -154,8 +154,10 @@ if (st.size() > 2) {
 	  else
             bot->SendTo(theClient,
                         bot->getResponse(theUser,
-                                        language::no_such_nick,
-                                        std::string("No such nick %s.")).c_str(), scUser);
+                                        language::no_scores_for_nick,
+                                        std::string("No scores on %s for %s.")).c_str(),
+					netChan->getName().c_str(),
+					scUser);
 	  return;
 	}
 	while (acctPtr != acctToScore.end()) {
@@ -195,8 +197,10 @@ if (st.size() > 2) {
       else
         bot->SendTo(theClient,
                     bot->getResponse(theUser,
-                                    language::no_such_nick,
-                                    std::string("No such nick %s.")).c_str(), scUser);
+                                    language::no_scores_for_nick,
+                                    std::string("No scores on %s for %s.")).c_str(),
+				    netChan->getName().c_str(),
+				    scUser);
       return;
     } // for
   } //else
