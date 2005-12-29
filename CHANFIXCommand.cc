@@ -177,7 +177,7 @@ if (theChan->getFlag(sqlChannel::F_ALERT) && !override) {
 bot->manualFix(netChan);
 
 /* Add note to the channel about this manual fix */
-theChan->addNote(sqlChannel::EV_CHANFIX, theUser, "");
+theChan->addNote(sqlChannel::EV_CHANFIX, theUser, (override) ? "[override]" : "");
 
 /* Log the chanfix */
 bot->SendTo(theClient,
@@ -185,10 +185,11 @@ bot->SendTo(theClient,
                             language::manual_chanfix_ack,
                             std::string("Manual chanfix acknowledged for %s")).c_str(),
                                         netChan->getName().c_str());
-bot->logAdminMessage("%s (%s) requested a manual fix for %s",
+bot->logAdminMessage("%s (%s) requested a manual fix for %s%s",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str(),
-		     netChan->getName().c_str());
+		     netChan->getName().c_str(),
+		     (override) ? " [override]" : "");
 
 return;
 }
