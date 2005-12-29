@@ -228,7 +228,7 @@ RegisterCommand(new SETCommand(this, "SET",
 	sqlUser::F_OWNER
 	));
 RegisterCommand(new SETGROUPCommand(this, "SETGROUP",
-	"<user> <group>",
+	"<username> <group>",
 	3,
 	sqlUser::F_USERMANAGER
 	));
