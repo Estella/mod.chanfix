@@ -173,4 +173,6 @@ COPY "translations" FROM stdin;
 1	165	End of host list.	31337	0
 1	166	No scores for %s on %s.	31337	0
 1	167	~U %s no@scores.for.nick 0	31337	0
+1	168	List of all groups:	31337	0
+1	169	Number of groups: %d.	31337	0
 \.

@@ -232,6 +232,8 @@ namespace gnuworld
 		const int whogroup_your_group		= 134;
 		const int users_with_group		= 135;
 		const int number_of_users		= 136;
+		const int whogroup_list_groups		= 168;
+		const int number_of_groups		= 169;
 
 		/* WHOIS */
 		const int list_of_all_users		= 137;

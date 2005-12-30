@@ -273,8 +273,8 @@ RegisterCommand(new USETCommand(this, "USET",
 	sqlUser::F_LOGGEDIN
 	));
 RegisterCommand(new WHOGROUPCommand(this, "WHOGROUP",
-	"<group>",
-	2,
+	"[group]",
+	1,
 	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
 	));
 RegisterCommand(new WHOISCommand(this, "WHOIS",

@@ -38,7 +38,7 @@ WHOIS	1	Shows account information for the specified user.
 SETGROUP	1	Sets the group for the specified user.
 SHUTDOWN	1	Saves the database and shuts GNUWorld down.
 UNSUSPEND	1	Unsuspends the specified user.
-WHOGROUP	1	Shows all users in the specified group along with their flags.
+WHOGROUP	1	Shows all users in the specified group along with their flags. If no argument is given, all groups are listed.
 <INDEXOPER>	1	\002Oper Level\002: SCORE CSCORE HISTORY INFO STATUS
 <INDEXLOGGEDIN>	1	\002Logged In\002: CHECK LISTHOSTS USET WHOIS
 <INDEXBLOCK>	1	\002Blocker (+b)\002: BLOCK UNBLOCK
