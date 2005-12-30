@@ -43,6 +43,7 @@ namespace gnuworld
 		const int already_has_hostmask		= 11;
 		const int failed_adding_hostmask	= 12;
 		const int adding_hostmask_to_user	= 13;
+		const int removed_default_hostmask	= 170;
 
 		/* ADDNOTE */
 		const int invalid_channel_name		= 14;
@@ -238,7 +239,6 @@ namespace gnuworld
 		/* WHOIS */
 		const int list_of_all_users		= 137;
 		const int user_flags_group		= 138;
-		const int end_of_user_list		= 139;
 		const int whois_suspended		= 140;
 		const int whois_group			= 142;
 		const int whois_flags_none		= 143;

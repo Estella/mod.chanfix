@@ -43,13 +43,14 @@ StringTokenizer st(Message);
 if (st.size() == 1) {
   /* No parameter supplied, so list all groups */
   PgDatabase* cacheCon = bot->theManager->getConnection();
+
   std::stringstream theQuery;
   theQuery << "SELECT DISTINCT faction FROM users ORDER BY faction ASC";
-	
+
   if (!cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
     elog	<< "chanfix::WHOGROUPCommand> SQL Error: "
-	<< cacheCon->ErrorMessage()
-	<< std::endl;
+		<< cacheCon->ErrorMessage()
+		<< std::endl;
     return;
   }
 
@@ -60,18 +61,19 @@ if (st.size() == 1) {
 		language::whogroup_list_groups,
 		std::string("List of all groups:")).c_str());
 
-  for (int i = 0 ; i < cacheCon->Tuples(); i++)
-	{
-	bot->SendTo(theClient, cacheCon->GetValue(i, 0));
-	numGroups++;
-	}
+  for (int i = 0 ; i < cacheCon->Tuples(); i++) {
+    bot->SendTo(theClient, cacheCon->GetValue(i, 0));
+    numGroups++;
+  }
 
   /* Dispose of our connection instance */
   bot->theManager->removeConnection(cacheCon);
+
   bot->SendTo(theClient,
-            bot->getResponse(theUser,
-                            language::number_of_groups,
-                            std::string("Number of groups: %d.")).c_str(), numGroups);
+	      bot->getResponse(theUser,
+			language::number_of_groups,
+			std::string("Number of groups: %d.")).c_str(),
+			numGroups);
   
   return;
 }
@@ -118,9 +120,10 @@ if (!groupUsers.empty())
   bot->SendTo(theClient, "%s", groupUsers.c_str());
 
 bot->SendTo(theClient,
-            bot->getResponse(theUser,
-                            language::number_of_users,
-                            std::string("Number of users: %d.")).c_str(), numUsersInGroup);
+	    bot->getResponse(theUser,
+			language::number_of_users,
+			std::string("Number of users: %d.")).c_str(),
+			numUsersInGroup);
 
 return;
 } //WHOGROUPCommand::Exec

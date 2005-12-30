@@ -62,12 +62,22 @@ if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
 }
   
 if (targetUser->matchHost(st[2].c_str())) {
-  bot->SendTo(theClient,
-              bot->getResponse(theUser,
-                              language::already_has_hostmask,
-                              std::string("User %s already has hostmask %s.")).c_str(),
-                                          targetUser->getUserName().c_str(), st[2].c_str());
-  return;
+  if ((st[2] != "*!*@*") && targetUser->hasHost("*!*@*")) {
+    targetUser->delHost("*!*@*");
+    bot->SendTo(theClient,
+		bot->getResponse(theUser,
+			language::removed_default_hostmask,
+			std::string("Removed the default hostmask of *!*@* from user %s.")).c_str(),
+			targetUser->getUserName().c_str());
+  } else {
+    bot->SendTo(theClient,
+		bot->getResponse(theUser,
+			language::already_has_hostmask,
+			std::string("User %s already has hostmask %s.")).c_str(),
+				targetUser->getUserName().c_str(),
+				st[2].c_str());
+    return;
+  }
 }
 
 if (!targetUser->addHost(st[2].c_str())) {

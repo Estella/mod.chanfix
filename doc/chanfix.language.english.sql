@@ -145,7 +145,6 @@ COPY "translations" FROM stdin;
 1	136	Number of users: %d.	31337	0
 1	137	List of all users:	31337	0
 1	138	User: %s, Flags: %s, Group: %s	31337	0
-1	139	End of user list.	31337	0
 1	140	--SUSPENDED--	31337	0
 1	142	Group: %s	31337	0
 1	143	Flags: none.	31337	0
@@ -175,4 +174,5 @@ COPY "translations" FROM stdin;
 1	167	~U %s no@scores.for.nick 0	31337	0
 1	168	List of all groups:	31337	0
 1	169	Number of groups: %d.	31337	0
+1	170	Removed the default hostmask of *!*@* from user %s.	31337	0
 \.

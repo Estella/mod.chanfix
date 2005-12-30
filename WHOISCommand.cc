@@ -41,6 +41,7 @@ void WHOISCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string&
 StringTokenizer st(Message);
 	
 if (st[1] == "*") {
+  unsigned int numUsers = 0;
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::list_of_all_users,
@@ -56,11 +57,13 @@ if (st[1] == "*") {
 				(tmpUser->getFlags()) ? std::string("+" + bot->getFlagsString(tmpUser->getFlags())).c_str() : "None",
 				tmpUser->getGroup().c_str());
     ptr++;
+    numUsers++;
   }
   bot->SendTo(theClient,
-              bot->getResponse(theUser,
-                              language::end_of_user_list,
-                              std::string("End of user list.")).c_str());
+	      bot->getResponse(theUser,
+			language::number_of_users,
+			std::string("Number of users: %d.")).c_str(),
+			numUsers);
   return;
 }
 
