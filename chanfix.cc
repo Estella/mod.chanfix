@@ -1056,18 +1056,20 @@ switch( currentState ) {
 	{
 	elog	<< "chanfix::changeState> Exiting state RUN"
 		<< std::endl;
+	break;
 	}
 	case SPLIT:
 	{
 	elog	<< "chanfix::changeState> Exiting state SPLIT"
 		<< std::endl;
+	break;
 	}
 	case INIT:
 	{
 	elog	<< "chanfix::changeState> Exiting state INIT"
 		<< std::endl;
+	break;
 	}
-
 }
 
 currentState = newState;
@@ -1377,13 +1379,13 @@ void chanfix::autoFix()
 {
 /* If autofixing has been disabled, well, forget it. */
 if (!enableAutoFix) {
-  elog << "chanfix::autoFix> DEBUG: AutoFix not enabled." << std::endl;
+  //elog << "chanfix::autoFix> DEBUG: AutoFix not enabled." << std::endl;
   return;
 }
 
 /* If there are too many servers split, don't autofix. */
 if (currentState != RUN) {
-  elog << "chanfix::autoFix> DEBUG: currentState != RUN" << std::endl;
+  //elog << "chanfix::autoFix> DEBUG: currentState != RUN" << std::endl;
   return;
 }
 
@@ -1653,7 +1655,7 @@ sqlChannel* chanfix::getChannelRecord(const std::string& Channel)
 sqlChannelCacheType::iterator ptr = sqlChanCache.find(Channel);
 if(ptr != sqlChanCache.end())
 	{
-	elog << "chanfix::getChannelRecord> DEBUG: cached channel " << Channel << " found" << std::endl;
+	//elog << "chanfix::getChannelRecord> DEBUG: cached channel " << Channel << " found" << std::endl;
 	return ptr->second;
 	}
 return 0;
@@ -2335,7 +2337,7 @@ if (cacheCon->ExecTuplesOk(langQuery.str().c_str()))
 
 elog	<< "*** [chanfix::loadTranslationTable]: Loaded "
 	<< languageTable.size()
-	<< " languages."
+	<< " language" << ((languageTable.size() != 1) ? "s." : ".")
 	<< std::endl;
 
 /* Grab the translations table */
