@@ -662,10 +662,6 @@ switch( whichEvent )
 	{
 	case EVT_JOIN:
 		{
-		/* First we need to see if the channel is first = minClients */
-		if (chanServLinked && (theChan->size() == minClients))
-		  startScoringChan(theChan);
-
 		/* If this is the operChan or supportChan, op opers on join */
 		theClient = static_cast< iClient* >( data1 );
 		if (theClient->isOper()) {
@@ -1262,6 +1258,7 @@ if (!thisOp) {
   if ((numMyOps >= MAXOPCOUNT) || (!numMyOps && !chanServLinked))
     return; /* No room for new ops or channel service not linked */
   thisOp = newChanOp(theChan, theClient);
+  gotOpped(theChan, theClient);
 }
 
 thisOp->addPoint();
@@ -1289,10 +1286,11 @@ if (!thisOp) {
   if ((numMyOps >= MAXOPCOUNT) || (!numMyOps && !chanServLinked))
     return; /* No room for new ops or channel service not linked */
   thisOp = newChanOp(thisChan, thisClient);
+} else {
+  thisOp->setTimeLastOpped(currentTime());
 }
 
 thisOp->setLastSeenAs(thisClient->getRealNickUserHost());
-thisOp->setTimeLastOpped(currentTime());
 
 clientOpsType* myOps = findMyOps(thisClient);
 if (myOps && !myOps->empty()) {
@@ -2164,32 +2162,6 @@ if (scoredOpsList.size() > 0)
   scoredOpsList.clear();
 return;
 } //giveAllOpsPoints
-
-void chanfix::startScoringChan(Channel* theChan)
-{
-chanfix::chanOpsType myOps = getMyOps(theChan);
-if (!myOps.empty()) return;
-
-typedef std::map<std::string,bool> ScoredOpsMapType;
-ScoredOpsMapType scoredOpsList;
-ScoredOpsMapType::iterator scOpiter;
-if (!canScoreChan(theChan, false))
-  return;
-for (Channel::userIterator ptr = theChan->userList_begin();
-     ptr != theChan->userList_end(); ptr++) {
-  ChannelUser* curUser = ptr->second;
-  if (curUser->isModeO() && curUser->getClient()->getAccount() != "") {
-    scOpiter = scoredOpsList.find(curUser->getClient()->getAccount());
-    if (scOpiter == scoredOpsList.end()) {
-      gotOpped(theChan, curUser->getClient());
-      scoredOpsList.insert(make_pair(curUser->getClient()->getAccount(), true));
-    }
-  }
-}
-scoredOpsList.clear();
-
-return;
-}
 
 char chanfix::getFlagChar(const sqlUser::flagType& whichFlag)
 {

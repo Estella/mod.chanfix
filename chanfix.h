@@ -233,8 +233,6 @@ public:
 
 	bool fixChan(sqlChannel*, bool);
 
-	void startScoringChan(Channel*);
-
 	sqlChannel* getChannelRecord(const std::string&);
 	sqlChannel* getChannelRecord(Channel*);
 
