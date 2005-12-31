@@ -175,4 +175,6 @@ COPY "translations" FROM stdin;
 1	168	List of all groups:	31337	0
 1	169	Number of groups: %d.	31337	0
 1	170	Removed the default hostmask of *!*@* from user %s.	31337	0
+1	171	Channel service linked. New channels will be scored.	31337	0
+1	172	Channel service not linked. New channels will not be scored.	31337	0
 \.

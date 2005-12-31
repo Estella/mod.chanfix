@@ -81,6 +81,16 @@ else
                               language::status_splitmode_disabled,
                               std::string("Splitmode disabled. There are %i servers linked.")).c_str(),
                                           Network->serverList_size());
+if (bot->isChanServLinked())
+  bot->SendTo(theClient,
+	      bot->getResponse(theUser,
+			language::status_channel_service_linked,
+			std::string("Channel service linked. New channels will be scored.")).c_str());
+else
+  bot->SendTo(theClient,
+	      bot->getResponse(theUser,
+			language::status_channel_service_not_linked,
+			std::string("Channel service not linked. New channels will not be scored.")).c_str());
 
 return;
 }

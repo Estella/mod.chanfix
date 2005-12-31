@@ -437,6 +437,7 @@ public:
 	bool doChanFix() { return enableChanFix; }
 	bool doChanBlocking() { return enableChannelBlocking; }
 	STATE getState() { return currentState; }
+	bool isChanServLinked() { return chanServLinked; }
 	unsigned int getNumServers() { return numServers; }
 	unsigned int getMinServersPresent() { return minServersPresent; }
 	unsigned int getNumTopScores() { return numTopScores; }

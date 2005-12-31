@@ -203,6 +203,8 @@ namespace gnuworld
 		const int status_servers_amount		= 115;
 		const int status_splitmode_enabled	= 116;
 		const int status_splitmode_disabled	= 117;
+		const int status_channel_service_linked	= 171;
+		const int status_channel_service_not_linked	= 172;
 
 		/* SUSPEND */
 		const int cant_suspend_diff_group	= 118;
