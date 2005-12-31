@@ -72,6 +72,11 @@ numServers = 10
 # any channels, be it automatic or manual.
 minServersPresent = 75
 
+# The full server name of the channel service. This is used in
+# checking whether the channel service is currently linked or
+# not to the network.
+chanServName = channels.undernet.org
+
 # ---------------------------------------------------------------------
 # Interface settings
 

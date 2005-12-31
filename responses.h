@@ -165,14 +165,14 @@ namespace gnuworld
 		const int score_for_channel_account	= 158;
 		const int compact_no_such_nick		= 90;
 		const int no_such_nick			= 91;
-		const int compact_no_such_account	= 156;
-		const int no_such_account		= 157;
+		const int compact_no_score_for_account	= 156;
+		const int no_score_for_account		= 157;
 		const int score_none			= 92;
 		const int top_scores_for_chan		= 93;
 		const int top_scores_for_ops		= 94;
 		const int top_scores_for_nonops		= 95;
-		const int no_scores_for_nick		= 166;
-		const int compact_no_scores_for_nick	= 167;
+		const int no_score_for_nick		= 166;
+		const int compact_no_score_for_nick	= 167;
 
 		/* SET */
 		const int num_server_syntax		= 96;

@@ -225,6 +225,8 @@ public:
 	bool hasIdent(iClient*);
 
 	void checkNetwork();
+	void checkChannelServiceLink(iServer*, const eventType&);
+	void findChannelService();
 
 	void autoFix();
 	void manualFix(Channel*);
@@ -316,9 +318,7 @@ public:
 
 	typedef std::map <std::string, Channel*, noCaseCompare> clientOpsType;
 	clientOpsType*		findMyOps(iClient*);
-
-	clientOpsType*		wasOpped(Channel*, iClient*);
-	void 			lostOps(Channel*, iClient*, clientOpsType*);
+	void 			lostOp(Channel*, iClient*, clientOpsType*);
 
 	typedef std::list< sqlChanOp* > chanOpsType;
 	chanOpsType		getMyOps(Channel*);
@@ -373,15 +373,14 @@ public:
 
 	const std::string getResponse(sqlUser*, int, std::string = std::string());
 
-	std::string	consoleChan;
-	std::string	operChan;
-	std::string	supportChan;
-
 	/**
 	 * Configuration variables
 	 */
+	std::string	consoleChan;
 	std::string	consoleChanModes;
+	std::string	operChan;
 	std::string	operChanModes;
+	std::string	supportChan;
 	std::string	supportChanModes;
 	bool		enableAutoFix;
 	bool		enableChanFix;
@@ -389,6 +388,7 @@ public:
 	unsigned int	version;
 	unsigned int	numServers;
 	unsigned int	minServersPresent;
+	std::string	chanServName;
 	unsigned int	numTopScores;
 	unsigned int	minClients;
 	bool		clientNeedsIdent;
@@ -409,6 +409,11 @@ protected:
 	 * State variable
 	 */
 	STATE		currentState;
+
+	/**
+	 * Channel service currently linked variable
+	 */
+	bool		chanServLinked;
 
 	/**
 	 * Timer declarations

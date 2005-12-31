@@ -36,7 +36,7 @@ COPY "translations" FROM stdin;
 1	25	Sorry, manual chanfixes are currently disabled.	31337	0
 1	26	Sorry, chanfix is currently disabled because not enough servers are linked.	31337	0
 1	27	No such channel %s.	31337	0
-1	28	%s cannot be chanfixed as it uses oplevels (+A/+U). If this channel has been taken over and needs to be returned to the original owners, append the OVERRIDE flag to force a manual fix.	31337	0
+1	28	%s cannot be chanfixed as it uses oplevels (+A/+U). If this channel has been taken over and needs to be returned to the original owners, use \002OPLIST %s\002 to see the real owners and then use an appropriate oper service to fix the channel manually.	31337	0
 1	29	%s is a registered channel.	31337	0
 1	30	There are no scores in the database for %s.	31337	0
 1	31	The channel %s is already being manually fixed.	31337	0
@@ -160,8 +160,8 @@ COPY "translations" FROM stdin;
 1	153	This command requires authentication and one of these flags: \"%s\".	31337	0
 1	154	SYNTAX: 	31337	0
 1	155	Language: %s (%s)	31337	0
-1	156	~U %s no@such.account 0	31337	0
-1	157	No such account %s.	31337	0
+1	156	~U %s no@score.for.account 0	31337	0
+1	157	No score for account %s on channel %s.	31337	0
 1	158	Score for account %s in channel %s: %u.	31337	0
 1	159	Suspending yourself is not a very wise thing to do.	31337	0
 1	160	Last modified: %s (%s ago)	31337	0
@@ -170,8 +170,8 @@ COPY "translations" FROM stdin;
 1	163	You cannot view hosts of a user in a different group.	31337	0
 1	164	Host list for %s:	31337	0
 1	165	End of host list.	31337	0
-1	166	No scores for %s on %s.	31337	0
-1	167	~U %s no@scores.for.nick 0	31337	0
+1	166	No score for %s on %s.	31337	0
+1	167	~U %s no@score.for.nick 0	31337	0
 1	168	List of all groups:	31337	0
 1	169	Number of groups: %d.	31337	0
 1	170	Removed the default hostmask of *!*@* from user %s.	31337	0

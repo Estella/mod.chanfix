@@ -76,12 +76,13 @@ if (!netChan) {
 }
 
 /* Only allow chanfixes for unregistered channels. */
-if (netChan->getMode(Channel::MODE_A) && !override) {
+if (netChan->getMode(Channel::MODE_A)) {
   bot->SendTo(theClient,
-              bot->getResponse(theUser,
-                              language::cant_fix_oplevels,
-                              std::string("%s cannot be chanfixed as it uses oplevels (+A/+U). If this channel has been taken over and needs to be returned to the original owners, append the OVERRIDE flag to force a manual fix.")).c_str(),
-                                          netChan->getName().c_str());
+	      bot->getResponse(theUser,
+			language::cant_fix_oplevels,
+			std::string("%s cannot be chanfixed as it uses oplevels (+A/+U). If this channel has been taken over and needs to be returned to the original owners, use \002OPLIST %s\002 to see the real owners and then use an appropriate oper service to fix the channel manually.")).c_str(),
+				netChan->getName().c_str(),
+				netChan->getName().c_str());
   return;
 }
 

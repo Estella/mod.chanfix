@@ -113,15 +113,16 @@ if (st.size() > 2) {
     if (compact)
       bot->SendTo(theClient,
 		  bot->getResponse(theUser,
-				   language::compact_no_such_account,
-				   std::string("~U %s no@such.account 0")).c_str(),
+				   language::compact_no_score_for_account,
+				   std::string("~U %s no@scores.for.account 0")).c_str(),
 					netChan->getName().c_str());
     else
       bot->SendTo(theClient,
 		  bot->getResponse(theUser,
-				   language::no_such_account,
-				   std::string("No such account %s.")).c_str(),
-					scUser);
+				   language::no_score_for_account,
+				   std::string("No scores for account %s on %s.")).c_str(),
+					scUser,
+					netChan->getName().c_str());
     return;
   } else {
     //Nickname
@@ -169,13 +170,13 @@ if (st.size() > 2) {
       if (compact)
 	bot->SendTo(theClient,
 		    bot->getResponse(theUser,
-				language::compact_no_scores_for_nick,
+				language::compact_no_score_for_nick,
 				std::string("~U %s no@scores.for.nick 0")).c_str(),
 					netChan->getName().c_str());
       else
 	bot->SendTo(theClient,
 		    bot->getResponse(theUser,
-				language::no_scores_for_nick,
+				language::no_score_for_nick,
 				std::string("No scores for %s on %s.")).c_str(),
 					curClient->getNickName().c_str(),
 					netChan->getName().c_str());

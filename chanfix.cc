@@ -91,6 +91,9 @@ readConfigFile(configFileName);
 /* Initial state */
 currentState = INIT;
 
+/* Initial finding of the channel service */
+chanServLinked = false;
+
 std::string dbString = "host=" + sqlHost + " dbname=" + sqlDB
   + " port=" + sqlPort + " user=" + sqlUsername + " password=" + sqlPass;
 
@@ -329,6 +332,7 @@ enableChannelBlocking = atob(chanfixConfig->Require("enableChannelBlocking")->se
 version = atoi((chanfixConfig->Require("version")->second).c_str()) ;
 numServers = atoi((chanfixConfig->Require("numServers")->second).c_str()) ;
 minServersPresent = atoi((chanfixConfig->Require("minServersPresent")->second).c_str()) ;
+chanServName = chanfixConfig->Require("chanServName")->second ;
 numTopScores = atoi((chanfixConfig->Require("numTopScores")->second).c_str()) ;
 minClients = atoi((chanfixConfig->Require("minClients")->second).c_str()) ;
 clientNeedsIdent = atob(chanfixConfig->Require("clientNeedsIdent")->second) ;
@@ -502,10 +506,11 @@ xClient::OnDetach( reason ) ;
 /* OnConnect */
 void chanfix::OnConnect()
 {
-
 /* If we have just reloaded, we won't be in BURST. */
-if (currentState == INIT)
+if (currentState == INIT) {
+  findChannelService();
   changeState(RUN);
+}
 
 xClient::OnConnect() ;
 }
@@ -658,7 +663,7 @@ switch( whichEvent )
 	case EVT_JOIN:
 		{
 		/* First we need to see if the channel is first = minClients */
-		if (theChan->size() == minClients)
+		if (chanServLinked && (theChan->size() == minClients))
 		  startScoringChan(theChan);
 
 		/* If this is the operChan or supportChan, op opers on join */
@@ -674,9 +679,7 @@ switch( whichEvent )
 	case EVT_PART:
 		{
 		theClient = static_cast< iClient* >( data1 );
-		clientOpsType* myOps = wasOpped(theChan, theClient);
-		if (myOps && !myOps->empty())
-		  lostOps(theChan, theClient, myOps);
+		lostOp(theChan, theClient, NULL);
 		break ;
 		}
 	default:
@@ -695,14 +698,14 @@ void chanfix::OnChannelModeO( Channel* theChan, ChannelUser*,
 if (theChan->size() < minClients)
   return;
 
-if (!canScoreChan(theChan, true))
+if (!canScoreChan(theChan, false))
   return;
 
 for (xServer::opVectorType::const_iterator ptr = theTargets.begin();
      ptr != theTargets.end(); ++ptr) {
   ChannelUser* tmpUser = ptr->second;
 
-  if (tmpUser->getClient()->getAccount() != "")
+  if (tmpUser->getClient()->getAccount() == "")
     continue;
 
   bool polarity = ptr->first;
@@ -711,9 +714,7 @@ for (xServer::opVectorType::const_iterator ptr = theTargets.begin();
     gotOpped(theChan, tmpUser->getClient());
   } else {
     // Someone is deopped
-    clientOpsType* myOps = wasOpped(theChan, tmpUser->getClient());
-    if (myOps && !myOps->empty())
-      lostOps(theChan, tmpUser->getClient(), myOps);
+    lostOp(theChan, tmpUser->getClient(), NULL);
   } // if
 } // for
 }
@@ -726,12 +727,15 @@ switch(whichEvent)
 	{
 	case EVT_BURST_CMPLT:
 		{
-		changeState(RUN);
+		if (currentState != SPLIT)
+		  changeState(RUN);
 		break;
 		}
 	case EVT_NETJOIN:
 	case EVT_NETBREAK:
 		{
+		iServer* theServer = static_cast< iServer* >(data1);
+		checkChannelServiceLink(theServer, whichEvent);
 		checkNetwork();
 		break;
 		}
@@ -746,7 +750,7 @@ switch(whichEvent)
 		clientOpsType* myOps = findMyOps(theClient);
 		for (clientOpsType::iterator ptr = myOps->begin();
 		     ptr != myOps->end(); ptr++)
-		  lostOps(ptr->second, theClient, myOps);
+		  lostOp(ptr->second, theClient, myOps);
 		break;
 		}
 	}
@@ -1124,17 +1128,17 @@ sqlChanOp* chanfix::newChanOp(const std::string& channel, const std::string& acc
 sqlChanOp* newOp = new (std::nothrow) sqlChanOp(theManager);
 assert( newOp != 0 ) ;
 
-sqlChanOps.insert(sqlChanOpsType::value_type(std::pair<std::string,std::string>(channel, account), newOp));
-
-size_t numMyOps = countMyOps(channel);
-myOpsCount.insert(myOpsCountType::value_type(channel, ++numMyOps));
-
 /* elog << "chanfix::newChanOp> DEBUG: Added new operator: " << account << " on " << channel << "!!" << std::endl; */
 
 newOp->setChannel(channel);
 newOp->setAccount(account);
 newOp->setTimeFirstOpped(currentTime());
 newOp->setTimeLastOpped(currentTime());
+
+sqlChanOps.insert(sqlChanOpsType::value_type(std::pair<std::string,std::string>(channel, account), newOp));
+
+size_t numMyOps = countMyOps(channel);
+myOpsCount.insert(myOpsCountType::value_type(channel, ++numMyOps));
 
 return newOp;
 }
@@ -1154,7 +1158,7 @@ chanfix::chanOpsType chanfix::getMyOps(Channel* theChan)
 chanOpsType myOps;
 for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
      ptr != sqlChanOps.end(); ptr++) {
-  if (ptr->second->getChannel() == theChan->getName())
+  if (string_lower(ptr->first.first) == string_lower(theChan->getName()))
     myOps.push_back(ptr->second);
 }
 
@@ -1254,8 +1258,9 @@ if (clientNeedsIdent && !hasIdent(theClient))
 
 sqlChanOp* thisOp = findChanOp(theChan, theClient);
 if (!thisOp) {
-  if (countMyOps(theChan) >= MAXOPCOUNT)
-    return; /* No room for new ops */
+  size_t numMyOps = countMyOps(theChan);
+  if ((numMyOps >= MAXOPCOUNT) || (!numMyOps && !chanServLinked))
+    return; /* No room for new ops or channel service not linked */
   thisOp = newChanOp(theChan, theClient);
 }
 
@@ -1270,9 +1275,6 @@ thisOp->setTimeLastOpped(currentTime()); //Update the time they were last opped
 
 void chanfix::gotOpped(Channel* thisChan, iClient* thisClient)
 {
-//Not enough users, forget about it.
-//if (thisChan->size() < minClients) return;
-
 //No tracking for unidented clients
 if (clientNeedsIdent && !hasIdent(thisClient))
   return;
@@ -1283,22 +1285,41 @@ if (clientNeedsIdent && !hasIdent(thisClient))
  */
 sqlChanOp* thisOp = findChanOp(thisChan, thisClient);
 if (!thisOp) {
-  if (countMyOps(thisChan) >= MAXOPCOUNT)
-    return; /* No room for new ops */
+  size_t numMyOps = countMyOps(thisChan);
+  if ((numMyOps >= MAXOPCOUNT) || (!numMyOps && !chanServLinked))
+    return; /* No room for new ops or channel service not linked */
   thisOp = newChanOp(thisChan, thisClient);
 }
 
 thisOp->setLastSeenAs(thisClient->getRealNickUserHost());
 thisOp->setTimeLastOpped(currentTime());
 
-clientOpsType* myOps = wasOpped(thisChan, thisClient);
-if (!myOps || myOps->empty())
-  return;
+clientOpsType* myOps = findMyOps(thisClient);
+if (myOps && !myOps->empty()) {
+  clientOpsType::iterator ptr = myOps->find(thisChan->getName());
+  if (ptr != myOps->end())
+    return;
+}
 
 myOps->insert(clientOpsType::value_type(thisChan->getName(), thisChan));
 thisClient->setCustomData(this, static_cast< void*>(myOps));
 
 return;
+}
+
+void chanfix::lostOp(Channel* theChan, iClient* theClient, clientOpsType* myOps)
+{
+if (myOps == NULL)
+  myOps = findMyOps(theClient);
+
+if (!myOps || myOps->empty())
+  return;
+
+clientOpsType::iterator ptr = myOps->find(theChan->getName());
+if (ptr != myOps->end()) {
+  myOps->erase(theChan->getName());
+  theClient->setCustomData(this, static_cast< void*>(myOps));
+}
 }
 
 bool chanfix::hasIdent(iClient* theClient)
@@ -1309,34 +1330,13 @@ if (userName[0] == '~')
 return true;
 }
 
-chanfix::clientOpsType* chanfix::wasOpped(Channel* theChan, iClient* theClient)
-{
-clientOpsType* myOps = findMyOps(theClient);
-if (!myOps || myOps->empty())
-  return 0;
-
-theClient->setCustomData(this, static_cast< void*>(myOps));
-
-clientOpsType::iterator ptr = myOps->find(theChan->getName());
-if (ptr != myOps->end())
-  return myOps;
-
-return 0;
-}
-
-void chanfix::lostOps(Channel* theChan, iClient* theClient, clientOpsType* myOps)
-{
-clientOpsType::iterator ptr = myOps->find(theChan->getName());
-if (ptr != myOps->end())
-  myOps->erase(theChan->getName());
-theClient->setCustomData(this, static_cast< void*>(myOps));
-}
-
 void chanfix::checkNetwork()
 {
 if (100 * Network->serverList_size() < numServers * minServersPresent) {
-  elog << "chanfix::checkNetwork> DEBUG: Not enough servers linked! Going to SPLIT-state" << std::endl;
-  changeState(SPLIT);
+  if (currentState != SPLIT) {
+    elog << "chanfix::checkNetwork> DEBUG: Not enough servers linked! Going to SPLIT-state" << std::endl;
+    changeState(SPLIT);
+  }
   return;
 }
 
@@ -1345,6 +1345,34 @@ if (currentState == SPLIT) {
   changeState(BURST);
   return;
 }
+}
+
+void chanfix::checkChannelServiceLink(iServer* theServer, const eventType& theEvent)
+{
+if (string_lower(theServer->getName()) == string_lower(chanServName)) {
+  if (theEvent == EVT_NETJOIN)
+    chanServLinked = true;
+  else if (theEvent == EVT_NETBREAK)
+    chanServLinked = false;
+}
+return;
+}
+
+/* Check for the channel service server to see if it is linked. */
+void chanfix::findChannelService()
+{
+iServer* curServer = 0;
+for (xNetwork::serverIterator ptr = Network->servers_begin();
+     ptr != Network->servers_end(); ptr++) {
+   curServer = ptr->second;
+   if ((curServer == NULL) || (Network->findFakeServer(curServer) != 0))
+     continue;
+   if (string_lower(curServer->getName()) == string_lower(chanServName)) {
+     chanServLinked = true;
+     break;
+   }
+}
+return;
 }
 
 void chanfix::autoFix()
@@ -1426,12 +1454,8 @@ if (thisChan->getCreationTime() > 1) {
     MyUplink->OnChannelModeL(thisChan, false, 0, 0);
   if (thisChan->getMode(Channel::MODE_R))
     modeVector.push_back(std::make_pair(false, Channel::MODE_R));
-  if (thisChan->getMode(Channel::MODE_A))
-    MyUplink->OnChannelModeA(thisChan, false, 0, std::string());
   if (thisChan->getMode(Channel::MODE_D))
     modeVector.push_back(std::make_pair(false, Channel::MODE_D));
-  if (thisChan->getMode(Channel::MODE_U))
-    MyUplink->OnChannelModeU(thisChan, false, 0, std::string());
   /* Due to a bug in .11, we need to set at least one mode. */
   if (version < 12) {
     if (!thisChan->getMode(Channel::MODE_N))
@@ -2117,7 +2141,7 @@ ScoredOpsMapType::iterator scOpiter;
 for (xNetwork::channelIterator ptr = Network->channels_begin();
      ptr != Network->channels_end(); ptr++) {
   thisChan = ptr->second;
-  if (!canScoreChan(thisChan, true))
+  if (!canScoreChan(thisChan, false))
     continue; // Exit the loop and go to the next chan
   if (thisChan->size() >= minClients && !isBeingFixed(thisChan)) {
     scoredOpsList.clear();
@@ -2143,16 +2167,13 @@ return;
 
 void chanfix::startScoringChan(Channel* theChan)
 {
-/* Ok, if a channel record exists, should we
- * still add points to ALL ops? -- Compy
- */
 chanfix::chanOpsType myOps = getMyOps(theChan);
 if (!myOps.empty()) return;
 
 typedef std::map<std::string,bool> ScoredOpsMapType;
 ScoredOpsMapType scoredOpsList;
 ScoredOpsMapType::iterator scOpiter;
-if (!canScoreChan(theChan, true))
+if (!canScoreChan(theChan, false))
   return;
 for (Channel::userIterator ptr = theChan->userList_begin();
      ptr != theChan->userList_end(); ptr++) {
