@@ -98,6 +98,9 @@ std::string dbString = "host=" + sqlHost + " dbname=" + sqlDB
   + " port=" + sqlPort + " user=" + sqlUsername + " password=" + sqlPass;
 
 theManager = sqlManager::getInstance(dbString);
+	
+/* Get our logfiles open */
+adminLog.open(adminLogFile.c_str());
 
 /* Register the commands we want to use */
 RegisterCommand(new ADDFLAGCommand(this, "ADDFLAG",
@@ -337,6 +340,7 @@ numTopScores = atoi((chanfixConfig->Require("numTopScores")->second).c_str()) ;
 minClients = atoi((chanfixConfig->Require("minClients")->second).c_str()) ;
 clientNeedsIdent = atob(chanfixConfig->Require("clientNeedsIdent")->second) ;
 connectCheckFreq = atoi((chanfixConfig->Require("connectCheckFreq")->second).c_str()) ;
+adminLogFile = chanfixConfig->Require("adminLogFile")->second ;
 
 /* Database processing */
 sqlHost = chanfixConfig->Require("sqlHost")->second;
@@ -808,6 +812,9 @@ if (!tmpChan)
 
 std::string message = std::string( "[" ) + nickName + "] " + buf ;
 serverNotice(tmpChan, message);
+
+/* Everything sent here is also logged to a file on disk */
+adminLog << message << std::endl;
 return true;
 }
 

@@ -395,7 +395,9 @@ public:
 	std::string	sqlPort;
 	std::string	sqlUsername;
 	std::string	sqlPass;
-	std::string	sqlDB;	
+	std::string	sqlDB;
+	std::string	adminLogFile;
+	std::ofstream	adminLog;
 
 protected:
 	/**
