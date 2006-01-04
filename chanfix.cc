@@ -810,11 +810,13 @@ Channel* tmpChan = Network->findChannel(consoleChan);
 if (!tmpChan)
   return false;
 
+/* Everything sent here is also logged to a file on disk */
+std::string theLog = std::string( "[" ) + tsToDateTime(currentTime(), true) + "] " + buf ;
+adminLog << theLog << std::endl;
+
 std::string message = std::string( "[" ) + nickName + "] " + buf ;
 serverNotice(tmpChan, message);
 
-/* Everything sent here is also logged to a file on disk */
-adminLog << message << std::endl;
 return true;
 }
 
@@ -2142,7 +2144,7 @@ return;
 void chanfix::giveAllOpsPoints()
 {
 Channel* thisChan;
-typedef std::map<std::string,bool> ScoredOpsMapType;
+
 ScoredOpsMapType scoredOpsList;
 ScoredOpsMapType::iterator scOpiter;
 for (xNetwork::channelIterator ptr = Network->channels_begin();
@@ -2161,14 +2163,13 @@ for (xNetwork::channelIterator ptr = Network->channels_begin();
 	scOpiter = scoredOpsList.find(curUser->getClient()->getAccount());
 	if (scOpiter == scoredOpsList.end()) {
 	  givePoints(thisChan, curUser->getClient());
-	  scoredOpsList.insert(make_pair(curUser->getClient()->getAccount(), true));
+	  scoredOpsList.insert(make_pair(curUser->getClient()->getAccount(),true));
 	}
       }
     }
   }
 }
-if (scoredOpsList.size() > 0)
-  scoredOpsList.clear();
+
 return;
 } //giveAllOpsPoints
 
