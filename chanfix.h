@@ -391,13 +391,12 @@ public:
 	unsigned int	minClients;
 	bool		clientNeedsIdent;
 	unsigned int	connectCheckFreq;
+	std::string	adminLogFile;
 	std::string	sqlHost;
 	std::string	sqlPort;
 	std::string	sqlUsername;
 	std::string	sqlPass;
 	std::string	sqlDB;
-	std::string	adminLogFile;
-	std::ofstream	adminLog;
 
 protected:
 	/**
@@ -429,6 +428,11 @@ protected:
 	 * Internal timer
 	 */
 	Timer *theTimer;
+
+	/**
+	 * Admin log-to-file stream
+	 */
+	std::ofstream	adminLog;
 
 public:
 

@@ -1195,7 +1195,7 @@ PgDatabase* cacheCon = theManager->getConnection();
 
 /* Grab the user's host list */
 static const char* queryHeader
-	= "SELECT host FROM hosts WHERE user_id =  ";
+	= "SELECT host FROM hosts WHERE user_id = ";
 
 std::stringstream theQuery;
 theQuery	<< queryHeader 

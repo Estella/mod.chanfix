@@ -102,8 +102,8 @@ COPY "translations" FROM stdin;
 1	91	No such nick %s.	31337	0
 1	92	None.	31337	0
 1	93	Top %u scores for channel %s in the database:	31337	0
-1	94	Top %u scores for ops in %s in the database:	31337	0
-1	95	Top %u scores for non-ops in %s in the database:	31337	0
+1	94	Top %u scores for current ops in %s in the database:	31337	0
+1	95	Top %u scores for current non-ops in %s in the database:	31337	0
 1	96	Please use SET NUM_SERVERS <integer number>.	31337	0
 1	97	NUM_SERVERS is now %d.	31337	0
 1	98	Enabled autofix.	31337	0

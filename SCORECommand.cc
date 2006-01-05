@@ -274,7 +274,7 @@ if (compact) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::top_scores_for_ops,
-                              std::string("Top %u scores for ops in %s in the database:")).c_str(),
+                              std::string("Top %u scores for current ops in %s in the database:")).c_str(),
                                           minScoreReply, netChan->getName().c_str());
   if (strScoresOP.str() == ".")
     bot->SendTo(theClient,
@@ -287,7 +287,7 @@ if (compact) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::top_scores_for_nonops,
-                              std::string("Top %u scores for non-ops in %s in the database:")).c_str(),
+                              std::string("Top %u scores for current non-ops in %s in the database:")).c_str(),
                                           minScoreReply, netChan->getName().c_str());
   if (strScoresNOP.str() == ".")
     bot->SendTo(theClient,

@@ -100,7 +100,7 @@ clientNeedsIdent = false
 # Frequency (in seconds) between database connection status checks
 connectCheckFreq = 10
 
-# File where all admin commands are logged and saved
+# File where all admin commands sent to backchan are logged and saved
 adminLogFile = chanfix-admin.log
 
 # End of config file.
