@@ -321,7 +321,6 @@ public:
 	typedef std::list< sqlChanOp* > chanOpsType;
 	chanOpsType		getMyOps(Channel*);
 
-
 	typedef std::map <std::string, size_t> myOpsCountType;
 	myOpsCountType		myOpsCount;
 	

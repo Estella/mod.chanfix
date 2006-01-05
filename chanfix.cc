@@ -2143,12 +2143,11 @@ return;
 
 void chanfix::giveAllOpsPoints()
 {
-typedef std::list <std::string> ScoredOpsMapType;
-	
-Channel* thisChan;
+typedef std::list <std::string> ScoredOpsListType;
 
-ScoredOpsMapType scoredOpsList;
-ScoredOpsMapType::iterator scOpiter;
+Channel* thisChan;
+ScoredOpsListType scoredOpsList;
+ScoredOpsListType::iterator scOpIter;
 for (xNetwork::channelIterator ptr = Network->channels_begin();
      ptr != Network->channels_end(); ptr++) {
   thisChan = ptr->second;
@@ -2162,10 +2161,10 @@ for (xNetwork::channelIterator ptr = Network->channels_begin();
       if (curUser->isModeO() && curUser->getClient()->getAccount() != "") {
 	//Ok hes an op
 	//Grab an iClient for curUser
-	scOpiter = std::find(scoredOpsList.begin(),scoredOpsList.end(),curUser->getClient()->getAccount());
-	if (scOpiter == scoredOpsList.end()) {
+	scOpIter = std::find(scoredOpsList.begin(), scoredOpsList.end(), curUser->getClient()->getAccount());
+	if (scOpIter == scoredOpsList.end()) {
 	  givePoints(thisChan, curUser->getClient());
-	  scoredOpsList.push_back(ScoredOpsMapType::value_type(curUser->getClient()->getAccount()));
+	  scoredOpsList.push_back(ScoredOpsListType::value_type(curUser->getClient()->getAccount()));
 	}
       }
     }
