@@ -42,7 +42,7 @@ void HISTORYCommand::Exec(iClient* theClient, sqlUser* theUser, const std::strin
 StringTokenizer st(Message);
 
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
-if (!theChan) {
+if (!theChan || !theChan->useSQL()) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::chan_no_manual_fixes,

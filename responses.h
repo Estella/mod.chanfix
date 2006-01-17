@@ -68,7 +68,6 @@ namespace gnuworld
 		const int manual_fix_disabled		= 25;
 		const int not_enough_servers		= 26;
 		const int no_such_channel		= 27;
-		const int cant_fix_oplevels		= 28;
 		const int registered_channel		= 29;
 		const int no_scores_for_chan		= 30;
 		const int already_being_man_fixed	= 31;

@@ -43,7 +43,7 @@ void INFOCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& 
 StringTokenizer st(Message);
 
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
-if (!theChan) {
+if (!theChan || !theChan->useSQL()) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::no_info_for_chan,

@@ -12,6 +12,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	BLOCKCommand.cc \
 	CHANFIXCommand.cc \
 	CHECKCommand.cc \
+	DEBUGCommand.cc \
 	DELFLAGCommand.cc \
 	DELHOSTCommand.cc \
 	DELNOTECommand.cc \
@@ -26,7 +27,6 @@ libchanfix_la_SOURCES = chanfix.cc \
 	QUOTECommand.cc \
 	REHASHCommand.cc \
 	RELOADCommand.cc \
-	ROTATECommand.cc \
 	SCORECommand.cc \
 	SETCommand.cc \
 	SETGROUPCommand.cc \
@@ -36,7 +36,6 @@ libchanfix_la_SOURCES = chanfix.cc \
 	UNALERTCommand.cc \
 	UNBLOCKCommand.cc \
 	UNSUSPENDCommand.cc \
-	UPDATECommand.cc \
 	USETCommand.cc \
 	WHOGROUPCommand.cc \
 	WHOISCommand.cc \

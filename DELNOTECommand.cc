@@ -51,7 +51,7 @@ if (!theChan) {
   return;
 }
 
-if (theChan->countNotes(0) <= 0) {
+if (!theChan->useSQL() || (theChan->countNotes(0) <= 0)) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::chan_has_no_notes,

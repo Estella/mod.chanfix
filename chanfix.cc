@@ -98,7 +98,7 @@ std::string dbString = "host=" + sqlHost + " dbname=" + sqlDB
   + " port=" + sqlPort + " user=" + sqlUsername + " password=" + sqlPass;
 
 theManager = sqlManager::getInstance(dbString);
-	
+
 /* Get our logfiles open */
 adminLog.open(adminLogFile.c_str());
 
@@ -143,6 +143,13 @@ RegisterCommand(new CHECKCommand(this, "CHECK",
 	2,
 	sqlUser::F_LOGGEDIN
 	));
+#ifdef CHANFIX_DEBUG
+RegisterCommand(new DEBUGCommand(this, "DEBUG",
+	"<ROTATE|UPDATE>",
+	2,
+	sqlUser::F_OWNER
+	));
+#endif
 RegisterCommand(new DELFLAGCommand(this, "DELFLAG",
 	"<username> <flag>",
 	3,
@@ -213,11 +220,6 @@ RegisterCommand(new RELOADCommand(this, "RELOAD",
 	1,
 	sqlUser::F_OWNER
 	));
-RegisterCommand(new ROTATECommand(this, "ROTATE",
-	"",
-	1,
-	sqlUser::F_OWNER
-	));
 RegisterCommand(new SCORECommand(this, "SCORE",
 	"<#channel> [nick|*account]",
 	2,
@@ -267,11 +269,6 @@ RegisterCommand(new UNSUSPENDCommand(this, "UNSUSPEND",
 	"<username>",
 	2,
 	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
-	));
-RegisterCommand(new UPDATECommand(this, "UPDATE",
-	"",
-	1,
-	sqlUser::F_OWNER
 	));
 RegisterCommand(new USETCommand(this, "USET",
 	"[username] <option> <value>",
@@ -504,6 +501,9 @@ for (commandMapType::iterator ptr = commandMap.begin();
 }
 commandMap.clear();
 
+/* Delete our sqlManager */
+theManager->removeManager();
+
 xClient::OnDetach( reason ) ;
 }
 
@@ -698,7 +698,7 @@ void chanfix::OnChannelModeO( Channel* theChan, ChannelUser*,
 if (theChan->size() < minClients)
   return;
 
-if (!canScoreChan(theChan, false))
+if (!canScoreChan(theChan))
   return;
 
 for (xServer::opVectorType::const_iterator ptr = theTargets.begin();
@@ -927,11 +927,15 @@ if (cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
      assert( newOp != 0 ) ;
 
      newOp->setAllMembers(cacheCon, i);
-     std::pair<std::string, std::string> thePair (newOp->getChannel(), newOp->getAccount());
-     sqlChanOps.insert(sqlChanOpsType::value_type(thePair, newOp));
-
-     size_t numMyOps = countMyOps(newOp->getChannel());
-     myOpsCount.insert(myOpsCountType::value_type(newOp->getChannel(), ++numMyOps));
+     sqlChanOpsType::iterator ptr = sqlChanOps.find(newOp->getChannel());
+     if (ptr != sqlChanOps.end()) {
+       ptr->second.insert(sqlChanOpsType::mapped_type::value_type(newOp->getAccount(),newOp));
+     } else {
+       typedef std::map <std::string, sqlChanOp*, noCaseCompare> tmpChanOpsMapType;
+       tmpChanOpsMapType theMap;
+       theMap.insert(tmpChanOpsMapType::value_type(newOp->getAccount(), newOp));
+       sqlChanOps.insert(sqlChanOpsType::value_type(newOp->getChannel(), theMap));
+     }
   }
 } else {
   elog << "*** [chanfix::precacheChanOps] Error executing query: "
@@ -1119,12 +1123,14 @@ elog	<< "Changed state in: "
 
 sqlChanOp* chanfix::findChanOp(const std::string& channel, const std::string& account)
 {
-sqlChanOpsType::iterator ptr = sqlChanOps.find(std::pair<std::string,std::string>(channel, account));
+sqlChanOpsType::iterator ptr = sqlChanOps.find(channel);
 if (ptr != sqlChanOps.end()) {
-  /* elog	<< "chanfix::findChanOp> DEBUG: We've got a winner: "
-   *	<< ptr->second->getAccount() << " on " << ptr->second->getChannel() << "!!" << std::endl;
-   */
-  return ptr->second ;
+  sqlChanOpsType::mapped_type::iterator chanOp = ptr->second.find(account);
+  if (chanOp != ptr->second.end())
+    /* elog	<< "chanfix::findChanOp> DEBUG: We've got a winner: "
+     *	<< chanOp->second->getAccount() << " on " << chanOp->second->getChannel() << "!!" << std::endl;
+     */
+    return chanOp->second ;
 }
 
 return 0;
@@ -1142,10 +1148,15 @@ newOp->setAccount(account);
 newOp->setTimeFirstOpped(currentTime());
 newOp->setTimeLastOpped(currentTime());
 
-sqlChanOps.insert(sqlChanOpsType::value_type(std::pair<std::string,std::string>(channel, account), newOp));
-
-size_t numMyOps = countMyOps(channel);
-myOpsCount.insert(myOpsCountType::value_type(channel, ++numMyOps));
+sqlChanOpsType::iterator ptr = sqlChanOps.find(channel);
+if (ptr != sqlChanOps.end()) {
+  ptr->second.insert(sqlChanOpsType::mapped_type::value_type(account, newOp));
+} else {
+  typedef std::map <std::string, sqlChanOp*, noCaseCompare> tmpChanOpsMapType;
+  tmpChanOpsMapType theMap;
+  theMap.insert(tmpChanOpsMapType::value_type(account, newOp));
+  sqlChanOps.insert(sqlChanOpsType::value_type(channel, theMap));
+}
 
 return newOp;
 }
@@ -1163,10 +1174,16 @@ return newChanOp(theChan->getName(), theClient->getAccount());
 chanfix::chanOpsType chanfix::getMyOps(Channel* theChan)
 {
 chanOpsType myOps;
-for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
-     ptr != sqlChanOps.end(); ptr++) {
-  if (string_lower(ptr->first.first) == string_lower(theChan->getName()))
-    myOps.push_back(ptr->second);
+
+sqlChanOpsType::iterator ptr = sqlChanOps.find(theChan->getName());
+if (ptr != sqlChanOps.end()) {
+  for (sqlChanOpsType::mapped_type::iterator chanOp = ptr->second.begin();
+       chanOp != ptr->second.end(); chanOp++) {
+    /* elog	<< "chanfix::findChanOp> DEBUG: We've got a winner: "
+     *	<< chanOp->second->getAccount() << " on " << chanOp->second->getChannel() << "!!" << std::endl;
+     */
+    myOps.push_back(chanOp->second);
+  }
 }
 
 myOps.sort(compare_points);
@@ -1176,9 +1193,9 @@ return myOps;
 
 size_t chanfix::countMyOps(const std::string& channel)
 {
-myOpsCountType::iterator ptr = myOpsCount.find(channel);
-if (ptr != myOpsCount.end())
-  return ptr->second;
+sqlChanOpsType::iterator ptr = sqlChanOps.find(channel);
+if (ptr != sqlChanOps.end())
+  return ptr->second.size();
 
 return 0;
 }
@@ -1410,8 +1427,6 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
    thisChan = ptr->second;
    bool opLess = true;
    bool hasService = false;
-   if (thisChan->getMode(Channel::MODE_A))
-     continue;
    if (thisChan->size() >= minClients && !isBeingFixed(thisChan)) {
      for (Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
 	curUser = ptr->second;
@@ -1423,10 +1438,13 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
 	  opLess = false;
      }
      if (opLess && !hasService) {
+       chanOpsType myOps = getMyOps(thisChan);
+       if (myOps.empty())
+	 continue;
+
        sqlChannel* sqlChan = getChannelRecord(thisChan);
        if (!sqlChan) sqlChan = newChannelRecord(thisChan);
 
-       chanOpsType myOps = getMyOps(thisChan);
        if (myOps.begin() != myOps.end())
 	 sqlChan->setMaxScore((*myOps.begin())->getPoints());
 
@@ -1662,11 +1680,10 @@ return chanAccts;
 sqlChannel* chanfix::getChannelRecord(const std::string& Channel)
 {
 sqlChannelCacheType::iterator ptr = sqlChanCache.find(Channel);
-if(ptr != sqlChanCache.end())
-	{
-	//elog << "chanfix::getChannelRecord> DEBUG: cached channel " << Channel << " found" << std::endl;
-	return ptr->second;
-	}
+if (ptr != sqlChanCache.end()) {
+  //elog << "chanfix::getChannelRecord> DEBUG: cached channel " << Channel << " found" << std::endl;
+  return ptr->second;
+}
 return 0;
 }
 
@@ -1683,7 +1700,6 @@ assert( newChan != 0 ) ;
 newChan->setChannel(Channel);
 newChan->setFixStart(0);
 newChan->setLastAttempt(0);
-newChan->Insert();
 
 sqlChanCache.insert(sqlChannelCacheType::value_type(Channel, newChan));
 elog << "chanfix::newChannelRecord> DEBUG: Added new channel: " << Channel << std::endl;
@@ -1698,7 +1714,7 @@ return newChannelRecord(theChan->getName());
 
 bool chanfix::deleteChannelRecord(sqlChannel* sqlChan)
 {
-if (sqlChan->Delete())
+if (sqlChan->useSQL() && sqlChan->Delete())
   return false;
 sqlChanCache.erase(sqlChan->getChannel());
 delete sqlChan; sqlChan = 0;
@@ -1741,11 +1757,8 @@ if (theChan->banList_size() ||
 return false;
 }
 
-bool chanfix::canScoreChan(Channel* theChan, bool oplevels)
+bool chanfix::canScoreChan(Channel* theChan)
 {
-if (oplevels && theChan->getMode(Channel::MODE_A))
-  return false;
-
 for (Channel::const_userIterator ptr = theChan->userList_begin();
      ptr != theChan->userList_end(); ++ptr)
    if (ptr->second->getClient()->getMode(iClient::MODE_SERVICES))
@@ -1908,21 +1921,21 @@ return std::string(datetimestring);
 
 const int chanfix::getCurrentGMTHour()
 {
-	time_t rawtime;
-	tm * ptm;
-	time ( &rawtime );
-	ptm = gmtime ( &rawtime );
-	return ptm->tm_hour;
+time_t rawtime;
+tm * ptm;
+
+time ( &rawtime );
+ptm = gmtime ( &rawtime );
+
+return ptm->tm_hour;
 }
 
 sqlUser* chanfix::isAuthed(const std::string Name)
 {
 //Name = escapeSQLChars(Name);
 sqlUser* tempUser = usersMap[Name];
-if(!tempUser)
-	{
-	usersMap.erase(usersMap.find(Name));
-	}
+if (!tempUser)
+  usersMap.erase(usersMap.find(Name));
 return tempUser;
 }
 
@@ -1993,31 +2006,36 @@ void chanfix::updateDB(bool threaded)
   }
 
   sqlChanOp* curOp;
+  std::string curChan;
   std::stringstream theLine;
   int chanOpsProcessed = 0;
 
   for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
        ptr != sqlChanOps.end(); ptr++) {
-    curOp = ptr->second;
-    theLine.str("");
-    theLine	<< escapeSQLChars(curOp->getChannel()).c_str() << "\t"
+    curChan = escapeSQLChars(ptr->first);
+    for (sqlChanOpsType::mapped_type::iterator chanOp = ptr->second.begin();
+	 chanOp != ptr->second.end(); chanOp++) {
+      curOp = chanOp->second;
+      theLine.str("");
+      theLine	<< curChan << "\t"
 		<< escapeSQLChars(curOp->getAccount()).c_str() << "\t"
 		<< escapeSQLChars(curOp->getLastSeenAs()).c_str() << "\t"
 		<< curOp->getTimeFirstOpped() << "\t"
 		<< curOp->getTimeLastOpped()
 		;
 
-    int i;
-    for (i = 0; i < DAYSAMPLES; i++) {
-      theLine	<< "\t" << curOp->getDay(i)
+      int i;
+      for (i = 0; i < DAYSAMPLES; i++) {
+        theLine	<< "\t" << curOp->getDay(i)
 		;
+      }
+
+      theLine	<< "\n"
+		;
+
+      cacheCon->PutLine(theLine.str().c_str());
+      chanOpsProcessed++;
     }
-
-    theLine	<< "\n"
-		;
-
-    cacheCon->PutLine(theLine.str().c_str());
-    chanOpsProcessed++;
   }
 
   /* Send completion string for the end of the data. */
@@ -2092,44 +2110,43 @@ else
 
 time_t maxFirstOppedTS = currentTime() - 86400;
 sqlChanOp* curOp;
-size_t numOpsLeft = 0;
 std::string curChan;
 
 for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
      ptr != sqlChanOps.end(); ptr++) {
-  curOp = ptr->second;
-  if (curChan != curOp->getChannel()) {
-    curChan = curOp->getChannel();
-    numOpsLeft = countMyOps(curChan);
+  for (sqlChanOpsType::mapped_type::iterator chanOp = ptr->second.begin();
+       chanOp != ptr->second.end(); chanOp++) {
+    curOp = chanOp->second;
+    curOp->setDay(nextDay, 0);
+    curOp->calcTotalPoints();
+    if (curOp->getPoints() <= 0 && maxFirstOppedTS > curOp->getTimeFirstOpped()) {
+      ptr->second.erase(chanOp);
+      delete curOp; curOp = 0;
+    }
   }
-  curOp->setDay(nextDay, 0);
-  curOp->calcTotalPoints();
-  if (curOp->getPoints() <= 0 && maxFirstOppedTS > curOp->getTimeFirstOpped()) {
-    sqlChanOps.erase(ptr);
-    myOpsCount.insert(myOpsCountType::value_type(curChan, --numOpsLeft));
-    delete curOp; curOp = 0;
-  }
-  if (!numOpsLeft) {
-    myOpsCountType::iterator myOpsPtr = myOpsCount.find(curChan);
-    if (myOpsPtr != myOpsCount.end())
-      myOpsCount.erase(myOpsPtr);
-
-#ifndef REMEMBER_CHANNELS_WITH_NOTES_OR_FLAGS
+  if (!ptr->second.size()) {
     /* Empty channel, start deleting info */
+    curChan = ptr->first;
     sqlChannel* sqlChan = getChannelRecord(curChan);
     if (!sqlChan)
       continue;
 
+#ifndef REMEMBER_CHANNELS_WITH_NOTES_OR_FLAGS
     if (!sqlChan->deleteAllNotes()) {
       elog	<< "chanfix::rotateDB> Error: could not delete all the notes of channel "
 		<< curChan.c_str()
 		<< std::endl;
     }
 
-    if (!deleteChannelRecord(sqlChan)) {
-      elog	<< "chanfix::rotateDB> Error: could not delete channel "
+#else
+    if (!sqlChan->getFlags()) {
+#endif
+      if (!deleteChannelRecord(sqlChan)) {
+	elog	<< "chanfix::rotateDB> Error: could not delete channel "
 		<< curChan.c_str()
 		<< std::endl;
+      }
+#ifdef REMEMBER_CHANNELS_WITH_NOTES_OR_FLAGS
     }
 #endif
   }
@@ -2151,7 +2168,7 @@ ScoredOpsListType::iterator scOpIter;
 for (xNetwork::channelIterator ptr = Network->channels_begin();
      ptr != Network->channels_end(); ptr++) {
   thisChan = ptr->second;
-  if (!canScoreChan(thisChan, false))
+  if (!canScoreChan(thisChan))
     continue; // Exit the loop and go to the next chan
   if (thisChan->size() >= minClients && !isBeingFixed(thisChan)) {
     scoredOpsList.clear();

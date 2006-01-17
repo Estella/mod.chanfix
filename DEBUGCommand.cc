@@ -1,10 +1,10 @@
 /**
- * ROTATECommand.cc
+ * DEBUGCommand.cc
  *
- * 07/26/2005 - Jimmy Lipham <music0m@alltel.net>
+ * 01/16/2006 - Reed Loden <reed@reedloden.com>
  * Initial Version
  *
- * Rotate the bot's score database (keep only DAYSAMPLES days)
+ * Overview command for old ROTATE and UPDATE commands
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -36,13 +36,31 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
-void ROTATECommand::Exec(iClient* theClient, sqlUser* theUser, const std::string&)
+void DEBUGCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
-bot->logAdminMessage("%s (%s) ordered a manual DB rotation.",
-		     theUser->getUserName().c_str(),
-		     theClient->getRealNickUserHost().c_str());
-bot->rotateDB(false);
+#ifndef CHANFIX_DEBUG
 return;
+#endif
+
+StringTokenizer st(Message);
+
+std::string option = string_upper(st[1]);
+
+if (option == "ROTATE") {
+  bot->logAdminMessage("%s (%s) ordered a manual DB rotation.",
+		       theUser->getUserName().c_str(),
+		       theClient->getRealNickUserHost().c_str());
+  bot->rotateDB(false);
+  return;
 }
 
+if (option == "UPDATE") {
+  bot->logAdminMessage("%s (%s) ordered a manual DB update.",
+		       theUser->getUserName().c_str(),
+		       theClient->getRealNickUserHost().c_str());
+  bot->updateDB(false);
+  return;
+}
+
+}
 } // namespace gnuworld

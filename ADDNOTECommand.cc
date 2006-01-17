@@ -53,6 +53,9 @@ if (st[1][0] != '#') {
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
 if (!theChan) theChan = bot->newChannelRecord(st[1]);
 
+if (!theChan->useSQL())
+  theChan->Insert();
+
 theChan->addNote(sqlChannel::EV_NOTE, theUser, st.assemble(2));
 
 bot->SendTo(theClient,

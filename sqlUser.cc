@@ -148,13 +148,15 @@ if (!cacheCon->ExecCommandOk(insertString.str().c_str())) {
 	<< cacheCon->ErrorMessage()
 	<< std::endl;
   retval = false;
+  maxUserId--;
 } else
   retval = true;
 
 /* Dispose of our connection instance */
 myManager->removeConnection(cacheCon);
 
-commit();
+if (retval)
+  commit();
 
 return retval;
 } // sqlUser::Insert()

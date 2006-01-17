@@ -70,7 +70,11 @@ if (!theChan->getFlag(sqlChannel::F_BLOCKED)) {
 }
 
 theChan->removeFlag(sqlChannel::F_BLOCKED);
-theChan->commit();
+
+if (!theChan->useSQL())
+  theChan->Insert();
+else
+  theChan->commit();
 
 /* Add note to the channel about this command */
 theChan->addNote(sqlChannel::EV_UNBLOCK, theUser, "");

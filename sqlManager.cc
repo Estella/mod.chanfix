@@ -93,8 +93,21 @@ void sqlManager::removeConnection(PgDatabase* tempCon)
 assert(tempCon != 0);
 
 elog << "*** [sqlManager:removeConnection] Removing DB connection." << std::endl;
-delete tempCon;
+delete tempCon; tempCon = 0;
 }
+
+/**
+ * This is our destructor that ensures the proper teardown of
+ * our DB link and clears out any memory currently in use by
+ * objects
+ */
+void sqlManager::removeManager()
+{
+/* Destruct our DB object */
+elog << "*** [sqlManager] Shutting down DB communications." << std::endl;
+removeConnection(SQLDb);
+delete theManager; theManager = 0;
+} // sqlManager::removeManager()
 
 
 /*****************************************************
@@ -102,28 +115,22 @@ delete tempCon;
  *****************************************************/
 
 /**
- * This is our constructor that initialises DB communications
- * and any of the queues that will be used
- * It is only ever called from initialize()
+ * This is our constructor that initialises DB communications.
+ * It is only ever called from initialize().
  */
 sqlManager::sqlManager(const std::string& _dbString)
 {
-/* Construct our DB object and initialise queues */
+/* Construct our DB object */
 dbString = _dbString;
 SQLDb = getConnection();
-} // sqlManager::sqlManager
-
+} // sqlManager::sqlManager(const std::string&)
 
 /**
- * This is our constructor that ensures the proper teardown of
- * our DB link and clears out any memory currently in use by
- * queues or objects
+ * This is a dummy destructor.
+ * The real code is in sqlManager::removeManager().
  */
 sqlManager::~sqlManager()
 {
-/* Destruct our DB object and any queues */
-elog << "*** [sqlManager] Shutting down DB communications." << std::endl;
-removeConnection(SQLDb);
 } // sqlManager::~sqlManager()
 
 

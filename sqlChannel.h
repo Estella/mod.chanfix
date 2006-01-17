@@ -87,6 +87,9 @@ public:
 	inline bool		getModesRemoved() const
 		{ return modesRemoved ; }
 
+	inline bool		useSQL() const
+		{ return inSQL ; }
+
 	/*
 	 *  Methods to set data atrributes.
 	 */
@@ -120,6 +123,9 @@ public:
 	inline void	setModesRemoved(bool _modesRemoved)
 		{ modesRemoved = _modesRemoved; }
 
+	inline void	setUseSQL(bool _inSQL)
+		{ inSQL = _inSQL; }
+
 	bool Insert();
 	bool Delete();
 	bool commit();
@@ -144,6 +150,7 @@ protected:
 	unsigned int	maxScore;
 	bool		modesRemoved;
 	flagType	flags;
+	bool		inSQL;
 
 	sqlManager*	myManager;
 }; // class sqlChannel

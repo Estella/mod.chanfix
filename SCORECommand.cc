@@ -62,7 +62,7 @@ if (!netChan) {
   return;
 }
 
-if (!bot->canScoreChan(netChan, false)) {
+if (!bot->canScoreChan(netChan)) {
   if (compact)
     bot->SendTo(theClient, "~! %s", netChan->getName().c_str());
   else

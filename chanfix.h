@@ -51,30 +51,6 @@ class Timer;
 namespace gnuworld
 {
 
-/**
- * Case insensitive comparison struct for use by STL structures/algorithms.
- */
-struct noCaseComparePair
-{
-inline bool operator()( const std::pair<std::string, std::string>& lhs, const std::pair<std::string, std::string>& rhs) const
-{
-	elog << "gnuworld::noCaseComparePair> DEBUG:"
-		<< "[lfirst=" << lhs.first
-		<< " lsecond=" << lhs.second
-		<< "] [rfirst=" << rhs.first
-		<< " rsecond=" << rhs.second << "]"
-		<< std::endl;
-	if (!strcasecmp(lhs.first, rhs.first) && !strcasecmp(lhs.second, rhs.second)) {
-		elog << "gnuworld::noCaseComparePair> DEBUG: This is a match!" << std::endl;
-		return true;
-	} else {
-		elog << "gnuworld::noCaseComparePair> DEBUG: This is not a match!" << std::endl;
-		return false;
-	}
-}
-} ;
-
-
 class chanfix : public xClient {
 
 public:
@@ -245,7 +221,7 @@ public:
 
 	bool needsModesRemoved(Channel*);
 
-	bool canScoreChan(Channel*, bool);
+	bool canScoreChan(Channel*);
 
 	void startTimers();
 
@@ -301,14 +277,14 @@ public:
 	/**
 	 * Commands map
 	 */
-	typedef std::map< std::string, Command*, noCaseCompare> commandMapType;
+	typedef std::map <std::string, Command*, noCaseCompare> commandMapType;
 	commandMapType commandMap;
 
 	/**
 	 * ChannelOp map
 	 */
-	//typedef std::map< std::pair<std::string, std::string>, sqlChanOp*, noCaseComparePair> sqlChanOpsType;
-	typedef std::map< std::pair<std::string, std::string>, sqlChanOp*> sqlChanOpsType;
+	// map contents: channel string (account string, sqlChanOp object)
+	typedef std::map <std::string, std::map <std::string, sqlChanOp*, noCaseCompare>, noCaseCompare> sqlChanOpsType;
 	sqlChanOpsType		sqlChanOps;
 
 	typedef std::map <std::string, sqlChannel*, noCaseCompare> sqlChannelCacheType;
@@ -318,11 +294,8 @@ public:
 	clientOpsType*		findMyOps(iClient*);
 	void 			lostOp(Channel*, iClient*, clientOpsType*);
 
-	typedef std::list< sqlChanOp* > chanOpsType;
+	typedef std::list <sqlChanOp*> chanOpsType;
 	chanOpsType		getMyOps(Channel*);
-
-	typedef std::map <std::string, size_t> myOpsCountType;
-	myOpsCountType		myOpsCount;
 	
 	/**
 	 * The db clients map

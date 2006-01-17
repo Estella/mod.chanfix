@@ -55,7 +55,8 @@ sqlChannel::sqlChannel(sqlManager* _myManager) :
   start(0),
   maxScore(0),
   modesRemoved(false),
-  flags(0)
+  flags(0),
+  inSQL(false)
 {
   myManager = _myManager;
 };
@@ -65,6 +66,7 @@ void sqlChannel::setAllMembers(PgDatabase* theDB, int row)
   id = atoi(theDB->GetValue(row, 0));
   channel = theDB->GetValue(row, 1);
   flags = atoi(theDB->GetValue(row, 2));
+  inSQL = true;
 
   if (id > maxUserId) maxUserId = id;
 }
@@ -74,8 +76,6 @@ void sqlChannel::setAllMembers(PgDatabase* theDB, int row)
  */
 bool sqlChannel::Insert()
 {
-bool retval = false;
-
 /* Get a connection instance to our backend */
 PgDatabase* cacheCon = myManager->getConnection();
 
@@ -98,14 +98,16 @@ if (!cacheCon->ExecCommandOk(insertString.str().c_str())) {
   elog	<< "sqlChannel::Insert> Something went wrong: "
 	<< cacheCon->ErrorMessage()
 	<< std::endl;
-  retval = false;
-} else
-  retval = true;
+  inSQL = false;
+  maxUserId--;
+} else {
+  inSQL = true;
+}
 
 /* Dispose of our connection instance */
 myManager->removeConnection(cacheCon);
 
-return retval;
+return inSQL;
 } // sqlChannel::Insert()
 
 bool sqlChannel::Delete()

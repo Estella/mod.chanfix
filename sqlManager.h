@@ -45,6 +45,9 @@ class sqlManager {
     /** Allow checking in of database connections */
     void removeConnection(PgDatabase*);
 
+    /** Allow removal of theManager */
+    void removeManager();
+
   protected:
     /**
      * Disable the default constructor so that instances can only be gotten

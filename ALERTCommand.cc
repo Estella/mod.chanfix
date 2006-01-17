@@ -63,7 +63,11 @@ if (theChan->getFlag(sqlChannel::F_ALERT)) {
 }
 
 theChan->setFlag(sqlChannel::F_ALERT);
-theChan->commit();
+
+if (!theChan->useSQL())
+  theChan->Insert();
+else
+  theChan->commit();
 
 /* Add note to the channel about this command */
 theChan->addNote(sqlChannel::EV_ALERT, theUser, (st.size() > 2) ? st.assemble(2) : "");
