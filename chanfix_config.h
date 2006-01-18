@@ -129,12 +129,12 @@
 /**
  * Interval between two consecutive checks for opless channels.
  */
-#define CHECK_CHANS_TIME	10
+#define CHECK_CHANS_TIME	600
 
 /**
  * Interval between two consecutive processing of the queues.
  */
-#define PROCESS_QUEUE_TIME	5
+#define PROCESS_QUEUE_TIME	300
 
 /**
  * Maximum score a client can obtain.
@@ -164,20 +164,6 @@
  * (default: 50)
  */
 #define MAXNOTECOUNT	50
-
-/**
- * The maximum number of automatic fixes to retain in history per
- * channel. (default: 10)
- * NOTE: Not used (yet).
- */
-#define MAXAUTOFIX	10
-
-/**
- * The maximum number of manual fixes to retain in history per channel.
- * (default: 10)
- * NOTE: Not used (yet).
- */
-#define MAXMANUALFIX	10
 
 /**
  * Do you want to remember (and never expire) old channel entries that

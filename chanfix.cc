@@ -100,7 +100,7 @@ std::string dbString = "host=" + sqlHost + " dbname=" + sqlDB
 theManager = sqlManager::getInstance(dbString);
 
 /* Get our logfiles open */
-adminLog.open(adminLogFile.c_str());
+adminLog.open(adminLogFile.c_str(), std::ios::out | std::ios::app);
 
 /* Register the commands we want to use */
 RegisterCommand(new ADDFLAGCommand(this, "ADDFLAG",
@@ -404,7 +404,6 @@ MyUplink->RegisterChannelEvent( xServer::CHANNEL_ALL, this );
 xClient::OnAttach() ;
 }
 
-
 /**
  * Thread class only used for score updates, updates on reload and shutdown are not threaded
  */
@@ -462,6 +461,7 @@ else if (theTimer == tidRotateDB) {
   tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
 }
 else if (theTimer == tidUpdateDB) {
+  /* Prepare to synchronize the database in a thread */
   prepareUpdate(true);
 
   /* Refresh Timer */
@@ -488,6 +488,10 @@ commandMap.clear();
 
 /* Delete our sqlManager */
 theManager->removeManager();
+
+/* Finally, close our admin log */
+if (adminLog.is_open())
+  adminLog.close();
 
 xClient::OnDetach( reason ) ;
 }
@@ -2003,7 +2007,7 @@ void chanfix::prepareUpdate(bool threaded)
         curStruct.day[i] = curOp->getDay(i);
       }
       
-      snapShot.insert(DBMapType::value_type(curChan,curStruct));
+      snapShot.insert(DBMapType::value_type(curChan, curStruct));
     }
   }
 
@@ -2050,55 +2054,29 @@ void chanfix::updateDB()
   std::stringstream theLine;
   int chanOpsProcessed = 0;
 
-  for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
-       ptr != sqlChanOps.end(); ptr++) {
-    /* curChan = escapeSQLChars(ptr->first); */
-    curChan = ptr->first;
-    for (sqlChanOpsType::mapped_type::iterator chanOp = ptr->second.begin();
-	 chanOp != ptr->second.end(); chanOp++) {
-      curOp = chanOp->second;
-		 
-      /* Fill the structures and maps */
-      tmpStruct.account = curOp->getAccount();
-      tmpStruct.lastSeenAs = curOp->getLastSeenAs();
-      tmpStruct.firstOpped = curOp->getTimeFirstOpped();
-      tmpStruct.lastOpped = curOp->getTimeLastOpped();
-      
-      for (i = 0; i < DAYSAMPLES; i++) {
-        tmpStruct.day[i] = curOp->getDay(i);
-      }
-      
-      tmpSnapShot.insert(tmpDBMapType::value_type(curChan,tmpStruct));
-      
-      /*
-      acct = escapeSQLChars (curOp->getAccount ()).c_str ();
-      lsa = escapeSQLChars (curOp->getLastSeenAs ()).c_str ();
+  for (DBMapType::iterator ptr = snapShot.begin();
+       ptr != snapShot.end(); ptr++) {
+    curChan = escapeSQLChars(ptr->first);
 
-      theLine.str("");
-      theLine	<< curChan << "\t"
-		<< acct << "\t"
-		<< lsa << "\t"
-		<< curOp->getTimeFirstOpped() << "\t"
-		<< curOp->getTimeLastOpped()
+    theLine.str("");
+    theLine	<< curChan << "\t"
+		<< escapeSQLChars(ptr->second.account) << "\t"
+		<< escapeSQLChars(ptr->second.lastSeenAs) << "\t"
+		<< ptr->second.firstOpped << "\t"
+		<< ptr->second.lastOpped
 		;
 
-      int i;
-      for (i = 0; i < DAYSAMPLES; i++) {
-        theLine	<< "\t" << curOp->getDay(i)
+    int i;
+    for (i = 0; i < DAYSAMPLES; i++) {
+      theLine	<< "\t" << ptr->second.day[i]
 		;
-      }
-
-      theLine	<< "\n"
-		;
-
-      bytes += strlen (acct) + strlen (lsa) 
-               + (sizeof (short) * DAYSAMPLES)
-               + (sizeof (time_t) * 2);
-
-      cacheCon->PutLine(theLine.str().c_str());
-      */
-      chanOpsProcessed++;
     }
+
+    theLine	<< "\n"
+		;
+
+    cacheCon->PutLine(theLine.str().c_str());
+    chanOpsProcessed++;
   }
   
   /* Send completion string for the end of the data. */
