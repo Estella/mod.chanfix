@@ -51,7 +51,7 @@ bot->logAdminMessage("%s (%s) is shutting me down.",
 		     theClient->getRealNickUserHost().c_str());
 
 /* Let's save our chanops database. */
-bot->updateDB(false);
+bot->prepareUpdate(false);
 
 if (st.size() < 2) {
   server->UnloadClient(bot, "Quit");

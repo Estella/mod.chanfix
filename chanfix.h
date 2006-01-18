@@ -227,8 +227,9 @@ public:
 
 	void processQueue();
 	
-	void rotateDB(bool);
-	void updateDB(bool);
+	void rotateDB();
+	void prepareUpdate(bool);
+	void updateDB();
 
 	bool isBeingFixed(Channel*);
 	bool isBeingAutoFixed(Channel*);

@@ -412,26 +412,13 @@ class ClassUpdateDB {
   public:
     ClassUpdateDB(chanfix& cf) : cf_(cf) {}
     void operator()() {
-      cf_.updateDB(true);
+      cf_.updateDB();
       return;
     }
 
 private:
         chanfix& cf_;
 };
-
-class ClassRotateDB {
-  public:
-    ClassRotateDB(chanfix& cf) : cf_(cf) {}
-    void operator()() {
-      cf_.rotateDB(true);
-      return;
-    }
-
-private:
-        chanfix& cf_;
-};
-
 
 /* OnTimer */
 void chanfix::OnTimer(const gnuworld::xServer::timerID& theTimer, void*)
@@ -468,16 +455,14 @@ else if (theTimer == tidFixQ) {
 }
 else if (theTimer == tidRotateDB) {
   /* Clean-up the database if its 00 GMT */
-  ClassRotateDB rotateDB(*this);
-  boost::thread pthrd(rotateDB);
+  rotateDB();
 
   /* Refresh Timer */
   theTime = time(NULL) + getSecsTilMidnight();
   tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
 }
 else if (theTimer == tidUpdateDB) {
-  ClassUpdateDB updateDB(*this);
-  boost::thread pthrd(updateDB);
+  prepareUpdate(true);
 
   /* Refresh Timer */
   theTime = time(NULL) + SQL_UPDATE_TIME;
@@ -1971,17 +1956,74 @@ elog	<< "chanfix::startTimers> Started all timers."
 }
 
 /**
- * updateDB - Copies the contents of sqlChanOps to the SQL database
- * Note: Only threaded if called via the ClassUpdateDB function with
- * boost::thread
+ * prepareUpdate - Copies the sqlChanOp map to a temporary multimap
  */
-void chanfix::updateDB(bool threaded)
+void chanfix::prepareUpdate(bool threaded)
 {
   elog	<< "*** [chanfix::updateDB] Updating the SQL database "
 	<< (threaded ? "(threaded)." : "(unthreaded).")
 	<< std::endl;
   logAdminMessage("Starting to update the SQL database.");
 
+  /* Local structure declaration */
+  struct snapShotStruct {
+    std::string	account;
+    std::string	lastSeenAs;
+    time_t	firstOpped;
+    time_t	lastOpped;
+    short	day[DAYSAMPLES];
+  };
+  
+  /* map declaration holding the chanindex & data struct */
+  typedef std::multimap<std::string,snapShotStruct> DBMapType;
+  DBMapType snapShot;
+  
+  snapShotStruct* curStruct = new (std::nothrow) snapShotStruct;
+  
+  if (!curStruct)
+    return;
+
+  sqlChanOp* curOp;
+  std::string curChan;
+
+  for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
+       ptr != sqlChanOps.end(); ptr++) {
+    curChan = ptr->first;
+    for (sqlChanOpsType::mapped_type::iterator chanOp = ptr->second.begin();
+	 chanOp != ptr->second.end(); chanOp++) {
+      curOp = chanOp->second;
+		 
+      /* Fill the structures and maps */
+      curStruct.account = curOp->getAccount();
+      curStruct.lastSeenAs = curOp->getLastSeenAs();
+      curStruct.firstOpped = curOp->getTimeFirstOpped();
+      curStruct.lastOpped = curOp->getTimeLastOpped();
+      
+      for (i = 0; i < DAYSAMPLES; i++) {
+        curStruct.day[i] = curOp->getDay(i);
+      }
+      
+      snapShot.insert(DBMapType::value_type(curChan,curStruct));
+    }
+  }
+
+  if (threaded) {
+    ClassUpdateDB updateDB(*this);
+    boost::thread pthrd(updateDB);
+  } else {
+    updateDB();
+  }
+
+  return;
+}
+
+/**
+ * updateDB - Copies the contents of sqlChanOps to the SQL database
+ * Note: Only threaded if called via the ClassUpdateDB function with
+ * boost::thread
+ */
+void chanfix::updateDB()
+{  
   /* Start our timer */
   Timer updateDBTimer;
   updateDBTimer.Start();
@@ -2005,21 +2047,37 @@ void chanfix::updateDB(bool threaded)
     return;
   }
 
-  sqlChanOp* curOp;
-  std::string curChan;
   std::stringstream theLine;
   int chanOpsProcessed = 0;
 
   for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
        ptr != sqlChanOps.end(); ptr++) {
-    curChan = escapeSQLChars(ptr->first);
+    /* curChan = escapeSQLChars(ptr->first); */
+    curChan = ptr->first;
     for (sqlChanOpsType::mapped_type::iterator chanOp = ptr->second.begin();
 	 chanOp != ptr->second.end(); chanOp++) {
       curOp = chanOp->second;
+		 
+      /* Fill the structures and maps */
+      tmpStruct.account = curOp->getAccount();
+      tmpStruct.lastSeenAs = curOp->getLastSeenAs();
+      tmpStruct.firstOpped = curOp->getTimeFirstOpped();
+      tmpStruct.lastOpped = curOp->getTimeLastOpped();
+      
+      for (i = 0; i < DAYSAMPLES; i++) {
+        tmpStruct.day[i] = curOp->getDay(i);
+      }
+      
+      tmpSnapShot.insert(tmpDBMapType::value_type(curChan,tmpStruct));
+      
+      /*
+      acct = escapeSQLChars (curOp->getAccount ()).c_str ();
+      lsa = escapeSQLChars (curOp->getLastSeenAs ()).c_str ();
+
       theLine.str("");
       theLine	<< curChan << "\t"
-		<< escapeSQLChars(curOp->getAccount()).c_str() << "\t"
-		<< escapeSQLChars(curOp->getLastSeenAs()).c_str() << "\t"
+		<< acct << "\t"
+		<< lsa << "\t"
 		<< curOp->getTimeFirstOpped() << "\t"
 		<< curOp->getTimeLastOpped()
 		;
@@ -2033,11 +2091,16 @@ void chanfix::updateDB(bool threaded)
       theLine	<< "\n"
 		;
 
+      bytes += strlen (acct) + strlen (lsa) 
+               + (sizeof (short) * DAYSAMPLES)
+               + (sizeof (time_t) * 2);
+
       cacheCon->PutLine(theLine.str().c_str());
+      */
       chanOpsProcessed++;
     }
   }
-
+  
   /* Send completion string for the end of the data. */
   cacheCon->PutLine("\\.\n");
 
@@ -2085,7 +2148,7 @@ void chanfix::updateDB(bool threaded)
   return;
 }
 
-void chanfix::rotateDB(bool threaded)
+void chanfix::rotateDB()
 {
 /* 
  * CODER NOTES:
@@ -2095,7 +2158,7 @@ void chanfix::rotateDB(bool threaded)
  * cache: acct,chan
  */
 
-logAdminMessage("Beginning database rotation (%s).", (threaded ? "threaded" : "unthreaded"));
+logAdminMessage("Beginning database rotation.");
 
 /* Start our timer */
 Timer rotateDBTimer;
