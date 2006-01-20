@@ -64,7 +64,7 @@ if (option == "UPDATE") {
     return;
   }
 
-  if ((st.size() > 2) && st[2] == "THREADED") {
+  if ((st.size() > 2) && string_upper(st[2]) == "THREADED") {
     bot->logAdminMessage("%s (%s) ordered a manual DB update (threaded).",
 			 theUser->getUserName().c_str(),
 			 theClient->getRealNickUserHost().c_str());

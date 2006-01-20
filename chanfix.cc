@@ -1770,7 +1770,7 @@ if (currentState != RUN) {
   return;
 }
 
-for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ptr++) {
+for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
    //elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first << " in autoFixQ ..." << std::endl;
    if (ptr->second <= currentTime()) {
      sqlChannel* sqlChan = getChannelRecord(ptr->first);
@@ -1785,18 +1785,19 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ptr++
       * has passed, remove it from the list
       */
      if (isFixed || currentTime() - sqlChan->getFixStart() > AUTOFIX_MAXIMUM) {
-       autoFixQ.erase(ptr);
+       autoFixQ.erase(ptr++);
        sqlChan->setFixStart(0);
        sqlChan->setLastAttempt(0);
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " done!" << std::endl;
      } else {
        ptr->second = currentTime() + AUTOFIX_INTERVAL;
+       ptr++;
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " not done yet ..." << std::endl;
      }
-   }
+   } else ptr++;
 }
 
-for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ptr++) {
+for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
    //elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first << " in manFixQ ..." << std::endl;
    if (ptr->second <= currentTime()) {
      sqlChannel* sqlChan = getChannelRecord(ptr->first);
@@ -1811,15 +1812,16 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ptr++) 
       * has passed, remove it from the list
       */
      if (isFixed || currentTime() - sqlChan->getFixStart() > CHANFIX_MAXIMUM + CHANFIX_DELAY) {
-       manFixQ.erase(ptr);
+       manFixQ.erase(ptr++);
        sqlChan->setFixStart(0);
        sqlChan->setLastAttempt(0);
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " done!" << std::endl;
      } else {
        ptr->second = currentTime() + CHANFIX_INTERVAL;
+       ptr++;
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " not done yet ..." << std::endl;
      }
-   }
+   } else ptr++;
 }
 
 return;
@@ -2045,8 +2047,34 @@ void chanfix::updateDB()
   /* Get a connection instance to our backend */
   PgDatabase* cacheCon = theManager->getConnection();
 
+  /* Check for the backup table. If it exists, something went wrong. */
+  /* SELECT count(*) FROM pg_tables WHERE tablename = 'chanOpsBackup'; */
+/* -- This is different for 7.2.x versus 7.4.x and greater
+  if (!cacheCon->ExecTuplesOk("SELECT chanOpsBackup FROM information_schema.tables")) {
+    elog	<< "*** [chanfix::updateDB]: Error checking for backup table presence: " 
+		<< cacheCon->ErrorMessage()
+		<< std::endl;
+    return;
+  }
+*/
+  /* Drop the backup table. */
+  if (!cacheCon->ExecCommandOk("DROP TABLE chanOpsBackup")) {
+    elog	<< "*** [chanfix::updateDB]: Error dropping backup table: " 
+		<< cacheCon->ErrorMessage()
+		<< std::endl;
+    return;
+  }
+
+  /* Copy all data from the main table to the backup table. */
+  if (!cacheCon->ExecCommandOk("CREATE TABLE chanOpsBackup AS SELECT * FROM chanOps")) {
+    elog	<< "*** [chanfix::updateDB]: Error creating backup table: " 
+		<< cacheCon->ErrorMessage()
+		<< std::endl;
+    return;
+  }
+
   /* Delete the current chanOps table. */
-  if (!cacheCon->ExecCommandOk("DELETE FROM chanOps")) {
+  if (!cacheCon->ExecCommandOk("TRUNCATE TABLE chanOps")) {
     elog	<< "*** [chanfix::updateDB]: Error deleting current chanOps table: " 
 		<< cacheCon->ErrorMessage()
 		<< std::endl;
