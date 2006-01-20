@@ -905,6 +905,23 @@ elog << "*** [chanfix::precacheChanOps] Precaching chanops." << std::endl;
 /* Get a connection instance to our backend */
 PgDatabase* cacheCon = theManager->getConnection();
 
+/* Check for the backup table. If it exists, something went wrong. */
+/* SELECT count(*) FROM pg_tables WHERE tablename = 'chanOpsBackup' */
+/* SELECT chanOpsBackup FROM information_schema.tables */
+if (!cacheCon->ExecTuplesOk("SELECT count(*) FROM pg_tables WHERE tablename = 'chanOpsBackup'")) {
+  elog	<< "*** [chanfix::precacheChanOps]: Error checking for backup table presence: " 
+		<< cacheCon->ErrorMessage()
+		<< std::endl;
+  return;
+}
+
+if (cacheCon->Tuples() && atoi(cacheCon->GetValue(0, 0))) {
+  elog	<< "*** [chanfix::precacheChanOps]: Backup table still exists! "
+	<< "Something must have gone wrong on the last update. Exiting..."
+	<< std::endl;
+  ::exit(0);
+}
+
 /* Retrieve the list of chanops */
 std::stringstream theQuery;
 theQuery	<< "SELECT channel,account,last_seen_as,ts_firstopped,ts_lastopped,day0,day1,day2,day3,day4,day5,day6,day7,day8,day9,day10,day11,day12,day13 FROM chanOps"
@@ -930,9 +947,9 @@ if (cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
      }
   }
 } else {
-  elog << "*** [chanfix::precacheChanOps] Error executing query: "
-    << cacheCon->ErrorMessage()
-    << std::endl;
+  elog	<< "*** [chanfix::precacheChanOps] Error executing query: "
+	<< cacheCon->ErrorMessage()
+	<< std::endl;
   ::exit(0);
 }
 
@@ -2048,21 +2065,23 @@ void chanfix::updateDB()
   PgDatabase* cacheCon = theManager->getConnection();
 
   /* Check for the backup table. If it exists, something went wrong. */
-  /* SELECT count(*) FROM pg_tables WHERE tablename = 'chanOpsBackup'; */
-/* -- This is different for 7.2.x versus 7.4.x and greater
-  if (!cacheCon->ExecTuplesOk("SELECT chanOpsBackup FROM information_schema.tables")) {
+  /* SELECT count(*) FROM pg_tables WHERE tablename = 'chanOpsBackup' */
+  /* SELECT chanOpsBackup FROM information_schema.tables */
+  if (!cacheCon->ExecTuplesOk("SELECT count(*) FROM pg_tables WHERE tablename = 'chanOpsBackup'")) {
     elog	<< "*** [chanfix::updateDB]: Error checking for backup table presence: " 
 		<< cacheCon->ErrorMessage()
 		<< std::endl;
     return;
   }
-*/
-  /* Drop the backup table. */
-  if (!cacheCon->ExecCommandOk("DROP TABLE chanOpsBackup")) {
-    elog	<< "*** [chanfix::updateDB]: Error dropping backup table: " 
+
+  if (cacheCon->Tuples() && atoi(cacheCon->GetValue(0, 0))) {
+    /* Drop the backup table. */
+    if (!cacheCon->ExecCommandOk("DROP TABLE chanOpsBackup")) {
+      elog	<< "*** [chanfix::updateDB]: Error dropping backup table: " 
 		<< cacheCon->ErrorMessage()
 		<< std::endl;
-    return;
+      return;
+    }
   }
 
   /* Copy all data from the main table to the backup table. */
@@ -2073,9 +2092,9 @@ void chanfix::updateDB()
     return;
   }
 
-  /* Delete the current chanOps table. */
+  /* Truncate the current chanOps table. */
   if (!cacheCon->ExecCommandOk("TRUNCATE TABLE chanOps")) {
-    elog	<< "*** [chanfix::updateDB]: Error deleting current chanOps table: " 
+    elog	<< "*** [chanfix::updateDB]: Error truncating current chanOps table: " 
 		<< cacheCon->ErrorMessage()
 		<< std::endl;
     return;
@@ -2154,6 +2173,14 @@ void chanfix::updateDB()
 		<< std::endl;
     logAdminMessage("Synched %d members to the SQL database in %u ms.",
 		    actualChanOpsProcessed, updateDBTimer.stopTimeMS());
+  }
+
+  /* Drop the backup table. */
+  if (!cacheCon->ExecCommandOk("DROP TABLE chanOpsBackup")) {
+    elog	<< "*** [chanfix::updateDB]: Error dropping backup table (after completion): " 
+		<< cacheCon->ErrorMessage()
+		<< std::endl;
+    return;
   }
 
   /* Dispose of our connection instance */
