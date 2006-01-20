@@ -177,4 +177,5 @@ COPY "translations" FROM stdin;
 1	170	Removed the default hostmask of *!*@* from user %s.	31337	0
 1	171	Channel service linked. New channels will be scored.	31337	0
 1	172	Channel service not linked. New channels will not be scored.	31337	0
+1	173	This command cannot proceed while an update is in progress. Please try again later.	31337	0
 \.

@@ -299,6 +299,20 @@ public:
 	chanOpsType		getMyOps(Channel*);
 	
 	/**
+	 * The snapshot map for updating the SQL database
+	 */
+	typedef struct {
+	    std::string	account;
+	    std::string	lastSeenAs;
+	    time_t	firstOpped;
+	    time_t	lastOpped;
+	    short	day[DAYSAMPLES];
+	} snapShotStruct;
+
+	typedef std::multimap<std::string, snapShotStruct> DBMapType;
+	DBMapType		snapShot;
+
+	/**
 	 * The db clients map
 	 */
 	typedef std::map <std::string, sqlUser*, noCaseCompare> usersMapType;
@@ -319,12 +333,12 @@ public:
 	/**
 	 * Queues to process.
 	 */
-	typedef std::list< std::pair<Channel*, time_t> > fixQueueType;
+	typedef std::map <std::string, time_t, noCaseCompare> fixQueueType;
 	fixQueueType	autoFixQ;
 	fixQueueType	manFixQ;
 
 	typedef std::vector< iClient* > acctListType; //For reopping all logged in users to an acct.
-	acctListType findAccount(Channel*, const std::string&);
+	acctListType	findAccount(Channel*, const std::string&);
 
 	typedef std::map < std::pair <int, std::string>, std::string > helpTableType;
 	helpTableType	helpTable;
@@ -337,7 +351,7 @@ public:
 
 	typedef std::map < std::pair <int, int>, std::string > translationTableType ;
 	translationTableType	translationTable;
-
+	
 	void loadTranslationTable();
 
 	const std::string getResponse(sqlUser*, int, std::string = std::string());
@@ -386,6 +400,11 @@ protected:
 	bool		chanServLinked;
 
 	/**
+	 * Update status variable
+	 */
+	bool		updateInProgress;
+
+	/**
 	 * Timer declarations
 	 */
 	xServer::timerID tidCheckDB;
@@ -415,6 +434,7 @@ public:
 	bool doChanBlocking() { return enableChannelBlocking; }
 	STATE getState() { return currentState; }
 	bool isChanServLinked() { return chanServLinked; }
+	bool isUpdateRunning() { return updateInProgress; }
 	unsigned int getNumServers() { return numServers; }
 	unsigned int getMinServersPresent() { return minServersPresent; }
 	unsigned int getNumTopScores() { return numTopScores; }

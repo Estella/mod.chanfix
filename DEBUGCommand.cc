@@ -30,6 +30,7 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
+#include	"responses.h"
 
 RCSTAG("$Id$");
 
@@ -50,16 +51,32 @@ if (option == "ROTATE") {
   bot->logAdminMessage("%s (%s) ordered a manual DB rotation.",
 		       theUser->getUserName().c_str(),
 		       theClient->getRealNickUserHost().c_str());
-  bot->rotateDB(false);
+  bot->rotateDB();
   return;
 }
 
 if (option == "UPDATE") {
-  bot->logAdminMessage("%s (%s) ordered a manual DB update.",
-		       theUser->getUserName().c_str(),
-		       theClient->getRealNickUserHost().c_str());
-  bot->updateDB(false);
-  return;
+  if (bot->isUpdateRunning()) {
+    bot->SendTo(theClient,
+		bot->getResponse(theUser,
+				language::update_in_progress,
+                        	std::string("This command cannot proceed while an update is in progress. Please try again later.")).c_str());
+    return;
+  }
+
+  if ((st.size() > 2) && st[2] == "THREADED") {
+    bot->logAdminMessage("%s (%s) ordered a manual DB update (threaded).",
+			 theUser->getUserName().c_str(),
+			 theClient->getRealNickUserHost().c_str());
+    bot->prepareUpdate(true);
+    return;
+  } else {
+    bot->logAdminMessage("%s (%s) ordered a manual DB update.",
+			 theUser->getUserName().c_str(),
+			 theClient->getRealNickUserHost().c_str());
+    bot->prepareUpdate(false);
+    return;
+  }
 }
 
 }

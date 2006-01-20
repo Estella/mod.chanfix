@@ -94,6 +94,9 @@ currentState = INIT;
 /* Initial finding of the channel service */
 chanServLinked = false;
 
+/* Initial update status */
+updateInProgress = false;
+
 std::string dbString = "host=" + sqlHost + " dbname=" + sqlDB
   + " port=" + sqlPort + " user=" + sqlUsername + " password=" + sqlPass;
 
@@ -1441,7 +1444,7 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
 	   static_cast<int>(static_cast<float>(FIX_MIN_ABS_SCORE_END)
 	   * MAX_SCORE)) && !sqlChan->getFlag(sqlChannel::F_BLOCKED)) {
 	 elog << "chanfix::autoFix> DEBUG: " << thisChan->getName() << " is opless, fixing." << std::endl;
-	 autoFixQ.push_back(fixQueueType::value_type(thisChan, currentTime()));
+	 autoFixQ.insert(fixQueueType::value_type(thisChan->getName(), currentTime()));
 	 numOpLess++;
        }
      }
@@ -1455,6 +1458,9 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
 
 void chanfix::manualFix(Channel* thisChan)
 {
+/* If the channel doesn't exist (anymore), don't try to fix it. */
+if (!thisChan) return;
+
 elog << "chanfix::manualFix> DEBUG: Manual fix " << thisChan->getName() << "!" << std::endl;
 
 if (thisChan->getCreationTime() > 1) {
@@ -1493,7 +1499,7 @@ if (thisChan->getCreationTime() > 1) {
 
 Message(thisChan, "Channel fix in progress, please stand by.");
 
-manFixQ.push_back(fixQueueType::value_type(thisChan, currentTime() + CHANFIX_DELAY));
+manFixQ.insert(fixQueueType::value_type(thisChan->getName(), currentTime() + CHANFIX_DELAY));
 }
 
 bool chanfix::fixChan(sqlChannel* sqlChan, bool autofix)
@@ -1764,8 +1770,8 @@ if (currentState != RUN) {
   return;
 }
 
-for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
-   //elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first->getName() << " in autoFixQ ..." << std::endl;
+for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ptr++) {
+   //elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first << " in autoFixQ ..." << std::endl;
    if (ptr->second <= currentTime()) {
      sqlChannel* sqlChan = getChannelRecord(ptr->first);
      if (!sqlChan) sqlChan = newChannelRecord(ptr->first);
@@ -1779,20 +1785,19 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
       * has passed, remove it from the list
       */
      if (isFixed || currentTime() - sqlChan->getFixStart() > AUTOFIX_MAXIMUM) {
-       ptr = autoFixQ.erase(ptr);
+       autoFixQ.erase(ptr);
        sqlChan->setFixStart(0);
        sqlChan->setLastAttempt(0);
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " done!" << std::endl;
      } else {
        ptr->second = currentTime() + AUTOFIX_INTERVAL;
-       ptr++;
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " not done yet ..." << std::endl;
      }
-   } else ptr++;
+   }
 }
 
-for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
-   //elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first->getName() << " in manFixQ ..." << std::endl;
+for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ptr++) {
+   //elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first << " in manFixQ ..." << std::endl;
    if (ptr->second <= currentTime()) {
      sqlChannel* sqlChan = getChannelRecord(ptr->first);
      if (!sqlChan) sqlChan = newChannelRecord(ptr->first);
@@ -1806,16 +1811,15 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
       * has passed, remove it from the list
       */
      if (isFixed || currentTime() - sqlChan->getFixStart() > CHANFIX_MAXIMUM + CHANFIX_DELAY) {
-       ptr = manFixQ.erase(ptr);
+       manFixQ.erase(ptr);
        sqlChan->setFixStart(0);
        sqlChan->setLastAttempt(0);
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " done!" << std::endl;
      } else {
        ptr->second = currentTime() + CHANFIX_INTERVAL;
-       ptr++;
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " not done yet ..." << std::endl;
      }
-   } else ptr++;
+   }
 }
 
 return;
@@ -1828,29 +1832,28 @@ return (isBeingAutoFixed(theChan) || isBeingChanFixed(theChan));
 
 bool chanfix::isBeingAutoFixed(Channel* theChan)
 {
-for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ptr++) {
-  if (ptr->first->getName() == theChan->getName()) return true;
-}
+fixQueueType::iterator ptr = autoFixQ.find(theChan->getName());
+if (ptr != autoFixQ.end())
+  return true;
 
 return false;
 }
 
 bool chanfix::isBeingChanFixed(Channel* theChan)
 {
-for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ptr++) {
-  if (ptr->first->getName() == theChan->getName()) return true;
-}
+fixQueueType::iterator ptr = manFixQ.find(theChan->getName());
+if (ptr != manFixQ.end())
+  return true;
 
 return false;
 }
 
 bool chanfix::removeFromAutoQ(Channel* theChan)
 {
-for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ptr++) {
-  if (ptr->first->getName() == theChan->getName()) {
-    ptr = autoFixQ.erase(ptr);
-    return true;
-  }
+fixQueueType::iterator ptr = autoFixQ.find(theChan->getName());
+if (ptr != autoFixQ.end()) {
+  autoFixQ.erase(ptr);
+  return true;
 }
 
 return false;
@@ -1858,11 +1861,10 @@ return false;
 
 bool chanfix::removeFromManQ(Channel* theChan)
 {
-for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ptr++) {
-  if (ptr->first->getName() == theChan->getName()) {
-    ptr = manFixQ.erase(ptr);
-    return true;
-  }
+fixQueueType::iterator ptr = manFixQ.find(theChan->getName());
+if (ptr != manFixQ.end()) {
+  manFixQ.erase(ptr);
+  return true;
 }
 
 return false;
@@ -1964,31 +1966,36 @@ elog	<< "chanfix::startTimers> Started all timers."
  */
 void chanfix::prepareUpdate(bool threaded)
 {
+  if (updateInProgress) {
+    elog	<< "*** [chanfix::updateDB] Update already in progress; not starting."
+		<< std::endl;
+    return;	  
+  }
+
   elog	<< "*** [chanfix::updateDB] Updating the SQL database "
 	<< (threaded ? "(threaded)." : "(unthreaded).")
 	<< std::endl;
   logAdminMessage("Starting to update the SQL database.");
 
-  /* Local structure declaration */
-  struct snapShotStruct {
-    std::string	account;
-    std::string	lastSeenAs;
-    time_t	firstOpped;
-    time_t	lastOpped;
-    short	day[DAYSAMPLES];
-  };
+  /**
+   * Set updateInProgress boolean to true so that any other updates 
+   * and/or requests for shutdown/reload will be denied.
+   */
+  updateInProgress = true;
+
+  /* Start our timer */
+  Timer snapShotTimer;
+  snapShotTimer.Start();
   
-  /* map declaration holding the chanindex & data struct */
-  typedef std::multimap<std::string,snapShotStruct> DBMapType;
-  DBMapType snapShot;
-  
-  snapShotStruct* curStruct = new (std::nothrow) snapShotStruct;
-  
-  if (!curStruct)
-    return;
+  /* Clear the snapShot map */
+  snapShot.clear();
+
+  //snapShotStruct* curStruct = new (std::nothrow) snapShotStruct;
+  snapShotStruct curStruct;
 
   sqlChanOp* curOp;
   std::string curChan;
+  int i = 0;
 
   for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
        ptr != sqlChanOps.end(); ptr++) {
@@ -2011,6 +2018,9 @@ void chanfix::prepareUpdate(bool threaded)
     }
   }
 
+  logAdminMessage("Created snapshot map in %u ms.",
+		  snapShotTimer.stopTimeMS());
+  
   if (threaded) {
     ClassUpdateDB updateDB(*this);
     boost::thread pthrd(updateDB);
@@ -2053,20 +2063,18 @@ void chanfix::updateDB()
 
   std::stringstream theLine;
   int chanOpsProcessed = 0;
-
+  int i = 0;
+  
   for (DBMapType::iterator ptr = snapShot.begin();
        ptr != snapShot.end(); ptr++) {
-    curChan = escapeSQLChars(ptr->first);
-
     theLine.str("");
-    theLine	<< curChan << "\t"
+    theLine	<< escapeSQLChars(ptr->first) << "\t"
 		<< escapeSQLChars(ptr->second.account) << "\t"
 		<< escapeSQLChars(ptr->second.lastSeenAs) << "\t"
 		<< ptr->second.firstOpped << "\t"
 		<< ptr->second.lastOpped
 		;
 
-    int i;
     for (i = 0; i < DAYSAMPLES; i++) {
       theLine	<< "\t" << ptr->second.day[i]
 		;
@@ -2122,6 +2130,10 @@ void chanfix::updateDB()
 
   /* Dispose of our connection instance */
   theManager->removeConnection(cacheCon);
+
+  /* Clean-up after ourselves and allow new updates to be started */
+  snapShot.clear();
+  updateInProgress = false;
 
   return;
 }

@@ -193,6 +193,7 @@ namespace gnuworld
 
 		/* SHUTDOWN */
 		const int shutting_down			= 110;
+		const int update_in_progress		= 173;
 
 		/* STATUS */
 		const int status_uptime			= 111;

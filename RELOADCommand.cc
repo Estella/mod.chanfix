@@ -40,6 +40,14 @@ namespace gnuworld
 void RELOADCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
+	
+if (bot->isUpdateRunning()) {
+  bot->SendTo(theClient,
+	      bot->getResponse(theUser,
+			language::update_in_progress,
+			std::string("This command cannot proceed while an update is in progress. Please try again later.")).c_str());
+  return;
+}
 
 bot->SendTo(theClient,
             bot->getResponse(theUser,
