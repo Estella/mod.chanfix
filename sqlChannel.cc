@@ -59,7 +59,7 @@ sqlChannel::sqlChannel(sqlManager* _myManager) :
   inSQL(false)
 {
   myManager = _myManager;
-};
+}
 
 void sqlChannel::setAllMembers(PgDatabase* theDB, int row)
 {

@@ -45,7 +45,7 @@ sqlChanOp::sqlChanOp(sqlManager* _myManager) :
   day()
 {
   myManager = _myManager;
-};
+}
 	
 void sqlChanOp::setAllMembers(PgDatabase* theDB, int row)
 {

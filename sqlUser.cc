@@ -58,7 +58,7 @@ sqlUser::sqlUser(sqlManager* _myManager) :
   needOper(true)
 {
   myManager = _myManager;
-};
+}
 
 void sqlUser::setAllMembers(PgDatabase* theDB, int row)
 {
