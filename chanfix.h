@@ -180,7 +180,7 @@ public:
 	size_t countMyOps(const std::string&);
 	size_t countMyOps(Channel*);
 
-	sqlUser* chanfix::isAuthed(const std::string);
+	sqlUser* isAuthed(const std::string);
 
 	void precacheChanOps();
 	void precacheChannels();

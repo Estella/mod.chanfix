@@ -51,8 +51,8 @@
 #include	"chanfix_misc.h"
 #include	"chanfixCommands.h"
 #include	"responses.h"
-#include	"sqlChannel.h"
 #include	"sqlChanOp.h"
+#include	"sqlChannel.h"
 #include	"sqlUser.h"
 
 RCSTAG("$Id$");
@@ -1252,7 +1252,7 @@ theManager->removeConnection(cacheCon);
 return hostlist.str();
 }
 
-const std::string gnuworld::escapeSQLChars(const std::string& theString)
+const std::string escapeSQLChars(const std::string& theString)
 {
 std::string retMe ;
 
