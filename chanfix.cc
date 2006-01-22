@@ -1275,7 +1275,7 @@ for( std::string::const_iterator ptr = theString.begin() ;
 return retMe ;
 }
 
-bool gnuworld::atob( std::string str )
+bool atob( std::string str )
 {
 str = string_lower(str);
 if (str == "y" || str == "true" || str == "yes")
