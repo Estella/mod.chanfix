@@ -803,8 +803,10 @@ if (!tmpChan)
   return false;
 
 /* Everything sent here is also logged to a file on disk */
-std::string theLog = std::string( "[" ) + tsToDateTime(currentTime(), true) + "] " + buf ;
-adminLog << theLog << std::endl;
+if (adminLog.is_open()) {
+  std::string theLog = std::string( "[" ) + tsToDateTime(currentTime(), true) + "] " + buf ;
+  adminLog << theLog << std::endl;
+}
 
 std::string message = std::string( "[" ) + nickName + "] " + buf ;
 serverNotice(tmpChan, message);
