@@ -291,7 +291,7 @@ public:
 	typedef std::map <std::string, sqlChannel*, noCaseCompare> sqlChannelCacheType;
 	sqlChannelCacheType	sqlChanCache;
 
-	typedef std::vector <std::string> clientOpsType;
+	typedef std::list <std::string> clientOpsType;
 	clientOpsType*		findMyOps(iClient*);
 	void 			lostOp(const std::string&, iClient*, clientOpsType*);
 
