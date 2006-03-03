@@ -42,23 +42,15 @@ void OPLISTCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string
 {
 StringTokenizer st(Message);
 
-Channel* netChan = Network->findChannel(st[1]);
 sqlChanOp* curOp = 0;
-if (!netChan) {
-  bot->SendTo(theClient,
-              bot->getResponse(theUser,
-                              language::no_such_channel,
-                              std::string("No such channel %s.")).c_str(), st[1].c_str());
-  return;
-}
 
-chanfix::chanOpsType myOps = bot->getMyOps(netChan);
+chanfix::chanOpsType myOps = bot->getMyOps(st[1]);
 if (myOps.empty()) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::no_scores_for_chan,
                               std::string("There are no scores in the database for %s.")).c_str(),
-                                          netChan->getName().c_str());
+                                          st[1].c_str());
   return;
 }
 
@@ -76,7 +68,7 @@ if (oCnt == 0) {
               bot->getResponse(theUser,
                               language::no_scores_for_chan,
                               std::string("There are no scores in the database for %s.")).c_str(),
-	      netChan->getName().c_str());
+	      st[1].c_str());
   return;
 }
 
@@ -85,13 +77,13 @@ if (oCnt == OPCOUNT)
               bot->getResponse(theUser,
                               language::top_unique_op_accounts,
                               std::string("Top %d unique op accounts in channel %s:")).c_str(),
-                                          OPCOUNT, netChan->getName().c_str());
+                                          OPCOUNT, st[1].c_str());
 else
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::found_unique_op_accounts,
                               std::string("Found %d unique op accounts in channel %s:")).c_str(),
-                                          oCnt, netChan->getName().c_str());
+                                          oCnt, st[1].c_str());
 
 bot->SendTo(theClient,
             bot->getResponse(theUser,
@@ -119,7 +111,7 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
 bot->logAdminMessage("%s (%s) has requested OPLIST for %s",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str(),
-		     netChan->getName().c_str());
+		     st[1].c_str());
 
 return;
 }

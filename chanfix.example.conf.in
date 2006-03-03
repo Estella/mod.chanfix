@@ -37,13 +37,15 @@ sqlPass = ""
 consoleChan = #coder-com
 consoleChanModes = +nst
 
-# Oper channel name and initial modes
-operChan = #staff
-operChanModes = +inst
+# Should the bot relay admin messages to the console channel?
+sendConsoleNotices = true
 
-# Support channel name and initial modes
-supportChan = #chanfix
-supportChanModes = +nt
+# Channel(s) that chanfix should join besides consoleChan (can be multiple)
+joinChan = #chanfix
+joinChan = #staff
+
+# Initial modes all joinChans should have
+joinChanModes = +nt
 
 # ---------------------------------------------------------------------
 # Fixing settings

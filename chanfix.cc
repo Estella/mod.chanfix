@@ -325,10 +325,8 @@ assert(chanfixConfig != 0);
 /* Config file processing */
 consoleChan = chanfixConfig->Require("consoleChan")->second ;
 consoleChanModes = chanfixConfig->Require("consoleChanModes")->second ;
-operChan = chanfixConfig->Require("operChan")->second ;
-operChanModes = chanfixConfig->Require("operChanModes")->second ;
-supportChan = chanfixConfig->Require("supportChan")->second ;
-supportChanModes = chanfixConfig->Require("supportChanModes")->second ;
+sendConsoleNotices = atob(chanfixConfig->Require("sendConsoleNotices")->second) ;
+joinChanModes = chanfixConfig->Require("joinChanModes")->second ;
 enableAutoFix = atob(chanfixConfig->Require("enableAutoFix")->second) ;
 enableChanFix = atob(chanfixConfig->Require("enableChanFix")->second) ;
 enableChannelBlocking = atob(chanfixConfig->Require("enableChannelBlocking")->second) ;
@@ -341,6 +339,23 @@ minClients = atoi((chanfixConfig->Require("minClients")->second).c_str()) ;
 clientNeedsIdent = atob(chanfixConfig->Require("clientNeedsIdent")->second) ;
 connectCheckFreq = atoi((chanfixConfig->Require("connectCheckFreq")->second).c_str()) ;
 adminLogFile = chanfixConfig->Require("adminLogFile")->second ;
+
+/* Set up the channels that chanfix should join */
+EConfig::const_iterator ptr = chanfixConfig->Find("joinChan");
+while (ptr != chanfixConfig->end() && ptr->first == "joinChan") {
+  chansToJoin.push_back(ptr->second);
+  ++ptr;
+}
+
+/* Make sure that the consoleChan is not a joinChan */
+for (joinChansType::iterator ptr = chansToJoin.begin();
+     ptr != chansToJoin.end(); ++ptr) {
+  if (!strcasecmp((*ptr).c_str(), consoleChan.c_str())) {
+    /* Found, remove it from the list of chansToJoin */
+    chansToJoin.erase(ptr);
+    break;
+  }
+}
 
 /* Database processing */
 sqlHost = chanfixConfig->Require("sqlHost")->second;
@@ -601,6 +616,9 @@ if (requiredFlags) {
   }
 }
 
+if (theUser)
+  theUser->setLastSeen(currentTime());
+
 commHandler->second->Exec(theClient, theUser ? theUser : NULL, Message);
 
 xClient::OnPrivateMessage(theClient, Message);
@@ -620,7 +638,7 @@ if (Command == "DCC") {
 } else if (Command == "PING" || Command == "ECHO") {
   DoCTCP(theClient, CTCP, Message);
 } else if (Command == "VERSION") {
-  DoCTCP(theClient, CTCP, "evilnet development - GNUWorld chanfix v" CF_VERSION);
+  DoCTCP(theClient, CTCP, "evilnet development - GNUWorld chanfix v" CF_VERSION " [compiled "__DATE__" "__TIME__"]");
 } else if (Command == "WHODUNIT?") {
   DoCTCP(theClient, CTCP, "reed, ULtimaTe_, Compy, SiRVulcaN");
 }
@@ -634,8 +652,11 @@ void chanfix::BurstChannels()
 xClient::BurstChannels();
 
 MyUplink->JoinChannel(this, consoleChan, consoleChanModes);
-MyUplink->JoinChannel(this, operChan, operChanModes);
-MyUplink->JoinChannel(this, supportChan, supportChanModes);
+
+for (joinChansType::size_type i = 0; i < chansToJoin.size(); i++) {
+  /* Burst our channels */
+  MyUplink->JoinChannel(this, chansToJoin[i], joinChanModes);
+}
 
 /* Start our timers */
 startTimers();
@@ -661,9 +682,14 @@ switch( whichEvent )
 		/* If this is the operChan or supportChan, op opers on join */
 		theClient = static_cast< iClient* >( data1 );
 		if (theClient->isOper()) {
-		  if ((string_lower(theChan->getName()) == string_lower(operChan))
-		      || (string_lower(theChan->getName()) == string_lower(supportChan)))
-		    Op(theChan, theClient);
+		  for (joinChansType::iterator ptr = chansToJoin.begin();
+		       ptr != chansToJoin.end(); ++ptr) {
+		    if (!strcasecmp((*ptr).c_str(), theChan->getName().c_str())) {
+		      /* Found, op the user */
+		      Op(theChan, theClient);
+		      break;
+		    }
+		  }
 		}
 		break ;
 		}
@@ -671,7 +697,7 @@ switch( whichEvent )
 	case EVT_PART:
 		{
 		theClient = static_cast< iClient* >( data1 );
-		lostOp(theChan, theClient, NULL);
+		lostOp(theChan->getName(), theClient, NULL);
 		break ;
 		}
 	default:
@@ -706,7 +732,7 @@ for (xServer::opVectorType::const_iterator ptr = theTargets.begin();
     gotOpped(theChan, tmpUser->getClient());
   } else {
     // Someone is deopped
-    lostOp(theChan, tmpUser->getClient(), NULL);
+    lostOp(theChan->getName(), tmpUser->getClient(), NULL);
   } // if
 } // for
 }
@@ -742,7 +768,7 @@ switch(whichEvent)
 		clientOpsType* myOps = findMyOps(theClient);
 		for (clientOpsType::iterator ptr = myOps->begin();
 		     ptr != myOps->end(); ptr++)
-		  lostOp(ptr->second, theClient, myOps);
+		  lostOp(*ptr, theClient, myOps);
 		break;
 		}
 	}
@@ -798,18 +824,20 @@ vsnprintf( buf, 1024, format, _list ) ;
 va_end( _list ) ;
 
 // Try and locate the relay channel.
-Channel* tmpChan = Network->findChannel(consoleChan);
-if (!tmpChan)
-  return false;
+if (sendConsoleNotices) {
+  Channel* tmpChan = Network->findChannel(consoleChan);
+  if (!tmpChan)
+    return false;
+
+  std::string message = std::string( "[" ) + nickName + "] " + buf ;
+  serverNotice(tmpChan, message);
+}
 
 /* Everything sent here is also logged to a file on disk */
 if (adminLog.is_open()) {
   std::string theLog = std::string( "[" ) + tsToDateTime(currentTime(), true) + "] " + buf ;
   adminLog << theLog << std::endl;
 }
-
-std::string message = std::string( "[" ) + nickName + "] " + buf ;
-serverNotice(tmpChan, message);
 
 return true;
 }
@@ -1182,11 +1210,11 @@ sqlChanOp* chanfix::newChanOp(Channel* theChan, iClient* theClient)
 return newChanOp(theChan->getName(), theClient->getAccount());
 }
 
-chanfix::chanOpsType chanfix::getMyOps(Channel* theChan)
+chanfix::chanOpsType chanfix::getMyOps(const std::string &channel)
 {
 chanOpsType myOps;
 
-sqlChanOpsType::iterator ptr = sqlChanOps.find(theChan->getName());
+sqlChanOpsType::iterator ptr = sqlChanOps.find(channel);
 if (ptr != sqlChanOps.end()) {
   for (sqlChanOpsType::mapped_type::iterator chanOp = ptr->second.begin();
        chanOp != ptr->second.end(); chanOp++) {
@@ -1200,6 +1228,11 @@ if (ptr != sqlChanOps.end()) {
 myOps.sort(compare_points);
 
 return myOps;
+}
+
+chanfix::chanOpsType chanfix::getMyOps(Channel* theChan)
+{
+return getMyOps(theChan->getName());
 }
 
 size_t chanfix::countMyOps(const std::string& channel)
@@ -1333,18 +1366,18 @@ thisOp->setLastSeenAs(thisClient->getRealNickUserHost());
 
 clientOpsType* myOps = findMyOps(thisClient);
 if (myOps && !myOps->empty()) {
-  clientOpsType::iterator ptr = myOps->find(thisChan->getName());
+  clientOpsType::iterator ptr = std::find(myOps->begin(), myOps->end(), thisChan->getName());
   if (ptr != myOps->end())
     return;
 }
 
-myOps->insert(clientOpsType::value_type(thisChan->getName(), thisChan));
+myOps->push_back(clientOpsType::value_type(thisChan->getName()));
 thisClient->setCustomData(this, static_cast< void*>(myOps));
 
 return;
 }
 
-void chanfix::lostOp(Channel* theChan, iClient* theClient, clientOpsType* myOps)
+void chanfix::lostOp(const std::string& channel, iClient* theClient, clientOpsType* myOps)
 {
 if (myOps == NULL)
   myOps = findMyOps(theClient);
@@ -1352,9 +1385,9 @@ if (myOps == NULL)
 if (!myOps || myOps->empty())
   return;
 
-clientOpsType::iterator ptr = myOps->find(theChan->getName());
+clientOpsType::iterator ptr = std::find(myOps->begin(), myOps->end(), channel);
 if (ptr != myOps->end()) {
-  myOps->erase(theChan->getName());
+  myOps->erase(ptr);
   theClient->setCustomData(this, static_cast< void*>(myOps));
 }
 }
@@ -1988,12 +2021,12 @@ elog	<< "chanfix::startTimers> Started all timers."
 void chanfix::prepareUpdate(bool threaded)
 {
   if (updateInProgress) {
-    elog	<< "*** [chanfix::updateDB] Update already in progress; not starting."
+    elog	<< "*** [chanfix::prepareUpdate] Update already in progress; not starting."
 		<< std::endl;
     return;	  
   }
 
-  elog	<< "*** [chanfix::updateDB] Updating the SQL database "
+  elog	<< "*** [chanfix::prepareUpdate] Updating the SQL database "
 	<< (threaded ? "(threaded)." : "(unthreaded).")
 	<< std::endl;
   logAdminMessage("Starting to update the SQL database.");

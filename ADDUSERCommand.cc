@@ -65,7 +65,7 @@ newUser->setLastUpdatedBy( std::string( "("
 /* A user added by a serveradmin automatically has the same group. */
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
     !theUser->getFlag(sqlUser::F_USERMANAGER))
-  newUser->setGroup(string_lower(theUser->getGroup()));
+  newUser->setGroup(theUser->getGroup());
 else
   newUser->setGroup("undernet.org");
 

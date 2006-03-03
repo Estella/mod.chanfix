@@ -49,16 +49,18 @@ if (!targetUser) {
   return;
 }
 
-if (targetUser->getGroup() == string_lower(st[2])) {
+std::string group = string_lower(st[2]);
+
+if (targetUser->getGroup() == group) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::user_already_in_group,
                               std::string("User %s is already in group %s.")).c_str(),
-                                          targetUser->getUserName().c_str(), st[2].c_str());
+                                          targetUser->getUserName().c_str(), group.c_str());
   return;
 }
 
-targetUser->setGroup(st[2]);
+targetUser->setGroup(group);
 targetUser->setLastUpdated(bot->currentTime());
 targetUser->setLastUpdatedBy( std::string( "("
 	+ theUser->getUserName()
@@ -70,12 +72,12 @@ bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::set_group_for_user,
                             std::string("Set group %s for user %s.")).c_str(),
-                                        st[2].c_str(), targetUser->getUserName().c_str());
+                                        group.c_str(), targetUser->getUserName().c_str());
 bot->logAdminMessage("%s (%s) set the group of user %s to %s.",
 	    theUser->getUserName().c_str(),
 	    theClient->getRealNickUserHost().c_str(),
 	    targetUser->getUserName().c_str(),
-	    st[2].c_str());
+	    group.c_str());
 
 return;
 } //SETGROUPCommand::Exec

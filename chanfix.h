@@ -291,12 +291,13 @@ public:
 	typedef std::map <std::string, sqlChannel*, noCaseCompare> sqlChannelCacheType;
 	sqlChannelCacheType	sqlChanCache;
 
-	typedef std::map <std::string, Channel*, noCaseCompare> clientOpsType;
+	typedef std::vector <std::string> clientOpsType;
 	clientOpsType*		findMyOps(iClient*);
-	void 			lostOp(Channel*, iClient*, clientOpsType*);
+	void 			lostOp(const std::string&, iClient*, clientOpsType*);
 
 	typedef std::list <sqlChanOp*> chanOpsType;
 	chanOpsType		getMyOps(Channel*);
+	chanOpsType		getMyOps(const std::string&);
 	
 	/**
 	 * The snapshot map for updating the SQL database
@@ -331,6 +332,12 @@ public:
 		{ return usersMap.end(); }
 
 	/**
+	 * Channels that chanfix should join
+	 */
+	typedef std::vector <std::string> joinChansType;
+	joinChansType	chansToJoin;
+
+	/**
 	 * Queues to process.
 	 */
 	typedef std::map <std::string, time_t, noCaseCompare> fixQueueType;
@@ -361,10 +368,8 @@ public:
 	 */
 	std::string	consoleChan;
 	std::string	consoleChanModes;
-	std::string	operChan;
-	std::string	operChanModes;
-	std::string	supportChan;
-	std::string	supportChanModes;
+	bool		sendConsoleNotices;
+	std::string	joinChanModes;
 	bool		enableAutoFix;
 	bool		enableChanFix;
 	bool		enableChannelBlocking;

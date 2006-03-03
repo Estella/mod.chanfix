@@ -113,7 +113,7 @@ if (channelID != theChan->getID()) {
   return;
 }
 
-if (userID != theUser->getID() && !theUser->getFlag(sqlUser::F_OWNER)) {
+if (userID != theUser->getID() && !theUser->getFlag(sqlUser::F_USERMANAGER)) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::note_not_added_by_you,
