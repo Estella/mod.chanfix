@@ -98,5 +98,5 @@ bot->SendTo(theClient,
 			std::string("End of host list.")).c_str());
 
 return;
-} //LISTHOSTCommand::Exec
+} //LISTHOSTSCommand::Exec
 } //namespace gnuworld

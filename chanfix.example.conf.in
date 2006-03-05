@@ -64,7 +64,14 @@ enableChannelBlocking = true
 
 # Version of IRCu used on the network (11 or 12)
 # Use 11 for u2.10.11 and 12 for u2.10.12
+# NOTE: You MUST restart GNUWorld for this change to take place.
 version = 12
+
+# Should burst be used to fix takeovers (through a manual fix)?
+# Burst guarantees that the abusers will not be reopped due to
+# a netsplit, but it can cause problems due to lowering timestamp.
+# NOTE: You MUST restart GNUWorld for this change to take place.
+useBurstToFix = true
 
 # Total number of servers on the network
 numServers = 10

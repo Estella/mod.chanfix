@@ -48,6 +48,7 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
+#include	"chanfix_defs.h"
 #include	"chanfix_misc.h"
 #include	"chanfixCommands.h"
 #include	"responses.h"
@@ -102,7 +103,7 @@ std::string dbString = "host=" + sqlHost + " dbname=" + sqlDB
 
 theManager = sqlManager::getInstance(dbString);
 
-/* Get our logfiles open */
+/* Open our logfile for writing */
 adminLog.open(adminLogFile.c_str(), std::ios::out | std::ios::app);
 
 /* Register the commands we want to use */
@@ -152,7 +153,7 @@ RegisterCommand(new DEBUGCommand(this, "DEBUG",
 	2,
 	sqlUser::F_OWNER
 	));
-#endif
+#endif /* CHANFIX_DEBUG */
 RegisterCommand(new DELFLAGCommand(this, "DELFLAG",
 	"<username> <flag>",
 	3,
@@ -208,11 +209,13 @@ RegisterCommand(new OPNICKSCommand(this, "OPNICKS",
 	2,
 	sqlUser::F_CHANFIX
 	));
+#ifdef ENABLE_QUOTE
 RegisterCommand(new QUOTECommand(this, "QUOTE",
 	"<text>",
 	2,
 	sqlUser::F_OWNER
 	));
+#endif /* ENABLE_QUOTE */
 RegisterCommand(new REHASHCommand(this, "REHASH",
 	"",
 	1,
@@ -284,7 +287,7 @@ RegisterCommand(new WHOGROUPCommand(this, "WHOGROUP",
 	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
 	));
 RegisterCommand(new WHOISCommand(this, "WHOIS",
-	"<username|*> [-modif]",
+	"<username|=nick|*> [-modif]",
 	2,
 	sqlUser::F_LOGGEDIN
 	));
@@ -331,6 +334,7 @@ enableAutoFix = atob(chanfixConfig->Require("enableAutoFix")->second) ;
 enableChanFix = atob(chanfixConfig->Require("enableChanFix")->second) ;
 enableChannelBlocking = atob(chanfixConfig->Require("enableChannelBlocking")->second) ;
 version = atoi((chanfixConfig->Require("version")->second).c_str()) ;
+useBurstToFix = atob(chanfixConfig->Require("useBurstToFix")->second) ;
 numServers = atoi((chanfixConfig->Require("numServers")->second).c_str()) ;
 minServersPresent = atoi((chanfixConfig->Require("minServersPresent")->second).c_str()) ;
 chanServName = chanfixConfig->Require("chanServName")->second ;
@@ -395,7 +399,7 @@ void chanfix::OnAttach()
  * Don't send END_OF_BURST (EB) so we can stay in burst mode 
  * indefinitely in order to be able to do TS-1.
  */
-if (version < 12) /* Not needed for u2.10.12+ */
+if (useBurstToFix && version < 12) /* Not needed for u2.10.12+ */
   MyUplink->setSendEB(false);
 
 /**
@@ -616,8 +620,10 @@ if (requiredFlags) {
   }
 }
 
-if (theUser)
+if (theUser) {
   theUser->setLastSeen(currentTime());
+  theUser->commit();
+}
 
 commHandler->second->Exec(theClient, theUser ? theUser : NULL, Message);
 
@@ -638,9 +644,13 @@ if (Command == "DCC") {
 } else if (Command == "PING" || Command == "ECHO") {
   DoCTCP(theClient, CTCP, Message);
 } else if (Command == "VERSION") {
-  DoCTCP(theClient, CTCP, "evilnet development - GNUWorld chanfix v" CF_VERSION " [compiled "__DATE__" "__TIME__"]");
+  DoCTCP(theClient, CTCP, "evilnet development - GNUWorld " CHANFIX_PACKAGE_STRING " [compiled "__DATE__" "__TIME__"]");
 } else if (Command == "WHODUNIT?") {
   DoCTCP(theClient, CTCP, "reed, ULtimaTe_, Compy, SiRVulcaN");
+} else if (Command == "SUBVERSION") {
+  DoCTCP(theClient, CTCP, "r$Revision$ [$Date$]");
+} else if (Command == "GENDER") {
+  DoCTCP(theClient, CTCP, "Gender pending vote, but for now I'll be whatever you want!");
 }
 
 xClient::OnCTCP(theClient, CTCP, Message, Secure);
@@ -1366,12 +1376,12 @@ thisOp->setLastSeenAs(thisClient->getRealNickUserHost());
 
 clientOpsType* myOps = findMyOps(thisClient);
 if (myOps && !myOps->empty()) {
-  clientOpsType::iterator ptr = std::find(myOps->begin(), myOps->end(), thisChan->getName());
+  clientOpsType::iterator ptr = myOps->find(thisChan->getName());
   if (ptr != myOps->end())
     return;
 }
 
-myOps->push_back(clientOpsType::value_type(thisChan->getName()));
+myOps->insert(clientOpsType::value_type(thisChan->getName()));
 thisClient->setCustomData(this, static_cast< void*>(myOps));
 
 return;
@@ -1385,7 +1395,7 @@ if (myOps == NULL)
 if (!myOps || myOps->empty())
   return;
 
-clientOpsType::iterator ptr = std::find(myOps->begin(), myOps->end(), channel);
+clientOpsType::iterator ptr = myOps->find(channel);
 if (ptr != myOps->end()) {
   myOps->erase(ptr);
   theClient->setCustomData(this, static_cast< void*>(myOps));
@@ -1515,7 +1525,7 @@ if (!thisChan) return;
 
 elog << "chanfix::manualFix> DEBUG: Manual fix " << thisChan->getName() << "!" << std::endl;
 
-if (thisChan->getCreationTime() > 1) {
+if (useBurstToFix && thisChan->getCreationTime() > 1) {
   if (version >= 12) /* temporary fix until GNUWorld is fixed */
     MyUplink->setBursting(true);
 

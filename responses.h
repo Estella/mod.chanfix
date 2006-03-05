@@ -205,6 +205,8 @@ namespace gnuworld
 		const int status_splitmode_disabled	= 117;
 		const int status_channel_service_linked	= 171;
 		const int status_channel_service_not_linked	= 172;
+		const int status_total_channels		= 174;
+		const int status_total_channels_with_extra	= 175;
 
 		/* SUSPEND */
 		const int cant_suspend_diff_group	= 118;
@@ -249,6 +251,8 @@ namespace gnuworld
 		const int whois_modif			= 160;
 		const int whois_needoper_yes		= 161;
 		const int whois_needoper_no		= 162;
+		const int whois_lastused		= 176;
+		const int whois_lastused_never		= 177;
 
 		/* chanfix.cc */
 		const int no_commands_during_burst	= 145;

@@ -10,3 +10,4 @@ stamp-h*
 autom4te.cache
 defs_chanfix.h
 chanfix.example.conf
+chanfix_defs.h

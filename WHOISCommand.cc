@@ -25,6 +25,7 @@
  */
 
 #include "gnuworld_config.h"
+#include "Network.h"
 
 #include "chanfix.h"
 #include "responses.h"
@@ -68,13 +69,23 @@ if (st[1] == "*") {
 }
 
 sqlUser* theUser2 = bot->isAuthed(st[1]);
+
+const char* username = st[1].c_str();
+if (username[0] == '=') {
+  /* Skip the '='. */
+  ++username;
+  iClient* theClient2 = Network->findNick(username);
+  if (theClient2)
+    theUser2 = bot->isAuthed(theClient2->getAccount());
+}
+
 if (!theUser2) 
 { 
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::no_such_user,
                               std::string("No such user %s.")).c_str(),
-			      st[1].c_str());
+			      username);
   return;
 }
 
@@ -133,6 +144,20 @@ else
             bot->getResponse(theUser,
                             language::whois_needoper_no,
                             std::string("NeedOper: No")).c_str());
+
+if (theUser != theUser2) {
+  if (theUser2->getLastSeen() > 0)
+    bot->SendTo(theClient,
+	      bot->getResponse(theUser,
+			language::whois_lastused,
+			std::string("Last used the service: %s ago")).c_str(),
+			bot->prettyDuration(theUser2->getLastSeen()).c_str());
+  else
+    bot->SendTo(theClient,
+	      bot->getResponse(theUser,
+			language::whois_lastused_never,
+			std::string("Last used the service: Never")).c_str());
+}
 
 if (st.size() > 2 && string_upper(st[2]) == "-MODIF")
   bot->SendTo(theClient,

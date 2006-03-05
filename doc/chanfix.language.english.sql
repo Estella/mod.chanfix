@@ -1,7 +1,7 @@
--- Language Definition Table for Chanfix.
+-- Language Definition Table for chanfix.
 --
 -- Language: English (1)
--- Author: Evilnet Development Team <http://evilnet.sourceforge.net>
+-- Author: evilnet development <http://evilnet.sourceforge.net>
 --
 -- $Id$
 
@@ -178,4 +178,8 @@ COPY "translations" FROM stdin;
 1	171	Channel service linked. New channels will be scored.	31337	0
 1	172	Channel service not linked. New channels will not be scored.	31337	0
 1	173	This command cannot proceed while an update is in progress. Please try again later.	31337	0
+1	174	Total number of channels recorded: %u	31337	0
+1	175	Total number of channel ops recorded: %u	31337	0
+1	176	Last used the service: %s ago	31337	0
+1	177	Last used the service: Never	31337	0
 \.

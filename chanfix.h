@@ -291,7 +291,7 @@ public:
 	typedef std::map <std::string, sqlChannel*, noCaseCompare> sqlChannelCacheType;
 	sqlChannelCacheType	sqlChanCache;
 
-	typedef std::list <std::string> clientOpsType;
+	typedef std::set <std::string> clientOpsType;
 	clientOpsType*		findMyOps(iClient*);
 	void 			lostOp(const std::string&, iClient*, clientOpsType*);
 
@@ -374,6 +374,7 @@ public:
 	bool		enableChanFix;
 	bool		enableChannelBlocking;
 	unsigned int	version;
+	bool		useBurstToFix;
 	unsigned int	numServers;
 	unsigned int	minServersPresent;
 	std::string	chanServName;

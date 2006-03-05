@@ -30,14 +30,27 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
+#include	"responses.h"
 
 RCSTAG("$Id$");
 
 namespace gnuworld
 {
 
-void QUOTECommand::Exec(iClient*, sqlUser*, const std::string& Message)
+void QUOTECommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
+#ifndef ENABLE_QUOTE
+return;
+#endif
+
+if (!theUser->getNeedOper()) {
+  bot->SendTo(theClient,
+	bot->getResponse(theUser,
+			 language::unknown_command,
+			 std::string("Unknown command.")).c_str());
+  return;
+}
+
 StringTokenizer st(Message);
 
 bot->Write( st.assemble(1) );

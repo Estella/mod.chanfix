@@ -23,11 +23,6 @@
 #define __CHANFIX_CONFIG_H "$Id$"
 
 /**
- * Version information
- */
-#define CF_VERSION "1.0.0"
-
-/**
  * Defines that deal with fixing channels, both manually and
  * automatically. All the below times are in seconds.
  */
@@ -134,7 +129,7 @@
 /**
  * Interval between two consecutive processing of the queues.
  */
-#define PROCESS_QUEUE_TIME	300
+#define PROCESS_QUEUE_TIME	60
 
 /**
  * Maximum score a client can obtain.
@@ -170,5 +165,11 @@
  * have notes or flags associated with them?
  */
 #define REMEMBER_CHANNELS_WITH_NOTES_OR_FLAGS
+
+/**
+ * Should the QUOTE command be enabled?
+ * This command allows raw P10 traffic to be sent to the network.
+ */
+#undef ENABLE_QUOTE
 
 #endif // __CHANFIX_CONFIG_H

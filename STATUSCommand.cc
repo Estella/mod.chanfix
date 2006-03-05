@@ -30,6 +30,7 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
+#include	"chanfix_defs.h"
 #include	"responses.h"
 #include	"Network.h"
 
@@ -41,8 +42,8 @@ namespace gnuworld
 void STATUSCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string&)
 {
 
-bot->SendTo(theClient, "[evilnet development's GNUWorld chanfix version %s]",
-	    CF_VERSION);
+bot->SendTo(theClient, "[evilnet development's GNUWorld %s]",
+	    CHANFIX_PACKAGE_STRING);
 bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::status_uptime,

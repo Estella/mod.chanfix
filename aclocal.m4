@@ -6795,3 +6795,4 @@ AC_SUBST([am__untar])
 
 m4_include([ac_cxx_namespaces.m4])
 m4_include([ax_boost_thread.m4])
+m4_include([ax_prefix_config_h.m4])

@@ -2,10 +2,11 @@ echo Configuring evilnet development's mod.chanfix...
 echo
 
 AC_REVISION($Revision$)
-AC_INIT
+AC_INIT([chanfix],[v1.0.0],[evilnet-devel@lists.sourceforge.net])
 AC_CONFIG_SRCDIR([chanfix.cc])
-AM_INIT_AUTOMAKE(chanfix,1.0.0)
+AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS(defs_chanfix.h)
+AX_PREFIX_CONFIG_H(chanfix_defs.h)
 
 AC_DISABLE_STATIC
 AC_ENABLE_SHARED
