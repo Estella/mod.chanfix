@@ -648,7 +648,7 @@ if (Command == "DCC") {
 } else if (Command == "WHODUNIT?") {
   DoCTCP(theClient, CTCP, "reed, ULtimaTe_, Compy, SiRVulcaN");
 } else if (Command == "SUBVERSION") {
-  DoCTCP(theClient, CTCP, "r$Revision$ [$Date$]");
+  DoCTCP(theClient, CTCP, rcsId);
 } else if (Command == "GENDER") {
   DoCTCP(theClient, CTCP, "Gender pending vote, but for now I'll be whatever you want!");
 }
