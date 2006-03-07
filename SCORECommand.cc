@@ -67,7 +67,7 @@ if (netChan && !bot->canScoreChan(netChan)) {
 chanfix::chanOpsType myOps = bot->getMyOps(st[1]);
 if (myOps.empty()) {
   if (compact)
-    bot->SendTo(theClient, "~! %s", netChan->getName().c_str());
+    bot->SendTo(theClient, "~! %s", st[1].c_str());
   else
     bot->SendTo(theClient,
                 bot->getResponse(theUser,
@@ -79,43 +79,9 @@ if (myOps.empty()) {
 
 if (st.size() > 2) {
   const char* scUser = st[2].c_str();
-  if (st[2][0] == '*') {
-    //Account
-    ++scUser;
-    for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
-	 opPtr != myOps.end(); opPtr++) {
-      curOp = *opPtr;
-      if (string_lower(curOp->getAccount()) == string_lower(scUser)) {
-	if (compact)
-	  bot->SendTo(theClient, "~U %s %s %u", st[1].c_str(), curOp->getAccount().c_str(), curOp->getPoints());
-	else
-	  bot->SendTo(theClient,
-		bot->getResponse(theUser,
-			language::score_for_channel_account,
-			std::string("Score for account %s in channel %s: %u.")).c_str(),
-				curOp->getAccount().c_str(),
-				st[1].c_str(),
-				curOp->getPoints());
-	
-	return;
-      }
-    }
-    if (compact)
-      bot->SendTo(theClient,
-		  bot->getResponse(theUser,
-				   language::compact_no_score_for_account,
-				   std::string("~U %s no@score.for.account 0")).c_str(),
-					st[1].c_str());
-    else
-      bot->SendTo(theClient,
-		  bot->getResponse(theUser,
-				   language::no_score_for_account,
-				   std::string("No score for account %s on %s.")).c_str(),
-					scUser,
-					st[1].c_str());
-    return;
-  } else {
-    //Nickname
+  if (st[2][0] == '=') {
+    /* Nickname */
+    scUser++;
     curClient = Network->findNick(scUser);
     if (!curClient) {
       if (compact)
@@ -172,6 +138,42 @@ if (st.size() > 2) {
 					st[1].c_str());
       return;
     } // else
+  } else {
+    /* Account */
+    if (st[2][0] == '*')
+      ++scUser;
+    for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
+	 opPtr != myOps.end(); opPtr++) {
+      curOp = *opPtr;
+      if (string_lower(curOp->getAccount()) == string_lower(scUser)) {
+	if (compact)
+	  bot->SendTo(theClient, "~U %s %s %u", st[1].c_str(), curOp->getAccount().c_str(), curOp->getPoints());
+	else
+	  bot->SendTo(theClient,
+		bot->getResponse(theUser,
+			language::score_for_channel_account,
+			std::string("Score for account %s in channel %s: %u.")).c_str(),
+				curOp->getAccount().c_str(),
+				st[1].c_str(),
+				curOp->getPoints());
+	
+	return;
+      }
+    }
+    if (compact)
+      bot->SendTo(theClient,
+		  bot->getResponse(theUser,
+				   language::compact_no_score_for_account,
+				   std::string("~U %s no@score.for.account 0")).c_str(),
+					st[1].c_str());
+    else
+      bot->SendTo(theClient,
+		  bot->getResponse(theUser,
+				   language::no_score_for_account,
+				   std::string("No score for account %s on %s.")).c_str(),
+					scUser,
+					st[1].c_str());
+    return;
   } // else
 } // if
 
@@ -249,8 +251,7 @@ if (!compact) {
 if (compact) {
   bot->SendTo(theClient, "~S %s %s", st[1].c_str(), strScoresDB.str().c_str());
   if (!netChan) {
-    // TODO: make a difference between "No such channel" and "There are no scores"
-    bot->SendTo(theClient, "~! %s", st[1].c_str());
+    bot->SendTo(theClient, "~? %s", st[1].c_str());
     return;
   }
   bot->SendTo(theClient, "~O %s %s", st[1].c_str(), strScoresOP.str().c_str());

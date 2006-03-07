@@ -103,8 +103,9 @@ std::string dbString = "host=" + sqlHost + " dbname=" + sqlDB
 
 theManager = sqlManager::getInstance(dbString);
 
-/* Open our logfile for writing */
+/* Open our logfiles for writing */
 adminLog.open(adminLogFile.c_str(), std::ios::out | std::ios::app);
+debugLog.open(debugLogFile.c_str(), std::ios::out | std::ios::app);
 
 /* Register the commands we want to use */
 RegisterCommand(new ADDFLAGCommand(this, "ADDFLAG",
@@ -145,7 +146,7 @@ RegisterCommand(new CHANFIXCommand(this, "CHANFIX",
 RegisterCommand(new CHECKCommand(this, "CHECK",
 	"<#channel>",
 	2,
-	sqlUser::F_LOGGEDIN
+	0
 	));
 #ifdef CHANFIX_DEBUG
 RegisterCommand(new DEBUGCommand(this, "DEBUG",
@@ -200,14 +201,14 @@ RegisterCommand(new LISTHOSTSCommand(this, "LISTHOSTS",
 	sqlUser::F_LOGGEDIN
 	));
 RegisterCommand(new OPLISTCommand(this, "OPLIST",
-	"<#channel>",
+	"<#channel> [all]",
 	2,
-	sqlUser::F_CHANFIX
+	0
 	));
 RegisterCommand(new OPNICKSCommand(this, "OPNICKS",
 	"<#channel>",
 	2,
-	sqlUser::F_CHANFIX
+	0
 	));
 #ifdef ENABLE_QUOTE
 RegisterCommand(new QUOTECommand(this, "QUOTE",
@@ -227,12 +228,12 @@ RegisterCommand(new RELOADCommand(this, "RELOAD",
 	sqlUser::F_OWNER
 	));
 RegisterCommand(new SCORECommand(this, "SCORE",
-	"<#channel> [nick|*account]",
+	"<#channel> [account|=nick]",
 	2,
 	0
 	));
 RegisterCommand(new SCORECommand(this, "CSCORE",
-	"<#channel> [nick|*account]",
+	"<#channel> [account|=nick]",
 	2,
 	0
 	));
@@ -343,6 +344,7 @@ minClients = atoi((chanfixConfig->Require("minClients")->second).c_str()) ;
 clientNeedsIdent = atob(chanfixConfig->Require("clientNeedsIdent")->second) ;
 connectCheckFreq = atoi((chanfixConfig->Require("connectCheckFreq")->second).c_str()) ;
 adminLogFile = chanfixConfig->Require("adminLogFile")->second ;
+debugLogFile = chanfixConfig->Require("debugLogFile")->second ;
 
 /* Set up the channels that chanfix should join */
 EConfig::const_iterator ptr = chanfixConfig->Find("joinChan");
@@ -511,9 +513,11 @@ commandMap.clear();
 /* Delete our sqlManager */
 theManager->removeManager();
 
-/* Finally, close our admin log */
+/* Finally, close our logs */
 if (adminLog.is_open())
   adminLog.close();
+if (debugLog.is_open())
+  debugLog.close();
 
 xClient::OnDetach( reason ) ;
 }
@@ -852,6 +856,31 @@ if (adminLog.is_open()) {
 return true;
 }
 
+bool chanfix::logDebugMessage(const char* format, ... )
+{
+char buf[ 1024 ] = { 0 } ;
+va_list _list ;
+va_start( _list, format ) ;
+vsnprintf( buf, 1024, format, _list ) ;
+va_end( _list ) ;
+
+// Try and locate the relay channel.
+Channel* tmpChan = Network->findChannel(consoleChan);
+if (!tmpChan)
+  return false;
+
+std::string message = std::string( "[" ) + nickName + "] " + buf ;
+serverNotice(tmpChan, message);
+
+/* Everything sent here is also logged to a file on disk */
+if (debugLog.is_open()) {
+  std::string theLog = std::string( "[" ) + tsToDateTime(currentTime(), true) + "] " + buf ;
+  debugLog << theLog << std::endl;
+}
+
+return true;
+}
+
 void chanfix::SendTo(iClient* theClient, const std::string& theMessage)
 {
 sqlUser* theUser = isAuthed(theClient->getAccount());
@@ -980,9 +1009,8 @@ if (cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
      if (ptr != sqlChanOps.end()) {
        ptr->second.insert(sqlChanOpsType::mapped_type::value_type(newOp->getAccount(),newOp));
      } else {
-       typedef std::map <std::string, sqlChanOp*, noCaseCompare> tmpChanOpsMapType;
-       tmpChanOpsMapType theMap;
-       theMap.insert(tmpChanOpsMapType::value_type(newOp->getAccount(), newOp));
+       sqlChanOpsType::mapped_type theMap;
+       theMap.insert(sqlChanOpsType::mapped_type::value_type(newOp->getAccount(), newOp));
        sqlChanOps.insert(sqlChanOpsType::value_type(newOp->getChannel(), theMap));
      }
   }
@@ -1201,9 +1229,8 @@ sqlChanOpsType::iterator ptr = sqlChanOps.find(channel);
 if (ptr != sqlChanOps.end()) {
   ptr->second.insert(sqlChanOpsType::mapped_type::value_type(account, newOp));
 } else {
-  typedef std::map <std::string, sqlChanOp*, noCaseCompare> tmpChanOpsMapType;
-  tmpChanOpsMapType theMap;
-  theMap.insert(tmpChanOpsMapType::value_type(account, newOp));
+  sqlChanOpsType::mapped_type theMap;
+  theMap.insert(sqlChanOpsType::mapped_type::value_type(account, newOp));
   sqlChanOps.insert(sqlChanOpsType::value_type(channel, theMap));
 }
 
@@ -2039,7 +2066,7 @@ void chanfix::prepareUpdate(bool threaded)
   elog	<< "*** [chanfix::prepareUpdate] Updating the SQL database "
 	<< (threaded ? "(threaded)." : "(unthreaded).")
 	<< std::endl;
-  logAdminMessage("Starting to update the SQL database.");
+  logDebugMessage("Starting to update the SQL database.");
 
   /**
    * Set updateInProgress boolean to true so that any other updates 
@@ -2082,7 +2109,7 @@ void chanfix::prepareUpdate(bool threaded)
     }
   }
 
-  logAdminMessage("Created snapshot map in %u ms.",
+  logDebugMessage("Created snapshot map in %u ms.",
 		  snapShotTimer.stopTimeMS());
   
   if (threaded) {
@@ -2208,7 +2235,7 @@ void chanfix::updateDB()
 		<< "Only " << actualChanOpsProcessed << " of "
 		<< chanOpsProcessed << " chanops were copied to the SQL database."
 		<< std::endl;
-    logAdminMessage("ERROR: Only %d of %d chanops were updated in %u ms.",
+    logDebugMessage("ERROR: Only %d of %d chanops were updated in %u ms.",
 		    actualChanOpsProcessed, chanOpsProcessed,
 		    updateDBTimer.stopTimeMS());
   } else {
@@ -2216,7 +2243,7 @@ void chanfix::updateDB()
 		<< actualChanOpsProcessed
 		<< " chanops to the SQL database."
 		<< std::endl;
-    logAdminMessage("Synched %d members to the SQL database in %u ms.",
+    logDebugMessage("Synched %d members to the SQL database in %u ms.",
 		    actualChanOpsProcessed, updateDBTimer.stopTimeMS());
   }
 
@@ -2248,7 +2275,7 @@ void chanfix::rotateDB()
  * cache: acct,chan
  */
 
-logAdminMessage("Beginning database rotation.");
+logDebugMessage("Beginning database rotation.");
 
 /* Start our timer */
 Timer rotateDBTimer;
@@ -2305,7 +2332,7 @@ for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
   }
 }
 
-logAdminMessage("Completed database rotation in %u ms.",
+logDebugMessage("Completed database rotation in %u ms.",
 		rotateDBTimer.stopTimeMS());
 
 return;

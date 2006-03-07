@@ -69,7 +69,7 @@ if (option == "NUMSERVERS") {
               bot->getResponse(theUser,
                               language::num_servers_set,
                               std::string("NUM_SERVERS is now %d.")).c_str(), setting);
-  bot->logAdminMessage("%s (%s) changed NUM_SERVERS to %d.",
+  bot->logDebugMessage("%s (%s) changed NUM_SERVERS to %d.",
 		       theUser->getUserName().c_str(),
 		       theClient->getRealNickUserHost().c_str(),
 		       setting);
@@ -84,7 +84,7 @@ if (option == "ENABLEAUTOFIX") {
                 bot->getResponse(theUser,
                                 language::enabled_autofix,
                                 std::string("Enabled autofix.")).c_str());
-    bot->logAdminMessage("%s (%s) enabled autofix.",
+    bot->logDebugMessage("%s (%s) enabled autofix.",
 			 theUser->getUserName().c_str(),
 			 theClient->getRealNickUserHost().c_str());
     return;
@@ -94,7 +94,7 @@ if (option == "ENABLEAUTOFIX") {
                 bot->getResponse(theUser,
                                 language::disabled_autofix,
                                 std::string("Disabled autofix.")).c_str());
-    bot->logAdminMessage("%s (%s) disabled autofix.",
+    bot->logDebugMessage("%s (%s) disabled autofix.",
 			 theUser->getUserName().c_str(),
 			 theClient->getRealNickUserHost().c_str());
     return;
@@ -114,7 +114,7 @@ if (option == "ENABLECHANFIX") {
                 bot->getResponse(theUser,
                                 language::enabled_manual_chanfix,
                                 std::string("Enabled manual chanfix.")).c_str());
-    bot->logAdminMessage("%s (%s) enabled manual chanfix.",
+    bot->logDebugMessage("%s (%s) enabled manual chanfix.",
 			 theUser->getUserName().c_str(),
 			 theClient->getRealNickUserHost().c_str());
     return;
@@ -124,7 +124,7 @@ if (option == "ENABLECHANFIX") {
                 bot->getResponse(theUser,
                                 language::disabled_manual_chanfix,
                                 std::string("Disabled manual chanfix.")).c_str());
-    bot->logAdminMessage("%s (%s) disabled manual chanfix.",
+    bot->logDebugMessage("%s (%s) disabled manual chanfix.",
 			 theUser->getUserName().c_str(),
 			 theClient->getRealNickUserHost().c_str());
     return;
@@ -144,7 +144,7 @@ if (option == "ENABLECHANNELBLOCKING") {
                 bot->getResponse(theUser,
                                 language::enabled_chan_blocking,
                                 std::string("Enabled channel blocking.")).c_str());
-    bot->logAdminMessage("%s (%s) enabled channel blocking.",
+    bot->logDebugMessage("%s (%s) enabled channel blocking.",
 			 theUser->getUserName().c_str(),
 			 theClient->getRealNickUserHost().c_str());
     return;
@@ -154,7 +154,7 @@ if (option == "ENABLECHANNELBLOCKING") {
                 bot->getResponse(theUser,
                                 language::disabled_chan_blocking,
                                 std::string("Disabled channel blocking.")).c_str());
-    bot->logAdminMessage("%s (%s) disabled channel blocking.",
+    bot->logDebugMessage("%s (%s) disabled channel blocking.",
 			 theUser->getUserName().c_str(),
 			 theClient->getRealNickUserHost().c_str());
     return;

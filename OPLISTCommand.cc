@@ -42,6 +42,13 @@ void OPLISTCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string
 {
 StringTokenizer st(Message);
 
+bool all = false;
+if (st.size() > 2) {
+  const std::string flag = string_upper(st[2]);
+  if ((flag == "ALL") || (flag == "-ALL") || (flag == "!"))
+    all = true;
+}
+
 sqlChanOp* curOp = 0;
 
 chanfix::chanOpsType myOps = bot->getMyOps(st[1]);
@@ -54,15 +61,12 @@ if (myOps.empty()) {
   return;
 }
 
-unsigned int oCnt = 0;
-for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
-     opPtr != myOps.end(); opPtr++) {
-  curOp = *opPtr;
-  if (oCnt < OPCOUNT) oCnt++;
-}
+unsigned int oCnt = myOps.size();
 
-/* Technically if they are all 0 scores it will get to this point,
- * dont want a notice saying 0 accounts. */
+/**
+ * Technically, if there are all 0 scores, it will get to this point.
+ * We don't want a notice saying 0 accounts.
+ */
 if (oCnt == 0) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
@@ -72,7 +76,7 @@ if (oCnt == 0) {
   return;
 }
 
-if (oCnt == OPCOUNT)
+if (oCnt > OPCOUNT && !all)
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::top_unique_op_accounts,
@@ -95,22 +99,21 @@ std::string firstop;
 std::string lastop;
 
 for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
-     opPtr != myOps.end(); opPtr++) {
+     opPtr != myOps.end() && (all || opCount < OPCOUNT); opPtr++) {
   curOp = *opPtr;
-  if (opCount < OPCOUNT) {
-    opCount++;
-    firstop = bot->tsToDateTime(curOp->getTimeFirstOpped(), false);
-    lastop = bot->tsToDateTime(curOp->getTimeLastOpped(), true);
-    bot->SendTo(theClient, "%2d. %4d %s -- %s / %s", opCount,
-		curOp->getPoints(), curOp->getAccount().c_str(),
-		firstop.c_str(), lastop.c_str());
-  }
+  opCount++;
+  firstop = bot->tsToDateTime(curOp->getTimeFirstOpped(), false);
+  lastop = bot->tsToDateTime(curOp->getTimeLastOpped(), true);
+  bot->SendTo(theClient, "%2d. %4d %s -- %s / %s", opCount,
+	      curOp->getPoints(), curOp->getAccount().c_str(),
+	      firstop.c_str(), lastop.c_str());
 }
 
 /* Log command */
-bot->logAdminMessage("%s (%s) has requested OPLIST for %s",
-		     theUser->getUserName().c_str(),
+bot->logAdminMessage("%s (%s) has requested OPLIST%s for %s",
+		     theUser ? theUser->getUserName().c_str() : "[NOT LOGGED-IN]",
 		     theClient->getRealNickUserHost().c_str(),
+		     (all ? " (all)" : ""),
 		     st[1].c_str());
 
 return;

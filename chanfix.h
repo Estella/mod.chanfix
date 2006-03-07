@@ -267,6 +267,7 @@ public:
 
 	/* Admin message logs */
 	bool logAdminMessage(const char*, ... );
+	bool logDebugMessage(const char*, ... );
 
 	void doSqlError(const std::string&, const std::string&);
 	
@@ -383,6 +384,7 @@ public:
 	bool		clientNeedsIdent;
 	unsigned int	connectCheckFreq;
 	std::string	adminLogFile;
+	std::string	debugLogFile;
 	std::string	sqlHost;
 	std::string	sqlPort;
 	std::string	sqlUsername;
@@ -426,9 +428,10 @@ protected:
 	Timer *theTimer;
 
 	/**
-	 * Admin log-to-file stream
+	 * Log-to-file streams
 	 */
 	std::ofstream	adminLog;
+	std::ofstream	debugLog;
 
 public:
 

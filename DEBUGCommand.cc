@@ -48,7 +48,7 @@ StringTokenizer st(Message);
 std::string option = string_upper(st[1]);
 
 if (option == "ROTATE") {
-  bot->logAdminMessage("%s (%s) ordered a manual DB rotation.",
+  bot->logDebugMessage("%s (%s) ordered a manual DB rotation.",
 		       theUser->getUserName().c_str(),
 		       theClient->getRealNickUserHost().c_str());
   bot->rotateDB();
@@ -65,13 +65,13 @@ if (option == "UPDATE") {
   }
 
   if ((st.size() > 2) && string_upper(st[2]) == "THREADED") {
-    bot->logAdminMessage("%s (%s) ordered a manual DB update (threaded).",
+    bot->logDebugMessage("%s (%s) ordered a manual DB update (threaded).",
 			 theUser->getUserName().c_str(),
 			 theClient->getRealNickUserHost().c_str());
     bot->prepareUpdate(true);
     return;
   } else {
-    bot->logAdminMessage("%s (%s) ordered a manual DB update.",
+    bot->logDebugMessage("%s (%s) ordered a manual DB update.",
 			 theUser->getUserName().c_str(),
 			 theClient->getRealNickUserHost().c_str());
     bot->prepareUpdate(false);

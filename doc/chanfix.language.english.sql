@@ -182,4 +182,6 @@ COPY "translations" FROM stdin;
 1	175	Total number of channel ops recorded: %u	31337	0
 1	176	Last used the service: %s ago	31337	0
 1	177	Last used the service: Never	31337	0
+1	178	WARNING: Channel %s is being manually fixed; aborting fix as per BLOCK.	31337	0
+1	179	WARNING: Channel %s is being automatically fixed; aborting fix as per BLOCK.	31337	0
 \.

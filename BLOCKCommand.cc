@@ -25,6 +25,7 @@
  */
 
 #include "gnuworld_config.h"
+#include "Network.h"
 
 #include "chanfix.h"
 #include "responses.h"
@@ -87,11 +88,36 @@ bot->SendTo(theClient,
                             std::string("The channel %s has been blocked.")).c_str(),
                                         theChan->getChannel().c_str());
 
+/* Warn and remove from the queue if it is being fixed */
+std::string extraLog;
+Channel* netChan = Network->findChannel(st[1]);
+if (netChan) {
+  if (bot->isBeingChanFixed(netChan)) {
+    bot->SendTo(theClient,
+		bot->getResponse(theUser,
+			language::aborting_manual_fix,
+			std::string("WARNING: Channel %s is being manually fixed; aborting fix as per BLOCK.")).c_str(),
+				    theChan->getChannel().c_str());
+    bot->removeFromManQ(netChan);
+    extraLog = ", which aborted a manual fix";
+  }
+  if (bot->isBeingAutoFixed(netChan)) {
+    bot->SendTo(theClient,
+		bot->getResponse(theUser,
+			language::aborting_auto_fix,
+			std::string("WARNING: Channel %s is being automatically fixed; aborting fix as per BLOCK.")).c_str(),
+				    theChan->getChannel().c_str());
+    bot->removeFromAutoQ(netChan);
+    extraLog = ", which aborted an automatic fix";
+  }
+}
+
 /* Log command */
-bot->logAdminMessage("%s (%s) has added the BLOCK flag to %s",
+bot->logAdminMessage("%s (%s) has added the BLOCK flag to %s%s",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str(),
-		     theChan->getChannel().c_str());
+		     theChan->getChannel().c_str(),
+		     extraLog.c_str());
 
 return;
 }

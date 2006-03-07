@@ -53,7 +53,7 @@ bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::shutting_down,
                             std::string("Shutting down the server as per your request.")).c_str());
-bot->logAdminMessage("%s (%s) is shutting me down.",
+bot->logDebugMessage("%s (%s) is shutting me down.",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str());
 

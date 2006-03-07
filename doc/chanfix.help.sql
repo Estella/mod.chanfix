@@ -23,11 +23,11 @@ HELP	1	Shows help about the specified command. With no command specified, all co
 HISTORY	1	Shows the times that the specified channel has been manually fixed.
 INFO	1	Shows all notes of the specified channel and whether the channel is actively blocked.
 LISTHOSTS	1	With no username specified, it lists the hostmasks chanfix recognizes you by. Otherwise, it views the specified username's host list.\nNOTE: Server admins (+a) can only view host lists of users within their own server group. Users lower than server admin status can only view their own host lists.
-OPLIST	1	Shows the top 10 op accounts and their scores for the specified channel.
+OPLIST	1	Shows the top 10 op accounts and their scores for the specified channel. Append ALL or an exclamation mark (!) to list them all.
 OPNICKS	1	Shows the nicknames currently opped on the specified channel.
 REHASH	1	Reloads the translations, configuration, or help values based on the specified target.
 RELOAD	1	Completely reloads chanfix.\nNOTE: This will subject chanfix to a reconnection which will also include a large netburst that takes time to process, so use with caution.
-SCORE	1	Without extra arguments, shows the top scores of <channel>.\nOtherwise, it shows the score of either the currently online client <nick>, or <*account> for <channel>.
+SCORE	1	Without extra arguments, shows the top scores of <channel>.\nOtherwise, it shows the score of either an <account> or a currently online client <=nick> for <channel>.
 SET	1	Sets various configuration options to the specified values.\nBoolean settings: ENABLE_AUTOFIX, ENABLE_CHANFIX, ENABLE_CHANNEL_BLOCKING.\nInteger settings: NUM_SERVERS.
 STATUS	1	Shows current statistics such as: uptime, percentage network presence, fix and block settings.
 SUSPEND	1	Suspends the specified user.
@@ -39,11 +39,11 @@ SETGROUP	1	Sets the group for the specified user.
 SHUTDOWN	1	Saves the database and shuts GNUWorld down.
 UNSUSPEND	1	Unsuspends the specified user.
 WHOGROUP	1	Shows all users in the specified group along with their flags. If no argument is given, all groups are listed.
-<INDEXOPER>	1	\002Oper Level\002: SCORE CSCORE HISTORY INFO STATUS
-<INDEXLOGGEDIN>	1	\002Logged In\002: CHECK LISTHOSTS USET WHOIS
+<INDEXOPER>	1	\002Oper Level\002: SCORE CSCORE CHECK HISTORY INFO OPLIST OPNICKS STATUS
+<INDEXLOGGEDIN>	1	\002Logged In\002: LISTHOSTS USET WHOIS
 <INDEXBLOCK>	1	\002Blocker (+b)\002: BLOCK UNBLOCK
 <INDEXCOMMENT>	1	\002Commenter (+c)\002: ADDNOTE DELNOTE ALERT UNALERT
-<INDEXCHANFIX>	1	\002Chanfixer (+f)\002: CHANFIX OPLIST OPNICKS
+<INDEXCHANFIX>	1	\002Chanfixer (+f)\002: CHANFIX
 <INDEXOWNER>	1	\002Owner (+o)\002: REHASH RELOAD SET SHUTDOWN
 <INDEXSERVERADMIN>	1	\002Server Admin (+a)\002: ADDUSER DELUSER ADDHOST DELHOST ADDFLAG DELFLAG WHOGROUP SUSPEND UNSUSPEND
 <INDEXUSERADMIN>	1	\002User Manager (+u)\002: ADDUSER DELUSER ADDHOST DELHOST ADDFLAG DELFLAG SETGROUP WHOGROUP SUSPEND UNSUSPEND

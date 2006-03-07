@@ -50,7 +50,7 @@ if (option == "CONFIG" || option.empty()) {
 	bot->getResponse(theUser,
 		language::reloaded_conf,
 		std::string("Successfully rehashed configuration file.")).c_str());
-  bot->logAdminMessage("%s (%s) rehashed the chanfix module.",
+  bot->logDebugMessage("%s (%s) rehashed the chanfix module.",
 		       theUser->getUserName().c_str(),
 		       theClient->getRealNickUserHost().c_str());
   return;
@@ -64,7 +64,7 @@ if (option == "HELP") {
               bot->getResponse(theUser,
                               language::reloaded_help,
                               std::string("Successfully reloaded help tables. %i entries in table.", bot->helpTable.size())).c_str());
-  bot->logAdminMessage("%s (%s) rehashed the chanfix help tables.",
+  bot->logDebugMessage("%s (%s) rehashed the chanfix help tables.",
 		       theUser->getUserName().c_str(),
 		       theClient->getRealNickUserHost().c_str());
   return;
@@ -77,7 +77,7 @@ if (option == "TRANSLATIONS") {
 
   bot->SendTo(theClient, "Successfully reloaded translation tables. %i entries in table.",
               bot->translationTable.size());
-  bot->logAdminMessage("%s (%s) rehashed the chanfix translation tables.",
+  bot->logDebugMessage("%s (%s) rehashed the chanfix translation tables.",
 		       theUser->getUserName().c_str(),
 		       theClient->getRealNickUserHost().c_str());
   return;

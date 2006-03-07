@@ -38,6 +38,8 @@ consoleChan = #coder-com
 consoleChanModes = +nst
 
 # Should the bot relay admin messages to the console channel?
+# NOTE: This only disables relaying information sent to the
+# adminLog. debugLog information is *always* relayed.
 sendConsoleNotices = true
 
 # Channel(s) that chanfix should join besides consoleChan (can be multiple)
@@ -111,6 +113,9 @@ connectCheckFreq = 10
 
 # File where all admin commands sent to backchan are logged and saved
 adminLogFile = chanfix-admin.log
+
+# File where all debug information sent to backchan is logged and saved
+debugLogFile = chanfix-debug.log
 
 # End of config file.
 # ---------------------------------------------------------------------

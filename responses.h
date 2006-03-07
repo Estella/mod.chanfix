@@ -63,6 +63,8 @@ namespace gnuworld
 		const int channel_blocking_disabled	= 22;
 		const int channel_already_blocked	= 23;
 		const int channel_has_been_blocked	= 24;
+		const int aborting_manual_fix		= 178;
+		const int aborting_auto_fix		= 179;
 
 		/* CHANFIX */
 		const int manual_fix_disabled		= 25;
