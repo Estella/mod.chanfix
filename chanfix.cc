@@ -2288,7 +2288,13 @@ if (nextDay >= (DAYSAMPLES - 1))
 else
   nextDay++;
 
-time_t maxFirstOppedTS = currentTime() - 86400;
+/**
+ * Basically, we need to make sure we do not delete ops that were
+ * just added. To do this, we take the currentTime(), subtract
+ * POINTS_UPDATE_TIME (plus 10 seconds to make sure), and then
+ * check it against the time that he/she was first opped.
+ */
+time_t maxFirstOppedTS = currentTime() - (POINTS_UPDATE_TIME + 10);
 sqlChanOp* curOp;
 std::string curChan;
 
