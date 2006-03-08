@@ -43,7 +43,7 @@ void INFOCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& 
 StringTokenizer st(Message);
 
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
-if (!theChan || !theChan->useSQL()) {
+if (!theChan) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::no_info_for_chan,
@@ -85,6 +85,14 @@ if (netChan) {
                                 language::info_chan_being_autofixed,
                                 std::string("%s is being autofixed.")).c_str(),
                                             theChan->getChannel().c_str());
+}
+
+if (!theChan->useSQL()) {
+  bot->SendTo(theClient,
+	      bot->getResponse(theUser,
+			       language::end_of_information,
+			       std::string("End of information.")).c_str());
+  return;
 }
 
 /* Get a connection instance to our backend */

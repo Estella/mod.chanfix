@@ -124,12 +124,12 @@
 /**
  * Interval between two consecutive checks for opless channels.
  */
-#define CHECK_CHANS_TIME	600
+#define CHECK_CHANS_TIME	60
 
 /**
  * Interval between two consecutive processing of the queues.
  */
-#define PROCESS_QUEUE_TIME	60
+#define PROCESS_QUEUE_TIME	30
 
 /**
  * Maximum score a client can obtain.

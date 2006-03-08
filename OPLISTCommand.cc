@@ -104,14 +104,14 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
   opCount++;
   firstop = bot->tsToDateTime(curOp->getTimeFirstOpped(), false);
   lastop = bot->tsToDateTime(curOp->getTimeLastOpped(), true);
-  bot->SendTo(theClient, "%2d. %4d %s -- %s / %s", opCount,
+  bot->SendTo(theClient, "%3d. %4d  %s -- %s / %s", opCount,
 	      curOp->getPoints(), curOp->getAccount().c_str(),
 	      firstop.c_str(), lastop.c_str());
 }
 
 /* Log command */
 bot->logAdminMessage("%s (%s) has requested OPLIST%s for %s",
-		     theUser ? theUser->getUserName().c_str() : "[NOT LOGGED-IN]",
+		     theUser ? theUser->getUserName().c_str() : "[NOT-LOGGED-IN]",
 		     theClient->getRealNickUserHost().c_str(),
 		     (all ? " (all)" : ""),
 		     st[1].c_str());
