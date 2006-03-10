@@ -578,23 +578,6 @@ if (st.size() < commHandler->second->getNumParams()) {
   return;
 }
 
-if (theUser) {
-  if (theUser->getIsSuspended()) {
-    SendTo(theClient,
-           getResponse(theUser,
-                       language::access_suspended,
-                       std::string("Your access to this service is suspended.")).c_str());
-    return;
-  }
-  if (!theUser->matchHost(theClient->getRealNickUserHost().c_str())) {
-    SendTo(theClient,
-           getResponse(theUser,
-                       language::host_not_matching,
-                       std::string("Your current host does not match any registered hosts for your username.")).c_str());
-    return;
-  }
-}
-
 /* If you change this code, remember to change it in HELPCommand.cc */
 sqlUser::flagType requiredFlags = commHandler->second->getRequiredFlags();
 if (requiredFlags) {
@@ -603,6 +586,22 @@ if (requiredFlags) {
            getResponse(theUser,
                        language::need_to_auth,
                        std::string("You need to authenticate to use this command.")).c_str());
+    return;
+  }
+
+  if (theUser->getIsSuspended()) {
+    SendTo(theClient,
+           getResponse(theUser,
+                       language::access_suspended,
+                       std::string("Your access to this service is suspended.")).c_str());
+    return;
+  }
+
+  if (!theUser->matchHost(theClient->getRealNickUserHost().c_str())) {
+    SendTo(theClient,
+           getResponse(theUser,
+                       language::host_not_matching,
+                       std::string("Your current host does not match any registered hosts for your username.")).c_str());
     return;
   }
 
