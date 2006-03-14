@@ -220,6 +220,8 @@ public:
 	static size_t countChanOps(const Channel*);
 
 	bool needsModesRemoved(Channel*);
+	
+	bool accountIsOnChan(const std::string&, const std::string&);
 
 	bool canScoreChan(Channel*);
 

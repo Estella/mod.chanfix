@@ -97,16 +97,20 @@ bot->SendTo(theClient,
 unsigned int opCount = 0;
 std::string firstop;
 std::string lastop;
-
 for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
      opPtr != myOps.end() && (all || opCount < OPCOUNT); opPtr++) {
   curOp = *opPtr;
   opCount++;
   firstop = bot->tsToDateTime(curOp->getTimeFirstOpped(), false);
   lastop = bot->tsToDateTime(curOp->getTimeLastOpped(), true);
-  bot->SendTo(theClient, "%3d. %4d  %s -- %s / %s", opCount,
-	      curOp->getPoints(), curOp->getAccount().c_str(),
-	      firstop.c_str(), lastop.c_str());
+  if (bot->accountIsOnChan(st[1],curOp->getAccount()))
+    bot->SendTo(theClient, "%3d. \002%4d  %s -- %s / %s\002", opCount,
+		curOp->getPoints(), curOp->getAccount().c_str(),
+		firstop.c_str(), lastop.c_str());
+  else
+    bot->SendTo(theClient, "%3d. %4d  %s -- %s / %s", opCount,
+		curOp->getPoints(), curOp->getAccount().c_str(),
+		firstop.c_str(), lastop.c_str());
 }
 
 /* Log command */

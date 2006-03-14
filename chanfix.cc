@@ -1795,6 +1795,17 @@ sqlChannel* chanfix::newChannelRecord(Channel* theChan)
 return newChannelRecord(theChan->getName());
 }
 
+bool chanfix::accountIsOnChan(const std::string& theChan, const std::string& Account)
+{
+Channel* tmpChan = Network->findChannel(theChan);
+if (!tmpChan) return false;
+for (Channel::userIterator ptr = tmpChan->userList_begin();
+     ptr != tmpChan->userList_end(); ptr++) {
+  if (Account == ptr->second->getClient()->getAccount()) return true;
+}
+return false;
+}
+
 bool chanfix::deleteChannelRecord(sqlChannel* sqlChan)
 {
 if (sqlChan->useSQL() && sqlChan->Delete())
