@@ -345,6 +345,7 @@ clientNeedsIdent = atob(chanfixConfig->Require("clientNeedsIdent")->second) ;
 connectCheckFreq = atoi((chanfixConfig->Require("connectCheckFreq")->second).c_str()) ;
 adminLogFile = chanfixConfig->Require("adminLogFile")->second ;
 debugLogFile = chanfixConfig->Require("debugLogFile")->second ;
+allowNonOpers = atob(chanfixConfig->Require("allowNonOpers")->second) ;
 
 /* Set up the channels that chanfix should join */
 EConfig::const_iterator ptr = chanfixConfig->Find("joinChan");

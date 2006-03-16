@@ -113,13 +113,6 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
 		firstop.c_str(), lastop.c_str());
 }
 
-/* Log command */
-bot->logAdminMessage("%s (%s) has requested OPLIST%s for %s",
-		     theUser ? theUser->getUserName().c_str() : "[NOT-LOGGED-IN]",
-		     theClient->getRealNickUserHost().c_str(),
-		     (all ? " (all)" : ""),
-		     st[1].c_str());
-
 return;
 }
 

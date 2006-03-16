@@ -117,5 +117,9 @@ adminLogFile = chanfix-admin.log
 # File where all debug information sent to backchan is logged and saved
 debugLogFile = chanfix-debug.log
 
+# Should people that are not opers have the possibility of using the
+# chanfix service?
+allowNonOpers = true
+
 # End of config file.
 # ---------------------------------------------------------------------
