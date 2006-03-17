@@ -13,7 +13,7 @@ username = chanfix
 hostname = evilnet.development
 
 # Real name (info) of bot
-userdescription = Lean, mean, channel-opping machine
+userdescription = Oooh! Oooh! I can fix it!
 
 # User modes bot should set
 mode = +idk
@@ -116,10 +116,6 @@ adminLogFile = chanfix-admin.log
 
 # File where all debug information sent to backchan is logged and saved
 debugLogFile = chanfix-debug.log
-
-# Should people that are not opers have the possibility of using the
-# chanfix service?
-allowNonOpers = true
 
 # End of config file.
 # ---------------------------------------------------------------------

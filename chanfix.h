@@ -384,7 +384,6 @@ public:
 	unsigned int	numTopScores;
 	unsigned int	minClients;
 	bool		clientNeedsIdent;
-	bool		allowNonOpers;
 	unsigned int	connectCheckFreq;
 	std::string	adminLogFile;
 	std::string	debugLogFile;
@@ -443,7 +442,6 @@ public:
 	 */
 	bool doAutoFix() { return enableAutoFix; }
 	bool doChanFix() { return enableChanFix; }
-	bool needOper() { return allowNonOpers; }
 	bool doChanBlocking() { return enableChannelBlocking; }
 	STATE getState() { return currentState; }
 	bool isChanServLinked() { return chanServLinked; }

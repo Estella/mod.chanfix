@@ -43,20 +43,38 @@ StringTokenizer st(Message);
 sqlUser* targetUser = bot->isAuthed(st[1]);  
 if (!targetUser) {
   bot->SendTo(theClient,
-              bot->getResponse(theUser,
-                              language::no_such_user,
-                              std::string("No such user %s.")).c_str(), st[1].c_str());
+	      bot->getResponse(theUser,
+			language::no_such_user,
+			std::string("No such user %s.")).c_str(), st[1].c_str());
   return;
 }
 
-/* A serveradmin can only add flags to users on his/her own group. */
+/* Can't add a host to an owner unless you're an owner. */
+if (targetUser->getFlag(sqlUser::F_OWNER) && !theUser->getFlag(sqlUser::F_OWNER)) {
+  bot->SendTo(theClient,
+	      bot->getResponse(theUser,
+			language::cant_add_host_an_owner,
+			std::string("You cannot add a host to an owner unless you're an owner.")).c_str());
+  return;
+}
+
+/* Can only add a host to a user manager if you're an owner. */
+if (targetUser->getFlag(sqlUser::F_USERMANAGER) && !theUser->getFlag(sqlUser::F_OWNER)) {
+  bot->SendTo(theClient,
+	      bot->getResponse(theUser,
+			language::cant_add_host_manager,
+			std::string("You cannot add a host to a user manager unless you're an owner.")).c_str());
+  return;
+}
+
+/* A serveradmin can only add hosts to users on his/her own group. */
 if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
     !theUser->getFlag(sqlUser::F_USERMANAGER)) {
   if (targetUser->getGroup() != theUser->getGroup()) {
     bot->SendTo(theClient,
-                bot->getResponse(theUser,
-                                language::cant_add_host_diff_group,
-                                std::string("You cannot add a host to a user in a different group.")).c_str());
+		bot->getResponse(theUser,
+			language::cant_add_host_diff_group,
+			std::string("You cannot add a host to a user in a different group.")).c_str());
     return;
   }
 }

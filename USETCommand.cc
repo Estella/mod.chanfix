@@ -51,7 +51,7 @@ if (st.size() == 4) {
   value = string_upper(st[3]);
   sqlUser::flagType requiredFlags;
 
-  if (option == "NEEDOPER" && bot->needOper()) {
+  if (option == "NEEDOPER") {
     requiredFlags = sqlUser::F_USERMANAGER;
     if (!theUser->getFlag(requiredFlags)) {
       bot->SendTo(theClient,

@@ -43,9 +43,27 @@ StringTokenizer st(Message);
 sqlUser* targetUser = bot->isAuthed(st[1]);
 if (!targetUser) {
   bot->SendTo(theClient,
-              bot->getResponse(theUser,
-                              language::no_such_user,
-                              std::string("No such user %s.")).c_str(), st[1].c_str());
+	      bot->getResponse(theUser,
+			language::no_such_user,
+			std::string("No such user %s.")).c_str(), st[1].c_str());
+  return;
+}
+
+/* Can't delete a host from an owner unless you're an owner. */
+if (targetUser->getFlag(sqlUser::F_OWNER) && !theUser->getFlag(sqlUser::F_OWNER$
+  bot->SendTo(theClient,
+	      bot->getResponse(theUser,
+			language::cant_del_host_an_owner,
+			std::string("You cannot delete a host from an owner unless you're an owner.")).c_str());
+  return;
+}
+
+/* Can only delete a host from a user manager if you're an owner. */
+if (targetUser->getFlag(sqlUser::F_USERMANAGER) && !theUser->getFlag(sqlUser::F$
+  bot->SendTo(theClient,
+	      bot->getResponse(theUser,
+			language::cant_del_host_manager,
+			std::string("You cannot delete a host from a user manager unless you're an owner.")).c_str());
   return;
 }
 
@@ -54,19 +72,19 @@ if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
     !theUser->getFlag(sqlUser::F_USERMANAGER)) {
   if (targetUser->getGroup() != theUser->getGroup()) {
     bot->SendTo(theClient,
-                bot->getResponse(theUser,
-                                language::cant_del_host_diff_group,
-                                std::string("You cannot delete a host on a user in a different group.")).c_str());
+		bot->getResponse(theUser,
+			language::cant_del_host_diff_group,
+			std::string("You cannot delete a host from a user in a different group.")).c_str());
     return;
   }
 }
 
 if (!targetUser->hasHost(st[2].c_str())) {
   bot->SendTo(theClient,
-              bot->getResponse(theUser,
-                              language::user_doesnt_have_host,
-                              std::string("User %s doesn't have hostmask %s.")).c_str(),
-                                          targetUser->getUserName().c_str(), st[2].c_str());
+	      bot->getResponse(theUser,
+			language::user_doesnt_have_host,
+			std::string("User %s doesn't have hostmask %s.")).c_str(),
+				targetUser->getUserName().c_str(), st[2].c_str());
   return;
 }
 
