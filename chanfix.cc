@@ -394,6 +394,12 @@ commandMap.erase( ptr ) ;
 return true ;
 }
 
+/* OnShutdown */
+void chanfix::OnShutdown(const std::string& reason)
+{
+MyUplink->UnloadClient(this, reason);
+}
+
 /* OnAttach */
 void chanfix::OnAttach()
 {
@@ -497,6 +503,9 @@ else if (theTimer == tidUpdateDB) {
 /* OnDetach */
 void chanfix::OnDetach( const std::string& reason )
 {
+/* Save our database */
+prepareUpdate(false);
+
 /* Delete our config */
 delete chanfixConfig; chanfixConfig = 0;
 
@@ -1747,17 +1756,29 @@ if (numClientsToOp + currentOps >= netChan->size() ||
 return false;
 }
 
-
-chanfix::acctListType chanfix::findAccount(Channel* theChan, const std::string& Account)
+chanfix::acctListType chanfix::findAccount(Channel* theChan, const std::string& account)
 {
 acctListType chanAccts;
 for (Channel::userIterator ptr = theChan->userList_begin();
      ptr != theChan->userList_end(); ptr++) {
-  if (Account == ptr->second->getClient()->getAccount())
+  if (account == ptr->second->getClient()->getAccount())
     chanAccts.push_back(ptr->second->getClient());
 }
 
 return chanAccts;
+}
+
+bool chanfix::accountIsOnChan(const std::string& channel, const std::string& account)
+{
+Channel* tmpChan = Network->findChannel(channel);
+if (!tmpChan) return false;
+
+for (Channel::userIterator ptr = tmpChan->userList_begin();
+     ptr != tmpChan->userList_end(); ptr++) {
+  if (account == ptr->second->getClient()->getAccount())
+    return true;
+}
+return false;
 }
 
 sqlChannel* chanfix::getChannelRecord(const std::string& Channel)
@@ -1793,17 +1814,6 @@ return newChan;
 sqlChannel* chanfix::newChannelRecord(Channel* theChan)
 {
 return newChannelRecord(theChan->getName());
-}
-
-bool chanfix::accountIsOnChan(const std::string& theChan, const std::string& Account)
-{
-Channel* tmpChan = Network->findChannel(theChan);
-if (!tmpChan) return false;
-for (Channel::userIterator ptr = tmpChan->userList_begin();
-     ptr != tmpChan->userList_end(); ptr++) {
-  if (Account == ptr->second->getClient()->getAccount()) return true;
-}
-return false;
 }
 
 bool chanfix::deleteChannelRecord(sqlChannel* sqlChan)

@@ -95,6 +95,18 @@ public:
 	virtual void BurstChannels() ;
 
 	/**
+	 * This method is invoked when the server has been requested
+	 * to shutdown.  If currently connected to the network, this
+	 * method gives xClient's a chance to gracefully QUIT from
+	 * the network, or whatever other processing is useful.
+	 * To force data to be written before final shutdown (again,
+	 * if connected), set xServer::FlushData().
+	 * Timers will be executed after this method is invoked, once,
+	 * depending upon target time of course :)
+	 */
+	virtual void OnShutdown( const std::string& reason ) ;
+
+	/**
 	 * This method is invoked when this module is first loaded.
 	 * This is a good place to setup timers, connect to DB, etc.
 	 * At this point, the server may not yet be connected to the
@@ -209,6 +221,8 @@ public:
 
 	bool fixChan(sqlChannel*, bool);
 
+	bool accountIsOnChan(const std::string&, const std::string&);
+
 	sqlChannel* getChannelRecord(const std::string&);
 	sqlChannel* getChannelRecord(Channel*);
 
@@ -220,8 +234,6 @@ public:
 	static size_t countChanOps(const Channel*);
 
 	bool needsModesRemoved(Channel*);
-	
-	bool accountIsOnChan(const std::string&, const std::string&);
 
 	bool canScoreChan(Channel*);
 
