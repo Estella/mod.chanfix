@@ -50,7 +50,7 @@ if (!targetUser) {
 }
 
 /* Can't delete a host from an owner unless you're an owner. */
-if (targetUser->getFlag(sqlUser::F_OWNER) && !theUser->getFlag(sqlUser::F_OWNER$
+if (targetUser->getFlag(sqlUser::F_OWNER) && !theUser->getFlag(sqlUser::F_OWNER)) {
   bot->SendTo(theClient,
 	      bot->getResponse(theUser,
 			language::cant_del_host_an_owner,
@@ -59,7 +59,7 @@ if (targetUser->getFlag(sqlUser::F_OWNER) && !theUser->getFlag(sqlUser::F_OWNER$
 }
 
 /* Can only delete a host from a user manager if you're an owner. */
-if (targetUser->getFlag(sqlUser::F_USERMANAGER) && !theUser->getFlag(sqlUser::F$
+if (targetUser->getFlag(sqlUser::F_USERMANAGER) && !theUser->getFlag(sqlUser::F_OWNER)) {
   bot->SendTo(theClient,
 	      bot->getResponse(theUser,
 			language::cant_del_host_manager,
