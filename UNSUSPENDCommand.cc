@@ -53,7 +53,7 @@ if (!targetUser) {
 if (targetUser->getFlag(sqlUser::F_OWNER) && !theUser->getFlag(sqlUser::F_OWNER)) {
   bot->SendTo(theClient,
 	      bot->getResponse(theUser,
-			language::cant_suspend_an_owner,
+			language::cant_unsuspend_an_owner,
 			std::string("You cannot unsuspend an owner unless you're an owner.")).c_str());
   return;
 }
