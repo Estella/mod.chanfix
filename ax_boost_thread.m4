@@ -37,11 +37,11 @@ if test "$ax_cv_boost_thread" = yes; then
   AC_ARG_WITH([boost-thread],AS_HELP_STRING([--with-boost-thread],
   [specify the boost thread library or suffix to use]),
   [if test "x$with_boost_thread" != "xno"; then
-    ax_thread_lib=-l$with_boost_thread
-    ax_boost_thread_lib=-lboost_thread-$with_boost_thread
+    ax_thread_lib=$with_boost_thread
+    ax_boost_thread_lib=boost_thread-$with_boost_thread
   fi])
   for ax_lib in $ax_thread_lib $ax_boost_thread_lib boost_thread; do
-    AC_CHECK_LIB($ax_lib, main, [BOOST_THREAD_LIB=$ax_lib break])
+    AC_CHECK_LIB($ax_lib, main, [BOOST_THREAD_LIB=-l$ax_lib break])
   done
   AC_SUBST(BOOST_THREAD_LIB)
 fi
