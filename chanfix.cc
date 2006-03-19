@@ -2080,7 +2080,11 @@ elog	<< "chanfix::startTimers> Started all timers."
 /**
  * prepareUpdate - Copies the sqlChanOp map to a temporary multimap
  */
+#ifdef CHANFIX_HAVE_BOOST_THREAD
 void chanfix::prepareUpdate(bool threaded)
+#else
+void chanfix::prepareUpdate(bool)
+#endif /* CHANFIX_HAVE_BOOST_THREAD */ 
 {
   if (updateInProgress) {
     elog	<< "*** [chanfix::prepareUpdate] Update already in progress; not starting."
@@ -2141,7 +2145,7 @@ void chanfix::prepareUpdate(bool threaded)
   logDebugMessage("Created snapshot map in %u ms.",
 		  snapShotTimer.stopTimeMS());
 
-#ifdef CHANFIX_HAVE_BOOST_THREAD  
+#ifdef CHANFIX_HAVE_BOOST_THREAD
   if (threaded) {
     ClassUpdateDB updateDB(*this);
     boost::thread pthrd(updateDB);
