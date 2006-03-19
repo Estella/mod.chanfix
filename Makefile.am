@@ -50,7 +50,7 @@ libchanfix_la_CXXFLAGS = -I$(PGSQL_INCLUDE) -I${top_srcdir}/include \
 	$(threadLib)
 
 libchanfix_la_LDFLAGS = -module -export-dynamic -L@PGSQL_LIB@ -lpq++ \
-	-l@BOOST_THREAD_LIB@
+	@BOOST_THREAD_LIB@
 
 EXTRA_DIST = chanfix.h \
 	chanfix.example.conf.in \

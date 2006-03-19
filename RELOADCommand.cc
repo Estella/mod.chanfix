@@ -57,14 +57,10 @@ bot->logDebugMessage("%s (%s) is reloading the chanfix module.",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str());
 
-/* Let's save our chanops database. */
-bot->prepareUpdate(false);
-
-if (st.size() < 2) {
+if (st.size() < 2)
   server->UnloadClient(bot, "Reloading...");
-} else {
+else
   server->UnloadClient(bot, st.assemble(1));
-}
 
 server->LoadClient("libchanfix", bot->getConfigFileName());
 

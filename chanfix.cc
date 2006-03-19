@@ -36,7 +36,6 @@
 #include	<string>
 #include	<utility>
 #include	<vector>
-#include	<boost/thread/thread.hpp>
 
 #include	"libpq++.h"
 
@@ -55,6 +54,10 @@
 #include	"sqlChanOp.h"
 #include	"sqlChannel.h"
 #include	"sqlUser.h"
+
+#ifdef CHANFIX_HAVE_BOOST_THREAD
+#include	<boost/thread/thread.hpp>
+#endif /* CHANFIX_HAVE_BOOST_THREAD */
 
 RCSTAG("$Id$");
 
@@ -437,6 +440,7 @@ xClient::OnAttach() ;
 /**
  * Thread class only used for score updates, updates on reload and shutdown are not threaded
  */
+#ifdef CHANFIX_HAVE_BOOST_THREAD
 class ClassUpdateDB {
   public:
     ClassUpdateDB(chanfix& cf) : cf_(cf) {}
@@ -448,6 +452,7 @@ class ClassUpdateDB {
 private:
         chanfix& cf_;
 };
+#endif /* CHANFIX_HAVE_BOOST_THREAD */
 
 /* OnTimer */
 void chanfix::OnTimer(const gnuworld::xServer::timerID& theTimer, void*)
@@ -2084,7 +2089,11 @@ void chanfix::prepareUpdate(bool threaded)
   }
 
   elog	<< "*** [chanfix::prepareUpdate] Updating the SQL database "
+#ifdef CHANFIX_HAVE_BOOST_THREAD
 	<< (threaded ? "(threaded)." : "(unthreaded).")
+#else
+	<< "(unthreaded [no boost])."
+#endif /* CHANFIX_HAVE_BOOST_THREAD */
 	<< std::endl;
   logDebugMessage("Starting to update the SQL database.");
 
@@ -2131,13 +2140,14 @@ void chanfix::prepareUpdate(bool threaded)
 
   logDebugMessage("Created snapshot map in %u ms.",
 		  snapShotTimer.stopTimeMS());
-  
+
+#ifdef CHANFIX_HAVE_BOOST_THREAD  
   if (threaded) {
     ClassUpdateDB updateDB(*this);
     boost::thread pthrd(updateDB);
-  } else {
+  } else
+#endif /* CHANFIX_HAVE_BOOST_THREAD */
     updateDB();
-  }
 
   return;
 }

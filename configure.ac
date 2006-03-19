@@ -5,7 +5,7 @@ AC_REVISION($Revision$)
 AC_INIT([chanfix],[v1.0.1],[evilnet-devel@lists.sourceforge.net])
 AC_CONFIG_SRCDIR([chanfix.cc])
 AM_INIT_AUTOMAKE
-AC_CONFIG_HEADERS(defs_chanfix.h)
+AC_CONFIG_HEADERS([defs_chanfix.h])
 AX_PREFIX_CONFIG_H(chanfix_defs.h)
 
 AC_DISABLE_STATIC
