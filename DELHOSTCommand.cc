@@ -35,6 +35,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void DELHOSTCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -117,4 +119,5 @@ bot->logAdminMessage("%s (%s) deleted hostmask %s from user %s.",
 return;
 }
 
+} //namespace cf
 } //namespace gnuworld

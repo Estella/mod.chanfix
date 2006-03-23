@@ -36,7 +36,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
-
+namespace cf
+{
 void ADDFLAGCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
@@ -135,4 +136,5 @@ bot->SendTo(theClient,
 					 flag,
 					 targetUser->getUserName().c_str());
 } //ADDFLAGCommand::Exec
+} //Namespace cf
 } //Namespace gnuworld

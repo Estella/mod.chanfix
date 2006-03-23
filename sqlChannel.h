@@ -29,6 +29,9 @@
 namespace gnuworld
 {
 
+namespace cf
+{
+
 class sqlUser;
 class sqlManager;
 
@@ -154,6 +157,8 @@ protected:
 
 	sqlManager*	myManager;
 }; // class sqlChannel
+
+} // namespace cf
 
 } // namespace gnuworld
 

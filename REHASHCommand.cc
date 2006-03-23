@@ -34,6 +34,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void REHASHCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -85,5 +87,7 @@ if (option == "TRANSLATIONS") {
 
 return;
 }
+
+} // namespace cf
 
 } // namespace gnuworld

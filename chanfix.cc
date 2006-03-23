@@ -64,6 +64,9 @@ RCSTAG("$Id$");
 namespace gnuworld
 {
 
+namespace cf
+{
+
 short currentDay;
 
 /*
@@ -348,7 +351,6 @@ clientNeedsIdent = atob(chanfixConfig->Require("clientNeedsIdent")->second) ;
 connectCheckFreq = atoi((chanfixConfig->Require("connectCheckFreq")->second).c_str()) ;
 adminLogFile = chanfixConfig->Require("adminLogFile")->second ;
 debugLogFile = chanfixConfig->Require("debugLogFile")->second ;
-ccontrolServer = chanfixConfig->Require("ccontrolServer")->second ;
 
 /* Set up the channels that chanfix should join */
 EConfig::const_iterator ptr = chanfixConfig->Find("joinChan");
@@ -456,7 +458,7 @@ private:
 #endif /* CHANFIX_HAVE_BOOST_THREAD */
 
 /* OnTimer */
-void chanfix::OnTimer(const gnuworld::xServer::timerID& theTimer, void*)
+void chanfix::OnTimer(const xServer::timerID& theTimer, void*)
 {
 time_t theTime;
 if (theTimer == tidGivePoints) {
@@ -750,11 +752,11 @@ void chanfix::OnChannelModeO( Channel* theChan, ChannelUser* theUser,
 /* if (currentState != RUN) return; */
 
 if (theUser) {
-	/* Lets see who did the mode */
-	iServer* targetServer = Network->findServer( theUser->getClient()->getIntYY() ) ;
-		
-	if (string_lower(targetServer->getName()) == string_lower(ccontrolServer)) {
-	  /* EUWorld mode, so lets add it to the tempblock list if its not already */
+	/* Let's see what server did the mode */
+	iServer* theServer = Network->findServer(theUser->getClient()->getIntYY());
+	/* If it was a service, then add the channel to the block list. */
+	if (theServer && theServer != MyUplink->getUplink() && theServer->isService()) {
+	  /* Check if it isn't already in the block list. If not, add it. */
 	  if (!isTempBlocked(theChan->getName()))
 	    tempBlockList.insert(tempBlockType::value_type(theChan->getName(), currentTime()));
 	}
@@ -1676,7 +1678,8 @@ int max_time = (autofix ? AUTOFIX_MAXIMUM : CHANFIX_MAXIMUM);
  * at time t between 0 and max_time. */
 int min_score_abs = static_cast<int>((MAX_SCORE *
 		static_cast<float>(FIX_MIN_ABS_SCORE_BEGIN)) -
-		time_since_start / max_time *
+		static_cast<float>(time_since_start) /
+		static_cast<float>(max_time) *
 		(MAX_SCORE * static_cast<float>(FIX_MIN_ABS_SCORE_BEGIN)
 		 - static_cast<float>(FIX_MIN_ABS_SCORE_END) * MAX_SCORE));
 
@@ -1691,7 +1694,8 @@ elog << "chanfix::fixChan> [" << netChan->getName() << "] max "
  * at time t between 0 and max_time. */
 int min_score_rel = static_cast<int>((maxScore *
 		static_cast<float>(FIX_MIN_REL_SCORE_BEGIN)) -
-		time_since_start / max_time *
+		static_cast<float>(time_since_start) /
+		static_cast<float>(max_time) *
 		(maxScore * static_cast<float>(FIX_MIN_REL_SCORE_BEGIN)
 		 - static_cast<float>(FIX_MIN_REL_SCORE_END) * maxScore));
 
@@ -2384,6 +2388,7 @@ else
  * check it against the time that he/she was first opped.
  */
 time_t maxFirstOppedTS = currentTime() - (POINTS_UPDATE_TIME + 10);
+time_t maxLastOppedTS = currentTime() - (DAYSAMPLES * 86400);
 sqlChanOp* curOp;
 std::string curChan;
 
@@ -2394,7 +2399,9 @@ for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
     curOp = chanOp->second;
     curOp->setDay(nextDay, 0);
     curOp->calcTotalPoints();
-    if (curOp->getPoints() <= 0 && maxFirstOppedTS > curOp->getTimeFirstOpped()) {
+    if (((curOp->getPoints() <= 0) &&
+	 (maxFirstOppedTS > curOp->getTimeFirstOpped()))
+	|| (maxLastOppedTS > curOp->getTimeLastOpped())) {
       ptr->second.erase(chanOp);
       delete curOp; curOp = 0;
     }
@@ -2759,4 +2766,7 @@ bot->SendTo(theClient,
                              std::string("SYNTAX: ")).c_str() + getInfo() );
 }
 
+} // namespace cf
+
 } // namespace gnuworld
+

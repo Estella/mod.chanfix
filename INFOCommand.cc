@@ -37,6 +37,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void INFOCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -183,4 +185,6 @@ bot->theManager->removeConnection(cacheCon);
 
 return;
 }
+
+} // namespace cf
 } // namespace gnuworld

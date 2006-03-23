@@ -35,6 +35,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void LISTHOSTSCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {	 
@@ -99,4 +101,6 @@ bot->SendTo(theClient,
 
 return;
 } //LISTHOSTSCommand::Exec
+
+} //namespace cf
 } //namespace gnuworld

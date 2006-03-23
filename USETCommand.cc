@@ -37,6 +37,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void USETCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -135,4 +137,5 @@ bot->SendTo(theClient,
 return;
 }
 
+} // namespace cf
 } // namespace gnuworld

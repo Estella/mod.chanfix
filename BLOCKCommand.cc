@@ -37,6 +37,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void BLOCKCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -121,4 +123,5 @@ bot->logAdminMessage("%s (%s) has added the BLOCK flag to %s%s",
 
 return;
 }
+} // namespace cf
 } // namespace gnuworld

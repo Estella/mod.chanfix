@@ -30,25 +30,31 @@
 #include	"client.h"
 #include	"EConfig.h"
 #include	"ELog.h"
+#include	"Timer.h"
 
 #include	"chanfixCommands.h"
 #include	"chanfix_config.h"
 #include	"sqlChannel.h"
-#include	"Timer.h"
 
 /* This must be declared before sqlChanOp.h is #include'd */
 namespace gnuworld
 {
+namespace cf
+{
 extern short currentDay;
+}
 }
 
 #include	"sqlChanOp.h"
 #include	"sqlManager.h"
 #include	"sqlUser.h"
 
+namespace gnuworld
+{
+
 class Timer;
 
-namespace gnuworld
+namespace cf
 {
 
 class chanfix : public xClient {
@@ -389,7 +395,6 @@ public:
 	/**
 	 * Configuration variables
 	 */
-	std::string	ccontrolServer;
 	std::string	consoleChan;
 	std::string	consoleChanModes;
 	bool		sendConsoleNotices;
@@ -492,6 +497,8 @@ public:
 
 const std::string escapeSQLChars(const std::string&);
 bool atob(std::string);
+
+} // namespace cf
 
 } // namespace gnuworld
 

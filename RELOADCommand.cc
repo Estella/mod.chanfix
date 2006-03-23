@@ -36,6 +36,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void RELOADCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -66,5 +68,7 @@ server->LoadClient("libchanfix", bot->getConfigFileName());
 
 return;
 }
+
+} // namespace cf
 
 } // namespace gnuworld

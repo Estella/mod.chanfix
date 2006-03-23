@@ -35,6 +35,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void SETGROUPCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -81,4 +83,5 @@ bot->logAdminMessage("%s (%s) set the group of user %s to %s.",
 
 return;
 } //SETGROUPCommand::Exec
+} //Namespace cf
 } //Namespace gnuworld

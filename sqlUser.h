@@ -31,6 +31,10 @@ namespace gnuworld
 {
 
 class iClient;
+
+namespace cf
+{
+
 class sqlManager;
 
 class sqlUser
@@ -167,6 +171,8 @@ private:
 
 	sqlManager*	myManager;
 }; // class sqlUser
+
+} // namespace cf
 
 } // namespace gnuworld
 

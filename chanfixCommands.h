@@ -24,6 +24,8 @@
 
 namespace gnuworld {
 
+namespace cf {
+
 class chanfix;
 class sqlUser;
 
@@ -130,6 +132,8 @@ DECLARE_COMMAND( REHASH )
 DECLARE_COMMAND( RELOAD )
 DECLARE_COMMAND( SET )
 DECLARE_COMMAND( SHUTDOWN )
+
+} // namespace cf
 
 } // namespace gnuworld
 

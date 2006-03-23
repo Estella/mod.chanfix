@@ -30,9 +30,14 @@
 namespace gnuworld
 {
 
-bool compare_points(gnuworld::sqlChanOp* a, gnuworld::sqlChanOp* b) {
+namespace cf
+{
+
+bool compare_points(sqlChanOp* a, sqlChanOp* b) {
   return a->getPoints() > b->getPoints();
 }
+
+} //namespace cf
 
 } //namespace gnuworld
 

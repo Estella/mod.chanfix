@@ -35,6 +35,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void WHOGROUPCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -127,4 +129,5 @@ bot->SendTo(theClient,
 
 return;
 } //WHOGROUPCommand::Exec
+} //namespace cf
 } //namespace gnuworld

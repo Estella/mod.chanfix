@@ -35,6 +35,9 @@
 namespace gnuworld
 {
 
+namespace cf
+{
+
 sqlChanOp::sqlChanOp(sqlManager* _myManager) :
   channel(""),
   account(""),
@@ -84,5 +87,7 @@ sqlChanOp::~sqlChanOp()
 {
 // No heap space allocated
 }
+
+} // namespace cf
 
 } // namespace gnuworld

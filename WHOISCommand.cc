@@ -36,6 +36,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void WHOISCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -169,4 +171,5 @@ if (st.size() > 2 && string_upper(st[2]) == "-MODIF")
 
 return;
 } //WHOISCommand::Exec
+} //namespace cf
 } //namespace gnuworld

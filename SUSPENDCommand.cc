@@ -35,6 +35,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void SUSPENDCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -117,4 +119,5 @@ bot->logAdminMessage("%s (%s) suspended user %s indefinitely.",
 
 return;
 } //SUSPENDCommand::Exec
+} //Namespace cf
 } //Namespace gnuworld

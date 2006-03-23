@@ -30,7 +30,11 @@
 #include "ELog.h"
 #include "sqlManager.h"
 
-namespace gnuworld {
+namespace gnuworld
+{
+
+namespace cf
+{
 
 /* Initialize our static data members */
 sqlManager* sqlManager::theManager = 0;
@@ -133,5 +137,7 @@ sqlManager::~sqlManager()
 {
 } // sqlManager::~sqlManager()
 
+
+} // namespace cf
 
 } // namespace gnuworld

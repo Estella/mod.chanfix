@@ -36,7 +36,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
-
+namespace cf
+{
 void ADDUSERCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
@@ -112,4 +113,5 @@ if (st.size() > 2) {
 
 return;
 } //ADDUSERCommand::Exec
+} //namespace cf
 } //namespace gnuworld

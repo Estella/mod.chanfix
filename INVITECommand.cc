@@ -35,6 +35,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void INVITECommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -81,4 +83,5 @@ bot->Invite(theClient, theChannel);
 return;
 }
 
+} // namespace cf
 } // namespace gnuworld

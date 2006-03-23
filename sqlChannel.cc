@@ -35,6 +35,9 @@
 namespace gnuworld
 {
 
+namespace cf
+{
+
 const sqlChannel::flagType sqlChannel::F_BLOCKED	= 0x00000001 ;
 const sqlChannel::flagType sqlChannel::F_ALERT		= 0x00000002 ;
 
@@ -365,5 +368,7 @@ sqlChannel::~sqlChannel()
 {
 // No heap space allocated
 }
+
+} // namespace cf
 
 } // namespace gnuworld

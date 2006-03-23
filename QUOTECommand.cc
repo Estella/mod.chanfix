@@ -36,6 +36,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void QUOTECommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -57,5 +59,7 @@ bot->Write( st.assemble(1) );
 
 return;
 }
+
+} // namespace cf
 
 } // namespace gnuworld

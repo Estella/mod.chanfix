@@ -36,6 +36,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void ALERTCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -86,4 +88,5 @@ bot->logAdminMessage("%s (%s) has added the ALERT flag to %s",
 
 return;
 }
+} // namespace cf
 } // namespace gnuworld

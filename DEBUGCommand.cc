@@ -36,6 +36,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void DEBUGCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -80,4 +82,6 @@ if (option == "UPDATE") {
 }
 
 }
+
+} // namespace cf
 } // namespace gnuworld

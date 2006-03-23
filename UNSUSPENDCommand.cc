@@ -35,6 +35,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void UNSUSPENDCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -108,4 +110,5 @@ bot->logAdminMessage("%s (%s) unsuspended user %s.",
 
 return;
 } //UNSUSPENDCommand::Exec
+} //namespace cf
 } //Namespace gnuworld

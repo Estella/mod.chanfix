@@ -38,6 +38,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void STATUSCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string&)
 {
@@ -96,4 +98,5 @@ else
 return;
 }
 
+} // namespace cf
 } // namespace gnuworld

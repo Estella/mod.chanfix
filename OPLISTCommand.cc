@@ -37,6 +37,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void OPLISTCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -114,4 +116,6 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
 return;
 }
 
-}
+} //namespace cf
+
+} //namespace gnuworld

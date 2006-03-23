@@ -31,6 +31,9 @@
 namespace gnuworld
 {
 
+namespace cf
+{
+
 class sqlManager;
 
 class sqlChanOp {
@@ -108,6 +111,8 @@ private:
 
 	sqlManager*	myManager;
 }; // class
+
+} // namespace cf
 
 } // namespace gnuworld
 

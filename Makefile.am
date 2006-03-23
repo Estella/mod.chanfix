@@ -62,7 +62,6 @@ EXTRA_DIST = chanfix.h \
 	sqlChannel.h \
 	sqlManager.h \
 	sqlUser.h \
-	Timer.h \
         $(COMMAND_CONF)
 
 confdir=${prefix}/bin

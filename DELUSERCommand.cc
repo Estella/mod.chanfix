@@ -35,6 +35,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void DELUSERCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -99,4 +101,6 @@ if (targetUser->Delete()) {
 
 return;
 } //DELUSERCommand::Exec
+
+} //namespace cf
 } //namespace gnuworld

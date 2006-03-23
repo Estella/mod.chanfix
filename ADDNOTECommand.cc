@@ -36,7 +36,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
-
+namespace cf
+{
 void ADDNOTECommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
@@ -66,4 +67,5 @@ bot->SendTo(theClient,
 
 return;
 }
+} // namespace cf
 } // namespace gnuworld

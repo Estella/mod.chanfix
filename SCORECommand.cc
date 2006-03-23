@@ -41,6 +41,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void SCORECommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -308,4 +310,6 @@ if (compact) {
 
 return;
 }
+
+} // namespace cf
 } // namespace gnuworld

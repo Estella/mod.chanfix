@@ -35,6 +35,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void DELFLAGCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -133,4 +135,6 @@ bot->SendTo(theClient,
                             std::string("Deleted flag '%c' from user %s.")).c_str(), flag,
                                         targetUser->getUserName().c_str());
 } //DELFLAGCommand::Exec
+
+} //Namespace cf
 } //Namespace gnuworld

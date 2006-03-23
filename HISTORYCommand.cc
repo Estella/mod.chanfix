@@ -36,6 +36,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void HISTORYCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -101,10 +103,7 @@ bot->SendTo(theClient,
                                         theChan->getChannel().c_str());
 
 for (unsigned int i = 0; i < noteCount; i++)
-  bot->SendTo(theClient,
-              bot->getResponse(theUser,
-                              language::chan_manual_fix,
-                              std::string("%s")).c_str(), bot->tsToDateTime(atoi(cacheCon->GetValue(i,0)), true).c_str());
+  bot->SendTo(theClient, "%s", bot->tsToDateTime(atoi(cacheCon->GetValue(i,0)), true).c_str());
 
 bot->SendTo(theClient,
             bot->getResponse(theUser,
@@ -116,4 +115,6 @@ bot->theManager->removeConnection(cacheCon);
 
 return;
 }
+
+} // namespace cf
 } // namespace gnuworld

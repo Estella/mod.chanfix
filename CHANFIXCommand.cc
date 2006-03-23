@@ -35,6 +35,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void CHANFIXCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -187,4 +189,5 @@ bot->logAdminMessage("%s (%s) requested a manual fix for %s%s",
 return;
 }
 
+} // namespace cf
 } // namespace gnuworld

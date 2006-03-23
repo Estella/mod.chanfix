@@ -36,6 +36,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void UNALERTCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -84,4 +86,5 @@ bot->logAdminMessage("%s (%s) has removed the ALERT flag from %s",
 
 return;
 }
+} // namespace cf
 } // namespace gnuworld

@@ -74,7 +74,6 @@ COPY "translations" FROM stdin;
 1	63	Channel %s has never been manually fixed.	31337	0
 1	64	An unknown error occurred while reading this channel's notes.	31337	0
 1	65	Channel %s has been manually fixed on:	31337	0
-1	66	%s	31337	0
 1	67	End of list.	31337	0
 1	68	No information on %s in the database.	31337	0
 1	69	Information on %s:	31337	0

@@ -35,7 +35,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
-
+namespace cf
+{
 void ADDHOSTCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
@@ -129,4 +130,5 @@ bot->logAdminMessage("%s (%s) added hostmask %s to user %s.",
 return;
 }
 
+} //namespace cf
 } //namespace gnuworld

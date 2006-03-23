@@ -29,7 +29,11 @@
 
 #include "libpq++.h"
 
-namespace gnuworld {
+namespace gnuworld
+{
+
+namespace cf
+{
 
 class sqlManager {
   public:
@@ -72,6 +76,8 @@ class sqlManager {
     static sqlManager* theManager;
 
 }; // class sqlManager
+
+} // namespace cf
 
 } // namespace gnuworld
 

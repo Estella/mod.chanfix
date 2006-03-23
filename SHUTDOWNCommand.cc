@@ -36,6 +36,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void SHUTDOWNCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -65,4 +67,5 @@ else
 return;
 }
 
+} // namespace cf
 } // namespace gnuworld

@@ -24,8 +24,10 @@
 
 namespace gnuworld
 	{
-	namespace language
+namespace cf
 	{
+	namespace language
+		{
 		/* ADDFLAG */
 		const int one_flag_per_addflag		= 1;
 		const int no_such_user			= 2;
@@ -125,7 +127,6 @@ namespace gnuworld
 		const int chan_no_manual_fixes		= 63;
 		const int error_occured_notes		= 64;
 		const int chan_manually_fix		= 65;
-		const int chan_manual_fix		= 66;
 		const int end_of_list			= 67;
 
 		/* INFO */
@@ -277,7 +278,8 @@ namespace gnuworld
 		const int requires_auth_and_flag	= 152;
 		const int requires_auth_and_flags	= 153;
 		const int syntax			= 154;
-	}
-}
+	} // namespace language
+} // namespace cf
+} // namespace gnuworld
 
 #endif /* __RESPONSES_H */

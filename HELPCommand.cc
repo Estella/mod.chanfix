@@ -36,6 +36,8 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
+namespace cf
+{
 
 void HELPCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
@@ -110,4 +112,6 @@ if (st.size() < 2) {
 }
 
 } //HELPCommand::Exec
+
+} //namespace cf
 } //namespace gnuworld
