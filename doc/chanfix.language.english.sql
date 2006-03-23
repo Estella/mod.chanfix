@@ -192,4 +192,6 @@ COPY "translations" FROM stdin;
 1	185	You cannot delete a host from a user manager unless you're an owner.	31337	0
 1	186	You cannot add a host to an owner unless you're an owner.	31337	0
 1	187	You cannot add a host to a user manager unless you're an owner.	31337	0
+1	188	%s is temporarily blocked.	31337	0
+1	189	%s is temporarily blocked due to oper intervention via EUWorld within the last hour. Please append the OVERRIDE flag to force a manual fix.	31337	0
 \.

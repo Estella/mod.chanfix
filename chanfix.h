@@ -242,12 +242,17 @@ public:
 	void processQueue();
 	
 	void rotateDB();
+	
+	void expireTempBlocks();
+	
 	void prepareUpdate(bool);
 	void updateDB();
 
 	bool isBeingFixed(Channel*);
 	bool isBeingAutoFixed(Channel*);
 	bool isBeingChanFixed(Channel*);
+
+	bool isTempBlocked(const std::string&);
 
 	bool removeFromAutoQ(Channel*);
 	bool removeFromManQ(Channel*);
@@ -313,6 +318,9 @@ public:
 	typedef std::list <sqlChanOp*> chanOpsType;
 	chanOpsType		getMyOps(Channel*);
 	chanOpsType		getMyOps(const std::string&);
+	
+	typedef std::map <std::string, time_t, noCaseCompare> tempBlockType;
+	tempBlockType		tempBlockList;
 	
 	/**
 	 * The snapshot map for updating the SQL database
@@ -381,6 +389,7 @@ public:
 	/**
 	 * Configuration variables
 	 */
+	std::string	ccontrolServer;
 	std::string	consoleChan;
 	std::string	consoleChanModes;
 	bool		sendConsoleNotices;
@@ -435,6 +444,7 @@ protected:
 	xServer::timerID tidGivePoints;
 	xServer::timerID tidRotateDB;
 	xServer::timerID tidUpdateDB;
+	xServer::timerID tidTempBlocks;
 
 	/**
 	 * Internal timer

@@ -348,6 +348,7 @@ clientNeedsIdent = atob(chanfixConfig->Require("clientNeedsIdent")->second) ;
 connectCheckFreq = atoi((chanfixConfig->Require("connectCheckFreq")->second).c_str()) ;
 adminLogFile = chanfixConfig->Require("adminLogFile")->second ;
 debugLogFile = chanfixConfig->Require("debugLogFile")->second ;
+ccontrolServer = chanfixConfig->Require("ccontrolServer")->second ;
 
 /* Set up the channels that chanfix should join */
 EConfig::const_iterator ptr = chanfixConfig->Find("joinChan");
@@ -502,6 +503,14 @@ else if (theTimer == tidUpdateDB) {
   /* Refresh Timer */
   theTime = time(NULL) + SQL_UPDATE_TIME;
   tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
+}
+else if (theTimer == tidTempBlocks) {
+  /* Remove expired temporary blocks */
+  expireTempBlocks();
+	
+  /* Refresh Timer */
+  theTime = time(NULL) + TEMPBLOCKS_CHECK_TIME;
+  tidTempBlocks = MyUplink->RegisterTimer(theTime, this, NULL);
 }
 }
 
@@ -735,11 +744,22 @@ xClient::OnChannelEvent( whichEvent, theChan,
 	data1, data2, data3, data4 ) ;
 }
 
-void chanfix::OnChannelModeO( Channel* theChan, ChannelUser*,
+void chanfix::OnChannelModeO( Channel* theChan, ChannelUser* theUser,
 			const xServer::opVectorType& theTargets)
 {
 /* if (currentState != RUN) return; */
 
+if (theUser) {
+	/* Lets see who did the mode */
+	iServer* targetServer = Network->findServer( theUser->getClient()->getIntYY() ) ;
+		
+	if (string_lower(targetServer->getName()) == string_lower(ccontrolServer)) {
+	  /* EUWorld mode, so lets add it to the tempblock list if its not already */
+	  if (!isTempBlocked(theChan->getName()))
+	    tempBlockList.insert(tempBlockType::value_type(theChan->getName(), currentTime()));
+	}
+}
+	
 if (theChan->size() < minClients)
   return;
 
@@ -1517,11 +1537,16 @@ autoFixTimer.Start();
 Channel* thisChan;
 ChannelUser* curUser;
 int numOpLess = 0;
+tempBlockType::iterator tbPtr;
 for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->channels_end(); ptr++) {
    thisChan = ptr->second;
    bool opLess = true;
    bool hasService = false;
    if (thisChan->size() >= minClients && !isBeingFixed(thisChan)) {
+     /* Dont autofix if the chan is temp blocked */
+     tbPtr = tempBlockList.find(thisChan->getName());
+     if (tbPtr != tempBlockList.end()) continue;
+	     
      for (Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
 	curUser = ptr->second;
 	if (curUser->getClient()->getMode(iClient::MODE_SERVICES)) {
@@ -2073,6 +2098,8 @@ theTime = time(NULL) + getSecsTilMidnight();
 tidRotateDB = MyUplink->RegisterTimer(theTime, this, NULL);
 theTime = time(NULL) + SQL_UPDATE_TIME;
 tidUpdateDB = MyUplink->RegisterTimer(theTime, this, NULL);
+theTime = time(NULL) + TEMPBLOCKS_CHECK_TIME;
+tidTempBlocks = MyUplink->RegisterTimer(theTime, this, NULL);
 elog	<< "chanfix::startTimers> Started all timers."
 	<< std::endl;
 }
@@ -2297,6 +2324,34 @@ void chanfix::updateDB()
   updateInProgress = false;
 
   return;
+}
+
+bool chanfix::isTempBlocked(const std::string& theChan)
+{
+  tempBlockType::iterator ptr = tempBlockList.find(theChan);
+  if (ptr == tempBlockList.end())
+    return false;
+  
+  return true;
+}
+
+void chanfix::expireTempBlocks()
+{
+  time_t unixTime = currentTime();
+  std::list<std::string> remList;
+  std::list<std::string>::iterator remIterator;
+
+  for (tempBlockType::iterator ptr = tempBlockList.begin();
+       ptr != tempBlockList.end(); ptr++) {
+    if ((unixTime - ptr->second) >= TEMPBLOCK_DURATION_TIME)
+      remList.push_back(ptr->first);
+  }
+  
+  for(remIterator = remList.begin();remIterator != remList.end();)
+  {
+    tempBlockList.erase(*remIterator);
+    remIterator = remList.erase(remIterator);
+  }
 }
 
 void chanfix::rotateDB()

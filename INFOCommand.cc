@@ -42,8 +42,21 @@ void INFOCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& 
 {
 StringTokenizer st(Message);
 
+bool isBlocked = bot->isTempBlocked(st[1]);
+
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
+	
 if (!theChan) {
+
+  if (isBlocked) {
+    bot->SendTo(theClient,
+	    bot->getResponse(theUser,
+			    language::temporarily_blocked,
+			    std::string("%s is temporarily blocked.")).c_str(),
+			    st[1].c_str());
+    return;
+  }
+	
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::no_info_for_chan,
@@ -57,6 +70,14 @@ bot->SendTo(theClient,
                             language::information_on,
                             std::string("Information on %s:")).c_str(),
                                         theChan->getChannel().c_str());
+
+if (isBlocked) {
+  bot->SendTo(theClient,
+	    bot->getResponse(theUser,
+			    language::temporarily_blocked,
+			    std::string("%s is temporarily blocked.")).c_str(),
+			    st[1].c_str());
+}
 
 if (theChan->getFlag(sqlChannel::F_BLOCKED))
   bot->SendTo(theClient,

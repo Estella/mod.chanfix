@@ -80,6 +80,7 @@ namespace gnuworld
 		const int channel_blocked		= 34;
 		const int channel_has_notes		= 35;
 		const int manual_chanfix_ack		= 36;
+		const int temporarily_blocked_override	= 189;
 
 		/* CHECK */
 		const int check_results			= 37;
@@ -137,6 +138,7 @@ namespace gnuworld
 		const int end_of_information		= 74;
 		const int info_chan_alerted		= 75;
 		const int info_notes			= 76;
+		const int temporarily_blocked		= 188;
 
 		/* INVITE */
 		const int cant_find_channel		= 77;
