@@ -132,6 +132,17 @@
 #define PROCESS_QUEUE_TIME	30
 
 /**
+ * Interval between checks for expired tempblocks
+ */
+#define TEMPBLOCKS_CHECK_TIME	30
+
+/**
+ * Duration that temp blocks should last
+ * (Default is 1hr 3600)
+ */
+#define TEMPBLOCK_DURATION_TIME	3600
+
+/**
  * Maximum score a client can obtain.
  */
 #define MAX_SCORE	(static_cast<int>(DAYSAMPLES) * 86400 / POINTS_UPDATE_TIME)
