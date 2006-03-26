@@ -201,6 +201,11 @@ RegisterCommand(new INVITECommand(this, "INVITE",
 	1,
 	sqlUser::F_OWNER
 	));
+RegisterCommand(new LISTBLOCKEDCommand(this, "LISTBLOCKED",
+	"",
+	1,
+	sqlUser::F_BLOCK
+	));
 RegisterCommand(new LISTHOSTSCommand(this, "LISTHOSTS",
 	"[username]",
 	1,
@@ -1813,6 +1818,34 @@ for (Channel::userIterator ptr = tmpChan->userList_begin();
     return true;
 }
 return false;
+}
+
+const std::string chanfix::getChanNickname(const std::string& channel, const std::string& account)
+{
+std::string theNick = "";
+Channel* tmpChan = Network->findChannel(channel);
+if (!tmpChan) return "";
+
+for (Channel::userIterator ptr = tmpChan->userList_begin();
+     ptr != tmpChan->userList_end(); ptr++) {
+  if (account == ptr->second->getClient()->getAccount()) {
+    if (ptr->second->isModeO()) {
+      theNick = "@";
+      theNick += ptr->second->getClient()->getNickName();
+      return theNick;
+    }
+    else if (ptr->second->isModeV()) {
+      theNick = "+";
+      theNick += ptr->second->getClient()->getNickName();
+      return theNick;
+    }
+    else {
+      theNick = ptr->second->getClient()->getNickName();
+      return theNick;
+    }
+  }
+}
+return theNick;
 }
 
 sqlChannel* chanfix::getChannelRecord(const std::string& Channel)

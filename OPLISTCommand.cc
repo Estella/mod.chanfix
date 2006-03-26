@@ -94,12 +94,14 @@ else
 bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::rank_score_acc_header,
-                            std::string("Rank Score Account -- Time first opped / Time last opped")).c_str());
+                            std::string("Rank Score Account -- Time first opped / Time last opped / Nick")).c_str());
 
 unsigned int opCount = 0;
 bool inChan = false;
+Channel* netChan = Network->findChannel(st[1]);
 std::string firstop;
 std::string lastop;
+std::string nickName = "";
 for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
      opPtr != myOps.end() && (all || opCount < OPCOUNT); opPtr++) {
   curOp = *opPtr;
@@ -107,10 +109,13 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
   firstop = bot->tsToDateTime(curOp->getTimeFirstOpped(), false);
   lastop = bot->tsToDateTime(curOp->getTimeLastOpped(), true);
   inChan = bot->accountIsOnChan(st[1], curOp->getAccount());
-  bot->SendTo(theClient, "%3d. %s%4d  %s -- %s / %s%s", opCount,
+  if (inChan)
+    nickName = bot->getChanNickname(st[1],curOp->getAccount());
+  
+  bot->SendTo(theClient, "%3d. %s%4d  %s -- %s / %s / %s%s", opCount,
 	      inChan ? "\002" : "", curOp->getPoints(),
 	      curOp->getAccount().c_str(), firstop.c_str(),
-	      lastop.c_str(), inChan ? "\002" : "");
+	      lastop.c_str(), inChan ? nickName.c_str() : "", inChan ? "\002" : "");
 }
 
 return;

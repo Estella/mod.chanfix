@@ -145,6 +145,10 @@ namespace cf
 		const int cant_find_channel		= 77;
 		const int chanfix_not_in_chan		= 78;
 		const int already_in_channel		= 79;
+		
+		/* LISTBLOCKED */
+		const int listblocks_blocked_chans	= 190;
+		const int listblocked_total_blocked	= 191;
 
 		/* LISTHOSTS */
 		const int cant_view_hosts_diff_group	= 163;

@@ -89,7 +89,7 @@ COPY "translations" FROM stdin;
 1	79	You are already in %s!	31337	0
 1	80	Top %d unique op accounts in channel %s:	31337	0
 1	81	Found %d unique op accounts in channel %s:	31337	0
-1	82	Rank Score Account -- Time first opped / Time last opped	31337	0
+1	82	Rank Score Account -- Time first opped / Time last opped / Nick	31337	0
 1	83	Opped clients on channel %s:	31337	0
 1	84	I see 1 opped client in %s.	31337	0
 1	85	I see %u opped clients in %s.	31337	0
@@ -193,4 +193,6 @@ COPY "translations" FROM stdin;
 1	187	You cannot add a host to a user manager unless you're an owner.	31337	0
 1	188	%s is temporarily blocked.	31337	0
 1	189	%s is temporarily blocked due to oper intervention via EUWorld within the last hour. Please append the OVERRIDE flag to force a manual fix.	31337	0
+1	190	List of all blocked channels:	31337	0
+1	191	%d channels blocked.	31337	0
 \.

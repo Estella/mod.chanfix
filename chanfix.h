@@ -275,6 +275,8 @@ public:
 
 	const std::string getHostList( sqlUser* );
 	
+	const std::string getChanNickname(const std::string&, const std::string&);
+	
 	const int getCurrentGMTHour(); /* returns the current hour in GMT (00-23) */
 
 	/* Server notices */
