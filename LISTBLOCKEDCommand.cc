@@ -41,7 +41,6 @@ namespace cf
 {
 void LISTBLOCKEDCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
-StringTokenizer st(Message);
 
 /* Check if channel blocking has been disabled in the config. */
 if (!bot->doChanBlocking()) {
@@ -56,7 +55,11 @@ if (!bot->doChanBlocking()) {
 PgDatabase* cacheCon = bot->theManager->getConnection();
 
 std::stringstream theQuery;
-theQuery << "SELECT channel FROM channels WHERE flags = 1 OR flags = 3 ORDER BY channel ASC";
+theQuery << "SELECT channel FROM channels WHERE flags = "
+	 << sqlChannel::F_BLOCKED
+	 << " OR flags = "
+	 << sqlChannel::F_BLOCKED + sqlChannel::F_ALERT
+	 << " ORDER BY channel ASC";
 
 if (!cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
   elog	<< "chanfix::LISTBLOCKEDCommand> SQL Error: "
