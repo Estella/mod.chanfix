@@ -111,10 +111,10 @@ bot->SendTo(theClient,
                             language::deleted_hostmask,
                             std::string("Deleted hostmask %s from user %s.")).c_str(),
                                         st[2].c_str(), targetUser->getUserName().c_str());
-bot->logAdminMessage("%s (%s) deleted hostmask %s from user %s.",
+bot->logAdminMessage("%s (%s) DELHOST %s %s",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str(),
-		     st[2].c_str(), targetUser->getUserName().c_str());
+		     targetUser->getUserName().c_str(), st[2].c_str());
 
 return;
 }

@@ -79,7 +79,7 @@ bot->SendTo(theClient,
                                         theChan->getChannel().c_str());
 
 /* Log command */
-bot->logAdminMessage("%s (%s) has removed the ALERT flag from %s",
+bot->logAdminMessage("%s (%s) UNALERT %s",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str(),
 		     theChan->getChannel().c_str());

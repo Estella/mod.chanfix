@@ -180,7 +180,7 @@ bot->SendTo(theClient,
                             language::manual_chanfix_ack,
                             std::string("Manual chanfix acknowledged for %s")).c_str(),
                                         netChan->getName().c_str());
-bot->logAdminMessage("%s (%s) requested a manual fix for %s%s",
+bot->logAdminMessage("%s (%s) CHANFIX %s%s",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str(),
 		     netChan->getName().c_str(),

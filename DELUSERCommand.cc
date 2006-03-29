@@ -87,7 +87,7 @@ if (targetUser->Delete()) {
 	      bot->getResponse(theUser,
 			language::deleted_user,
 			std::string("Deleted user %s.")).c_str(), targetUser->getUserName().c_str());
-  bot->logAdminMessage("%s (%s) deleted user %s.",
+  bot->logAdminMessage("%s (%s) DELUSER %s",
 		       theClient->getAccount().c_str(),
 		       theClient->getRealNickUserHost().c_str(),
 		       targetUser->getUserName().c_str());

@@ -103,7 +103,7 @@ bot->SendTo(theClient,
 			language::user_unsuspended,
 			std::string("Unsuspended user %s.")).c_str(),
 				targetUser->getUserName().c_str());
-bot->logAdminMessage("%s (%s) unsuspended user %s.",
+bot->logAdminMessage("%s (%s) UNSUSPEND %s",
 	    theUser->getUserName().c_str(),
 	    theClient->getRealNickUserHost().c_str(),
 	    targetUser->getUserName().c_str());

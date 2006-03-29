@@ -101,7 +101,7 @@ if (netChan) {
 			std::string("WARNING: Channel %s is being manually fixed; aborting fix as per BLOCK.")).c_str(),
 				    theChan->getChannel().c_str());
     bot->removeFromManQ(netChan);
-    extraLog = ", which aborted a manual fix";
+    extraLog = " (current manual fix aborted)";
   }
   if (bot->isBeingAutoFixed(netChan)) {
     bot->SendTo(theClient,
@@ -110,12 +110,12 @@ if (netChan) {
 			std::string("WARNING: Channel %s is being automatically fixed; aborting fix as per BLOCK.")).c_str(),
 				    theChan->getChannel().c_str());
     bot->removeFromAutoQ(netChan);
-    extraLog = ", which aborted an automatic fix";
+    extraLog = " (current autofix aborted)";
   }
 }
 
 /* Log command */
-bot->logAdminMessage("%s (%s) has added the BLOCK flag to %s%s",
+bot->logAdminMessage("%s (%s) BLOCK %s%s",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str(),
 		     theChan->getChannel().c_str(),

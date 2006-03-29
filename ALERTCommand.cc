@@ -81,7 +81,7 @@ bot->SendTo(theClient,
                                         theChan->getChannel().c_str());
 
 /* Log command */
-bot->logAdminMessage("%s (%s) has added the ALERT flag to %s",
+bot->logAdminMessage("%s (%s) ALERT %s",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str(),
 		     theChan->getChannel().c_str());
