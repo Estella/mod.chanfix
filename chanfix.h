@@ -182,6 +182,8 @@ public:
 		void* data3 = 0, void* data4 = 0 ) ;
 
 	virtual void OnCTCP( iClient*, const std::string&, const std::string&, bool ) ;
+	
+	virtual void OnSignal(int sig);
 
 	/**
 	 * Our functions.

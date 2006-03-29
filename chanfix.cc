@@ -26,6 +26,7 @@
  * $Id$
  */
 
+#include	<csignal>
 #include	<cstdarg>
 #include	<ctime>
 #include	<iomanip>
@@ -409,6 +410,21 @@ return true ;
 void chanfix::OnShutdown(const std::string& reason)
 {
 MyUplink->UnloadClient(this, reason);
+}
+
+/* OnSignal */
+void chanfix::OnSignal(int sig)
+{
+if(sig == SIGHUP) {
+  /* Close/reopen log files */
+  logAdminMessage("---------- End of log file. Rotating... ----------");
+  if (adminLog.is_open())
+    adminLog.close();
+  
+  adminLog.open(adminLogFile.c_str(), std::ios::out | std::ios::app);
+}
+
+xClient::OnSignal(sig);
 }
 
 /* OnAttach */
