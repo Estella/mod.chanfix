@@ -47,6 +47,8 @@ StringTokenizer st(Message);
 std::string option;
 std::string value;
 
+
+
 if (st.size() == 4) {
   sqlUser* targetUser = bot->isAuthed(st[1]);
   option = string_upper(st[2]);
@@ -84,6 +86,12 @@ if (st.size() == 4) {
 
 option = string_upper(st[1]);
 value = string_upper(st[2]);
+
+bot->logAdminMessage("%s (%s) USET %s %s",
+                     theUser->getUserName().c_str(),
+                     theClient->getRealNickUserHost().c_str(),
+                     option.c_str(), value.c_str());
+
 
 if (option == "NOTICE") {
   if (value == "ON" || value == "YES" || value == "1") {

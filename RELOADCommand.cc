@@ -59,6 +59,12 @@ bot->logDebugMessage("%s (%s) is reloading the chanfix module.",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str());
 
+bot->logAdminMessage("%s (%s) RELOAD %s",
+                     theUser->getUserName().c_str(),
+                     theClient->getRealNickUserHost().c_str(),
+                     (st.size() < 2) ? "" : st.assemble(1).c_str());
+
+
 if (st.size() < 2)
   server->UnloadClient(bot, "Reloading...");
 else

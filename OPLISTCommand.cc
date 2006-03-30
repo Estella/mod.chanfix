@@ -98,7 +98,6 @@ bot->SendTo(theClient,
 
 unsigned int opCount = 0;
 bool inChan = false;
-Channel* netChan = Network->findChannel(st[1]);
 std::string firstop;
 std::string lastop;
 std::string nickName = "";
@@ -117,6 +116,12 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
 	      curOp->getAccount().c_str(), firstop.c_str(),
 	      lastop.c_str(), inChan ? nickName.c_str() : "", inChan ? "\002" : "");
 }
+
+bot->logAdminMessage("%s (%s) OPLIST %s %s",
+                     theUser->getUserName().c_str(),
+                     theClient->getRealNickUserHost().c_str(),
+                     st[1].c_str(), all ? "ALL" : "");
+
 
 return;
 }

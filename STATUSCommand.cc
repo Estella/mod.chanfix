@@ -95,6 +95,11 @@ else
 			language::status_channel_service_not_linked,
 			std::string("Channel service not linked. New channels will not be scored.")).c_str());
 
+bot->logAdminMessage("%s (%s) STATUS",
+                     theUser->getUserName().c_str(),
+                     theClient->getRealNickUserHost().c_str());
+
+
 return;
 }
 

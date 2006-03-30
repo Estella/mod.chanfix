@@ -42,6 +42,12 @@ void WHOGROUPCommand::Exec(iClient* theClient, sqlUser* theUser, const std::stri
 {
 StringTokenizer st(Message);
 
+bot->logAdminMessage("%s (%s) WHOGROUP %s",
+                     theUser->getUserName().c_str(),
+                     theClient->getRealNickUserHost().c_str(),
+                     (st.size() > 1) ? st[1].c_str() : "");
+
+
 if (st.size() == 1) {
   /* No parameter supplied, so list all groups */
   PgDatabase* cacheCon = bot->theManager->getConnection();

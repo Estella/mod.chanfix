@@ -135,6 +135,12 @@ bot->SendTo(theClient,
 			     std::string("Added flag '%c' to user %s.")).c_str(),
 					 flag,
 					 targetUser->getUserName().c_str());
+
+bot->logAdminMessage("%s (%s) ADDFLAG %s %c",
+                     theUser->getUserName().c_str(),
+                     theClient->getRealNickUserHost().c_str(),
+                     targetUser->getUserName(),flag);
+
 } //ADDFLAGCommand::Exec
 } //Namespace cf
 } //Namespace gnuworld

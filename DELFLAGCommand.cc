@@ -134,6 +134,13 @@ bot->SendTo(theClient,
                             language::deleted_flag,
                             std::string("Deleted flag '%c' from user %s.")).c_str(), flag,
                                         targetUser->getUserName().c_str());
+
+bot->logAdminMessage("%s (%s) DELFLAG %s %c",
+                     theUser->getUserName().c_str(),
+                     theClient->getRealNickUserHost().c_str(),
+                     targetUser->getUserName().c_str(),flag);
+
+
 } //DELFLAGCommand::Exec
 
 } //Namespace cf

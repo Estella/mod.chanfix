@@ -183,6 +183,12 @@ bot->SendTo(theClient,
 /* Dispose of our connection instance */
 bot->theManager->removeConnection(cacheCon);
 
+bot->logAdminMessage("%s (%s) INFO %s",
+                     theUser->getUserName().c_str(),
+                     theClient->getRealNickUserHost().c_str(),
+                     theChan->getChannel().c_str());
+
+
 return;
 }
 

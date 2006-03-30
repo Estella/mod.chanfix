@@ -141,6 +141,13 @@ bot->SendTo(theClient,
                             std::string("Note #%d for channel %s deleted.")).c_str(),
                                         messageId, theChan->getChannel().c_str());
 
+
+bot->logAdminMessage("%s (%s) DELNOTE %s %d",
+                     theUser->getUserName().c_str(),
+                     theClient->getRealNickUserHost().c_str(),
+                     theChan->getChannel().c_str(), messageId);
+
+
 return;
 }
 

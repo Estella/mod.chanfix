@@ -80,6 +80,12 @@ if (myOps.empty()) {
 }
 
 if (st.size() > 2) {
+  bot->logAdminMessage("%s (%s) %s %s",
+                     theUser->getUserName().c_str(),
+                     theClient->getRealNickUserHost().c_str(),
+                     compact ? "CSCORE" : "SCORE",
+                     st.assemble(1).c_str());
+
   const char* scUser = st[2].c_str();
   if (st[2][0] == '=') {
     /* Nickname */
@@ -250,6 +256,13 @@ if (!compact) {
   strScoresNOP << ".";
 }
 
+bot->logAdminMessage("%s (%s) %s %s %s",
+                     theUser->getUserName().c_str(),
+                     theClient->getRealNickUserHost().c_str(),
+                     compact ? "CSCORE" : "SCORE",
+                     st.assemble(1).c_str());
+
+
 if (compact) {
   bot->SendTo(theClient, "~S %s %s", st[1].c_str(), strScoresDB.str().c_str());
   if (!netChan) {
@@ -307,6 +320,7 @@ if (compact) {
   else
     bot->SendTo(theClient, strScoresNOP.str());
 }
+
 
 return;
 }

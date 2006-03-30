@@ -65,6 +65,12 @@ bot->SendTo(theClient,
                             std::string("Note recorded for channel %s.")).c_str(),
                                         theChan->getChannel().c_str());
 
+bot->logAdminMessage("%s (%s) ADDNOTE %s %s",
+                     theUser->getUserName().c_str(),
+                     theClient->getRealNickUserHost().c_str(),
+                     theChan->getChannel().c_str(),st.assemble(2).c_str());
+
+
 return;
 }
 } // namespace cf

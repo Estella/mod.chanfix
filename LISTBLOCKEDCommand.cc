@@ -98,6 +98,11 @@ bot->SendTo(theClient,
 		std::string("%d channels blocked.")).c_str(),
 		numBlocks);
 
+bot->logAdminMessage("%s (%s) LISTBLOCKED",
+                     theUser->getUserName().c_str(),
+                     theClient->getRealNickUserHost().c_str());
+
+
 return;
 }
 } // namespace cf

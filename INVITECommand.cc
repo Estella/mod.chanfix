@@ -80,6 +80,12 @@ if (theChannelUser) {
 
 bot->Invite(theClient, theChannel);
 
+bot->logAdminMessage("%s (%s) INVITE %s [CODER-CHAN]",
+                     theUser->getUserName().c_str(),
+                     theClient->getRealNickUserHost().c_str(),
+                     theChannel->getName().c_str());
+
+
 return;
 }
 

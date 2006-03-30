@@ -85,6 +85,12 @@ if (option == "TRANSLATIONS") {
   return;
 }
 
+bot->logAdminMessage("%s (%s) REHASH %s",
+                     theUser->getUserName().c_str(),
+                     theClient->getRealNickUserHost().c_str(),
+                     !option.empty() ? option.c_str() : "");
+
+
 return;
 }
 

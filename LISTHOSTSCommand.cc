@@ -99,6 +99,12 @@ bot->SendTo(theClient,
 			language::host_list_footer,
 			std::string("End of host list.")).c_str());
 
+bot->logAdminMessage("%s (%s) LISTHOSTS %s",
+                     theUser->getUserName().c_str(),
+                     theClient->getRealNickUserHost().c_str(),
+                     targetUser->getUserName().c_str());
+
+
 return;
 } //LISTHOSTSCommand::Exec
 

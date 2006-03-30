@@ -93,6 +93,12 @@ else
 /* Log command */
 /* ... */
 
+bot->logAdminMessage("%s (%s) OPNICKS %s",
+                     theUser->getUserName().c_str(),
+                     theClient->getRealNickUserHost().c_str(),
+                     netChan->getName().c_str());
+
+
 return;
 }
 
