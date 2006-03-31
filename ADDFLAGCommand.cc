@@ -139,7 +139,7 @@ bot->SendTo(theClient,
 bot->logAdminMessage("%s (%s) ADDFLAG %s %c",
                      theUser->getUserName().c_str(),
                      theClient->getRealNickUserHost().c_str(),
-                     targetUser->getUserName(),flag);
+                     targetUser->getUserName().c_str(),flag);
 
 } //ADDFLAGCommand::Exec
 } //Namespace cf
