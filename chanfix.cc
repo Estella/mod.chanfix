@@ -771,17 +771,18 @@ void chanfix::OnChannelModeO( Channel* theChan, ChannelUser* theUser,
 			const xServer::opVectorType& theTargets)
 {
 /* if (currentState != RUN) return; */
-
-if (theUser) {
-	/* Let's see what server did the mode */
-	iServer* theServer = Network->findServer(theUser->getClient()->getIntYY());
-	/* If it was a service, then add the channel to the block list. */
-	if (theServer && theServer != MyUplink->getUplink() && theServer->isService()) {
-	  /* Check if it isn't already in the block list. If not, add it. */
-	  if (!isTempBlocked(theChan->getName()))
-	    tempBlockList.insert(tempBlockType::value_type(theChan->getName(), currentTime()));
-	}
-}
+/*
+ * if (theUser) {
+ *	/* Let's see what server did the mode
+ *	iServer* theServer = Network->findServer(theUser->getClient()->getIntYY());
+ *	/* If it was a service, then add the channel to the block list.
+ *	if (theServer && theServer != MyUplink->getUplink() && theServer->isService()) {
+ *	  /* Check if it isn't already in the block list. If not, add it.
+ *	  if (!isTempBlocked(theChan->getName()))
+ *	    tempBlockList.insert(tempBlockType::value_type(theChan->getName(), currentTime()));
+ *	}
+ * }
+ */
 	
 if (theChan->size() < minClients)
   return;
