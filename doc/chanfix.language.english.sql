@@ -195,4 +195,6 @@ COPY "translations" FROM stdin;
 1	189	%s is temporarily blocked due to oper intervention via EUWorld within the last hour. Please append the OVERRIDE flag to force a manual fix.	31337	0
 1	190	List of all blocked channels:	31337	0
 1	191	%d channels blocked.	31337	0
+1	192	Current fix has been running for %s	31337	0
+1	193	Current fix is on hold (waiting for ops to join)	31337	0
 \.

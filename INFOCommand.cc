@@ -108,6 +108,21 @@ if (netChan) {
                                 language::info_chan_being_autofixed,
                                 std::string("%s is being autofixed.")).c_str(),
                                             theChan->getChannel().c_str());
+  
+  if (bot->isBeingChanFixed(netChan) || bot->isBeingAutoFixed(netChan)) {
+    if (theChan->getFixStart() > 0)
+      bot->SendTo(theClient,
+		bot->getResponse(theUser,
+				language::info_fix_started,
+				std::string("Current fix has been running for %s")).c_str(),
+				bot->prettyDuration(theChan->getFixStart()).c_str());
+    else
+      bot->SendTo(theClient,
+		bot->getResponse(theUser,
+				language::info_fix_waiting,
+				std::string("Current fix is on hold (waiting for ops to join)")).c_str());
+  }
+
 }
 
 if (!theChan->useSQL()) {

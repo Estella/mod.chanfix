@@ -256,7 +256,7 @@ if (!compact) {
   strScoresNOP << ".";
 }
 
-bot->logAdminMessage("%s (%s) %s %s %s",
+bot->logAdminMessage("%s (%s) %s %s",
                      theUser->getUserName().c_str(),
                      theClient->getRealNickUserHost().c_str(),
                      compact ? "CSCORE" : "SCORE",
