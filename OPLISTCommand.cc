@@ -118,7 +118,7 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
 }
 
 bot->logAdminMessage("%s (%s) OPLIST %s %s",
-                     theUser->getUserName().c_str(),
+                     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
                      theClient->getRealNickUserHost().c_str(),
                      st[1].c_str(), all ? "ALL" : "");
 

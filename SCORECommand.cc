@@ -81,7 +81,7 @@ if (myOps.empty()) {
 
 if (st.size() > 2) {
   bot->logAdminMessage("%s (%s) %s %s",
-                     theUser->getUserName().c_str(),
+                     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
                      theClient->getRealNickUserHost().c_str(),
                      compact ? "CSCORE" : "SCORE",
                      st.assemble(1).c_str());
@@ -257,7 +257,7 @@ if (!compact) {
 }
 
 bot->logAdminMessage("%s (%s) %s %s",
-                     theUser->getUserName().c_str(),
+                     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
                      theClient->getRealNickUserHost().c_str(),
                      compact ? "CSCORE" : "SCORE",
                      st.assemble(1).c_str());

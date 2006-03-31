@@ -60,8 +60,9 @@ bot->SendTo(theClient,
                                         bot->countChanOps(netChan), netChan->size(),
                                         netChan->getName().c_str());
 
+
 bot->logAdminMessage("%s (%s) CHECK %s",
-                     theUser->getUserName().c_str(),
+                     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
                      theClient->getRealNickUserHost().c_str(),
                      netChan->getName().c_str());
 
