@@ -351,6 +351,8 @@ joinChanModes = chanfixConfig->Require("joinChanModes")->second ;
 enableAutoFix = atob(chanfixConfig->Require("enableAutoFix")->second) ;
 enableChanFix = atob(chanfixConfig->Require("enableChanFix")->second) ;
 enableChannelBlocking = atob(chanfixConfig->Require("enableChannelBlocking")->second) ;
+stopAutoFixOnOp = atob(chanfixConfig->Require("stopAutoFixOnOp")->second);
+stopManualFixOnOp =  atob(chanfixConfig->Require("stopManualFixOnOp")->second);
 version = atoi((chanfixConfig->Require("version")->second).c_str()) ;
 useBurstToFix = atob(chanfixConfig->Require("useBurstToFix")->second) ;
 numServers = atoi((chanfixConfig->Require("numServers")->second).c_str()) ;
@@ -811,10 +813,14 @@ for (xServer::opVectorType::const_iterator ptr = theTargets.begin();
     // If the channel is being fixed and the op is done by a user,
     // cancel the fix, as there is an awake op
     if (theUser) {
-      if (isBeingAutoFixed(theChan))
-	removeFromAutoQ(theChan);
-      if (isBeingChanFixed(theChan))
-	removeFromManQ(theChan);
+      if (stopAutoFixOnOp) {
+        if (isBeingAutoFixed(theChan))
+	  removeFromAutoQ(theChan);
+      }
+      if (stopManualFixOnOp) {
+        if (isBeingChanFixed(theChan))
+	  removeFromManQ(theChan);
+      }
     }
   } else {
     // Someone is deopped
