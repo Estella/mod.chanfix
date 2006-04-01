@@ -807,6 +807,13 @@ for (xServer::opVectorType::const_iterator ptr = theTargets.begin();
   if (polarity) {
     // Someone is opped
     gotOpped(theChan, tmpUser->getClient());
+
+    // If the channel is being fixed, cancel the fix as theres an awake op
+    if (isBeingChanFixed(theChan))
+      removeFromManQ(theChan);
+
+    if (isBeingAutoFixed(theChan))
+      removeFromAutoQ(theChan);
   } else {
     // Someone is deopped
     lostOp(theChan->getName(), tmpUser->getClient(), NULL);
