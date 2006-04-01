@@ -55,7 +55,9 @@ if (!bot->doChanBlocking()) {
 PgDatabase* cacheCon = bot->theManager->getConnection();
 
 std::stringstream theQuery;
-theQuery << "SELECT channel FROM channels WHERE flags & "
+theQuery << "SELECT channel FROM channels WHERE (flags & "
+	 << sqlChannel::F_BLOCKED
+	 << ") = "
 	 << sqlChannel::F_BLOCKED
 	 << " ORDER BY channel ASC";
 
@@ -99,7 +101,6 @@ bot->SendTo(theClient,
 bot->logAdminMessage("%s (%s) LISTBLOCKED",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str());
-
 
 return;
 }

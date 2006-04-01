@@ -1,10 +1,10 @@
 /**
- * SCORECommand.cc
+ * USERSCORESCommand.cc
  *
  * 03/06/2006 - Wouter Coekaerts <wouter@coekaerts.be>
  * Initial Version
  *
- * Shows all the channels <user> has a score in
+ * Shows all the channels that <user> has a score in
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -39,7 +39,6 @@ RCSTAG("$Id$");
 
 namespace gnuworld
 {
-
 namespace cf
 {
 
@@ -47,6 +46,7 @@ void USERSCORESCommand::Exec(iClient* theClient, sqlUser* theUser, const std::st
 {
 StringTokenizer st(Message);
 
+sqlChanOp* curOp;
 std::string firstop;
 std::string lastop;
 bool foundOne = false;
@@ -60,33 +60,34 @@ for (chanfix::sqlChanOpsType::iterator ptr = bot->sqlChanOps.begin();
       // print header
       foundOne = true;
       bot->SendTo(theClient,
-                  bot->getResponse(theUser,
-                                   language::userscores_header,
-                                   std::string("Channel Score -- Time first opped / Time last opped.")).c_str());
+		  bot->getResponse(theUser,
+				   language::userscores_header,
+				   std::string("Channel Score -- Time first opped / Time last opped")).c_str());
     }
 
-    sqlChanOp* curOp = chanOp->second;
+    curOp = chanOp->second;
     firstop = bot->tsToDateTime(curOp->getTimeFirstOpped(), false);
     lastop = bot->tsToDateTime(curOp->getTimeLastOpped(), true);
     bot->SendTo(theClient, "%s %d -- %s / %s", ptr->first.c_str(),
-                curOp->getPoints(), firstop.c_str(), lastop.c_str());
+		curOp->getPoints(), firstop.c_str(), lastop.c_str());
   }
 }
 
 if (!foundOne) {
   bot->SendTo(theClient,
-	           bot->getResponse(theUser,
-                               language::userscores_noscore,
-                               std::string("Account %s doesn't have any scores in the database.")).c_str(),
+	      bot->getResponse(theUser,
+			       language::userscores_noscore,
+			       std::string("Account %s doesn't have any scores in the database.")).c_str(),
 					st[1].c_str());
 }
 
 bot->logAdminMessage("%s (%s) USERSCORES %s",
-		     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
+		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str(),
 		     st[1].c_str());
 
 return;
 }
+
 } // namespace cf
 } // namespace gnuworld

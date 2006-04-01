@@ -772,7 +772,7 @@ xClient::OnChannelEvent( whichEvent, theChan,
 	data1, data2, data3, data4 ) ;
 }
 
-void chanfix::OnChannelModeO( Channel* theChan, ChannelUser*,
+void chanfix::OnChannelModeO( Channel* theChan, ChannelUser* theUser,
 			const xServer::opVectorType& theTargets)
 {
 /* if (currentState != RUN) return; */
@@ -808,12 +808,14 @@ for (xServer::opVectorType::const_iterator ptr = theTargets.begin();
     // Someone is opped
     gotOpped(theChan, tmpUser->getClient());
 
-    // If the channel is being fixed, cancel the fix as theres an awake op
-    if (isBeingChanFixed(theChan))
-      removeFromManQ(theChan);
-
-    if (isBeingAutoFixed(theChan))
-      removeFromAutoQ(theChan);
+    // If the channel is being fixed and the op is done by a user,
+    // cancel the fix, as there is an awake op
+    if (theUser) {
+      if (isBeingAutoFixed(theChan))
+	removeFromAutoQ(theChan);
+      if (isBeingChanFixed(theChan))
+	removeFromManQ(theChan);
+    }
   } else {
     // Someone is deopped
     lostOp(theChan->getName(), tmpUser->getClient(), NULL);

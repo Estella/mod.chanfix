@@ -109,7 +109,7 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
   lastop = bot->tsToDateTime(curOp->getTimeLastOpped(), true);
   inChan = bot->accountIsOnChan(st[1], curOp->getAccount());
   if (inChan)
-    nickName = bot->getChanNickName(st[1],  curOp->getAccount());
+    nickName = bot->getChanNickName(st[1], curOp->getAccount());
   
   bot->SendTo(theClient, "%3d. %s%4d  %s -- %s / %s%s%s%s", opCount,
 	      inChan ? "\002" : "", curOp->getPoints(),
