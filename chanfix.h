@@ -406,8 +406,8 @@ public:
 	bool		enableAutoFix;
 	bool		enableChanFix;
 	bool		enableChannelBlocking;
-	bool		stopManualFixOnOp;
 	bool		stopAutoFixOnOp;
+	bool		stopChanFixOnOp;
 	unsigned int	version;
 	bool		useBurstToFix;
 	unsigned int	numServers;

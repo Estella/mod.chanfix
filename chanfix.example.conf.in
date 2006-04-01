@@ -61,13 +61,11 @@ enableChanFix = true
 # Can channels be blocked by admins?
 enableChannelBlocking = true
 
-# Should manual fixes stop if an opped client by chanfix ops another
-# client
-stopManualFixOnOp = false
-
-# Should auto fixes stop if an opped client by chanfix ops another
-# client
+# Should auto fixes stop if an already reopped user ops another user?
 stopAutoFixOnOp = true
+
+# Should manual fixes stop if an already reopped user ops another user?
+stopChanFixOnOp = true
 
 # ---------------------------------------------------------------------
 # Network settings
