@@ -86,6 +86,7 @@ bot->SendTo(theClient,
                             language::channel_unblocked,
                             std::string("Channel %s has been unblocked.")).c_str(),
                                         theChan->getChannel().c_str());
+
 /* Log command */
 bot->logAdminMessage("%s (%s) UNBLOCK %s",
 		     theUser->getUserName().c_str(),

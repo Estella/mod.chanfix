@@ -114,10 +114,9 @@ bot->SendTo(theClient,
 bot->theManager->removeConnection(cacheCon);
 
 bot->logAdminMessage("%s (%s) HISTORY %s",
-                     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
-                     theClient->getRealNickUserHost().c_str(),
-                     theChan->getChannel().c_str());
-
+		     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
+		     theClient->getRealNickUserHost().c_str(),
+		     theChan->getChannel().c_str());
 
 return;
 }

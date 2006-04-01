@@ -57,9 +57,13 @@ StringTokenizer st(Message);
 
 bot->Write( st.assemble(1) );
 
+bot->logAdminMessage("%s (%s) QUOTE %s",
+		     theUser->getUserName().c_str(),
+		     theClient->getRealNickUserHost().c_str(),
+		     st.assemble(1).c_str());
+
 return;
 }
 
 } // namespace cf
-
 } // namespace gnuworld

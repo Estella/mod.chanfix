@@ -55,14 +55,15 @@ bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::reloading_client,
                             std::string("Reloading client...see you on the flip side")).c_str());
+
 bot->logDebugMessage("%s (%s) is reloading the chanfix module.",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str());
 
 bot->logAdminMessage("%s (%s) RELOAD %s",
-                     theUser->getUserName().c_str(),
-                     theClient->getRealNickUserHost().c_str(),
-                     (st.size() < 2) ? "" : st.assemble(1).c_str());
+		     theUser->getUserName().c_str(),
+		     theClient->getRealNickUserHost().c_str(),
+		     (st.size() < 2) ? "" : st.assemble(1).c_str());
 
 
 if (st.size() < 2)

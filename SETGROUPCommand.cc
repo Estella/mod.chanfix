@@ -75,6 +75,7 @@ bot->SendTo(theClient,
                             language::set_group_for_user,
                             std::string("Set group %s for user %s.")).c_str(),
                                         group.c_str(), targetUser->getUserName().c_str());
+
 bot->logAdminMessage("%s (%s) SETGROUP %s %s",
 	    theUser->getUserName().c_str(),
 	    theClient->getRealNickUserHost().c_str(),
@@ -83,5 +84,5 @@ bot->logAdminMessage("%s (%s) SETGROUP %s %s",
 
 return;
 } //SETGROUPCommand::Exec
-} //Namespace cf
-} //Namespace gnuworld
+} //namespace cf
+} //namespace gnuworld

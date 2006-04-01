@@ -109,23 +109,22 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
   lastop = bot->tsToDateTime(curOp->getTimeLastOpped(), true);
   inChan = bot->accountIsOnChan(st[1], curOp->getAccount());
   if (inChan)
-    nickName = bot->getChanNickname(st[1],curOp->getAccount());
+    nickName = bot->getChanNickName(st[1],  curOp->getAccount());
   
-  bot->SendTo(theClient, "%3d. %s%4d  %s -- %s / %s / %s%s", opCount,
+  bot->SendTo(theClient, "%3d. %s%4d  %s -- %s / %s%s%s%s", opCount,
 	      inChan ? "\002" : "", curOp->getPoints(),
 	      curOp->getAccount().c_str(), firstop.c_str(),
-	      lastop.c_str(), inChan ? nickName.c_str() : "", inChan ? "\002" : "");
+	      lastop.c_str(), inChan ? " / " : "",
+	      inChan ? nickName.c_str() : "", inChan ? "\002" : "");
 }
 
 bot->logAdminMessage("%s (%s) OPLIST %s %s",
-                     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
-                     theClient->getRealNickUserHost().c_str(),
-                     st[1].c_str(), all ? "ALL" : "");
-
+		     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
+		     theClient->getRealNickUserHost().c_str(),
+		     st[1].c_str(), all ? "ALL" : "");
 
 return;
 }
 
 } //namespace cf
-
 } //namespace gnuworld

@@ -49,10 +49,9 @@ bool isBlocked = bot->isTempBlocked(st[1]);
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
 	
 if (!theChan) {
-
   if (isBlocked) {
     bot->SendTo(theClient,
-	    bot->getResponse(theUser,
+		bot->getResponse(theUser,
 			    language::temporarily_blocked,
 			    std::string("%s is temporarily blocked.")).c_str(),
 			    st[1].c_str());
@@ -73,13 +72,12 @@ bot->SendTo(theClient,
                             std::string("Information on %s:")).c_str(),
                                         theChan->getChannel().c_str());
 
-if (isBlocked) {
+if (isBlocked)
   bot->SendTo(theClient,
 	    bot->getResponse(theUser,
 			    language::temporarily_blocked,
 			    std::string("%s is temporarily blocked.")).c_str(),
 			    st[1].c_str());
-}
 
 if (theChan->getFlag(sqlChannel::F_BLOCKED))
   bot->SendTo(theClient,
@@ -95,7 +93,7 @@ else if (theChan->getFlag(sqlChannel::F_ALERT))
                                           theChan->getChannel().c_str());
 
 Channel* netChan = Network->findChannel(st[1]);
-if (netChan) {
+if (netChan && bot->isBeingFixed(netChan)) {
   if (bot->isBeingChanFixed(netChan))
     bot->SendTo(theClient,
                 bot->getResponse(theUser,
@@ -109,23 +107,24 @@ if (netChan) {
                                 std::string("%s is being autofixed.")).c_str(),
                                             theChan->getChannel().c_str());
   
-  if (bot->isBeingChanFixed(netChan) || bot->isBeingAutoFixed(netChan)) {
-    if (theChan->getFixStart() > 0)
-      bot->SendTo(theClient,
+  if (theChan->getFixStart() > 0)
+    bot->SendTo(theClient,
 		bot->getResponse(theUser,
 				language::info_fix_started,
 				std::string("Current fix has been running for %s")).c_str(),
 				bot->prettyDuration(theChan->getFixStart()).c_str());
-    else
-      bot->SendTo(theClient,
+  else
+    bot->SendTo(theClient,
 		bot->getResponse(theUser,
 				language::info_fix_waiting,
 				std::string("Current fix is on hold (waiting for ops to join)")).c_str());
-  }
-
 }
 
 if (!theChan->useSQL()) {
+  bot->logAdminMessage("%s (%s) INFO %s",
+		       theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
+		       theClient->getRealNickUserHost().c_str(),
+		       theChan->getChannel().c_str());
   bot->SendTo(theClient,
 	      bot->getResponse(theUser,
 			       language::end_of_information,
@@ -199,10 +198,9 @@ bot->SendTo(theClient,
 bot->theManager->removeConnection(cacheCon);
 
 bot->logAdminMessage("%s (%s) INFO %s",
-                     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
-                     theClient->getRealNickUserHost().c_str(),
-                     theChan->getChannel().c_str());
-
+		     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
+		     theClient->getRealNickUserHost().c_str(),
+		     theChan->getChannel().c_str());
 
 return;
 }

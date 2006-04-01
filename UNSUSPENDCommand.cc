@@ -103,12 +103,13 @@ bot->SendTo(theClient,
 			language::user_unsuspended,
 			std::string("Unsuspended user %s.")).c_str(),
 				targetUser->getUserName().c_str());
+
 bot->logAdminMessage("%s (%s) UNSUSPEND %s",
-	    theUser->getUserName().c_str(),
-	    theClient->getRealNickUserHost().c_str(),
-	    targetUser->getUserName().c_str());
+		     theUser->getUserName().c_str(),
+		     theClient->getRealNickUserHost().c_str(),
+		     targetUser->getUserName().c_str());
 
 return;
 } //UNSUSPENDCommand::Exec
 } //namespace cf
-} //Namespace gnuworld
+} //namespace gnuworld

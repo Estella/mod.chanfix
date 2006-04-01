@@ -142,7 +142,7 @@ namespace cf
 		const int temporarily_blocked		= 188;
 		const int info_fix_started		= 192;
 		const int info_fix_waiting		= 193;
-		
+
 		/* INVITE */
 		const int cant_find_channel		= 77;
 		const int chanfix_not_in_chan		= 78;

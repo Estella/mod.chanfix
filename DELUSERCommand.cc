@@ -4,7 +4,7 @@
  * 08/08/2005 - Jimmy Lipham <music0m@alltel.net>
  * Initial Version
  *
- * Deletes this user
+ * Deletes a user
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License

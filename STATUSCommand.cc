@@ -96,8 +96,8 @@ else
 			std::string("Channel service not linked. New channels will not be scored.")).c_str());
 
 bot->logAdminMessage("%s (%s) STATUS",
-                     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
-                     theClient->getRealNickUserHost().c_str());
+		     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
+		     theClient->getRealNickUserHost().c_str());
 
 
 return;

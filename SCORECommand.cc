@@ -81,10 +81,10 @@ if (myOps.empty()) {
 
 if (st.size() > 2) {
   bot->logAdminMessage("%s (%s) %s %s",
-                     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
-                     theClient->getRealNickUserHost().c_str(),
-                     compact ? "CSCORE" : "SCORE",
-                     st.assemble(1).c_str());
+		       theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
+		       theClient->getRealNickUserHost().c_str(),
+		       compact ? "CSCORE" : "SCORE",
+		       st.assemble(1).c_str());
 
   const char* scUser = st[2].c_str();
   if (st[2][0] == '=') {

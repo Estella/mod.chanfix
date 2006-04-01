@@ -57,10 +57,9 @@ while ((pos = option.find('_', 0)) != std::string::npos)
   option.erase(pos, 1);
 
 bot->logAdminMessage("%s (%s) SET %s %s",
-                     theUser->getUserName().c_str(),
-                     theClient->getRealNickUserHost().c_str(),
-                     option.c_str(), value.c_str());
-
+		     theUser->getUserName().c_str(),
+		     theClient->getRealNickUserHost().c_str(),
+		     option.c_str(), value.c_str());
 
 if (option == "NUMSERVERS") {
   int setting = atoi(value.c_str());

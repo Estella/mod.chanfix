@@ -182,8 +182,8 @@ public:
 		void* data3 = 0, void* data4 = 0 ) ;
 
 	virtual void OnCTCP( iClient*, const std::string&, const std::string&, bool ) ;
-	
-	virtual void OnSignal(int sig);
+
+	virtual void OnSignal( int sig ) ;
 
 	/**
 	 * Our functions.
@@ -277,7 +277,7 @@ public:
 
 	const std::string getHostList( sqlUser* );
 	
-	const std::string getChanNickname(const std::string&, const std::string&);
+	const std::string getChanNickName(const std::string&, const std::string&);
 	
 	const int getCurrentGMTHour(); /* returns the current hour in GMT (00-23) */
 

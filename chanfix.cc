@@ -415,12 +415,12 @@ MyUplink->UnloadClient(this, reason);
 /* OnSignal */
 void chanfix::OnSignal(int sig)
 {
-if(sig == SIGHUP) {
+if (sig == SIGHUP) {
   /* Close/reopen log files */
   logAdminMessage("---------- End of log file. Rotating... ----------");
   if (adminLog.is_open())
     adminLog.close();
-  
+
   adminLog.open(adminLogFile.c_str(), std::ios::out | std::ios::app);
 }
 
@@ -767,17 +767,18 @@ xClient::OnChannelEvent( whichEvent, theChan,
 	data1, data2, data3, data4 ) ;
 }
 
-void chanfix::OnChannelModeO( Channel* theChan, ChannelUser* theUser,
+void chanfix::OnChannelModeO( Channel* theChan, ChannelUser*,
 			const xServer::opVectorType& theTargets)
 {
 /* if (currentState != RUN) return; */
-/*
+
+/* COMMENTED OUT DUE TO isService() NOT IN CORE YET
  * if (theUser) {
- *	/* Let's see what server did the mode
+ *	// Let's see what server did the mode
  *	iServer* theServer = Network->findServer(theUser->getClient()->getIntYY());
- *	/* If it was a service, then add the channel to the block list.
+ *	// If it was a service, then add the channel to the block list.
  *	if (theServer && theServer != MyUplink->getUplink() && theServer->isService()) {
- *	  /* Check if it isn't already in the block list. If not, add it.
+ *	  // Check if it isn't already in the block list. If not, add it.
  *	  if (!isTempBlocked(theChan->getName()))
  *	    tempBlockList.insert(tempBlockType::value_type(theChan->getName(), currentTime()));
  *	}
@@ -1567,10 +1568,11 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
    bool opLess = true;
    bool hasService = false;
    if (thisChan->size() >= minClients && !isBeingFixed(thisChan)) {
-     /* Dont autofix if the chan is temp blocked */
+     /* Don't autofix if the chan is temp blocked */
      tbPtr = tempBlockList.find(thisChan->getName());
      if (tbPtr != tempBlockList.end()) continue;
-	     
+
+     /* Loop through the channel list to check users for op and umode +k */
      for (Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
 	curUser = ptr->second;
 	if (curUser->getClient()->getMode(iClient::MODE_SERVICES)) {
@@ -1837,7 +1839,7 @@ for (Channel::userIterator ptr = tmpChan->userList_begin();
 return false;
 }
 
-const std::string chanfix::getChanNickname(const std::string& channel, const std::string& account)
+const std::string chanfix::getChanNickName(const std::string& channel, const std::string& account)
 {
 std::string theNick = "";
 Channel* tmpChan = Network->findChannel(channel);

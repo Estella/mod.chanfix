@@ -125,7 +125,7 @@ bot->SendTo(theClient,
 bot->logAdminMessage("%s (%s) ADDHOST %s %s",
 		     theUser->getUserName().c_str(), 
 		     theClient->getRealNickUserHost().c_str(), 
-		     targetUser->getUserName().c_str(),st[2].c_str());
+		     targetUser->getUserName().c_str(), st[2].c_str());
 
 return;
 }

@@ -4,7 +4,7 @@
  * 03/25/2006 - Jimmy Lipham <music0m@alltel.net>
  * Initial Version
  *
- * Lists all blocked chans that chanfix has stored.
+ * Lists all blocked chans that chanfix has stored
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,7 +21,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
  * USA.
  *
- * $Id:
+ * $Id$
  */
 
 #include "gnuworld_config.h"
@@ -33,13 +33,13 @@
 #include "sqlChannel.h"
 #include "sqlUser.h"
 
-RCSTAG("");
+RCSTAG("$Id$");
 
 namespace gnuworld
 {
 namespace cf
 {
-void LISTBLOCKEDCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void LISTBLOCKEDCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string&)
 {
 
 /* Check if channel blocking has been disabled in the config. */
@@ -55,10 +55,8 @@ if (!bot->doChanBlocking()) {
 PgDatabase* cacheCon = bot->theManager->getConnection();
 
 std::stringstream theQuery;
-theQuery << "SELECT channel FROM channels WHERE flags = "
+theQuery << "SELECT channel FROM channels WHERE flags & "
 	 << sqlChannel::F_BLOCKED
-	 << " OR flags = "
-	 << sqlChannel::F_BLOCKED + sqlChannel::F_ALERT
 	 << " ORDER BY channel ASC";
 
 if (!cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
@@ -99,8 +97,8 @@ bot->SendTo(theClient,
 		numBlocks);
 
 bot->logAdminMessage("%s (%s) LISTBLOCKED",
-                     theUser->getUserName().c_str(),
-                     theClient->getRealNickUserHost().c_str());
+		     theUser->getUserName().c_str(),
+		     theClient->getRealNickUserHost().c_str());
 
 
 return;

@@ -112,10 +112,11 @@ bot->SendTo(theClient,
                             language::user_suspended,
                             std::string("Suspended user %s indefinitely.")).c_str(),
                                         targetUser->getUserName().c_str());
+
 bot->logAdminMessage("%s (%s) SUSPEND %s",
-	    theUser->getUserName().c_str(),
-	    theClient->getRealNickUserHost().c_str(),
-	    targetUser->getUserName().c_str());
+		     theUser->getUserName().c_str(),
+		     theClient->getRealNickUserHost().c_str(),
+		     targetUser->getUserName().c_str());
 
 return;
 } //SUSPENDCommand::Exec

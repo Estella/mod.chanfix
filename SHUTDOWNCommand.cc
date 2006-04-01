@@ -55,15 +55,15 @@ bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::shutting_down,
                             std::string("Shutting down the server as per your request.")).c_str());
+
 bot->logDebugMessage("%s (%s) is shutting me down.",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str());
 
 bot->logAdminMessage("%s (%s) SHUTDOWN %s",
-                     theUser->getUserName().c_str(),
-                     theClient->getRealNickUserHost().c_str(),
-                     (st.size() < 2) ? "" : st.assemble(1).c_str());
-
+		     theUser->getUserName().c_str(),
+		     theClient->getRealNickUserHost().c_str(),
+		     (st.size() < 2) ? "" : st.assemble(1).c_str());
 
 if (st.size() < 2)
   server->Shutdown();

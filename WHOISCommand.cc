@@ -44,10 +44,9 @@ void WHOISCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string&
 StringTokenizer st(Message);
 
 bot->logAdminMessage("%s (%s) WHOIS %s",
-                     theUser->getUserName().c_str(),
-                     theClient->getRealNickUserHost().c_str(),
-                     st[1].c_str());
-
+		     theUser->getUserName().c_str(),
+		     theClient->getRealNickUserHost().c_str(),
+		     st[1].c_str());
 
 if (st[1] == "*") {
   unsigned int numUsers = 0;
