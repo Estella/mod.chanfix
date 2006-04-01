@@ -88,6 +88,11 @@ minServersPresent = 75
 # not to the network.
 chanServName = channels.undernet.org
 
+# The full server name of the euworld service. This is used to
+# detect whether euworld has performed a mode and should halt
+# autofixing for a brief period on the channel.
+ccontrolServer = uworld.eu.undernet.org
+
 # ---------------------------------------------------------------------
 # Interface settings
 

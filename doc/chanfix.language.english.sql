@@ -197,4 +197,6 @@ COPY "translations" FROM stdin;
 1	191	%d channels blocked.	31337	0
 1	192	Current fix has been running for %s	31337	0
 1	193	Current fix is on hold (waiting for ops to join)	31337	0
+1	194	Channel Score -- Time first opped / Time last opped.	31337	0
+1	195	Account %s doesn't have any scores in the database.	31337	0
 \.

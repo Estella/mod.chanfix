@@ -289,6 +289,11 @@ RegisterCommand(new UNSUSPENDCommand(this, "UNSUSPEND",
 	2,
 	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
 	));
+RegisterCommand(new USERSCORESCommand(this, "USERSCORES",
+	"<account>",
+	2,
+	sqlUser::F_LOGGEDIN
+	));
 RegisterCommand(new USETCommand(this, "USET",
 	"[username] <option> <value>",
 	3,

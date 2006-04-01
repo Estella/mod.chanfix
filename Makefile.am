@@ -37,6 +37,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	UNALERTCommand.cc \
 	UNBLOCKCommand.cc \
 	UNSUSPENDCommand.cc \
+	USERSCORESCommand.cc \
 	USETCommand.cc \
 	WHOGROUPCommand.cc \
 	WHOISCommand.cc \

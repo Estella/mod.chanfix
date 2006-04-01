@@ -246,6 +246,10 @@ namespace cf
 		const int user_not_suspended		= 126;
 		const int user_unsuspended		= 127;
 
+		/* USERSCORES */
+		const int userscores_header 		= 194;
+		const int userscores_noscore		= 195;
+		
 		/* USET */
 		const int lang_set_to			= 128;
 		const int send_notices			= 129;
