@@ -45,10 +45,29 @@ void OPLISTCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string
 StringTokenizer st(Message);
 
 bool all = false;
-if (st.size() > 2) {
-  const std::string flag = string_upper(st[2]);
-  if ((flag == "ALL") || (flag == "-ALL") || (flag == "!"))
+bool dots = false;
+bool dotscolor = false;
+
+unsigned int pos = 2;
+while(pos < st.size()) {
+  if (!strcasecmp(st[pos],"-all"))
     all = true;
+
+  if (!strcasecmp(st[pos],"all"))
+    all = true;
+
+  if (!strcasecmp(st[pos],"!"))
+    all = true;
+
+  if (!strcasecmp(st[pos],"-dots"))
+    dots = true;
+
+  if (!strcasecmp(st[pos],"-dotscolor")) {
+    dotscolor = true;
+    dots = true;
+  }
+
+  pos++;
 }
 
 sqlChanOp* curOp = 0;
@@ -94,13 +113,16 @@ else
 bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::rank_score_acc_header,
-                            std::string("Rank Score Account -- Time first opped / Time last opped / Nick")).c_str());
+			     std::string("Rank Score Account -- Time first opped / Time last opped / Nick")).c_str());
 
 unsigned int opCount = 0;
 bool inChan = false;
 std::string firstop;
 std::string lastop;
 std::string nickName = "";
+std::string dotStr;
+std::stringstream dotString;
+int cScore;
 for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
      opPtr != myOps.end() && (all || opCount < OPCOUNT); opPtr++) {
   curOp = *opPtr;
@@ -110,12 +132,51 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
   inChan = bot->accountIsOnChan(st[1], curOp->getAccount());
   if (inChan)
     nickName = bot->getChanNickName(st[1], curOp->getAccount());
-  
-  bot->SendTo(theClient, "%3d. %s%4d  %s -- %s / %s%s%s%s", opCount,
+
+  if (dots || dotscolor) {
+    dotString.str("");
+
+    for (int i = 0; i < DAYSAMPLES; i++) {
+      cScore = curOp->getDay(i);
+
+      if (dotscolor) {
+        if ((cScore > 0) && (cScore < 40))
+          dotString << "\0032,2" << (cScore ? "*" : ".") << "\003"; // BLUE 1-39
+        else if ((cScore >= 40) && (cScore < 80))
+          dotString << "\0033,3" << (cScore ? "*" : ".") << "\003"; // GREEN 40-79
+        else if ((cScore >= 80) && (cScore < 120))
+          dotString << "\0034,4" << (cScore ? "*" : ".") << "\003"; // RED 80-119
+        else if ((cScore >= 120) && (cScore < 160))
+          dotString << "\0035,5" << (cScore ? "*" : ".") << "\003"; // BROWN 120-159
+        else if ((cScore >= 160) && (cScore < 200))
+          dotString << "\0036,6" << (cScore ? "*" : ".") << "\003"; // PURPLE 160-199
+        else if ((cScore >= 200) && (cScore < 240))
+          dotString << "\0037,7" << (cScore ? "*" : ".") << "\003"; // ORANGE 200-240
+        else if ((cScore >= 240) && (cScore < 280))
+          dotString << "\0038,8" << (cScore ? "*" : ".") << "\003"; // YELLOW 240-280
+        else if ((cScore >= 280) && (cScore < 300))
+          dotString << "\0039,9" << (cScore ? "*" : ".") << "\003"; // NEON GREEN 280-300 (MAX 288)
+        else
+          dotString << "\0030,0" << (cScore ? "*" : ".") << "\003"; // WHITE 0
+      } else {
+        dotString << (cScore ? "*" : ".");
+      }
+    }
+
+    dotString << std::ends;
+    dotStr = dotString.str();
+  }
+
+  bot->SendTo(theClient, "%3d. %4s%4d  %15s -- %s / %s%s%s%s %s%s%s", opCount,
 	      inChan ? "\002" : "", curOp->getPoints(),
 	      curOp->getAccount().c_str(), firstop.c_str(),
 	      lastop.c_str(), inChan ? " / " : "",
-	      inChan ? nickName.c_str() : "", inChan ? "\002" : "");
+	      inChan ? nickName.c_str() : "", inChan ? "\002" : "",
+              (dots || dotscolor) ? "[" : "",
+              (dots || dotscolor) ? dotStr.c_str() : "",
+              (dots || dotscolor) ? "]" : "");
+
+
 }
 
 bot->logAdminMessage("%s (%s) OPLIST %s %s",

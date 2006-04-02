@@ -213,7 +213,7 @@ RegisterCommand(new LISTHOSTSCommand(this, "LISTHOSTS",
 	sqlUser::F_LOGGEDIN
 	));
 RegisterCommand(new OPLISTCommand(this, "OPLIST",
-	"<#channel> [all]",
+	"<#channel> [-all] [-dots/-dotscolor]",
 	2,
 	0
 	));

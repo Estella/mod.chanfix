@@ -24,7 +24,7 @@ HISTORY	1	Shows the times that the specified channel has been manually fixed.
 INFO	1	Shows all notes of the specified channel and whether the channel is actively blocked.
 LISTBLOCKED	1	Lists all of the channels that chanfix will not score.
 LISTHOSTS	1	With no username specified, it lists the hostmasks chanfix recognizes you by. Otherwise, it views the specified username's host list.\nNOTE: Server admins (+a) can only view host lists of users within their own server group. Users lower than server admin status can only view their own host lists.
-OPLIST	1	Shows the top 10 op accounts and their scores for the specified channel. Append ALL or an exclamation mark (!) to list them all.
+OPLIST	1	Shows the top 10 op accounts and their scores for the specified channel. Possible flags\n-all (or ALL or !) - Lists all scores.\n-dots - Displays a small bar of the 2 week scoring period showing when a person was opped (* means opped, . means not opped)\n-dotscolor - Same as -dots except its in a color bar, brighter the color the more score collected on the given day. White means no score collected.
 OPNICKS	1	Shows the nicknames currently opped on the specified channel.
 REHASH	1	Reloads the translations, configuration, or help values based on the specified target.
 RELOAD	1	Completely reloads chanfix.\nNOTE: This will subject chanfix to a reconnection which will also include a large netburst that takes time to process, so use with caution.
@@ -39,9 +39,10 @@ WHOIS	1	Shows account information for the specified user.
 SETGROUP	1	Sets the group for the specified user.
 SHUTDOWN	1	Saves the database and shuts GNUWorld down.
 UNSUSPEND	1	Unsuspends the specified user.
+USERSCORES	1	Shows all scores for the given account over all channels. 
 WHOGROUP	1	Shows all users in the specified group along with their flags. If no argument is given, all groups are listed.
 <INDEXOPER>	1	\002Oper Level\002: SCORE CSCORE CHECK HISTORY INFO OPLIST OPNICKS STATUS
-<INDEXLOGGEDIN>	1	\002Logged In\002: LISTHOSTS USET WHOIS
+<INDEXLOGGEDIN>	1	\002Logged In\002: LISTHOSTS USET USERSCORES WHOIS
 <INDEXBLOCK>	1	\002Blocker (+b)\002: BLOCK UNBLOCK LISTBLOCKED
 <INDEXCOMMENT>	1	\002Commenter (+c)\002: ADDNOTE DELNOTE ALERT UNALERT
 <INDEXCHANFIX>	1	\002Chanfixer (+f)\002: CHANFIX
