@@ -178,7 +178,7 @@ if (st.size() > 2) {
       bot->SendTo(theClient,
 		  bot->getResponse(theUser,
 				   language::no_score_for_account,
-				   std::string("No score for account %s on %s.")).c_str(),
+				   std::string("No score for account %s on channel %s.")).c_str(),
 					scUser,
 					st[1].c_str());
     return;

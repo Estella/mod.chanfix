@@ -100,7 +100,7 @@ if (netChan) {
 			language::aborting_manual_fix,
 			std::string("WARNING: Channel %s is being manually fixed; aborting fix as per BLOCK.")).c_str(),
 				    theChan->getChannel().c_str());
-    bot->removeFromManQ(netChan);
+    bot->stopFixingChan(netChan, true);
     extraLog = " (current manual fix aborted)";
   }
   if (bot->isBeingAutoFixed(netChan)) {
@@ -109,7 +109,7 @@ if (netChan) {
 			language::aborting_auto_fix,
 			std::string("WARNING: Channel %s is being automatically fixed; aborting fix as per BLOCK.")).c_str(),
 				    theChan->getChannel().c_str());
-    bot->removeFromAutoQ(netChan);
+    bot->stopFixingChan(netChan, true);
     extraLog = " (current autofix aborted)";
   }
 }

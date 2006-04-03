@@ -160,7 +160,7 @@ COPY "translations" FROM stdin;
 1	154	SYNTAX: 	31337	0
 1	155	Language: %s (%s)	31337	0
 1	156	~U %s no@score.for.account 0	31337	0
-1	157	No score for account %s on %s.	31337	0
+1	157	No score for account %s on channel %s.	31337	0
 1	158	Score for account %s in channel %s: %u.	31337	0
 1	159	Suspending yourself is not a very wise thing to do.	31337	0
 1	160	Last modified: %s (%s ago)	31337	0

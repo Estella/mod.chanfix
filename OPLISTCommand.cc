@@ -45,11 +45,10 @@ void OPLISTCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string
 StringTokenizer st(Message);
 
 bool all = false;
-bool dots = false;
-bool dotscolor = false;
+bool days = false;
 
 unsigned int pos = 2;
-while(pos < st.size()) {
+while (pos < st.size()) {
   if (!strcasecmp(st[pos],"-all"))
     all = true;
 
@@ -59,18 +58,11 @@ while(pos < st.size()) {
   if (!strcasecmp(st[pos],"!"))
     all = true;
 
-  if (!strcasecmp(st[pos],"-dots"))
-    dots = true;
-
-  if (!strcasecmp(st[pos],"-dotscolor")) {
-    dotscolor = true;
-    dots = true;
-  }
+  if (!strcasecmp(st[pos],"-days"))
+    days = true;
 
   pos++;
 }
-
-sqlChanOp* curOp = 0;
 
 chanfix::chanOpsType myOps = bot->getMyOps(st[1]);
 if (myOps.empty()) {
@@ -115,14 +107,15 @@ bot->SendTo(theClient,
                             language::rank_score_acc_header,
 			     std::string("Rank Score Account -- Time first opped / Time last opped / Nick")).c_str());
 
+sqlChanOp* curOp = 0;
 unsigned int opCount = 0;
+unsigned int percent = 0;
+int cScore;
 bool inChan = false;
 std::string firstop;
 std::string lastop;
-std::string nickName = "";
-std::string dotStr;
-std::stringstream dotString;
-int cScore;
+std::string nickName;
+std::stringstream dayString;
 for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
      opPtr != myOps.end() && (all || opCount < OPCOUNT); opPtr++) {
   curOp = *opPtr;
@@ -133,56 +126,54 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
   if (inChan)
     nickName = bot->getChanNickName(st[1], curOp->getAccount());
 
-  if (dots || dotscolor) {
-    dotString.str("");
+  if (days) {
+    dayString.str("");
 
-    for (int i = 0; i < DAYSAMPLES; i++) {
-      cScore = curOp->getDay(i);
+    for (int i = 1; i <= DAYSAMPLES; i++) {
+      cScore = curOp->getDay((currentDay + i) % DAYSAMPLES);
+      percent = static_cast<unsigned int>(((static_cast<float>(cScore) / static_cast<float>(86400 / POINTS_UPDATE_TIME)) * 100) + 0.5);
 
-      if (dotscolor) {
-        if ((cScore > 0) && (cScore < 40))
-          dotString << "\0032,2" << (cScore ? "*" : ".") << "\003"; // BLUE 1-39
-        else if ((cScore >= 40) && (cScore < 80))
-          dotString << "\0033,3" << (cScore ? "*" : ".") << "\003"; // GREEN 40-79
-        else if ((cScore >= 80) && (cScore < 120))
-          dotString << "\0034,4" << (cScore ? "*" : ".") << "\003"; // RED 80-119
-        else if ((cScore >= 120) && (cScore < 160))
-          dotString << "\0035,5" << (cScore ? "*" : ".") << "\003"; // BROWN 120-159
-        else if ((cScore >= 160) && (cScore < 200))
-          dotString << "\0036,6" << (cScore ? "*" : ".") << "\003"; // PURPLE 160-199
-        else if ((cScore >= 200) && (cScore < 240))
-          dotString << "\0037,7" << (cScore ? "*" : ".") << "\003"; // ORANGE 200-240
-        else if ((cScore >= 240) && (cScore < 280))
-          dotString << "\0038,8" << (cScore ? "*" : ".") << "\003"; // YELLOW 240-280
-        else if ((cScore >= 280) && (cScore < 300))
-          dotString << "\0039,9" << (cScore ? "*" : ".") << "\003"; // NEON GREEN 280-300 (MAX 288)
-        else
-          dotString << "\0030,0" << (cScore ? "*" : ".") << "\003"; // WHITE 0
-      } else {
-        dotString << (cScore ? "*" : ".");
-      }
+      if (!cScore)
+	dayString << "."; // no score (.)
+      else if (percent <= 10)
+	dayString << "0"; // 0%-10% (0)
+      else if ((percent >= 11) && (percent <= 20))
+	dayString << "1"; // 11%-20% (1)
+      else if ((percent >= 21) && (percent <= 30))
+	dayString << "2"; // 21%-30% (2)
+      else if ((percent >= 31) && (percent <= 40))
+	dayString << "3"; // 31%-40% (3)
+      else if ((percent >= 41) && (percent <= 50))
+	dayString << "4"; // 41%-50% (4)
+      else if ((percent >= 51) && (percent <= 60))
+	dayString << "5"; // 51%-60% (5)
+      else if ((percent >= 61) && (percent <= 70))
+	dayString << "6"; // 61%-70% (6)
+      else if ((percent >= 71) && (percent <= 80))
+	dayString << "7"; // 71%-80% (7)
+      else if ((percent >= 81) && (percent <= 90))
+	dayString << "8"; // 81%-90% (8)
+      else if ((percent >= 91))
+	dayString << "9"; // 91%-100% (9)
     }
-
-    dotString << std::ends;
-    dotStr = dotString.str();
+    dayString << std::ends;
   }
 
-  bot->SendTo(theClient, "%3d. %4s%4d  %15s -- %s / %s%s%s%s %s%s%s", opCount,
-	      inChan ? "\002" : "", curOp->getPoints(),
+  bot->SendTo(theClient, "%3d. %4d  %s -- %s / %s%s%s%s%s%s",
+	      opCount, curOp->getPoints(),
 	      curOp->getAccount().c_str(), firstop.c_str(),
 	      lastop.c_str(), inChan ? " / " : "",
-	      inChan ? nickName.c_str() : "", inChan ? "\002" : "",
-              (dots || dotscolor) ? "[" : "",
-              (dots || dotscolor) ? dotStr.c_str() : "",
-              (dots || dotscolor) ? "]" : "");
-
-
+	      inChan ? nickName.c_str() : "",
+	      (days) ? " [" : "",
+	      (days) ? dayString.str().c_str() : "",
+	      (days) ? "]" : "");
 }
 
 bot->logAdminMessage("%s (%s) OPLIST %s %s",
 		     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
 		     theClient->getRealNickUserHost().c_str(),
-		     st[1].c_str(), all ? "ALL" : "");
+		     st[1].c_str(),
+		     (st.size() > 2) ? st.assemble(2).c_str() : "");
 
 return;
 }

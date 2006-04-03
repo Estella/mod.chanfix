@@ -228,6 +228,7 @@ public:
 	void manualFix(Channel*);
 
 	bool fixChan(sqlChannel*, bool);
+	void stopFixingChan(Channel*, bool);
 
 	bool accountIsOnChan(const std::string&, const std::string&);
 

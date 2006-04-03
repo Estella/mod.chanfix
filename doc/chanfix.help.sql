@@ -24,7 +24,7 @@ HISTORY	1	Shows the times that the specified channel has been manually fixed.
 INFO	1	Shows all notes of the specified channel and whether the channel is actively blocked.
 LISTBLOCKED	1	Lists all of the channels that chanfix will not score.
 LISTHOSTS	1	With no username specified, it lists the hostmasks chanfix recognizes you by. Otherwise, it views the specified username's host list.\nNOTE: Server admins (+a) can only view host lists of users within their own server group. Users lower than server admin status can only view their own host lists.
-OPLIST	1	Shows the top 10 op accounts and their scores for the specified channel. Possible flags\n-all (or ALL or !) - Lists all scores.\n-dots - Displays a small bar of the 2 week scoring period showing when a person was opped (* means opped, . means not opped)\n-dotscolor - Same as -dots except its in a color bar, brighter the color the more score collected on the given day. White means no score collected.
+OPLIST	1	Shows the top 10 op accounts and their scores for the specified channel. Possible flags\n-all (or ALL or !) - Lists all scores.\n-days - Displays a small bar of the 2 week scoring period showing when a person was opped (. means never opped, 0 means 0-10%, 9 means 91-100%)
 OPNICKS	1	Shows the nicknames currently opped on the specified channel.
 REHASH	1	Reloads the translations, configuration, or help values based on the specified target.
 RELOAD	1	Completely reloads chanfix.\nNOTE: This will subject chanfix to a reconnection which will also include a large netburst that takes time to process, so use with caution.

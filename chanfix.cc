@@ -213,7 +213,7 @@ RegisterCommand(new LISTHOSTSCommand(this, "LISTHOSTS",
 	sqlUser::F_LOGGEDIN
 	));
 RegisterCommand(new OPLISTCommand(this, "OPLIST",
-	"<#channel> [-all] [-dots/-dotscolor]",
+	"<#channel> [-all] [-days]",
 	2,
 	0
 	));
@@ -812,12 +812,8 @@ for (xServer::opVectorType::const_iterator ptr = theTargets.begin();
 
     // If the channel is being fixed and the op is done by a user,
     // cancel the fix, as there is an awake op
-    if (theUser) {
-      if (stopAutoFixOnOp && isBeingAutoFixed(theChan))
-	removeFromAutoQ(theChan);
-      if (stopChanFixOnOp && isBeingChanFixed(theChan))
-	removeFromManQ(theChan);
-    }
+    if (theUser)
+      stopFixingChan(theChan, false);
   } else {
     // Someone is deopped
     lostOp(theChan->getName(), tmpUser->getClient(), NULL);
@@ -1828,6 +1824,33 @@ if (numClientsToOp + currentOps >= netChan->size() ||
   return true;
 
 return false;
+}
+
+void chanfix::stopFixingChan(Channel* theChan, bool force)
+{
+/* If the channel doesn't exist (anymore), don't try to end the fix. */
+if (!theChan) return;
+
+bool inFix = false;
+
+if ((stopAutoFixOnOp || force) && isBeingAutoFixed(theChan)) {
+  inFix = true;
+  removeFromAutoQ(theChan);
+}
+if ((stopChanFixOnOp || force) && isBeingChanFixed(theChan)) {
+  inFix = true;
+  removeFromManQ(theChan);
+}
+
+if (inFix) {
+  sqlChannel* sqlChan = getChannelRecord(theChan);
+  if (sqlChan) {
+    sqlChan->setFixStart(0);
+    sqlChan->setLastAttempt(0);
+  }
+}
+
+return;
 }
 
 chanfix::acctListType chanfix::findAccount(Channel* theChan, const std::string& account)
