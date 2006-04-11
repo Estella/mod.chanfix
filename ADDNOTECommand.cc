@@ -57,7 +57,7 @@ if (!theChan) theChan = bot->newChannelRecord(st[1]);
 if (!theChan->useSQL())
   theChan->Insert();
 
-theChan->addNote(sqlChannel::EV_NOTE, theUser, st.assemble(2));
+theChan->addNote(sqlChannel::EV_NOTE, theClient, st.assemble(2));
 
 bot->SendTo(theClient,
             bot->getResponse(theUser,

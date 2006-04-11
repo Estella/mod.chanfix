@@ -10,6 +10,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	ADDUSERCommand.cc \
 	ALERTCommand.cc \
 	BLOCKCommand.cc \
+	CANFIXCommand.cc \
 	CHANFIXCommand.cc \
 	CHECKCommand.cc \
 	DEBUGCommand.cc \
@@ -28,6 +29,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	QUOTECommand.cc \
 	REHASHCommand.cc \
 	RELOADCommand.cc \
+	REQUESTOPCommand.cc \
 	SCORECommand.cc \
 	SETCommand.cc \
 	SETGROUPCommand.cc \

@@ -69,7 +69,7 @@ PgDatabase* cacheCon = bot->theManager->getConnection();
 
 /* Retrieve the note */
 std::stringstream noteCheckQuery;
-noteCheckQuery	<< "SELECT channelID, userID, event "
+noteCheckQuery	<< "SELECT channelID, user_name, event "
 		<< "FROM notes "
 		<< "WHERE id = "
 		<< messageId
@@ -100,7 +100,7 @@ if (cacheCon->Tuples() != 1) {
 }
 
 unsigned int channelID = atoi(cacheCon->GetValue(0,0));
-unsigned int userID = atoi(cacheCon->GetValue(0,1));
+std::string user_name = cacheCon->GetValue(0,1);
 unsigned short eventType = atoi(cacheCon->GetValue(0,2));
 
 /* Dispose of our connection instance */
@@ -115,7 +115,7 @@ if (channelID != theChan->getID()) {
   return;
 }
 
-if (userID != theUser->getID() && !theUser->getFlag(sqlUser::F_USERMANAGER)) {
+if (user_name != theUser->getUserName() && !theUser->getFlag(sqlUser::F_USERMANAGER)) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::note_not_added_by_you,

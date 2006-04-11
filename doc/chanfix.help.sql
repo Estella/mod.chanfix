@@ -11,9 +11,10 @@ ADDNOTE	1	Adds a note to the specified channel.
 ADDUSER	1	Adds a new user, without flags, and optionally with the specified hostmask.
 ALERT	1	Puts a channel on ALERT status\nChannels in alert status have information contained in notes that should be considered before fixing the channel. These channels also require the OVERRIDE flag to manually fix them.
 BLOCK	1	Blocks a channel from being fixed, both automatically and manually.\nThe reason will be shown when doing INFO <channel>.
+CANFIX	1	Lists the ops that can fix the specified channel without requiring oper assistance.
 CHECK	1	Shows the number of ops and total clients in the specified channel.
 CSCORE	1	Shows the same as SCORE, but in a compact output. See /msg C HELP SCORE.
-CHANFIX	1	Performs a manual fix on the specified channel. Append OVERRIDE, YES, or an exclamation mark (!) to force a manual fix.
+CHANFIX	1	Performs a manual fix on the specified channel. Append OVERRIDE, YES, or an exclamation mark (!) to force a manual fix. Append ALERT if you wish that the top 10 ops for the channel be alerted before the fix happens.
 DELFLAG	1	Removes the specified flag from a user. See /msg C HELP ADDFLAG.
 DELHOST	1	Deletes the specified hostmask from a user's list of hostmasks.
 DELNOTE	1	Deletes a note matching the specified id from the specified channel. You can only delete the notes you have added.
@@ -28,6 +29,7 @@ OPLIST	1	Shows the top 10 op accounts and their scores for the specified channel
 OPNICKS	1	Shows the nicknames currently opped on the specified channel.
 REHASH	1	Reloads the translations, configuration, or help values based on the specified target.
 RELOAD	1	Completely reloads chanfix.\nNOTE: This will subject chanfix to a reconnection which will also include a large netburst that takes time to process, so use with caution.
+REQUESTOP	1	Performs a fix on the specified channel. Append ALERT if you wish that the top 10 ops for the channel be alerted before the fix happens.
 SCORE	1	Without extra arguments, shows the top scores of <channel>.\nOtherwise, it shows the score of either an <account> or a currently online client <=nick> for <channel>.
 SET	1	Sets various configuration options to the specified values.\nBoolean settings: ENABLE_AUTOFIX, ENABLE_CHANFIX, ENABLE_CHANNEL_BLOCKING.\nInteger settings: NUM_SERVERS.
 STATUS	1	Shows current statistics such as: uptime, percentage network presence, fix and block settings.
@@ -41,6 +43,7 @@ SHUTDOWN	1	Saves the database and shuts GNUWorld down.
 UNSUSPEND	1	Unsuspends the specified user.
 USERSCORES	1	Shows all scores for the given account over all channels. 
 WHOGROUP	1	Shows all users in the specified group along with their flags. If no argument is given, all groups are listed.
+<INDEXNORMAL>	1	\002Normal User\002: CANFIX REQUESTOP
 <INDEXOPER>	1	\002Oper Level\002: SCORE CSCORE CHECK HISTORY INFO OPLIST OPNICKS STATUS
 <INDEXLOGGEDIN>	1	\002Logged In\002: LISTHOSTS USET USERSCORES WHOIS
 <INDEXBLOCK>	1	\002Blocker (+b)\002: BLOCK UNBLOCK LISTBLOCKED

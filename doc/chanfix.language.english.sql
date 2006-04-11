@@ -199,4 +199,16 @@ COPY "translations" FROM stdin;
 1	193	Current fix is on hold (waiting for ops to join)	31337	0
 1	194	Channel Score -- Time first opped / Time last opped	31337	0
 1	195	Account %s doesn't have any scores in the database.	31337	0
+1	196	You score for %s is not high enough to issue a fix.	31337	0
+1	197	Accounts who can issue fixes in channel %s:	31337	0
+1	198	Account -- Time first opped / Time last opped	31337	0
+1	199	You do not have a high enough score for %s to check canfix list.	31337	0
+1	200	Sorry, chanfix cannot fix channels at the moment, please try again soon.	31337	0
+1	201	The channel %s is being automatically fixed. You cannot issue another fix at the moment.	31337	0
+1	202	The channel %s cannot be fixed, please contact a help channel for further information.	31337	0
+1	203	Sorry, I'm too busy at the moment. Please try again soon.	31337	0
+1	204	Sorry, I cant fix channels at the moment.	31337	0
+1	205	Fixing %s, please wait.	31337	0
+1	206	You must wait %d seconds before %s can be fixed again with this command, or contact a help channel.	31337	0
+
 \.

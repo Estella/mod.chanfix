@@ -43,11 +43,28 @@ void CHANFIXCommand::Exec(iClient* theClient, sqlUser* theUser, const std::strin
 StringTokenizer st(Message);
 
 bool override = false;
+bool alert = false;
 
 if (st.size() > 2) {
-  const std::string flag = string_upper(st[2]);
-  if ((flag == "OVERRIDE") || (flag == "NOW") || (flag == "YES") || (flag == "!"))
-    override = true;
+  unsigned int pos = 2;
+  while(pos < st.size()) {
+    if (!strcasecmp(st[pos],"OVERRIDE"))
+      override = true;
+
+    if (!strcasecmp(st[pos],"NOW"))
+      override = true;
+
+    if (!strcasecmp(st[pos],"YES"))
+      override = true;
+
+    if (!strcasecmp(st[pos],"!"))
+      override = true;
+
+    if (!strcasecmp(st[pos],"ALERT"))
+      alert = true;
+
+    pos++;
+  }
 }
 
 /* Check if manual chanfix has been disabled in the config. */
@@ -168,11 +185,15 @@ if (theChan->getFlag(sqlChannel::F_ALERT) && !override) {
 if (!theChan->useSQL())
   theChan->Insert();
 
+/* Alert top ops out of the channel if wanted */
+if (alert)
+  bot->msgTopOps(netChan);
+
 /* Fix the channel */
 bot->manualFix(netChan);
 
 /* Add note to the channel about this manual fix */
-theChan->addNote(sqlChannel::EV_CHANFIX, theUser, (override) ? "[override]" : "");
+theChan->addNote(sqlChannel::EV_CHANFIX, theClient, (override) ? "[override]" : "");
 
 /* Log the chanfix */
 bot->SendTo(theClient,

@@ -84,6 +84,10 @@ class commandName##Command : public Command \
     virtual void Exec(iClient*, sqlUser*, const std::string&); \
 };
 
+/* Normal user commands */
+DECLARE_COMMAND( CANFIX )
+DECLARE_COMMAND( REQUESTOP )
+
 /* Oper commands */
 DECLARE_COMMAND( HELP )
 DECLARE_COMMAND( HISTORY )

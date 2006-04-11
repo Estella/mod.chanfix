@@ -139,10 +139,9 @@ PgDatabase* cacheCon = bot->theManager->getConnection();
  * Perform a query to list all notes belonging to this channel.
  */
 std::stringstream allNotesQuery;
-allNotesQuery	<< "SELECT notes.id, notes.ts, users.user_name, notes.event, notes.message "
+allNotesQuery	<< "SELECT notes.id, notes.ts, notes.user_name, notes.event, notes.message "
  		<< "FROM notes,users "
-		<< "WHERE notes.userID = users.id "
-		<< "AND notes.channelID = "
+		<< "WHERE notes.channelID = "
 		<< theChan->getID()
 		<< " ORDER BY notes.ts DESC"
 		;

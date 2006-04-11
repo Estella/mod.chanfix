@@ -44,7 +44,11 @@ void HELPCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& 
 StringTokenizer st(Message);
 
 if (st.size() < 2) {
-  bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXOPER>"));
+  if (bot->isAllowingTopFix())
+    bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXNORMAL>"));
+
+  if (theClient->isOper())
+    bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXOPER>"));
 
   if (!theUser)
     return;

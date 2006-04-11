@@ -70,6 +70,12 @@ namespace cf
 		const int aborting_manual_fix		= 178;
 		const int aborting_auto_fix		= 179;
 
+		/* CANFIX */
+		const int canfix_op_accounts		= 197;
+		const int canfix_rank_score_acc_header	= 198;
+		const int can_fix_not_enough_points	= 199;
+		const int canfix_manual_fix_disabled	= 204;
+
 		/* CHANFIX */
 		const int manual_fix_disabled		= 25;
 		const int not_enough_servers		= 26;
@@ -83,6 +89,10 @@ namespace cf
 		const int channel_has_notes		= 35;
 		const int manual_chanfix_ack		= 36;
 		const int temporarily_blocked_override	= 189;
+		const int score_not_high_enough		= 196;
+		const int not_enough_servers_non_oper	= 200;
+		const int channel_being_auto_fixed_noper= 201;
+		const int channel_blocked_non_oper	= 202;
 
 		/* CHECK */
 		const int check_results			= 37;
@@ -173,6 +183,10 @@ namespace cf
 
 		/* RELOAD */
 		const int reloading_client		= 88;
+
+		/* REQUESTOP */
+		const int requestop_ack			= 205;
+		const int requestop_must_wait		= 206;
 
 		/* SCORE */
 		const int score_for_channel_nick	= 89;
@@ -288,6 +302,8 @@ namespace cf
 		const int requires_auth_and_flag	= 152;
 		const int requires_auth_and_flags	= 153;
 		const int syntax			= 154;
+		const int no_commands_during_burst_noper= 203;
+
 	} // namespace language
 } // namespace cf
 } // namespace gnuworld

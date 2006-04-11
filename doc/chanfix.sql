@@ -102,7 +102,7 @@ CREATE TABLE notes (
 	id SERIAL,
 	ts INT4,
 	channelID INT4 CONSTRAINT notes_channelID_ref REFERENCES channels ( id ),
-	userID INT4 CONSTRAINT notes_userID_ref REFERENCES users ( id ),
+	user_name VARCHAR(128),
 	event INT2 DEFAULT 0,
 	-- Defines the note event type, so we can filter nice reports.
 -- 1  -- EV_MISC - Uncategorised event.
@@ -112,11 +112,11 @@ CREATE TABLE notes (
 -- 5  -- EV_UNBLOCK - When somebody unblocks a channel.
 -- 6  -- EV_ALERT - When someone sets alert flag on a channel.
 -- 7  -- EV_UNALERT - When somebody removes alert flag from a channel.
-	message TEXT,
+-- 8  -- EV_REQUESTOPS - When a normal client requestops a channel.
 
-	PRIMARY KEY(id, channelID, userID)
+	message TEXT,
+	PRIMARY KEY(id, channelID)
 );
 
 CREATE INDEX notes_channelID_idx ON notes(channelID);
-CREATE INDEX notes_userID_idx ON notes(userID);
 CREATE INDEX notes_event_idx ON notes(event);

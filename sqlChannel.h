@@ -24,6 +24,7 @@
 
 #include	<string>
 #include	<ctime>
+#include	"client.h"
 #include	"libpq++.h"
 
 namespace gnuworld
@@ -60,6 +61,7 @@ public:
 	static const int	EV_UNBLOCK; /* Channel unblock */
 	static const int	EV_ALERT; /* Channel alert */
 	static const int	EV_UNALERT; /* Channel unalert */
+	static const int	EV_REQUESTOP; /* Requestops */
 
 	/*
 	 *  Methods to get data atrributes.
@@ -137,7 +139,7 @@ public:
 	/** Static member for keeping track of max user id */
 	static unsigned long int maxUserId;
 
-	void addNote(unsigned short, sqlUser*, const std::string&);
+	void addNote(unsigned short, iClient*, const std::string&);
 	bool deleteNote(unsigned int);
 	bool deleteOldestNote();
 	bool deleteAllNotes();
@@ -148,6 +150,7 @@ protected:
 
 	unsigned int	id;
 	std::string	channel;
+	std::string	user_name;
 	time_t		last;
 	time_t		start;
 	unsigned int	maxScore;

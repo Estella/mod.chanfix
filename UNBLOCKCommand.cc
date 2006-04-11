@@ -79,7 +79,7 @@ else
   theChan->commit();
 
 /* Add note to the channel about this command */
-theChan->addNote(sqlChannel::EV_UNBLOCK, theUser, "");
+theChan->addNote(sqlChannel::EV_UNBLOCK, theClient, "");
 
 bot->SendTo(theClient,
             bot->getResponse(theUser,

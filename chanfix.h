@@ -223,9 +223,12 @@ public:
 	void checkNetwork();
 	void checkChannelServiceLink(iServer*, const eventType&);
 	void findChannelService();
+	const int chanfix::getLastFix(sqlChannel*);
 
 	void autoFix();
 	void manualFix(Channel*);
+
+	bool msgTopOps(Channel*);
 
 	bool fixChan(sqlChannel*, bool);
 	void stopFixingChan(Channel*, bool);
@@ -279,7 +282,7 @@ public:
 	const std::string getHostList( sqlUser* );
 	
 	const std::string getChanNickName(const std::string&, const std::string&);
-	
+
 	const int getCurrentGMTHour(); /* returns the current hour in GMT (00-23) */
 
 	/* Server notices */
@@ -393,6 +396,9 @@ public:
 	typedef std::map < std::pair <int, int>, std::string > translationTableType ;
 	translationTableType	translationTable;
 	
+	typedef std::map < std::string, std::list< iClient* >, noCaseCompare > authMapType;
+	authMapType	authMap;
+
 	void loadTranslationTable();
 
 	const std::string getResponse(sqlUser*, int, std::string = std::string());
@@ -409,6 +415,12 @@ public:
 	bool		enableChannelBlocking;
 	bool		stopAutoFixOnOp;
 	bool		stopChanFixOnOp;
+	bool		allowTopOpFix;
+	bool		allowTopOpAlert;
+	int		topOpPercent;
+	int		minFixScore;
+	int		minCanFixScore;
+	int		minRequestOpTime;
 	unsigned int	version;
 	bool		useBurstToFix;
 	unsigned int	numServers;
@@ -480,6 +492,12 @@ public:
 	STATE getState() { return currentState; }
 	bool isChanServLinked() { return chanServLinked; }
 	bool isUpdateRunning() { return updateInProgress; }
+	bool isAllowingTopFix() { return allowTopOpFix; }
+	bool isAllowingTopOpAlert() { return allowTopOpAlert; }
+	unsigned int getTopOpPercent() { return topOpPercent; }
+	unsigned int getMinFixScore() { return minFixScore; }
+	unsigned int getMinCanFixScore() { return minCanFixScore; }
+	unsigned int getMinRequestOpTime() { return minRequestOpTime; }
 	unsigned int getNumServers() { return numServers; }
 	unsigned int getMinServersPresent() { return minServersPresent; }
 	unsigned int getNumTopScores() { return numTopScores; }

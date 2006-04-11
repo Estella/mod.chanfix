@@ -66,6 +66,8 @@ chanfixQuery	<< "SELECT ts "
 		<< theChan->getID()
 		<< " AND event = "
 		<< sqlChannel::EV_CHANFIX
+		<< " AND event = "
+		<< sqlChannel::EV_REQUESTOP
 		<< " ORDER BY ts DESC"
 		;
 

@@ -145,8 +145,13 @@ RegisterCommand(new BLOCKCommand(this, "BLOCK",
 	3,
 	sqlUser::F_BLOCK
 	));
+RegisterCommand(new CANFIXCommand(this, "CANFIX",
+	"<#channel>",
+	2,
+	0
+	));
 RegisterCommand(new CHANFIXCommand(this, "CHANFIX",
-	"<#channel> [override]",
+	"<#channel> [override] [alert]",
 	2,
 	sqlUser::F_CHANFIX
 	));
@@ -238,6 +243,11 @@ RegisterCommand(new RELOADCommand(this, "RELOAD",
 	"[reason]",
 	1,
 	sqlUser::F_OWNER
+	));
+RegisterCommand(new REQUESTOPCommand(this, "REQUESTOP",
+	isAllowingTopOpAlert() ? "<#channel> [alert]" : "<#channel>",
+	2,
+	0
 	));
 RegisterCommand(new SCORECommand(this, "SCORE",
 	"<#channel> [account|=nick]",
@@ -352,7 +362,13 @@ enableAutoFix = atob(chanfixConfig->Require("enableAutoFix")->second) ;
 enableChanFix = atob(chanfixConfig->Require("enableChanFix")->second) ;
 enableChannelBlocking = atob(chanfixConfig->Require("enableChannelBlocking")->second) ;
 stopAutoFixOnOp = atob(chanfixConfig->Require("stopAutoFixOnOp")->second) ;
-stopChanFixOnOp =  atob(chanfixConfig->Require("stopChanFixOnOp")->second) ;
+stopChanFixOnOp = atob(chanfixConfig->Require("stopChanFixOnOp")->second) ;
+allowTopOpFix = atob(chanfixConfig->Require("allowTopOpFix")->second) ;
+allowTopOpAlert = atob(chanfixConfig->Require("allowTopOpAlert")->second) ;
+topOpPercent = atoi((chanfixConfig->Require("topOpPercent")->second).c_str()) ;
+minFixScore = atoi((chanfixConfig->Require("minFixScore")->second).c_str()) ;
+minCanFixScore = atoi((chanfixConfig->Require("minCanFixScore")->second).c_str()) ;
+minRequestOpTime = atoi((chanfixConfig->Require("minRequestOpTime")->second).c_str()) ;
 version = atoi((chanfixConfig->Require("version")->second).c_str()) ;
 useBurstToFix = atob(chanfixConfig->Require("useBurstToFix")->second) ;
 numServers = atoi((chanfixConfig->Require("numServers")->second).c_str()) ;
@@ -454,11 +470,13 @@ for (commandMapType::iterator ptr = commandMap.begin(); ptr != commandMap.end();
 /**
  * Register for global network events
  */
+MyUplink->RegisterEvent( EVT_ACCOUNT, this );
 MyUplink->RegisterEvent( EVT_KILL, this );
 MyUplink->RegisterEvent( EVT_QUIT, this );
 MyUplink->RegisterEvent( EVT_BURST_CMPLT, this );
 MyUplink->RegisterEvent( EVT_NETJOIN, this );
 MyUplink->RegisterEvent( EVT_NETBREAK, this );
+MyUplink->RegisterEvent( EVT_NICK, this );
 
 /**
  * Register for all channel events
@@ -598,16 +616,17 @@ void chanfix::OnPrivateMessage( iClient* theClient,
 {
 sqlUser* theUser = isAuthed(theClient->getAccount());
 
-if (!theClient->isOper()) {
-  if (!theUser || theUser->getNeedOper())
-    return;
-}
-
 if (currentState == BURST) {
-  SendTo(theClient,
-         getResponse(theUser,
-                     language::no_commands_during_burst,
-                     std::string("Sorry, I do not accept commands during a burst.")).c_str());
+  if (theUser)
+    SendTo(theClient,
+           getResponse(theUser,
+                       language::no_commands_during_burst,
+                       std::string("Sorry, I do not accept commands during a burst.")).c_str());
+  else
+    SendTo(theClient,
+           getResponse(theUser,
+                       language::no_commands_during_burst_noper,
+                       std::string("Sorry, I'm too busy at the moment. Please try again soon.")).c_str());
   return;
 }
 
@@ -616,6 +635,13 @@ if (st.empty())
   return;
 
 const std::string Command = string_upper(st[0]);
+
+if (!theClient->isOper()) {
+  if (Command != "CANFIX" && Command != "HELP" && Command != "REQUESTOP") {
+    if (!theUser || theUser->getNeedOper())
+      return;
+  }
+}
 
 commandMapType::iterator commHandler = commandMap.find(Command);
 if (commHandler == commandMap.end()) {
@@ -821,12 +847,79 @@ for (xServer::opVectorType::const_iterator ptr = theTargets.begin();
 } // for
 }
 
+/* msgTopOps */
+bool chanfix::msgTopOps(Channel* netChan) {
+
+  int opCount = 0;
+  sqlChanOp* curOp = 0;
+  bool inChan = true;
+
+  chanOpsType myOps = getMyOps(netChan);
+
+  for (chanOpsType::iterator opPtr = myOps.begin();
+     opPtr != myOps.end() && (opCount < OPCOUNT); opPtr++) {
+ 
+    curOp = *opPtr;
+    opCount++;
+
+    inChan = accountIsOnChan(netChan->getName(), curOp->getAccount());
+    if (!inChan) {
+      typedef std::list < iClient* > accountListType;
+      const iClient* curAccount;
+      accountListType accountList;
+      authMapType::iterator cAuth = authMap.find(curOp->getAccount());
+      if (cAuth == authMap.end())
+	break;
+      
+      accountList = cAuth->second;
+
+      if (accountList.empty())
+        break;
+
+      for (accountListType::iterator cptr = accountList.begin(); (cptr != accountList.end()); cptr++)
+      {
+        curAccount = *cptr;
+
+        MyUplink->Write("%s P %s :%s channel modes have been removed to allow you to return. Please return so that I can op you during the channel fixing process\r\n",
+                  getCharYYXXX().c_str(), curAccount->getCharYYXXX().c_str(), netChan->getName().c_str());
+
+        MyUplink->Write("%s P %s :\002DO NOT REPLY TO THIS MESSAGE\002\r\n",
+                  getCharYYXXX().c_str(), curAccount->getCharYYXXX().c_str());
+
+      }
+    }
+  }
+
+  return true;
+}
+
 /* OnEvent */
 void chanfix::OnEvent( const eventType& whichEvent,
 	void* data1, void* data2, void* data3, void* data4 )
 {
 switch(whichEvent)
 	{
+	case EVT_ACCOUNT:
+		{
+		iClient* tmpUser = static_cast< iClient* >( data1 ) ;
+		authMapType::iterator ptr = authMap.find(tmpUser->getAccount());
+		if (ptr != authMap.end()) {
+			/* This user is already logged in, just add the iClient
+			 * (if they aren't in the list already)
+			 */
+			authMapType::mapped_type::iterator listPtr = std::find(ptr->second.begin(),
+					ptr->second.end(),
+					tmpUser);
+			if (listPtr == ptr->second.end())
+			  ptr->second.push_back(tmpUser);
+		} else {
+			/* Add the map entry AND the initial list entry */
+			authMapType::mapped_type theList;
+			theList.push_back(tmpUser);
+			authMap.insert(authMapType::value_type(tmpUser->getAccount(), theList));
+		}
+		break;
+		}
 	case EVT_BURST_CMPLT:
 		{
 		if (currentState != SPLIT)
@@ -853,6 +946,41 @@ switch(whichEvent)
 		for (clientOpsType::iterator ptr = myOps->begin();
 		     ptr != myOps->end(); ptr++)
 		  lostOp(*ptr, theClient, myOps);
+		
+		/* Now we need to remove this iClient from the auth map */
+		authMapType::iterator ptr = authMap.find(theClient->getAccount());
+		
+		if (ptr != authMap.end()) {
+		  ptr->second.erase(std::find(ptr->second.begin(), ptr->second.end(), theClient));
+			
+		  /* If the list is empty, remove the map entry */
+		  if (ptr->second.empty())
+		    authMap.erase(theClient->getAccount());
+		}
+		break;
+		}
+	case EVT_NICK:
+		{
+		iClient* tmpUser = static_cast< iClient* >( data1 );
+		if (tmpUser->isModeR()) {
+		  /* Check to see if this current account is already mapped,
+		   * Then check to see if this nick is already there
+		   */
+		  authMapType::iterator ptr = authMap.find(tmpUser->getAccount());
+		  if (ptr != authMap.end()) {
+		    /* Already have an entry, just add the iClient if not there already */
+		    authMapType::mapped_type::iterator listPtr = std::find(ptr->second.begin(),
+					ptr->second.end(),
+					tmpUser);
+		    if (listPtr == ptr->second.end())
+		      ptr->second.push_back(tmpUser);
+		    
+		  } else {
+		    authMapType::mapped_type theList;
+		    theList.push_back(tmpUser);
+		    authMap.insert(authMapType::value_type(tmpUser->getAccount(), theList));
+		  }
+		}
 		break;
 		}
 	}
@@ -1550,6 +1678,50 @@ for (xNetwork::serverIterator ptr = Network->servers_begin();
    }
 }
 return;
+}
+
+const int chanfix::getLastFix(sqlChannel* theChan)
+{
+/* Get a connection instance to our backend */
+PgDatabase* cacheCon = theManager->getConnection();
+
+/* Grab the user's host list */
+static const char* queryHeader
+	= "SELECT ts,event FROM notes WHERE channelID = ";
+
+std::stringstream theQuery;
+theQuery	<< queryHeader 
+		<< theChan->getID()
+		;
+
+if (!cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
+  elog	<< "chanfix::getHostList> SQL Error: "
+	<< cacheCon->ErrorMessage()
+	<< std::endl;
+  return 0;
+}
+
+int max_ts = 0;
+int ts = 0;
+int event;
+
+// SQL Query succeeded
+std::stringstream notes;
+for (int i = 0 ; i < cacheCon->Tuples(); i++)
+{
+	ts = atoi(cacheCon->GetValue(i, 0));
+	event = atoi(cacheCon->GetValue(i, 1));
+
+	if ((event == sqlChannel::EV_CHANFIX) || (event == sqlChannel::EV_REQUESTOP)) {
+		if (ts > max_ts)
+			max_ts = ts;
+	}
+}
+
+/* Dispose of our connection instance */
+theManager->removeConnection(cacheCon);
+
+return max_ts;
 }
 
 void chanfix::autoFix()
@@ -2621,6 +2793,8 @@ else if (whichEvent == sqlChannel::EV_NOTE)
   return "NOTE";
 else if (whichEvent == sqlChannel::EV_CHANFIX)
   return "CHANFIX";
+else if (whichEvent == sqlChannel::EV_REQUESTOP)
+  return "REQUESTOP";
 else if (whichEvent == sqlChannel::EV_BLOCK)
   return "BLOCK";
 else if (whichEvent == sqlChannel::EV_UNBLOCK)

@@ -70,7 +70,7 @@ else
   theChan->commit();
 
 /* Add note to the channel about this command */
-theChan->addNote(sqlChannel::EV_UNALERT, theUser, "");
+theChan->addNote(sqlChannel::EV_UNALERT, theClient, "");
 
 bot->SendTo(theClient,
             bot->getResponse(theUser,

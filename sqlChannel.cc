@@ -48,12 +48,14 @@ const int sqlChannel::EV_BLOCK		= 4 ; /* Channel block */
 const int sqlChannel::EV_UNBLOCK	= 5 ; /* Channel unblock */
 const int sqlChannel::EV_ALERT		= 6 ; /* Channel alert */
 const int sqlChannel::EV_UNALERT	= 7 ; /* Channel unalert */
+const int sqlChannel::EV_REQUESTOP	= 8 ; /* Requestops */
 
 unsigned long int sqlChannel::maxUserId = 0;
 
 sqlChannel::sqlChannel(sqlManager* _myManager) :
   id(0),
   channel(),
+  user_name(),
   last(0),
   start(0),
   maxScore(0),
@@ -174,7 +176,7 @@ return retval;
  * occured in this channel.
  */
 
-void sqlChannel::addNote(unsigned short eventType, sqlUser* theUser,
+void sqlChannel::addNote(unsigned short eventType, iClient* theUser,
 	const std::string& theMessage)
 {
 unsigned int num_notes = countNotes(0);
@@ -189,14 +191,14 @@ PgDatabase* cacheCon = myManager->getConnection();
 
 /* Create the INSERT statement */
 std::stringstream theLog;
-theLog	<< "INSERT INTO notes (ts, channelID, userID, event, message) "
+theLog	<< "INSERT INTO notes (ts, channelID, user_name, event, message) "
 	<< "VALUES ("
 	<< "now()::abstime::int4"
 	<< ", "
 	<< id
-	<< ", "
-	<< theUser->getID()
-	<< ", "
+	<< ", '"
+	<< theUser->getAccount()
+	<< "', "
 	<< eventType
 	<< ", "
 	<< "'"
