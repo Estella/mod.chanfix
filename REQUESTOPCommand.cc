@@ -113,7 +113,7 @@ if (bot->isAllowingTopOpAlert()) {
   if (st.size() > 2) {
     unsigned int pos = 2;
     while(pos < st.size()) {
-      if (!strcasecmp(st[pos],"ALERT"))
+      if (!strcasecmp(st[pos],"CONTACT"))
         alert = true;
 
       pos++;

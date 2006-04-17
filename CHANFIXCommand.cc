@@ -60,7 +60,7 @@ if (st.size() > 2) {
     if (!strcasecmp(st[pos],"!"))
       override = true;
 
-    if (!strcasecmp(st[pos],"ALERT"))
+    if (!strcasecmp(st[pos],"CONTACT"))
       alert = true;
 
     pos++;

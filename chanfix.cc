@@ -151,7 +151,7 @@ RegisterCommand(new CANFIXCommand(this, "CANFIX",
 	0
 	));
 RegisterCommand(new CHANFIXCommand(this, "CHANFIX",
-	"<#channel> [override] [alert]",
+	"<#channel> [override] [contact]",
 	2,
 	sqlUser::F_CHANFIX
 	));
@@ -245,7 +245,7 @@ RegisterCommand(new RELOADCommand(this, "RELOAD",
 	sqlUser::F_OWNER
 	));
 RegisterCommand(new REQUESTOPCommand(this, "REQUESTOP",
-	isAllowingTopOpAlert() ? "<#channel> [alert]" : "<#channel>",
+	isAllowingTopOpAlert() ? "<#channel> [contact]" : "<#channel>",
 	2,
 	0
 	));

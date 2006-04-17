@@ -91,7 +91,7 @@ namespace cf
 		const int temporarily_blocked_override	= 189;
 		const int score_not_high_enough		= 196;
 		const int not_enough_servers_non_oper	= 200;
-		const int channel_being_auto_fixed_noper= 201;
+		const int channel_being_auto_fixed_noper	= 201;
 		const int channel_blocked_non_oper	= 202;
 
 		/* CHECK */
@@ -171,6 +171,7 @@ namespace cf
 		const int top_unique_op_accounts	= 80;
 		const int found_unique_op_accounts	= 81;
 		const int rank_score_acc_header		= 82;
+		const int end_of_oplist			= 207;
 
 		/* OPNICKS */
 		const int opped_clients_on		= 83;
@@ -302,7 +303,7 @@ namespace cf
 		const int requires_auth_and_flag	= 152;
 		const int requires_auth_and_flags	= 153;
 		const int syntax			= 154;
-		const int no_commands_during_burst_noper= 203;
+		const int no_commands_during_burst_noper	= 203;
 
 	} // namespace language
 } // namespace cf

@@ -169,6 +169,12 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
 	      (days) ? "]" : "");
 }
 
+bot->SendTo(theClient,
+            bot->getResponse(theUser,
+                            language::end_of_oplist,
+			    std::string("End of OPLIST for %s")).c_str(),
+			    st[1].c_str());
+
 bot->logAdminMessage("%s (%s) OPLIST %s %s",
 		     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
 		     theClient->getRealNickUserHost().c_str(),

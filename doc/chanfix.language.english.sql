@@ -210,5 +210,6 @@ COPY "translations" FROM stdin;
 1	204	Sorry, I cant fix channels at the moment.	31337	0
 1	205	Fixing %s, please wait.	31337	0
 1	206	You must wait %d seconds before %s can be fixed again with this command, or contact a help channel.	31337	0
+1	207	End of OPLIST for %s	31337	0
 
 \.
