@@ -39,7 +39,7 @@ namespace gnuworld
 {
 namespace cf
 {
-void LISTBLOCKEDCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string&)
+void LISTBLOCKEDCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 
 /* Check if channel blocking has been disabled in the config. */
@@ -101,6 +101,8 @@ bot->SendTo(theClient,
 bot->logAdminMessage("%s (%s) LISTBLOCKED",
 		     theUser->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str());
+
+bot->logLastComMessage(theClient, Message);
 
 return;
 }

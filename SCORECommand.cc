@@ -321,6 +321,7 @@ if (compact) {
     bot->SendTo(theClient, strScoresNOP.str());
 }
 
+bot->logLastComMessage(theClient, Message);
 
 return;
 }

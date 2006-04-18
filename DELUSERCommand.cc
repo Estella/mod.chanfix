@@ -99,6 +99,8 @@ if (targetUser->Delete()) {
 			std::string("Error deleting user %s.")).c_str(), st[1].c_str());
 }
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 } //DELUSERCommand::Exec
 

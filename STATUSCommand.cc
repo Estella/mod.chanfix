@@ -41,7 +41,7 @@ namespace gnuworld
 namespace cf
 {
 
-void STATUSCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string&)
+void STATUSCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
 {
 
 bot->SendTo(theClient, "[evilnet development's GNUWorld %s]",
@@ -99,6 +99,7 @@ bot->logAdminMessage("%s (%s) STATUS",
 		     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
 		     theClient->getRealNickUserHost().c_str());
 
+bot->logLastComMessage(theClient, Message);
 
 return;
 }

@@ -81,6 +81,8 @@ if (option == "UPDATE") {
   }
 }
 
+bot->logLastComMessage(theClient, Message);
+
 }
 
 } // namespace cf

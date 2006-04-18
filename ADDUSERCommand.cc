@@ -111,6 +111,8 @@ if (st.size() > 2) {
 		       st[1].c_str());
 }
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 } //ADDUSERCommand::Exec
 } //namespace cf

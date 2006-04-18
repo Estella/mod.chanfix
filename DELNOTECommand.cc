@@ -146,6 +146,8 @@ bot->logAdminMessage("%s (%s) DELNOTE %s %d",
 		     theClient->getRealNickUserHost().c_str(),
 		     theChan->getChannel().c_str(), messageId);
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 }
 

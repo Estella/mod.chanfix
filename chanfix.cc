@@ -208,7 +208,7 @@ RegisterCommand(new INVITECommand(this, "INVITE",
 	sqlUser::F_OWNER
 	));
 RegisterCommand(new LASTCOMCommand(this, "LASTCOM",
-	"[days]",
+	"[amount of commands] [days from]",
 	1,
 	sqlUser::F_OWNER
 	));
@@ -714,37 +714,6 @@ if (theUser) {
 
 commHandler->second->Exec(theClient, theUser ? theUser : NULL, Message);
 
-if ((Command != "CANFIX" && Command != "HELP")) {
-  std::string log;
-  PgDatabase* cacheCon = theManager->getConnection();
-
-  static const char *Main = "INSERT into comlog (ts,user_name,command) VALUES (now()::abstime::int4,'";
-
-  std::stringstream insertString;
-  insertString	<< Main
-		<< theClient->getAccount()
-		<< "','"
-		<< Command
-		<< " ";
-  unsigned int pos = 1;
-  while (pos < st.size()) {
-    insertString << st[pos]
-		 << " ";
-    pos++;
-  }
-
-  insertString	<< "')"
-		<< std::ends;
-
-  if (!cacheCon->ExecCommandOk(insertString.str().c_str())) {
-    elog << "sqlChannel::Insert> Something went wrong: "
-	 << cacheCon->ErrorMessage()
-	 << std::endl;
-  }
-
-  theManager->removeConnection(cacheCon);
-}
-
 xClient::OnPrivateMessage(theClient, Message);
 }
 
@@ -881,6 +850,47 @@ for (xServer::opVectorType::const_iterator ptr = theTargets.begin();
     lostOp(theChan->getName(), tmpUser->getClient(), NULL);
   } // if
 } // for
+}
+
+bool chanfix::logLastComMessage(iClient* theClient, const std::string& Message)
+{
+  StringTokenizer st(Message);
+  if (st.empty())
+    return false;
+
+  const std::string Command = string_upper(st[0]);
+
+  std::string log;
+  PgDatabase* cacheCon = theManager->getConnection();
+
+  static const char *Main = "INSERT into comlog (ts,user_name,command) VALUES (now()::abstime::int4,'";
+
+  std::stringstream insertString;
+  insertString	<< Main
+		<< theClient->getAccount()
+		<< "','"
+		<< Command
+		<< " ";
+
+  unsigned int pos = 1;
+  while (pos < st.size()) {
+    insertString << st[pos]
+		 << " ";
+    pos++;
+  }
+
+  insertString	<< "')"
+		<< std::ends;
+
+  if (!cacheCon->ExecCommandOk(insertString.str().c_str())) {
+    elog << "sqlChannel::Insert> Something went wrong: "
+	 << cacheCon->ErrorMessage()
+	 << std::endl;
+  }
+
+  theManager->removeConnection(cacheCon);
+
+  return true;
 }
 
 /* msgTopOps */

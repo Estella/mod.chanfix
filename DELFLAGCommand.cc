@@ -140,6 +140,8 @@ bot->logAdminMessage("%s (%s) DELFLAG %s %c",
 		     theClient->getRealNickUserHost().c_str(),
 		     targetUser->getUserName().c_str(), flag);
 
+bot->logLastComMessage(theClient, Message);
+
 } //DELFLAGCommand::Exec
 
 } //Namespace cf

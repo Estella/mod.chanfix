@@ -86,6 +86,8 @@ bot->logAdminMessage("%s (%s) ALERT %s",
 		     theClient->getRealNickUserHost().c_str(),
 		     theChan->getChannel().c_str());
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 }
 } // namespace cf

@@ -127,6 +127,8 @@ bot->logAdminMessage("%s (%s) ADDHOST %s %s",
 		     theClient->getRealNickUserHost().c_str(), 
 		     targetUser->getUserName().c_str(), st[2].c_str());
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 }
 

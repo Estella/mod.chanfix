@@ -121,6 +121,8 @@ bot->logAdminMessage("%s (%s) BLOCK %s%s",
 		     theChan->getChannel().c_str(),
 		     extraLog.c_str());
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 }
 } // namespace cf

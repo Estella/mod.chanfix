@@ -118,6 +118,8 @@ bot->logAdminMessage("%s (%s) SUSPEND %s",
 		     theClient->getRealNickUserHost().c_str(),
 		     targetUser->getUserName().c_str());
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 } //SUSPENDCommand::Exec
 } //Namespace cf

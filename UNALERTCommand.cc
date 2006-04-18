@@ -84,6 +84,8 @@ bot->logAdminMessage("%s (%s) UNALERT %s",
 		     theClient->getRealNickUserHost().c_str(),
 		     theChan->getChannel().c_str());
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 }
 } // namespace cf

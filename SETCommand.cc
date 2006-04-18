@@ -179,6 +179,8 @@ bot->SendTo(theClient,
                             language::setting_doesnt_exist,
                             std::string("This setting does not exist.")).c_str());
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 }
 

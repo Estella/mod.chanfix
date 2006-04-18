@@ -109,6 +109,8 @@ bot->logAdminMessage("%s (%s) UNSUSPEND %s",
 		     theClient->getRealNickUserHost().c_str(),
 		     targetUser->getUserName().c_str());
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 } //UNSUSPENDCommand::Exec
 } //namespace cf

@@ -228,6 +228,7 @@ public:
 	void autoFix();
 	void manualFix(Channel*);
 
+	bool logLastComMessage(iClient*, const std::string&);
 	bool msgTopOps(Channel*);
 
 	bool fixChan(sqlChannel*, bool);

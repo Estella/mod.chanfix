@@ -120,6 +120,8 @@ bot->logAdminMessage("%s (%s) HISTORY %s",
 		     theClient->getRealNickUserHost().c_str(),
 		     theChan->getChannel().c_str());
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 }
 

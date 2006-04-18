@@ -98,6 +98,8 @@ bot->logAdminMessage("%s (%s) OPNICKS %s",
 		     theClient->getRealNickUserHost().c_str(),
 		     netChan->getName().c_str());
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 }
 

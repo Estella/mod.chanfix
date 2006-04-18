@@ -73,6 +73,8 @@ else
 
 server->LoadClient("libchanfix", bot->getConfigFileName());
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 }
 

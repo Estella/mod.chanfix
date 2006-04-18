@@ -207,6 +207,8 @@ bot->logAdminMessage("%s (%s) CHANFIX %s%s",
 		     netChan->getName().c_str(),
 		     (override) ? " [override]" : "");
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 }
 

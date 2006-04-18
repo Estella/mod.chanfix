@@ -90,6 +90,7 @@ bot->logAdminMessage("%s (%s) REHASH %s",
 		     theClient->getRealNickUserHost().c_str(),
 		     !option.empty() ? option.c_str() : "");
 
+bot->logLastComMessage(theClient, Message);
 
 return;
 }

@@ -86,6 +86,8 @@ bot->logAdminMessage("%s (%s) USERSCORES %s",
 		     theClient->getRealNickUserHost().c_str(),
 		     st[1].c_str());
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 }
 

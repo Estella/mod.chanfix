@@ -141,6 +141,8 @@ bot->logAdminMessage("%s (%s) ADDFLAG %s %c",
 		     theClient->getRealNickUserHost().c_str(),
 		     targetUser->getUserName().c_str(), flag);
 
+bot->logLastComMessage(theClient, Message);
+
 } //ADDFLAGCommand::Exec
 } //Namespace cf
 } //Namespace gnuworld

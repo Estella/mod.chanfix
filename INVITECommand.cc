@@ -85,6 +85,8 @@ bot->logAdminMessage("%s (%s) INVITE %s [CODER-CHAN]",
 		     theClient->getRealNickUserHost().c_str(),
 		     theChannel->getName().c_str());
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 }
 

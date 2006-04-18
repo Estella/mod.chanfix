@@ -104,6 +104,8 @@ bot->logAdminMessage("%s (%s) LISTHOSTS %s",
 		     theClient->getRealNickUserHost().c_str(),
 		     targetUser->getUserName().c_str());
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 } //LISTHOSTSCommand::Exec
 

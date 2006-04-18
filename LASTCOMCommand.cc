@@ -125,6 +125,8 @@ bot->SendTo(theClient,
 /* Dispose of our connection instance */
 bot->theManager->removeConnection(cacheCon);
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 }
 

@@ -62,6 +62,8 @@ bot->logAdminMessage("%s (%s) QUOTE %s",
 		     theClient->getRealNickUserHost().c_str(),
 		     st.assemble(1).c_str());
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 }
 

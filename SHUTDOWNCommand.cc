@@ -70,6 +70,8 @@ if (st.size() < 2)
 else
   server->Shutdown( st.assemble(1) );
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 }
 

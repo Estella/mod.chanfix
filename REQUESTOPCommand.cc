@@ -252,6 +252,9 @@ bot->logAdminMessage("%s (%s) REQUESTOP %s %s",
 		     theUser ? theUser->getUserName().c_str() : theClient->getUserName().c_str(),
 		     theClient->getRealNickUserHost().c_str(), netChan->getName().c_str(),
 		     (alert) ? " [alert]" : "");
+
+bot->logLastComMessage(theClient, Message);
+
 return;
 }
 

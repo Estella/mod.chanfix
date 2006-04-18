@@ -132,6 +132,8 @@ bot->SendTo(theClient,
 			std::string("Number of users: %d.")).c_str(),
 			numUsersInGroup);
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 } //WHOGROUPCommand::Exec
 } //namespace cf

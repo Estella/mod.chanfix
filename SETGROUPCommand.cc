@@ -82,6 +82,8 @@ bot->logAdminMessage("%s (%s) SETGROUP %s %s",
 	    targetUser->getUserName().c_str(),
 	    group.c_str());
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 } //SETGROUPCommand::Exec
 } //namespace cf

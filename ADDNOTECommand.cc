@@ -70,6 +70,8 @@ bot->logAdminMessage("%s (%s) ADDNOTE %s %s",
 		     theClient->getRealNickUserHost().c_str(),
 		     theChan->getChannel().c_str(), st.assemble(2).c_str());
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 }
 } // namespace cf

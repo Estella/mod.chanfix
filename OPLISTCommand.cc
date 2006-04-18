@@ -181,6 +181,8 @@ bot->logAdminMessage("%s (%s) OPLIST %s %s",
 		     st[1].c_str(),
 		     (st.size() > 2) ? st.assemble(2).c_str() : "");
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 }
 

@@ -174,6 +174,8 @@ if (st.size() > 2 && string_upper(st[2]) == "-MODIF")
 			theUser2->getLastUpdatedBy().c_str(),
 			bot->prettyDuration(theUser2->getLastUpdated()).c_str());
 
+bot->logLastComMessage(theClient, Message);
+
 return;
 } //WHOISCommand::Exec
 } //namespace cf
