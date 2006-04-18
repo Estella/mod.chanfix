@@ -285,6 +285,8 @@ public:
 
 	const int getCurrentGMTHour(); /* returns the current hour in GMT (00-23) */
 
+	char *convertToAscTime(time_t);
+
 	/* Server notices */
 	bool serverNotice( Channel*, const char*, ... );
 	bool serverNotice( Channel*, const std::string& );

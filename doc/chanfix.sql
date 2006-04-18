@@ -118,5 +118,11 @@ CREATE TABLE notes (
 	PRIMARY KEY(id, channelID)
 );
 
+CREATE TABLE comlog (
+	ts INT4 NOT NULL,
+	user_name text,
+	command VARCHAR(512)
+);
+
 CREATE INDEX notes_channelID_idx ON notes(channelID);
 CREATE INDEX notes_event_idx ON notes(event);

@@ -207,6 +207,11 @@ RegisterCommand(new INVITECommand(this, "INVITE",
 	1,
 	sqlUser::F_OWNER
 	));
+RegisterCommand(new LASTCOMCommand(this, "LASTCOM",
+	"[days]",
+	1,
+	sqlUser::F_OWNER
+	));
 RegisterCommand(new LISTBLOCKEDCommand(this, "LISTBLOCKED",
 	"",
 	1,
@@ -709,6 +714,37 @@ if (theUser) {
 
 commHandler->second->Exec(theClient, theUser ? theUser : NULL, Message);
 
+if ((Command != "CANFIX" && Command != "HELP")) {
+  std::string log;
+  PgDatabase* cacheCon = theManager->getConnection();
+
+  static const char *Main = "INSERT into comlog (ts,user_name,command) VALUES (now()::abstime::int4,'";
+
+  std::stringstream insertString;
+  insertString	<< Main
+		<< theClient->getAccount()
+		<< "','"
+		<< Command
+		<< " ";
+  unsigned int pos = 1;
+  while (pos < st.size()) {
+    insertString << st[pos]
+		 << " ";
+    pos++;
+  }
+
+  insertString	<< "')"
+		<< std::ends;
+
+  if (!cacheCon->ExecCommandOk(insertString.str().c_str())) {
+    elog << "sqlChannel::Insert> Something went wrong: "
+	 << cacheCon->ErrorMessage()
+	 << std::endl;
+  }
+
+  theManager->removeConnection(cacheCon);
+}
+
 xClient::OnPrivateMessage(theClient, Message);
 }
 
@@ -1087,6 +1123,15 @@ if (theUser && !theUser->getUseNotice())
   Message(theClient, theMessage);
 else
   Notice(theClient, theMessage);
+}
+
+char *chanfix::convertToAscTime(time_t NOW)
+{
+  time_t *tNow = &NOW;
+  struct tm* Now = gmtime(tNow);
+  char *ATime = asctime(Now);
+  ATime[strlen(ATime)-1] = '\0';
+  return ATime;
 }
 
 void chanfix::SendFmtTo(iClient* theClient, const std::string& theMessage)

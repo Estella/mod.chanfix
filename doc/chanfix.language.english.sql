@@ -211,5 +211,8 @@ COPY "translations" FROM stdin;
 1	205	Fixing %s, please wait.	31337	0
 1	206	You must wait %d seconds before %s can be fixed again with this command, or contact a help channel.	31337	0
 1	207	End of OPLIST for %s	31337	0
+1	208	You cannot see logs more than one year ago.	31337	0
+1	209	Listing last %d messages from day %d.	31337	0
+1	210	End of LASTCOM report.	31337	0
 
 \.

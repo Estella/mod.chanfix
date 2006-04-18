@@ -157,6 +157,11 @@ namespace cf
 		const int cant_find_channel		= 77;
 		const int chanfix_not_in_chan		= 78;
 		const int already_in_channel		= 79;
+
+		/* LASTCOM */
+		const int lastcom_too_far_back		= 208;
+		const int lastcom_listing_messages	= 209;
+		const int end_of_log			= 210;
 		
 		/* LISTBLOCKED */
 		const int listblocks_blocked_chans	= 190;
