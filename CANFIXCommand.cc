@@ -70,6 +70,11 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
   }
 }
 
+/* Opers can view the list anyway despite having
+ * potentially no score. */
+if (theClient->isOper())
+  highscore = true;
+
 if (highscore == false) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
