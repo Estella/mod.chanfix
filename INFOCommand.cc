@@ -140,7 +140,7 @@ PgDatabase* cacheCon = bot->theManager->getConnection();
  */
 std::stringstream allNotesQuery;
 allNotesQuery	<< "SELECT notes.id, notes.ts, notes.user_name, notes.event, notes.message "
- 		<< "FROM notes,users "
+ 		<< "FROM notes "
 		<< "WHERE notes.channelID = "
 		<< theChan->getID()
 		<< " ORDER BY notes.ts DESC"
