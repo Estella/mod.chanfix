@@ -169,6 +169,24 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
 	      (days) ? "]" : "");
 }
 
+sqlChannel* theChan = bot->getChannelRecord(st[1]);
+if (theChan) {
+  bot->SendTo(theClient, "Notes: %d", theChan->countNotes(0));
+	
+  if (theChan->getFlag(sqlChannel::F_BLOCKED))
+    bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::info_chan_blocked,
+                              std::string("%s is BLOCKED.")).c_str(),
+                                          theChan->getChannel().c_str());
+  else if (theChan->getFlag(sqlChannel::F_ALERT))
+    bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::info_chan_alerted,
+                              std::string("%s is ALERTED.")).c_str(),
+                                          theChan->getChannel().c_str());
+}
+
 bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::end_of_oplist,
