@@ -264,6 +264,11 @@ RegisterCommand(new SCORECommand(this, "CSCORE",
 	2,
 	0
 	));
+RegisterCommand(new SAYCommand(this, "SAY",
+	"<#channel> <text>",
+	3,
+	sqlUser::F_OWNER
+	));
 RegisterCommand(new SETCommand(this, "SET",
 	"<option> <value>",
 	3,

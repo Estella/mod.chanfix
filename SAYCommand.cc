@@ -1,0 +1,69 @@
+/**
+ * SAYCommand.cc
+ *
+ * 08/16/2006 - Jimmy Lipham <music0m@alltel.net>
+ * Initial Version
+ *
+ * Displays <text> in <#channel>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+ * USA.
+ *
+ * $Id$
+ */
+
+#include	<string>
+
+#include	"gnuworld_config.h"
+#include	"StringTokenizer.h"
+
+#include	"chanfix.h"
+#include	"responses.h"
+#include	"Network.h"
+
+
+namespace gnuworld
+{
+namespace cf
+{
+
+void SAYCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+{
+StringTokenizer st(Message);
+
+std::string option = string_upper(st[1]);
+std::string value = string_upper(st[2]);
+
+bot->logAdminMessage("%s (%s) SAY %s %s",
+		     theUser->getUserName().c_str(),
+		     theClient->getRealNickUserHost().c_str(),
+		     option.c_str(), value.c_str());
+
+bot->logLastComMessage(theClient, Message);
+
+Channel* thisChan = Network->findChannel(option);
+
+if (!thisChan)
+	bot->SendTo(theClient,
+		std::string("The channel %s does not exist on the network."),
+		option.c_str());
+else
+	bot->Message(thisChan,option);
+
+return;
+}
+
+} // namespace cf
+} // namespace gnuworld

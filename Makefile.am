@@ -32,6 +32,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	RELOADCommand.cc \
 	REQUESTOPCommand.cc \
 	SCORECommand.cc \
+	SAYCommand.cc \
 	SETCommand.cc \
 	SETGROUPCommand.cc \
 	SHUTDOWNCommand.cc \

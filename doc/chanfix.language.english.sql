@@ -214,5 +214,4 @@ COPY "translations" FROM stdin;
 1	208	You cannot see logs more than one year ago.	31337	0
 1	209	Listing last %d messages from day %d.	31337	0
 1	210	End of LASTCOM report.	31337	0
-
 \.

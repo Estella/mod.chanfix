@@ -34,8 +34,8 @@ $dbhost = "127.0.0.1";
 $dbport = "5432";
 $dbusername = "gnuworld";
 $dbpassword = "";
-$cservicedatabase = "cservice";
-$chanfixdatabase = "chanfix";
+$cservicedatabase = "chanfixtest";
+$chanfixdatabase = "chanfixtest";
 
 /* Dont change anything below this */
 /* --------------------------------------------------------------------- */
@@ -77,6 +77,7 @@ if ($notesempty != true) {
     $usernameq = pg_query($cservicedb, "SELECT user_name FROM users WHERE id='". $result[3] ."'");
     while ($username = pg_fetch_row($usernameq)) {
       $insertq = "INSERT INTO newnotes (id, ts, channelID, user_name, event, message) VALUES($result[0], $result[1], $result[2], '$username[0]', $result[4], '$result[5]')";
+      echo $insertq . "\n";
       $insert = pg_query($chanfixdb, $insertq);
     }
   }

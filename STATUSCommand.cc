@@ -95,6 +95,13 @@ else
 			language::status_channel_service_not_linked,
 			std::string("Channel service not linked. New channels will not be scored.")).c_str());
 
+bot->SendTo(theClient,
+	std::string("Number of channels being autofixed: %i").c_str(),bot->countAutoFixes());
+
+bot->SendTo(theClient,
+	std::string("Number of channels being manually fixed: %i").c_str(),bot->countManFixes());
+
+
 bot->logAdminMessage("%s (%s) STATUS",
 		     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",
 		     theClient->getRealNickUserHost().c_str());

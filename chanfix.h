@@ -212,6 +212,9 @@ public:
 	
 	time_t getSecsTilMidnight() { return 86400 - (currentTime() % 86400); }
 
+	size_t countAutoFixes() { return autoFixQ.size(); }
+	size_t countManFixes() { return manFixQ.size(); }
+
 	void updatePoints();
 	void giveAllOpsPoints();
 
