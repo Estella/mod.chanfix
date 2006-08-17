@@ -43,8 +43,8 @@ void SAYCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& M
 {
 StringTokenizer st(Message);
 
-std::string option = string_upper(st[1]);
-std::string value = string_upper(st[2]);
+std::string option = st[1];
+std::string value = st.assemble(2);
 
 bot->logAdminMessage("%s (%s) SAY %s %s",
 		     theUser->getUserName().c_str(),
@@ -57,10 +57,10 @@ Channel* thisChan = Network->findChannel(option);
 
 if (!thisChan)
 	bot->SendTo(theClient,
-		std::string("The channel %s does not exist on the network."),
+		"The channel %s does not exist on the network.",
 		option.c_str());
 else
-	bot->Message(thisChan,option);
+	bot->Message(thisChan,value);
 
 return;
 }
