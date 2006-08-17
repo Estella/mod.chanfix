@@ -115,7 +115,7 @@ if (channelID != theChan->getID()) {
   return;
 }
 
-if (user_name != theUser->getUserName() && !theUser->getFlag(sqlUser::F_USERMANAGER)) {
+if (string_lower(user_name) != string_lower(theUser->getUserName()) && !theUser->getFlag(sqlUser::F_USERMANAGER)) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::note_not_added_by_you,

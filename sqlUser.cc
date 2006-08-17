@@ -172,26 +172,26 @@ bool retval = false;
 PgDatabase* cacheCon = myManager->getConnection();
 
 /* Create the DELETE statement */
-std::stringstream deleteString;
-deleteString	<< "DELETE FROM users "
-		<< "WHERE id = '" << id << "'"
-		;
-
-if (!cacheCon->ExecCommandOk(deleteString.str().c_str())) {
-  elog	<< "sqlUser::Delete> Something went wrong: "
-	<< cacheCon->ErrorMessage()
-	<< std::endl;
-  retval = false;
-} else
-  retval = true;
-
-/* Create the DELETE statement */
 std::stringstream hostString;
 hostString	<< "DELETE FROM hosts "
 		<< "WHERE user_id = " << id
 		;
 
 if (!cacheCon->ExecCommandOk(hostString.str().c_str())) {
+  elog	<< "sqlUser::Delete> Something went wrong: "
+	<< cacheCon->ErrorMessage()
+	<< std::endl;
+  retval = false;
+} else
+  retval = true;
+	
+/* Create the DELETE statement */
+std::stringstream deleteString;
+deleteString	<< "DELETE FROM users "
+		<< "WHERE id = '" << id << "'"
+		;
+
+if (!cacheCon->ExecCommandOk(deleteString.str().c_str())) {
   elog	<< "sqlUser::Delete> Something went wrong: "
 	<< cacheCon->ErrorMessage()
 	<< std::endl;
