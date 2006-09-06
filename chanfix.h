@@ -206,6 +206,8 @@ public:
 	void precacheChannels();
 	void precacheUsers();
 
+	void printResourceStats();
+
 	void changeState(STATE);
 
 	time_t currentTime() { return ::time(0); }

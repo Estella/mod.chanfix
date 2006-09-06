@@ -38,6 +38,8 @@
 #include	<utility>
 #include	<vector>
 
+#include	<sys/resource.h>
+
 #include	"libpq++.h"
 
 #include	"gnuworld_config.h"
@@ -487,6 +489,7 @@ MyUplink->RegisterEvent( EVT_BURST_CMPLT, this );
 MyUplink->RegisterEvent( EVT_NETJOIN, this );
 MyUplink->RegisterEvent( EVT_NETBREAK, this );
 MyUplink->RegisterEvent( EVT_NICK, this );
+MyUplink->RegisterEvent( EVT_SERVERMODE, this );
 
 /**
  * Register for all channel events
@@ -800,6 +803,11 @@ switch( whichEvent )
 		{
 		theClient = static_cast< iClient* >( data1 );
 		lostOp(theChan->getName(), theClient, NULL);
+		break ;
+		}
+	case EVT_SERVERMODE:
+		{
+		elog << "chanfix: GOT SERVER MODE EVENT!" << std::endl;
 		break ;
 		}
 	default:
@@ -1973,6 +1981,16 @@ int min_score = min_score_abs;
 if (min_score_rel > min_score)
   min_score = min_score_rel;
 
+/* We need to check to see if the highest scoring ops score for the chan
+ * is less than min_score, if so, adjust min_score so we wont have
+ * to wait forever for the first op! */
+
+if (myOps.begin() != myOps.end())
+  sqlChan->setMaxScore((*myOps.begin())->getPoints());
+
+if (sqlChan->getMaxScore() < min_score)
+  min_score = sqlChan->getMaxScore();
+
 elog << "chanfix::fixChan> [" << netChan->getName() << "] start "
 	<< sqlChan->getFixStart() << ", delta " << time_since_start
 	<< ", max " << maxScore << ", minabs " << min_score_abs
@@ -2506,7 +2524,7 @@ void chanfix::prepareUpdate(bool)
   } else
 #endif /* CHANFIX_HAVE_BOOST_THREAD */
     updateDB();
-
+    printResourceStats();
   return;
 }
 
@@ -2651,6 +2669,15 @@ void chanfix::updateDB()
   updateInProgress = false;
 
   return;
+}
+
+void chanfix::printResourceStats()
+{
+  int who = RUSAGE_SELF;
+  struct rusage usage;
+  int ret;
+  ret = getrusage(who, &usage);
+  logDebugMessage("Max. resident size used by chanfix (kB): %ld", usage.ru_maxrss);
 }
 
 bool chanfix::isTempBlocked(const std::string& theChan)
