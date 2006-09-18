@@ -225,6 +225,9 @@ public:
 
 	bool hasIdent(iClient*);
 
+	void JoinChan(Channel* theChan);
+	void PartChan(Channel* theChan);
+
 	void checkNetwork();
 	void checkChannelServiceLink(iServer*, const eventType&);
 	void findChannelService();
@@ -421,6 +424,7 @@ public:
 	bool		enableAutoFix;
 	bool		enableChanFix;
 	bool		enableChannelBlocking;
+	bool		joinChannels;
 	bool		stopAutoFixOnOp;
 	bool		stopChanFixOnOp;
 	bool		allowTopOpFix;
@@ -497,6 +501,7 @@ public:
 	bool doAutoFix() { return enableAutoFix; }
 	bool doChanFix() { return enableChanFix; }
 	bool doChanBlocking() { return enableChannelBlocking; }
+	bool doJoinChannels() { return joinChannels; }
 	STATE getState() { return currentState; }
 	bool isChanServLinked() { return chanServLinked; }
 	bool isUpdateRunning() { return updateInProgress; }
@@ -523,6 +528,8 @@ public:
 		{ enableChanFix = _enableChanFix; }
 	inline void	setDoChanBlocking(bool _enableChannelBlocking)
 		{ enableChannelBlocking = _enableChannelBlocking; }
+	inline void	setJoinChannels(bool _joinChannels)
+		{ joinChannels = _joinChannels; }
 	inline void	setCurrentDay()
 		{ currentDay = currentTime() / 86400 % DAYSAMPLES; }
 

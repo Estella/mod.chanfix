@@ -61,6 +61,9 @@ enableChanFix = true
 # Can channels be blocked by admins?
 enableChannelBlocking = true
 
+# Should chanfix join the channel its fixing? this avoids the hopping issue
+joinChannels = true
+
 # Should auto fixes stop if an already reopped user ops another user?
 stopAutoFixOnOp = true
 

@@ -373,6 +373,7 @@ joinChanModes = chanfixConfig->Require("joinChanModes")->second ;
 enableAutoFix = atob(chanfixConfig->Require("enableAutoFix")->second) ;
 enableChanFix = atob(chanfixConfig->Require("enableChanFix")->second) ;
 enableChannelBlocking = atob(chanfixConfig->Require("enableChannelBlocking")->second) ;
+joinChannels = atob(chanfixConfig->Require("joinChannels")->second) ;
 stopAutoFixOnOp = atob(chanfixConfig->Require("stopAutoFixOnOp")->second) ;
 stopChanFixOnOp = atob(chanfixConfig->Require("stopChanFixOnOp")->second) ;
 allowTopOpFix = atob(chanfixConfig->Require("allowTopOpFix")->second) ;
@@ -824,6 +825,8 @@ void chanfix::OnChannelModeO( Channel* theChan, ChannelUser* theUser,
 /* if (currentState != RUN) return; */
 
 /* COMMENTED OUT DUE TO isService() NOT IN CORE YET
+ * TODO: make sure that we ignore ops to C from servers (ie when it joins on a fix)
+ *       assuming that joinchannel triggers this.
  * if (theUser) {
  *	// Let's see what server did the mode
  *	iServer* theServer = Network->findServer(theUser->getClient()->getIntYY());
@@ -1731,6 +1734,16 @@ if (string_lower(theServer->getName()) == string_lower(chanServName)) {
 return;
 }
 
+void chanfix::JoinChan(Channel* theChan)
+{
+MyUplink->JoinChannel(this, theChan->getName());
+}
+
+void chanfix::PartChan(Channel* theChan)
+{
+MyUplink->PartChannel(this, theChan->getName(), "Channel Fixed");
+}
+
 /* Check for the channel service server to see if it is linked. */
 void chanfix::findChannelService()
 {
@@ -1851,6 +1864,11 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
 	 elog << "chanfix::autoFix> DEBUG: " << thisChan->getName() << " is opless, fixing." << std::endl;
 	 autoFixQ.insert(fixQueueType::value_type(thisChan->getName(), currentTime()));
 	 numOpLess++;
+
+	 if (doJoinChannels()) {
+	   JoinChan(thisChan);
+	   Message(thisChan, "Channel fix in progress, please stand by.");
+	 }
        }
      }
    }
@@ -1901,6 +1919,9 @@ if (useBurstToFix && thisChan->getCreationTime() > 1) {
 } else {
   ClearMode(thisChan, "obiklrD", true);
 }
+
+if (doJoinChannels())
+  JoinChan(thisChan);
 
 Message(thisChan, "Channel fix in progress, please stand by.");
 
@@ -2100,6 +2121,9 @@ if (inFix) {
   }
 }
 
+if (doJoinChannels())
+  PartChan(theChan);
+
 return;
 }
 
@@ -2269,6 +2293,9 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
       * has passed, remove it from the list
       */
      if (isFixed || currentTime() - sqlChan->getFixStart() > AUTOFIX_MAXIMUM) {
+       Channel* theChan = Network->findChannel(sqlChan->getChannel());
+       if (doJoinChannels())
+         PartChan(theChan);
        autoFixQ.erase(ptr++);
        sqlChan->setFixStart(0);
        sqlChan->setLastAttempt(0);
@@ -2296,6 +2323,9 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
       * has passed, remove it from the list
       */
      if (isFixed || currentTime() - sqlChan->getFixStart() > CHANFIX_MAXIMUM + CHANFIX_DELAY) {
+       Channel* theChan = Network->findChannel(sqlChan->getChannel());
+       if (doJoinChannels())
+         PartChan(theChan);
        manFixQ.erase(ptr++);
        sqlChan->setFixStart(0);
        sqlChan->setLastAttempt(0);
