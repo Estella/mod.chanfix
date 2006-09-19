@@ -2099,10 +2099,10 @@ void chanfix::stopFixingChan(Channel* theChan, bool force)
 if (!theChan) return;
 
 bool inFix = false;
-int type = 0;
+bool isAutoFix = false; /* false = manual - true = auto */
 
 if ((stopAutoFixOnOp || force) && isBeingAutoFixed(theChan)) {
-  type = 1;
+  isAutoFix = true;
   inFix = true;
   removeFromAutoQ(theChan);
 }
@@ -2120,9 +2120,9 @@ if (inFix) {
   }
 }
 
-if ((type == 1) && (doAutoFixNotice()))
+if ((isAutoFix) && (doAutoFixNotice()))
   Message(theChan, "Channel has been automatically fixed.");
-else if ((type == 2) && (doManualFixNotice()))
+else if ((!isAutoFix) && (doManualFixNotice()))
   Message(theChan, "Channel has been fixed.");
 
 if (doJoinChannels())
