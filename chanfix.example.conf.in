@@ -64,6 +64,14 @@ enableChannelBlocking = true
 # Should chanfix join the channel its fixing? this avoids the hopping issue
 joinChannels = true
 
+# Should chanfix send notices saying the channel is being fixed for auto
+# fixes. Also a notice after its finished saying its done?
+autoFixNotice = true
+
+# Should chanfix send notices saying the channel is being fixed for manual
+# fixes Also a notice after its finished saying its done?
+manualFixNotice = true
+
 # Should auto fixes stop if an already reopped user ops another user?
 stopAutoFixOnOp = true
 

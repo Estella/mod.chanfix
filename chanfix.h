@@ -425,6 +425,8 @@ public:
 	bool		enableChanFix;
 	bool		enableChannelBlocking;
 	bool		joinChannels;
+	bool		autoFixNotice;
+	bool		manualFixNotice;
 	bool		stopAutoFixOnOp;
 	bool		stopChanFixOnOp;
 	bool		allowTopOpFix;
@@ -502,6 +504,8 @@ public:
 	bool doChanFix() { return enableChanFix; }
 	bool doChanBlocking() { return enableChannelBlocking; }
 	bool doJoinChannels() { return joinChannels; }
+	bool doAutoFixNotice() { return autoFixNotice; }
+	bool doManualFixNotice() { return manualFixNotice; }
 	STATE getState() { return currentState; }
 	bool isChanServLinked() { return chanServLinked; }
 	bool isUpdateRunning() { return updateInProgress; }
@@ -528,8 +532,6 @@ public:
 		{ enableChanFix = _enableChanFix; }
 	inline void	setDoChanBlocking(bool _enableChannelBlocking)
 		{ enableChannelBlocking = _enableChannelBlocking; }
-	inline void	setJoinChannels(bool _joinChannels)
-		{ joinChannels = _joinChannels; }
 	inline void	setCurrentDay()
 		{ currentDay = currentTime() / 86400 % DAYSAMPLES; }
 
