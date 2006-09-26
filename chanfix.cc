@@ -224,6 +224,11 @@ RegisterCommand(new LISTHOSTSCommand(this, "LISTHOSTS",
 	1,
 	sqlUser::F_LOGGEDIN
 	));
+RegisterCommand(new LISTTEMPBLOCKEDCommand(this, "LISTTEMPBLOCKED",
+	"",
+	1,
+	sqlUser::F_BLOCK
+	));
 RegisterCommand(new OPLISTCommand(this, "OPLIST",
 	"<#channel> [-all] [-days]",
 	2,
@@ -296,6 +301,11 @@ RegisterCommand(new SUSPENDCommand(this, "SUSPEND",
 	2,
 	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
 	));
+RegisterCommand(new TEMPBLOCKCommand(this, "TEMPBLOCK",
+	"<#channel>",
+	2,
+	sqlUser::F_BLOCK
+	));
 RegisterCommand(new UNALERTCommand(this, "UNALERT",
 	"<#channel>",
 	2,
@@ -310,6 +320,11 @@ RegisterCommand(new UNSUSPENDCommand(this, "UNSUSPEND",
 	"<username>",
 	2,
 	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
+	));
+RegisterCommand(new UNTEMPBLOCKCommand(this, "UNTEMPBLOCK",
+	"<#channel>",
+	2,
+	sqlUser::F_BLOCK
 	));
 RegisterCommand(new USERSCORESCommand(this, "USERSCORES",
 	"<account>",
@@ -1856,7 +1871,8 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
 
        if ((sqlChan->getMaxScore() > 
 	   static_cast<int>(static_cast<float>(FIX_MIN_ABS_SCORE_END)
-	   * MAX_SCORE)) && !sqlChan->getFlag(sqlChannel::F_BLOCKED)) {
+	   * MAX_SCORE)) && !sqlChan->getFlag(sqlChannel::F_BLOCKED) &&
+	   !isTempBlocked(thisChan->getName())) {
 	 elog << "chanfix::autoFix> DEBUG: " << thisChan->getName() << " is opless, fixing." << std::endl;
 	 autoFixQ.insert(fixQueueType::value_type(thisChan->getName(), currentTime()));
 	 numOpLess++;
@@ -2107,7 +2123,6 @@ if ((stopAutoFixOnOp || force) && isBeingAutoFixed(theChan)) {
   removeFromAutoQ(theChan);
 }
 if ((stopChanFixOnOp || force) && isBeingChanFixed(theChan)) {
-  type = 2;
   inFix = true;
   removeFromManQ(theChan);
 }
@@ -2922,6 +2937,10 @@ else if (whichEvent == sqlChannel::EV_REQUESTOP)
   return "REQUESTOP";
 else if (whichEvent == sqlChannel::EV_BLOCK)
   return "BLOCK";
+else if (whichEvent == sqlChannel::EV_TEMPBLOCK)
+  return "TEMPBLOCK";
+else if (whichEvent == sqlChannel::EV_UNTEMPBLOCK)
+  return "UNTEMPBLOCK";
 else if (whichEvent == sqlChannel::EV_UNBLOCK)
   return "UNBLOCK";
 else if (whichEvent == sqlChannel::EV_ALERT)

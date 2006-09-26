@@ -25,6 +25,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	LASTCOMCommand.cc \
 	LISTBLOCKEDCommand.cc \
 	LISTHOSTSCommand.cc \
+	LISTTEMPBLOCKEDCommand.cc \
 	OPLISTCommand.cc \
 	OPNICKSCommand.cc \
 	QUOTECommand.cc \
@@ -38,9 +39,11 @@ libchanfix_la_SOURCES = chanfix.cc \
 	SHUTDOWNCommand.cc \
 	STATUSCommand.cc \
 	SUSPENDCommand.cc \
+	TEMPBLOCKCommand.cc \
 	UNALERTCommand.cc \
 	UNBLOCKCommand.cc \
 	UNSUSPENDCommand.cc \
+	UNTEMPBLOCKCommand.cc \
 	USERSCORESCommand.cc \
 	USETCommand.cc \
 	WHOGROUPCommand.cc \

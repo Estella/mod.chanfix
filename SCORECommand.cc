@@ -331,6 +331,12 @@ if (theChan) {
                               language::info_chan_blocked,
                               std::string("%s is BLOCKED.")).c_str(),
                                           theChan->getChannel().c_str());
+  else if (bot->isTempBlocked(theChan->getChannel()))
+    bot->SendTo(theClient,
+              bot->getResponse(theUser,
+                              language::info_chan_temp_blocked,
+                              std::string("%s is TEMPBLOCKED.")).c_str(),
+                                          theChan->getChannel().c_str());
   else if (theChan->getFlag(sqlChannel::F_ALERT))
     bot->SendTo(theClient,
               bot->getResponse(theUser,

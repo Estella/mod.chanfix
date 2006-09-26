@@ -93,6 +93,7 @@ namespace cf
 		const int not_enough_servers_non_oper	= 200;
 		const int channel_being_auto_fixed_noper	= 201;
 		const int channel_blocked_non_oper	= 202;
+		const int channel_temp_blocked		= 211;
 
 		/* CHECK */
 		const int check_results			= 37;
@@ -152,6 +153,7 @@ namespace cf
 		const int temporarily_blocked		= 188;
 		const int info_fix_started		= 192;
 		const int info_fix_waiting		= 193;
+		const int info_chan_temp_blocked	= 214;
 
 		/* INVITE */
 		const int cant_find_channel		= 77;
@@ -171,6 +173,10 @@ namespace cf
 		const int cant_view_hosts_diff_group	= 163;
 		const int host_list_header		= 164;
 		const int host_list_footer		= 165;
+
+		/* LISTTEMPBLOCKED */
+		const int list_temp_blocked_chans	= 212;
+		const int list_total_temp_blocked	= 213;
 
 		/* OPLIST */
 		const int top_unique_op_accounts	= 80;
@@ -251,6 +257,12 @@ namespace cf
 		const int user_suspended		= 120;
 		const int user_cant_suspend_self	= 159;
 
+		/* TEMPBLOCK */
+		const int channel_already_temp_blocked	= 215;
+		const int channel_has_been_temp_blocked	= 216;
+		const int block_aborting_manual_fix	= 217;
+		const int block_aborting_auto_fix	= 218;
+
 		/* UNALERT */
 		const int no_alert_set			= 121;
 		const int alert_removed			= 122;
@@ -265,6 +277,10 @@ namespace cf
 		const int cant_unsuspend_diff_group	= 125;
 		const int user_not_suspended		= 126;
 		const int user_unsuspended		= 127;
+
+		/* UNTEMPBLOCK */
+		const int channel_not_temp_blocked	= 219;
+		const int channel_untempblocked		= 220;
 
 		/* USERSCORES */
 		const int userscores_header 		= 194;

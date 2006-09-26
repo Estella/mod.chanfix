@@ -265,7 +265,7 @@ public:
 	void rotateDB();
 	
 	void expireTempBlocks();
-	
+
 	void prepareUpdate(bool);
 	void updateDB();
 

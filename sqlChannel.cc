@@ -41,14 +41,16 @@ namespace cf
 const sqlChannel::flagType sqlChannel::F_BLOCKED	= 0x00000001 ;
 const sqlChannel::flagType sqlChannel::F_ALERT		= 0x00000002 ;
 
-const int sqlChannel::EV_MISC		= 1 ; /* Uncategorized event */
-const int sqlChannel::EV_NOTE		= 2 ; /* Miscellaneous notes */
-const int sqlChannel::EV_CHANFIX	= 3 ; /* Manual chanfixes */
-const int sqlChannel::EV_BLOCK		= 4 ; /* Channel block */
-const int sqlChannel::EV_UNBLOCK	= 5 ; /* Channel unblock */
-const int sqlChannel::EV_ALERT		= 6 ; /* Channel alert */
-const int sqlChannel::EV_UNALERT	= 7 ; /* Channel unalert */
-const int sqlChannel::EV_REQUESTOP	= 8 ; /* Requestops */
+const int sqlChannel::EV_MISC		= 1  ; /* Uncategorized event */
+const int sqlChannel::EV_NOTE		= 2  ; /* Miscellaneous notes */
+const int sqlChannel::EV_CHANFIX	= 3  ; /* Manual chanfixes */
+const int sqlChannel::EV_BLOCK		= 4  ; /* Channel block */
+const int sqlChannel::EV_UNBLOCK	= 5  ; /* Channel unblock */
+const int sqlChannel::EV_ALERT		= 6  ; /* Channel alert */
+const int sqlChannel::EV_UNALERT	= 7  ; /* Channel unalert */
+const int sqlChannel::EV_REQUESTOP	= 8  ; /* Requestops */
+const int sqlChannel::EV_TEMPBLOCK	= 9  ; /* Temp channel block */
+const int sqlChannel::EV_UNTEMPBLOCK	= 10 ; /* Temp channel unblock */
 
 unsigned long int sqlChannel::maxUserId = 0;
 

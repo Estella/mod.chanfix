@@ -172,8 +172,14 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
 if (theChan) {
   bot->SendTo(theClient, "Notes: %d", theChan->countNotes(0));
-	
-  if (theChan->getFlag(sqlChannel::F_BLOCKED))
+
+  if (bot->isTempBlocked(theChan->getChannel()))
+    bot->SendTo(theClient,
+                bot->getResponse(theUser,
+                                language::info_chan_temp_blocked,
+                                std::string("%s is TEMPBLOCKED.")).c_str(),
+                                            theChan->getChannel().c_str());
+  else if (theChan->getFlag(sqlChannel::F_BLOCKED))
     bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::info_chan_blocked,

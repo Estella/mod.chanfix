@@ -218,7 +218,8 @@ if (bot->isBeingAutoFixed(netChan)) {
 }
 
 /* Don't fix a blocked or alerted channel. */
-if ((theChan->getFlag(sqlChannel::F_BLOCKED)) || (theChan->getFlag(sqlChannel::F_ALERT))) {
+if ((bot->isTempBlocked(theChan->getChannel())) || (theChan->getFlag(sqlChannel::F_BLOCKED)) || 
+    (theChan->getFlag(sqlChannel::F_ALERT))) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::channel_blocked_non_oper,

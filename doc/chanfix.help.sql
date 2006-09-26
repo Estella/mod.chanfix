@@ -26,6 +26,7 @@ INFO	1	Shows all notes of the specified channel and whether the channel is activ
 LASTCOM	1	Shows all the last commands which where issued to the bot.
 LISTBLOCKED	1	Lists all of the channels that chanfix will not score.
 LISTHOSTS	1	With no username specified, it lists the hostmasks chanfix recognizes you by. Otherwise, it views the specified username's host list.\nNOTE: Server admins (+a) can only view host lists of users within their own server group. Users lower than server admin status can only view their own host lists.
+LISTTEMPBLOCKED	1	Lists all of the channels that chanfix will not score temporarly.
 OPLIST	1	Shows the top 10 op accounts and their scores for the specified channel. Possible flags\n-all (or ALL or !) - Lists all scores.\n-days - Displays a small bar of the 2 week scoring period showing when a person was opped (. means never opped, 0 means 0-10%, 9 means 91-100%)
 OPNICKS	1	Shows the nicknames currently opped on the specified channel.
 REHASH	1	Reloads the translations, configuration, or help values based on the specified target.
@@ -35,8 +36,10 @@ SCORE	1	Without extra arguments, shows the top scores of <channel>.\nOtherwise, 
 SET	1	Sets various configuration options to the specified values.\nBoolean settings: ENABLE_AUTOFIX, ENABLE_CHANFIX, ENABLE_CHANNEL_BLOCKING.\nInteger settings: NUM_SERVERS.
 STATUS	1	Shows current statistics such as: uptime, percentage network presence, fix and block settings.
 SUSPEND	1	Suspends the specified user.
+TEMPBLOCK	1	Temporary blocks a channel from being fixed, both automatically and manually.\nThe reason will be shown when doing INFO <channel>.
 UNALERT	1	Removes a channel from alert status.
 UNBLOCK	1	Removes a channel from the blocklist causing it to be fixable again.
+UNTEMPBLOCK	1	Removes a channel from the temporary blocklist causing it to be fixable again.
 USET	1	Sets options on your account. Possible settings:\nNOTICE - receive notices, if no then PRIVMSG's will be sent.\nLANG - What language chanfix will communicate with you in; available languages: EN - English.
 WHOIS	1	Shows account information for the specified user.
 SETGROUP	1	Sets the group for the specified user.
@@ -47,7 +50,7 @@ WHOGROUP	1	Shows all users in the specified group along with their flags. If no 
 <INDEXNORMAL>	1	\002Normal User\002: CANFIX REQUESTOP
 <INDEXOPER>	1	\002Oper Level\002: SCORE CSCORE CHECK HISTORY INFO OPLIST OPNICKS STATUS
 <INDEXLOGGEDIN>	1	\002Logged In\002: LISTHOSTS USET USERSCORES WHOIS
-<INDEXBLOCK>	1	\002Blocker (+b)\002: BLOCK UNBLOCK LISTBLOCKED
+<INDEXBLOCK>	1	\002Blocker (+b)\002: BLOCK TEMPBLOCK UNBLOCK UNTEMPBLOCK LISTBLOCKED LISTTEMPBLOCKED
 <INDEXCOMMENT>	1	\002Commenter (+c)\002: ADDNOTE DELNOTE ALERT UNALERT
 <INDEXCHANFIX>	1	\002Chanfixer (+f)\002: CHANFIX
 <INDEXOWNER>	1	\002Owner (+o)\002: LASTCOM REHASH RELOAD SET SHUTDOWN

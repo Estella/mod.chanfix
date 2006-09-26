@@ -58,6 +58,8 @@ public:
 	static const int	EV_NOTE; /* Miscellaneous notes */
 	static const int	EV_CHANFIX; /* Manual chanfixes */
 	static const int	EV_BLOCK; /* Channel block */
+	static const int	EV_TEMPBLOCK; /* Temp channel block */
+	static const int	EV_UNTEMPBLOCK; /* Temp channel block */
 	static const int	EV_UNBLOCK; /* Channel unblock */
 	static const int	EV_ALERT; /* Channel alert */
 	static const int	EV_UNALERT; /* Channel unalert */

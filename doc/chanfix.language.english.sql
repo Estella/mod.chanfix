@@ -214,4 +214,14 @@ COPY "translations" FROM stdin;
 1	208	You cannot see logs more than one year ago.	31337	0
 1	209	Listing last %d messages from day %d.	31337	0
 1	210	End of LASTCOM report.	31337	0
+1	211	The channel %s is TEMPBLOCKED.	31337	0
+1	212	List of all temp blocked channels:	31337	0
+1	213	%d channels temp blocked.	31337	0
+1	214	%s is TEMPBLOCKED.	31337	0
+1	215	The channel %s is already temp blocked.	31337	0
+1	216	The channel %s has been temp blocked.	31337	0
+1	217	WARNING: Channel %s is being manually fixed; aborting fix as per TEMPBLOCK.	31337	0
+1	218	WARNING: Channel %s is being automatically fixed; aborting fix as per TEMPBLOCK.	31337	0
+1	219	The channel %s is not temp blocked.	31337	0
+1	220	Channel %s has been untempblocked.	31337	0
 \.
