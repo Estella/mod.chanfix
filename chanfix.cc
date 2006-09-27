@@ -825,7 +825,9 @@ switch( whichEvent )
 		}
 	case EVT_SERVERMODE:
 		{
-		elog << "chanfix: GOT SERVER MODE EVENT!" << std::endl;
+		if (!isTempBlocked(theChan->getName()))
+		  tempBlockList.insert(tempBlockType::value_type(theChan->getName(), currentTime()));
+//		elog << "chanfix: GOT SERVER MODE EVENT!" << std::endl;
 		break ;
 		}
 	default:

@@ -138,4 +138,5 @@ for file in files:
 	if file[-3:] != ".cc": continue
 	Parser(file).run()
 
+print "* Note: The chanfix.cc error is safe to ignore."
 print "* Done"
