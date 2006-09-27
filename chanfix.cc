@@ -791,6 +791,7 @@ void chanfix::OnChannelEvent( const channelEventType& whichEvent,
 	void* data1, void* data2, void* data3, void* data4 )
 {
 iClient* theClient = 0;
+iServer* theServer = 0;
 
 /* If we are not running, we don't want to be giving points. */
 if (currentState != RUN) return;
@@ -825,8 +826,11 @@ switch( whichEvent )
 		}
 	case EVT_SERVERMODE:
 		{
-		if (!isTempBlocked(theChan->getName()))
-		  tempBlockList.insert(tempBlockType::value_type(theChan->getName(), currentTime()));
+		theServer = static_cast< iServer* >( data1 );
+                if (theServer && theServer != MyUplink->getUplink() && theServer->isService()) {
+		  if (!isTempBlocked(theChan->getName()))
+		    tempBlockList.insert(tempBlockType::value_type(theChan->getName(), currentTime()));
+		}
 //		elog << "chanfix: GOT SERVER MODE EVENT!" << std::endl;
 		break ;
 		}

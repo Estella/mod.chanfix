@@ -1,3 +1,16 @@
+ include/events.h         |    2 +
+ include/iServer.h        |   54 ++++++++++++++++++++++++++++++++++++++++++++++-
+ libircu/msg_CM.cc        |   18 +++++++++++++++
+ libircu/msg_M.cc         |   13 +++++++++++
+ libircu/msg_S.cc         |    9 +++++--
+ libircu/msg_Server.cc    |    3 ++
+ src/Network.cc           |   10 +++-----
+ src/iServer.cc           |   37 ++++++++++++++++++++++++++++++++
+ src/main.cc              |    4 +--
+ src/server.cc            |    2 -
+ src/server_connection.cc |    3 ++
+ 11 files changed, 142 insertions(+), 13 deletions(-)
+
 Index: include/events.h
 ===================================================================
 RCS file: /cvsroot/gnuworld/gnuworld/include/events.h,v
