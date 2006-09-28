@@ -91,6 +91,9 @@ public:
 	inline unsigned int	getMaxScore() const
 		{ return maxScore ; }
 
+	inline unsigned int	getTMaxScore() const
+		{ return tmaxScore ; }
+
 	inline bool		getModesRemoved() const
 		{ return modesRemoved ; }
 
@@ -127,6 +130,9 @@ public:
 	inline void	setMaxScore(unsigned int _maxScore)
 		{ maxScore = _maxScore; }
 
+	inline void	setTMaxScore(unsigned int _tmaxScore)
+		{ tmaxScore = _tmaxScore; }
+
 	inline void	setModesRemoved(bool _modesRemoved)
 		{ modesRemoved = _modesRemoved; }
 
@@ -156,6 +162,7 @@ protected:
 	time_t		last;
 	time_t		start;
 	unsigned int	maxScore;
+	unsigned int	tmaxScore;
 	bool		modesRemoved;
 	flagType	flags;
 	bool		inSQL;

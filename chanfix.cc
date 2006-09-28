@@ -1883,9 +1883,9 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
 	 autoFixQ.insert(fixQueueType::value_type(thisChan->getName(), currentTime()));
 	 numOpLess++;
 
-	 if (doJoinChannels())
+	 if (doJoinChannels() && shouldCJoin(sqlChan, true))
 	   JoinChan(thisChan);
-	 if (doAutoFixNotice())
+	 if (doAutoFixNotice() && shouldCJoin(sqlChan, true))
 	   Message(thisChan, "Automatic channel fix in progress, please stand by.");
        }
      }
@@ -1938,12 +1938,113 @@ if (useBurstToFix && thisChan->getCreationTime() > 1) {
   ClearMode(thisChan, "obiklrD", true);
 }
 
-if (doJoinChannels())
+sqlChannel* sqlChan = getChannelRecord(thisChan);
+if (!sqlChan) sqlChan = newChannelRecord(thisChan);
+
+if (doJoinChannels() && shouldCJoin(sqlChan, false))
   JoinChan(thisChan);
-if (doManualFixNotice())
+if (doManualFixNotice()  && shouldCJoin(sqlChan, false))
   Message(thisChan, "Channel fix in progress, please stand by.");
 
 manFixQ.insert(fixQueueType::value_type(thisChan->getName(), currentTime() + CHANFIX_DELAY));
+}
+
+bool chanfix::shouldCJoin(sqlChannel* sqlChan, bool autofix)
+{
+bool joinchan = false;
+int maxScore;
+time_t lastattempt;
+time_t fixstart;
+
+/* coder notes (mostly so i dont forget -sirv)
+ * if we use this function for simulation then fix start is the both
+ * these times will need to be set as temp vars in sqlChan
+ */
+fixstart = currentTime();
+lastattempt = currentTime();
+
+Channel* netChan = Network->findChannel(sqlChan->getChannel());
+if (!netChan) return joinchan;
+
+chanOpsType myOps = getMyOps(netChan);
+
+if (myOps.begin() != myOps.end())
+  sqlChan->setTMaxScore((*myOps.begin())->getPoints());
+
+maxScore = sqlChan->getTMaxScore();
+
+if (maxScore <= FIX_MIN_ABS_SCORE_END * MAX_SCORE)
+  return joinchan;
+
+unsigned int maxOpped = (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED);
+unsigned int currentOps = countChanOps(netChan);
+
+if (currentOps >= maxOpped) {
+  return joinchan;
+} 
+
+int time_since_start;
+if (autofix)
+  time_since_start = currentTime() - fixstart;
+else
+  time_since_start = currentTime() - (fixstart + CHANFIX_DELAY);
+
+int max_time = (autofix ? AUTOFIX_MAXIMUM : CHANFIX_MAXIMUM);
+
+int min_score_abs = static_cast<int>((MAX_SCORE *
+		static_cast<float>(FIX_MIN_ABS_SCORE_BEGIN)) -
+		static_cast<float>(time_since_start) /
+		static_cast<float>(max_time) *
+		(MAX_SCORE * static_cast<float>(FIX_MIN_ABS_SCORE_BEGIN)
+		 - static_cast<float>(FIX_MIN_ABS_SCORE_END) * MAX_SCORE));
+
+int min_score_rel = static_cast<int>((maxScore *
+		static_cast<float>(FIX_MIN_REL_SCORE_BEGIN)) -
+		static_cast<float>(time_since_start) /
+		static_cast<float>(max_time) *
+		(maxScore * static_cast<float>(FIX_MIN_REL_SCORE_BEGIN)
+		 - static_cast<float>(FIX_MIN_REL_SCORE_END) * maxScore));
+
+int min_score = min_score_abs;
+if (min_score_rel > min_score)
+  min_score = min_score_rel;
+
+if (myOps.begin() != myOps.end())
+  sqlChan->setTMaxScore((*myOps.begin())->getPoints());
+
+if (sqlChan->getTMaxScore() < min_score)
+  min_score = sqlChan->getTMaxScore();
+
+iClient* curClient = 0;
+sqlChanOp* curOp = 0;
+acctListType acctToOp;
+unsigned int numClientsToOp = 0;
+bool cntMaxedOut = false;
+for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
+     opPtr++) {
+  curOp = *opPtr;
+  if (curOp->getPoints() >= min_score) {
+    acctToOp = findAccount(netChan, curOp->getAccount());
+    std::vector< iClient* >::const_iterator acctPtr = acctToOp.begin(),
+	end = acctToOp.end();
+    while (acctPtr != end) {
+      curClient = *acctPtr;
+      if (curClient && !netChan->findUser(curClient)->isModeO()) {
+	if ((++numClientsToOp + currentOps) >= maxOpped) {
+          joinchan = true;
+	  cntMaxedOut = true;
+	  break;
+	}
+      }
+      ++acctPtr;
+    }
+    acctToOp.clear();
+    if (cntMaxedOut)
+      break;
+  }
+}
+
+return joinchan;
 }
 
 bool chanfix::fixChan(sqlChannel* sqlChan, bool autofix)

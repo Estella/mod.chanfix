@@ -233,6 +233,8 @@ public:
 	void findChannelService();
 	const int chanfix::getLastFix(sqlChannel*);
 
+	bool shouldCJoin(sqlChannel*, bool);
+
 	void autoFix();
 	void manualFix(Channel*);
 
