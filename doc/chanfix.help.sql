@@ -34,6 +34,7 @@ RELOAD	1	Completely reloads chanfix.\nNOTE: This will subject chanfix to a recon
 REQUESTOP	1	Performs a fix on the specified channel. Append CONTACT if you wish that the top 10 ops for the channel be noticed about the fix before the fix happens.
 SCORE	1	Without extra arguments, shows the top scores of <channel>.\nOtherwise, it shows the score of either an <account> or a currently online client <=nick> for <channel>.
 SET	1	Sets various configuration options to the specified values.\nBoolean settings: ENABLE_AUTOFIX, ENABLE_CHANFIX, ENABLE_CHANNEL_BLOCKING.\nInteger settings: NUM_SERVERS.
+SIMULATE	1	Performs a simulated fix on the specified channel. Append AUTO or MANUAL to choose what type of fix to simulate upon the channel. 
 STATUS	1	Shows current statistics such as: uptime, percentage network presence, fix and block settings.
 SUSPEND	1	Suspends the specified user.
 TEMPBLOCK	1	Temporary blocks a channel from being fixed, both automatically and manually.\nThe reason will be shown when doing INFO <channel>.
@@ -52,7 +53,7 @@ WHOGROUP	1	Shows all users in the specified group along with their flags. If no 
 <INDEXLOGGEDIN>	1	\002Logged In\002: LISTHOSTS USET USERSCORES WHOIS
 <INDEXBLOCK>	1	\002Blocker (+b)\002: BLOCK TEMPBLOCK UNBLOCK UNTEMPBLOCK LISTBLOCKED LISTTEMPBLOCKED
 <INDEXCOMMENT>	1	\002Commenter (+c)\002: ADDNOTE DELNOTE ALERT UNALERT
-<INDEXCHANFIX>	1	\002Chanfixer (+f)\002: CHANFIX
+<INDEXCHANFIX>	1	\002Chanfixer (+f)\002: CHANFIX SIMULATE
 <INDEXOWNER>	1	\002Owner (+o)\002: LASTCOM REHASH RELOAD SET SHUTDOWN
 <INDEXSERVERADMIN>	1	\002Server Admin (+a)\002: ADDUSER DELUSER ADDHOST DELHOST ADDFLAG DELFLAG WHOGROUP SUSPEND UNSUSPEND
 <INDEXUSERADMIN>	1	\002User Manager (+u)\002: ADDUSER DELUSER ADDHOST DELHOST ADDFLAG DELFLAG SETGROUP WHOGROUP SUSPEND UNSUSPEND

@@ -286,6 +286,11 @@ RegisterCommand(new SETGROUPCommand(this, "SETGROUP",
 	3,
 	sqlUser::F_USERMANAGER
 	));
+RegisterCommand(new SIMULATECommand(this, "SIMULATE",
+	"<#channel> <auto/manual>",
+	3,
+	sqlUser::F_CHANFIX
+	));
 RegisterCommand(new SHUTDOWNCommand(this, "SHUTDOWN",
 	"[reason]",
 	1,
@@ -566,6 +571,7 @@ else if (theTimer == tidFixQ) {
   /* Refresh Timer */
   theTime = time(NULL) + PROCESS_QUEUE_TIME;
   tidFixQ = MyUplink->RegisterTimer(theTime, this, NULL);
+  setNextFix(currentTime() + PROCESS_QUEUE_TIME);
 }
 else if (theTimer == tidRotateDB) {
   /* Clean-up the database if its 00 GMT */
@@ -1949,6 +1955,218 @@ if (doManualFixNotice()  && shouldCJoin(sqlChan, false))
 manFixQ.insert(fixQueueType::value_type(thisChan->getName(), currentTime() + CHANFIX_DELAY));
 }
 
+
+void chanfix::insertop(sqlChanOp* curOp, sqlChannel* sqlChan)
+{
+  simOppedStruct curStruct;
+
+  curStruct.account = curOp->getAccount();
+  curStruct.channel = sqlChan->getChannel();
+      
+  simMap.insert(SimMapType::value_type(sqlChan->getChannel(), curStruct));
+
+  return;
+}
+
+bool chanfix::findop(sqlChanOp* curOp, sqlChannel* sqlChan)
+{
+  for (SimMapType::iterator ptr = simMap.begin();
+       ptr != simMap.end(); ptr++) {
+
+    if ((ptr->first == sqlChan->getChannel()) && (ptr->second.account == curOp->getAccount()))
+      return true;
+  }
+
+  return false;
+}
+
+void chanfix::removechan(sqlChannel* sqlChan)
+{
+  simMap.erase(sqlChan->getChannel());
+  return;
+}
+
+bool chanfix::simFix(sqlChannel* sqlChan, bool autofix, time_t c_Time, iClient* theClient, sqlUser* theUser)
+{
+if (sqlChan->getSimStart() == 0) sqlChan->setSimStart(c_Time);
+sqlChan->setLastSimAttempt(c_Time);
+
+Channel* netChan = Network->findChannel(sqlChan->getChannel());
+if (!netChan) return true;
+
+chanOpsType myOps = getMyOps(netChan);
+
+if (myOps.begin() != myOps.end())
+  sqlChan->setTMaxScore((*myOps.begin())->getPoints());
+
+int maxScore = sqlChan->getTMaxScore();
+if (maxScore <= FIX_MIN_ABS_SCORE_END * MAX_SCORE)
+  return false;
+
+unsigned int maxOpped = (autofix ? AUTOFIX_NUM_OPPED : CHANFIX_NUM_OPPED);
+
+unsigned int currentOps = sqlChan->getAmountSimOpped();
+if (currentOps >= maxOpped)
+  return true;
+
+int time_since_start;
+if (autofix)
+  time_since_start = c_Time - sqlChan->getSimStart();
+else
+  time_since_start = c_Time - (sqlChan->getSimStart() + CHANFIX_DELAY);
+
+int max_time = (autofix ? AUTOFIX_MAXIMUM : CHANFIX_MAXIMUM);
+int min_score_abs = static_cast<int>((MAX_SCORE *
+		static_cast<float>(FIX_MIN_ABS_SCORE_BEGIN)) -
+		static_cast<float>(time_since_start) /
+		static_cast<float>(max_time) *
+		(MAX_SCORE * static_cast<float>(FIX_MIN_ABS_SCORE_BEGIN)
+		 - static_cast<float>(FIX_MIN_ABS_SCORE_END) * MAX_SCORE));
+
+int min_score_rel = static_cast<int>((maxScore *
+		static_cast<float>(FIX_MIN_REL_SCORE_BEGIN)) -
+		static_cast<float>(time_since_start) /
+		static_cast<float>(max_time) *
+		(maxScore * static_cast<float>(FIX_MIN_REL_SCORE_BEGIN)
+		 - static_cast<float>(FIX_MIN_REL_SCORE_END) * maxScore));
+
+int min_score = min_score_abs;
+if (min_score_rel > min_score)
+  min_score = min_score_rel;
+
+if (myOps.begin() != myOps.end())
+  sqlChan->setTMaxScore((*myOps.begin())->getPoints());
+
+if (sqlChan->getTMaxScore() < min_score)
+  min_score = sqlChan->getTMaxScore();
+
+unsigned int amtopped;
+iClient* curClient = 0;
+sqlChanOp* curOp = 0;
+acctListType acctToOp;
+std::string modes = "+";
+std::string args;
+unsigned int numClientsToOp = 0;
+bool cntMaxedOut = false;
+for (chanOpsType::iterator opPtr = myOps.begin(); opPtr != myOps.end();
+     opPtr++) {
+  curOp = *opPtr;
+  if (curOp->getPoints() >= min_score) {
+    acctToOp = findAccount(netChan, curOp->getAccount());
+    std::vector< iClient* >::const_iterator acctPtr = acctToOp.begin(),
+	end = acctToOp.end();
+    while (acctPtr != end) {
+      curClient = *acctPtr;
+      if (curClient && !findop(curOp, sqlChan)) {
+        amtopped = sqlChan->getAmountSimOpped();
+        amtopped++;
+        sqlChan->setAmountSimOpped(amtopped);
+
+	insertop(curOp, sqlChan);
+	if (!args.empty())
+	  args += " ";
+	args += curClient->getNickName();
+
+	if ((++numClientsToOp + currentOps) >= maxOpped) {
+	  cntMaxedOut = true;
+	  break;
+	}
+      }
+      ++acctPtr;
+    }
+    acctToOp.clear();
+    if (cntMaxedOut)
+      break;
+  }
+}
+
+if ((!numClientsToOp || maxScore < min_score) &&
+    (!autofix || !(numClientsToOp + currentOps))) {
+  if (autofix && !sqlChan->getSimModesRemoved()) {
+
+    if (netChan->banList_size() ||
+        netChan->getMode(Channel::MODE_I) ||
+        netChan->getMode(Channel::MODE_K) ||
+        netChan->getMode(Channel::MODE_L) ||
+        netChan->getMode(Channel::MODE_R) ||
+        netChan->getMode(Channel::MODE_D)) {
+
+      sqlChan->setSimModesRemoved(true);
+      SendTo(theClient,
+                getResponse(theUser,
+                                 language::sim_modes_removed,
+                                 std::string("(%s) Channel modes have been removed.")).c_str(),
+                                 tsToDateTime(c_Time, true).c_str());
+    }
+  }
+return false;
+}
+
+
+if (numClientsToOp) {
+  SendTo(theClient,
+            getResponse(theUser,
+                             language::sim_opping,
+                             std::string("(%s) Opping: %s (%d Clients)")).c_str(),
+                             tsToDateTime(c_Time, true).c_str(), args.c_str(), numClientsToOp);
+}
+
+if (numClientsToOp + currentOps >= netChan->size() ||
+    numClientsToOp + currentOps >= maxOpped)
+  return true;
+
+return false;
+}
+
+bool chanfix::simulateFix(sqlChannel* sqlChan, bool autofix, iClient* theClient, sqlUser* theUser)
+{
+  bool isFixed = false;
+  time_t t = getNextFix(); /* currentTime() + tidFixQ; */
+  time_t next_fix = t + PROCESS_QUEUE_TIME;
+
+  /* Modes are always removed straight when a CHANFIX command is issued
+     for a channel (manual fix). */
+  if (autofix == false)
+    SendTo(theClient,
+              getResponse(theUser,
+                               language::sim_modes_removed,
+                               std::string("(%s) Channel modes have been removed.")).c_str(),
+                               tsToDateTime(currentTime(), true).c_str());
+
+  while (t) {
+    if (next_fix == t) {
+      if (autofix) {
+        if (t - sqlChan->getSimStart() > AUTOFIX_MAXIMUM) {
+          isFixed = simFix(sqlChan, autofix, t, theClient, theUser);
+        }
+      } else {
+        if (t - sqlChan->getSimStart() > CHANFIX_MAXIMUM) {
+          isFixed = simFix(sqlChan, autofix, t, theClient, theUser);
+        }
+      }
+
+      next_fix = t + PROCESS_QUEUE_TIME;
+    }
+
+    if (isFixed)
+      break;
+    else
+      t++;
+  }
+
+  /* Cleanup */
+  removechan(sqlChan);
+
+  sqlChan->setSimStart(0);
+  sqlChan->setLastSimAttempt(0);
+  sqlChan->setAmountSimOpped(0);
+  sqlChan->setSimModesRemoved(false);
+
+  return isFixed;
+}
+
+
+
 bool chanfix::shouldCJoin(sqlChannel* sqlChan, bool autofix)
 {
 bool joinchan = false;
@@ -3040,6 +3258,8 @@ else if (whichEvent == sqlChannel::EV_NOTE)
   return "NOTE";
 else if (whichEvent == sqlChannel::EV_CHANFIX)
   return "CHANFIX";
+else if (whichEvent == sqlChannel::EV_SIMULATE)
+  return "SIMULATE";
 else if (whichEvent == sqlChannel::EV_REQUESTOP)
   return "REQUESTOP";
 else if (whichEvent == sqlChannel::EV_BLOCK)

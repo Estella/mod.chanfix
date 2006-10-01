@@ -233,6 +233,13 @@ public:
 	void findChannelService();
 	const int chanfix::getLastFix(sqlChannel*);
 
+	void chanfix::insertop(sqlChanOp*, sqlChannel*);
+	bool chanfix::findop(sqlChanOp*, sqlChannel*);
+	void chanfix::removechan(sqlChannel*);
+
+	bool simFix(sqlChannel*, bool, time_t, iClient*, sqlUser*);
+	bool simulateFix(sqlChannel*, bool, iClient*, sqlUser*);
+
 	bool shouldCJoin(sqlChannel*, bool);
 
 	void autoFix();
@@ -349,6 +356,14 @@ public:
 	typedef std::map <std::string, time_t, noCaseCompare> tempBlockType;
 	tempBlockType		tempBlockList;
 	
+	typedef struct {
+	    std::string account;
+	    std::string channel;
+	} simOppedStruct;
+
+	typedef std::multimap<std::string, simOppedStruct> SimMapType;
+	SimMapType		simMap;
+
 	/**
 	 * The snapshot map for updating the SQL database
 	 */
@@ -439,6 +454,7 @@ public:
 	int		minRequestOpTime;
 	unsigned int	version;
 	bool		useBurstToFix;
+	unsigned int	nextFix;
 	unsigned int	numServers;
 	unsigned int	minServersPresent;
 	std::string	chanServName;
@@ -521,11 +537,14 @@ public:
 	unsigned int getMinServersPresent() { return minServersPresent; }
 	unsigned int getNumTopScores() { return numTopScores; }
 	unsigned int getMinClients() { return minClients; }
+	unsigned int getNextFix() { return nextFix; }
 	short getCurrentDay() { return currentDay; }
 
 	/*
 	 *  Methods to set data attributes.
 	 */
+	inline void	setNextFix(int _nextFix)
+		{ nextFix = _nextFix; }
 	inline void	setNumServers(int _numServers)
 		{ numServers = _numServers; }
 	inline void	setDoAutoFix(bool _enableAutoFix)

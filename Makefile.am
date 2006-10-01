@@ -37,6 +37,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	SETCommand.cc \
 	SETGROUPCommand.cc \
 	SHUTDOWNCommand.cc \
+	SIMULATECommand.cc \
 	STATUSCommand.cc \
 	SUSPENDCommand.cc \
 	TEMPBLOCKCommand.cc \

@@ -51,6 +51,7 @@ const int sqlChannel::EV_UNALERT	= 7  ; /* Channel unalert */
 const int sqlChannel::EV_REQUESTOP	= 8  ; /* Requestops */
 const int sqlChannel::EV_TEMPBLOCK	= 9  ; /* Temp channel block */
 const int sqlChannel::EV_UNTEMPBLOCK	= 10 ; /* Temp channel unblock */
+const int sqlChannel::EV_SIMULATE	= 11 ; /* Fix simulation */
 
 unsigned long int sqlChannel::maxUserId = 0;
 

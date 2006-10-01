@@ -89,6 +89,7 @@ am_libchanfix_la_OBJECTS = libchanfix_la-chanfix.lo \
 	libchanfix_la-SCORECommand.lo libchanfix_la-SAYCommand.lo \
 	libchanfix_la-SETCommand.lo libchanfix_la-SETGROUPCommand.lo \
 	libchanfix_la-SHUTDOWNCommand.lo \
+	libchanfix_la-SIMULATECommand.lo \
 	libchanfix_la-STATUSCommand.lo libchanfix_la-SUSPENDCommand.lo \
 	libchanfix_la-TEMPBLOCKCommand.lo \
 	libchanfix_la-UNALERTCommand.lo \
@@ -270,6 +271,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	SETCommand.cc \
 	SETGROUPCommand.cc \
 	SHUTDOWNCommand.cc \
+	SIMULATECommand.cc \
 	STATUSCommand.cc \
 	SUSPENDCommand.cc \
 	TEMPBLOCKCommand.cc \
@@ -436,6 +438,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SETCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SETGROUPCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SHUTDOWNCommand.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SIMULATECommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-STATUSCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SUSPENDCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-TEMPBLOCKCommand.Plo@am__quote@
@@ -711,6 +714,13 @@ libchanfix_la-SHUTDOWNCommand.lo: SHUTDOWNCommand.cc
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='SHUTDOWNCommand.cc' object='libchanfix_la-SHUTDOWNCommand.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-SHUTDOWNCommand.lo `test -f 'SHUTDOWNCommand.cc' || echo '$(srcdir)/'`SHUTDOWNCommand.cc
+
+libchanfix_la-SIMULATECommand.lo: SIMULATECommand.cc
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-SIMULATECommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-SIMULATECommand.Tpo" -c -o libchanfix_la-SIMULATECommand.lo `test -f 'SIMULATECommand.cc' || echo '$(srcdir)/'`SIMULATECommand.cc; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/libchanfix_la-SIMULATECommand.Tpo" "$(DEPDIR)/libchanfix_la-SIMULATECommand.Plo"; else rm -f "$(DEPDIR)/libchanfix_la-SIMULATECommand.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='SIMULATECommand.cc' object='libchanfix_la-SIMULATECommand.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-SIMULATECommand.lo `test -f 'SIMULATECommand.cc' || echo '$(srcdir)/'`SIMULATECommand.cc
 
 libchanfix_la-STATUSCommand.lo: STATUSCommand.cc
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -MT libchanfix_la-STATUSCommand.lo -MD -MP -MF "$(DEPDIR)/libchanfix_la-STATUSCommand.Tpo" -c -o libchanfix_la-STATUSCommand.lo `test -f 'STATUSCommand.cc' || echo '$(srcdir)/'`STATUSCommand.cc; \

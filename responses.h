@@ -236,6 +236,11 @@ namespace cf
 		const int shutting_down			= 110;
 		const int update_in_progress		= 173;
 
+		/* SIMULATE */
+		const int manual_simulate_complete	= 221;
+		const int manual_simulate_starting	= 224;
+		const int manual_simulate_estimate	= 225;
+
 		/* STATUS */
 		const int status_uptime			= 111;
 		const int status_auto_fixing		= 112;
@@ -325,6 +330,8 @@ namespace cf
 		const int requires_auth_and_flags	= 153;
 		const int syntax			= 154;
 		const int no_commands_during_burst_noper	= 203;
+		const int sim_opping			= 222;
+		const int sim_modes_removed		= 223;
 
 	} // namespace language
 } // namespace cf

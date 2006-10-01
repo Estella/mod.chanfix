@@ -224,4 +224,9 @@ COPY "translations" FROM stdin;
 1	218	WARNING: Channel %s is being automatically fixed; aborting fix as per TEMPBLOCK.	31337	0
 1	219	The channel %s is not temp blocked.	31337	0
 1	220	Channel %s has been untempblocked.	31337	0
+1	221	Simulate complete for %s	31337	0
+1	222	(%s) Opping: %s (%d Clients)	31337	0
+1	223	(%s) Channel modes have been removed.	31337	0
+1	224	Simulate for %s (%s) starting at next fixing round (Current C time %s).	31337	0
+1	225	NOTE: This is only an estimate, if ops with points join or part it could affect who gets opped.	31337	0
 \.
