@@ -2121,7 +2121,8 @@ return false;
 bool chanfix::simulateFix(sqlChannel* sqlChan, bool autofix, iClient* theClient, sqlUser* theUser)
 {
   bool isFixed = false;
-  time_t t = getNextFix(); /* currentTime() + tidFixQ; */
+  time_t t = getNextFix();
+  time_t end_fix = t + 86400; /* 1 Day */
   time_t next_fix = t + PROCESS_QUEUE_TIME;
 
   /* Modes are always removed straight when a CHANFIX command is issued
@@ -2148,7 +2149,7 @@ bool chanfix::simulateFix(sqlChannel* sqlChan, bool autofix, iClient* theClient,
       next_fix = t + PROCESS_QUEUE_TIME;
     }
 
-    if (isFixed)
+    if (isFixed || (t == end_fix))
       break;
     else
       t++;
