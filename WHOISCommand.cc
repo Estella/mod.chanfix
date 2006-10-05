@@ -30,7 +30,7 @@
 #include "chanfix.h"
 #include "responses.h"
 #include "StringTokenizer.h"
-#include "sqlUser.h"
+#include "sqlcfUser.h"
 
 RCSTAG("$Id$");
 
@@ -39,7 +39,7 @@ namespace gnuworld
 namespace cf
 {
 
-void WHOISCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void WHOISCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 
@@ -56,7 +56,7 @@ if (st[1] == "*") {
                               std::string("List of all users:")).c_str());
   chanfix::usersIterator ptr = bot->usersMap_begin();
   while (ptr != bot->usersMap_end()) {
-    sqlUser* tmpUser = ptr->second;
+    sqlcfUser* tmpUser = ptr->second;
     bot->SendTo(theClient,
 		bot->getResponse(theUser,
 			language::user_flags_group,
@@ -75,7 +75,7 @@ if (st[1] == "*") {
   return;
 }
 
-sqlUser* theUser2 = bot->isAuthed(st[1]);
+sqlcfUser* theUser2 = bot->isAuthed(st[1]);
 
 const char* username = st[1].c_str();
 if (username[0] == '=') {

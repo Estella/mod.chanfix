@@ -31,7 +31,7 @@
 
 #include	"chanfix.h"
 #include	"responses.h"
-#include	"sqlUser.h"
+#include	"sqlcfUser.h"
 
 RCSTAG("$Id$");
 
@@ -40,7 +40,7 @@ namespace gnuworld
 namespace cf
 {
 
-void USETCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void USETCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 
@@ -48,13 +48,13 @@ std::string option;
 std::string value;
 
 if (st.size() == 4) {
-  sqlUser* targetUser = bot->isAuthed(st[1]);
+  sqlcfUser* targetUser = bot->isAuthed(st[1]);
   option = string_upper(st[2]);
   value = string_upper(st[3]);
-  sqlUser::flagType requiredFlags;
+  sqlcfUser::flagType requiredFlags;
 
   if (option == "NEEDOPER") {
-    requiredFlags = sqlUser::F_USERMANAGER;
+    requiredFlags = sqlcfUser::F_USERMANAGER;
     if (!theUser->getFlag(requiredFlags)) {
       bot->SendTo(theClient,
 		  bot->getResponse(theUser,

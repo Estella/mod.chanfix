@@ -27,7 +27,7 @@ namespace gnuworld {
 namespace cf {
 
 class chanfix;
-class sqlUser;
+class sqlcfUser;
 
 class Command {
 public:
@@ -38,7 +38,7 @@ public:
 
 	virtual ~Command() { }
 	
-	virtual void Exec(iClient*, sqlUser*, const std::string&) = 0;
+	virtual void Exec(iClient*, sqlcfUser*, const std::string&) = 0;
 	
 	void setServer(xServer *_server)
 		{ server = _server; }
@@ -81,7 +81,7 @@ class commandName##Command : public Command \
       unsigned short int _requiredFlags) : \
 	Command(_bot, _commandName, _help, _numParams, _requiredFlags) {} \
     virtual ~commandName##Command() {} \
-    virtual void Exec(iClient*, sqlUser*, const std::string&); \
+    virtual void Exec(iClient*, sqlcfUser*, const std::string&); \
 };
 
 /* Normal user commands */

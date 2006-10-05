@@ -31,7 +31,7 @@
 #include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlChannel.h"
-#include "sqlUser.h"
+#include "sqlcfUser.h"
 
 RCSTAG("$Id$");
 
@@ -39,7 +39,7 @@ namespace gnuworld
 {
 namespace cf
 {
-void LISTBLOCKEDCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void LISTBLOCKEDCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 
 /* Check if channel blocking has been disabled in the config. */

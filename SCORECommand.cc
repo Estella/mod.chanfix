@@ -35,7 +35,7 @@
 #include "StringTokenizer.h"
 #include "sqlChannel.h"
 #include "sqlChanOp.h"
-#include "sqlUser.h"
+#include "sqlcfUser.h"
 
 RCSTAG("$Id$");
 
@@ -44,7 +44,7 @@ namespace gnuworld
 namespace cf
 {
 
-void SCORECommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void SCORECommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 

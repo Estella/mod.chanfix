@@ -37,7 +37,7 @@ namespace gnuworld
 namespace cf
 {
 
-void REHASHCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void REHASHCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 

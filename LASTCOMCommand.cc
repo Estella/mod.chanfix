@@ -37,7 +37,7 @@
 #include        "responses.h"
 #include        "sqlChanOp.h"
 #include        "sqlChannel.h"
-#include        "sqlUser.h"
+#include        "sqlcfUser.h"
 
 #include        "Network.h"
 #include	"iClient.h"
@@ -53,7 +53,7 @@ namespace gnuworld
 namespace cf
 {
 
-void LASTCOMCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void LASTCOMCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 StringTokenizer st( Message ) ;
 unsigned int NumOfCom;

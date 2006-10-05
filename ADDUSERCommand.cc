@@ -30,7 +30,7 @@
 #include "chanfix.h"
 #include "responses.h"
 #include "StringTokenizer.h"
-#include "sqlUser.h"
+#include "sqlcfUser.h"
 
 RCSTAG("$Id$");
 
@@ -38,11 +38,11 @@ namespace gnuworld
 {
 namespace cf
 {
-void ADDUSERCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void ADDUSERCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 
-sqlUser* targetUser = bot->isAuthed(st[1]);
+sqlcfUser* targetUser = bot->isAuthed(st[1]);
 if (targetUser) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
@@ -51,7 +51,7 @@ if (targetUser) {
   return;
 }
 
-sqlUser *newUser = new sqlUser(bot->theManager);
+sqlcfUser *newUser = new sqlcfUser(bot->theManager);
 assert(newUser != 0);
 newUser->setUserName(st[1]);
 newUser->setCreated(bot->currentTime());
@@ -64,8 +64,8 @@ newUser->setLastUpdatedBy( std::string( "("
 	+ theClient->getRealNickUserHost() ) );
 
 /* A user added by a serveradmin automatically has the same group. */
-if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
-    !theUser->getFlag(sqlUser::F_USERMANAGER))
+if (theUser->getFlag(sqlcfUser::F_SERVERADMIN) &&
+    !theUser->getFlag(sqlcfUser::F_USERMANAGER))
   newUser->setGroup(theUser->getGroup());
 else
   newUser->setGroup("undernet.org");

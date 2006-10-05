@@ -56,7 +56,7 @@
 #include	"responses.h"
 #include	"sqlChanOp.h"
 #include	"sqlChannel.h"
-#include	"sqlUser.h"
+#include	"sqlcfUser.h"
 
 #ifdef CHANFIX_HAVE_BOOST_THREAD
 #include	<boost/thread/thread.hpp>
@@ -108,7 +108,7 @@ chanServLinked = false;
 updateInProgress = false;
 
 std::string dbString = "host=" + sqlHost + " dbname=" + sqlDB
-  + " port=" + sqlPort + " user=" + sqlUsername + " password=" + sqlPass;
+  + " port=" + sqlPort + " user=" + sqlcfUsername + " password=" + sqlPass;
 
 theManager = sqlManager::getInstance(dbString);
 
@@ -120,32 +120,32 @@ debugLog.open(debugLogFile.c_str(), std::ios::out | std::ios::app);
 RegisterCommand(new ADDFLAGCommand(this, "ADDFLAG",
 	"<username> <flag>",
 	3,
-	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
+	sqlcfUser::F_USERMANAGER | sqlcfUser::F_SERVERADMIN
 	));
 RegisterCommand(new ADDHOSTCommand(this, "ADDHOST",
 	"<username> <nick!user@host>",
 	3,
-	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
+	sqlcfUser::F_USERMANAGER | sqlcfUser::F_SERVERADMIN
 	));
 RegisterCommand(new ADDNOTECommand(this, "ADDNOTE",
 	"<#channel> <reason>",
 	3,
-	sqlUser::F_COMMENT
+	sqlcfUser::F_COMMENT
 	));
 RegisterCommand(new ADDUSERCommand(this, "ADDUSER",
 	"<username> [host]",
 	2,
-	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
+	sqlcfUser::F_USERMANAGER | sqlcfUser::F_SERVERADMIN
 	));
 RegisterCommand(new ALERTCommand(this, "ALERT",
 	"<#channel> [reason]",
 	2,
-	sqlUser::F_COMMENT
+	sqlcfUser::F_COMMENT
 	));
 RegisterCommand(new BLOCKCommand(this, "BLOCK",
 	"<#channel> <reason>",
 	3,
-	sqlUser::F_BLOCK
+	sqlcfUser::F_BLOCK
 	));
 RegisterCommand(new CANFIXCommand(this, "CANFIX",
 	"<#channel>",
@@ -155,7 +155,7 @@ RegisterCommand(new CANFIXCommand(this, "CANFIX",
 RegisterCommand(new CHANFIXCommand(this, "CHANFIX",
 	"<#channel> [override] [contact]",
 	2,
-	sqlUser::F_CHANFIX
+	sqlcfUser::F_CHANFIX
 	));
 RegisterCommand(new CHECKCommand(this, "CHECK",
 	"<#channel>",
@@ -166,28 +166,28 @@ RegisterCommand(new CHECKCommand(this, "CHECK",
 RegisterCommand(new DEBUGCommand(this, "DEBUG",
 	"<ROTATE|UPDATE>",
 	2,
-	sqlUser::F_OWNER
+	sqlcfUser::F_OWNER
 	));
 #endif /* CHANFIX_DEBUG */
 RegisterCommand(new DELFLAGCommand(this, "DELFLAG",
 	"<username> <flag>",
 	3,
-	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
+	sqlcfUser::F_USERMANAGER | sqlcfUser::F_SERVERADMIN
 	));
 RegisterCommand(new DELHOSTCommand(this, "DELHOST",
 	"<username> <nick!user@host>",
 	3,
-	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
+	sqlcfUser::F_USERMANAGER | sqlcfUser::F_SERVERADMIN
 	));
 RegisterCommand(new DELNOTECommand(this, "DELNOTE",
 	"<#channel> <note_id>",
 	3,
-	sqlUser::F_COMMENT
+	sqlcfUser::F_COMMENT
 	));
 RegisterCommand(new DELUSERCommand(this, "DELUSER",
 	"<username>",
 	2,
-	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
+	sqlcfUser::F_USERMANAGER | sqlcfUser::F_SERVERADMIN
 	));
 RegisterCommand(new HELPCommand(this, "HELP",
 	"[command]",
@@ -207,27 +207,27 @@ RegisterCommand(new INFOCommand(this, "INFO",
 RegisterCommand(new INVITECommand(this, "INVITE",
 	"",
 	1,
-	sqlUser::F_OWNER
+	sqlcfUser::F_OWNER
 	));
 RegisterCommand(new LASTCOMCommand(this, "LASTCOM",
 	"[amount of commands] [days from]",
 	1,
-	sqlUser::F_OWNER
+	sqlcfUser::F_OWNER
 	));
 RegisterCommand(new LISTBLOCKEDCommand(this, "LISTBLOCKED",
 	"",
 	1,
-	sqlUser::F_BLOCK
+	sqlcfUser::F_BLOCK
 	));
 RegisterCommand(new LISTHOSTSCommand(this, "LISTHOSTS",
 	"[username]",
 	1,
-	sqlUser::F_LOGGEDIN
+	sqlcfUser::F_LOGGEDIN
 	));
 RegisterCommand(new LISTTEMPBLOCKEDCommand(this, "LISTTEMPBLOCKED",
 	"",
 	1,
-	sqlUser::F_BLOCK
+	sqlcfUser::F_BLOCK
 	));
 RegisterCommand(new OPLISTCommand(this, "OPLIST",
 	"<#channel> [-all] [-days]",
@@ -243,18 +243,18 @@ RegisterCommand(new OPNICKSCommand(this, "OPNICKS",
 RegisterCommand(new QUOTECommand(this, "QUOTE",
 	"<text>",
 	2,
-	sqlUser::F_OWNER
+	sqlcfUser::F_OWNER
 	));
 #endif /* ENABLE_QUOTE */
 RegisterCommand(new REHASHCommand(this, "REHASH",
 	"",
 	1,
-	sqlUser::F_OWNER
+	sqlcfUser::F_OWNER
 	));
 RegisterCommand(new RELOADCommand(this, "RELOAD",
 	"[reason]",
 	1,
-	sqlUser::F_OWNER
+	sqlcfUser::F_OWNER
 	));
 RegisterCommand(new REQUESTOPCommand(this, "REQUESTOP",
 	isAllowingTopOpAlert() ? "<#channel> [contact]" : "<#channel>",
@@ -274,27 +274,27 @@ RegisterCommand(new SCORECommand(this, "CSCORE",
 RegisterCommand(new SAYCommand(this, "SAY",
 	"<#channel> <text>",
 	3,
-	sqlUser::F_OWNER
+	sqlcfUser::F_OWNER
 	));
 RegisterCommand(new SETCommand(this, "SET",
 	"<option> <value>",
 	3,
-	sqlUser::F_OWNER
+	sqlcfUser::F_OWNER
 	));
 RegisterCommand(new SETGROUPCommand(this, "SETGROUP",
 	"<username> <group>",
 	3,
-	sqlUser::F_USERMANAGER
+	sqlcfUser::F_USERMANAGER
 	));
 RegisterCommand(new SIMULATECommand(this, "SIMULATE",
 	"<#channel> <auto/manual>",
 	3,
-	sqlUser::F_CHANFIX
+	sqlcfUser::F_CHANFIX
 	));
 RegisterCommand(new SHUTDOWNCommand(this, "SHUTDOWN",
 	"[reason]",
 	1,
-	sqlUser::F_OWNER
+	sqlcfUser::F_OWNER
 	));
 RegisterCommand(new STATUSCommand(this, "STATUS",
 	"",
@@ -304,52 +304,52 @@ RegisterCommand(new STATUSCommand(this, "STATUS",
 RegisterCommand(new SUSPENDCommand(this, "SUSPEND",
 	"<username>",
 	2,
-	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
+	sqlcfUser::F_USERMANAGER | sqlcfUser::F_SERVERADMIN
 	));
 RegisterCommand(new TEMPBLOCKCommand(this, "TEMPBLOCK",
 	"<#channel>",
 	2,
-	sqlUser::F_BLOCK
+	sqlcfUser::F_BLOCK
 	));
 RegisterCommand(new UNALERTCommand(this, "UNALERT",
 	"<#channel>",
 	2,
-	sqlUser::F_COMMENT
+	sqlcfUser::F_COMMENT
 	));
 RegisterCommand(new UNBLOCKCommand(this, "UNBLOCK",
 	"<#channel>",
 	2,
-	sqlUser::F_BLOCK
+	sqlcfUser::F_BLOCK
 	));
 RegisterCommand(new UNSUSPENDCommand(this, "UNSUSPEND",
 	"<username>",
 	2,
-	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
+	sqlcfUser::F_USERMANAGER | sqlcfUser::F_SERVERADMIN
 	));
 RegisterCommand(new UNTEMPBLOCKCommand(this, "UNTEMPBLOCK",
 	"<#channel>",
 	2,
-	sqlUser::F_BLOCK
+	sqlcfUser::F_BLOCK
 	));
 RegisterCommand(new USERSCORESCommand(this, "USERSCORES",
 	"<account>",
 	2,
-	sqlUser::F_LOGGEDIN
+	sqlcfUser::F_LOGGEDIN
 	));
 RegisterCommand(new USETCommand(this, "USET",
 	"[username] <option> <value>",
 	3,
-	sqlUser::F_LOGGEDIN
+	sqlcfUser::F_LOGGEDIN
 	));
 RegisterCommand(new WHOGROUPCommand(this, "WHOGROUP",
 	"[group]",
 	1,
-	sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN
+	sqlcfUser::F_USERMANAGER | sqlcfUser::F_SERVERADMIN
 	));
 RegisterCommand(new WHOISCommand(this, "WHOIS",
 	"<username|=nick|*> [-modif]",
 	2,
-	sqlUser::F_LOGGEDIN
+	sqlcfUser::F_LOGGEDIN
 	));
 
 /* Set our current day. */
@@ -437,7 +437,7 @@ for (joinChansType::iterator ptr = chansToJoin.begin();
 sqlHost = chanfixConfig->Require("sqlHost")->second;
 sqlPort = chanfixConfig->Require("sqlPort")->second;
 sqlDB = chanfixConfig->Require("sqlDB")->second;
-sqlUsername = chanfixConfig->Require("sqlUser")->second;
+sqlcfUsername = chanfixConfig->Require("sqlcfUser")->second;
 sqlPass = chanfixConfig->Require("sqlPass")->second;
 
 elog	<< "chanfix::readConfigFile> Configuration loaded!"
@@ -651,7 +651,7 @@ xClient::OnDisconnect() ;
 void chanfix::OnPrivateMessage( iClient* theClient,
 	const std::string& Message, bool)
 {
-sqlUser* theUser = isAuthed(theClient->getAccount());
+sqlcfUser* theUser = isAuthed(theClient->getAccount());
 
 if (currentState == BURST) {
   if (theUser)
@@ -695,7 +695,7 @@ if (st.size() < commHandler->second->getNumParams()) {
 }
 
 /* If you change this code, remember to change it in HELPCommand.cc */
-sqlUser::flagType requiredFlags = commHandler->second->getRequiredFlags();
+sqlcfUser::flagType requiredFlags = commHandler->second->getRequiredFlags();
 if (requiredFlags) {
   if (!theUser) {
     SendTo(theClient,
@@ -721,7 +721,7 @@ if (requiredFlags) {
     return;
   }
 
-  if (requiredFlags != sqlUser::F_LOGGEDIN &&
+  if (requiredFlags != sqlcfUser::F_LOGGEDIN &&
       !theUser->getFlag(requiredFlags)) {
     if (getFlagChar(requiredFlags) != ' ')
       SendTo(theClient,
@@ -1166,7 +1166,7 @@ return true;
 
 void chanfix::SendTo(iClient* theClient, const std::string& theMessage)
 {
-sqlUser* theUser = isAuthed(theClient->getAccount());
+sqlcfUser* theUser = isAuthed(theClient->getAccount());
 
 if (theUser && !theUser->getUseNotice())
   Message(theClient, theMessage);
@@ -1189,7 +1189,7 @@ char buffer[512] = { 0 };
 char *b = buffer ;
 const char *m = 0 ;
 
-sqlUser* theUser = isAuthed(theClient->getAccount());
+sqlcfUser* theUser = isAuthed(theClient->getAccount());
 
 for (m = theMessage.c_str(); *m != 0; m++) {
   if (*m == '\n' || *m == '\r') {
@@ -1239,7 +1239,7 @@ va_start( list, Msg ) ;
 vsprintf( buffer, Msg, list ) ;
 va_end( list ) ;
 
-sqlUser* theUser = isAuthed(theClient->getAccount());
+sqlcfUser* theUser = isAuthed(theClient->getAccount());
 
 if (theUser && !theUser->getUseNotice())
   Message(theClient, "%s", buffer);
@@ -1388,7 +1388,7 @@ if (cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
   usersMap.clear();
 
   for (int i = 0; i < cacheCon->Tuples(); ++i) {
-    sqlUser *newUser = new sqlUser(theManager);
+    sqlcfUser *newUser = new sqlcfUser(theManager);
     assert(newUser != 0);
 
     newUser->setAllMembers(cacheCon, i);
@@ -1578,7 +1578,7 @@ size_t chanfix::countMyOps(Channel* theChan)
 return countMyOps(theChan->getName());
 }
 
-const std::string chanfix::getHostList( sqlUser* User)
+const std::string chanfix::getHostList( sqlcfUser* User)
 {
 /* Get a connection instance to our backend */
 PgDatabase* cacheCon = theManager->getConnection();
@@ -1986,7 +1986,7 @@ void chanfix::removechan(sqlChannel* sqlChan)
   return;
 }
 
-bool chanfix::simFix(sqlChannel* sqlChan, bool autofix, time_t c_Time, iClient* theClient, sqlUser* theUser)
+bool chanfix::simFix(sqlChannel* sqlChan, bool autofix, time_t c_Time, iClient* theClient, sqlcfUser* theUser)
 {
 if (sqlChan->getSimStart() == 0) sqlChan->setSimStart(c_Time);
 sqlChan->setLastSimAttempt(c_Time);
@@ -2118,12 +2118,17 @@ if (numClientsToOp + currentOps >= netChan->size() ||
 return false;
 }
 
-bool chanfix::simulateFix(sqlChannel* sqlChan, bool autofix, iClient* theClient, sqlUser* theUser)
+bool chanfix::simulateFix(sqlChannel* sqlChan, bool autofix, iClient* theClient, sqlcfUser* theUser)
 {
   bool isFixed = false;
   time_t t = getNextFix();
   time_t end_fix = t + 86400; /* 1 Day */
   time_t next_fix = t + PROCESS_QUEUE_TIME;
+
+  sqlChan->setSimStart(0);
+  sqlChan->setLastSimAttempt(0);
+  sqlChan->setAmountSimOpped(0);
+  sqlChan->setSimModesRemoved(false);
 
   /* Modes are always removed straight when a CHANFIX command is issued
      for a channel (manual fix). */
@@ -2786,10 +2791,10 @@ ptm = gmtime ( &rawtime );
 return ptm->tm_hour;
 }
 
-sqlUser* chanfix::isAuthed(const std::string Name)
+sqlcfUser* chanfix::isAuthed(const std::string Name)
 {
 //Name = escapeSQLChars(Name);
-sqlUser* tempUser = usersMap[Name];
+sqlcfUser* tempUser = usersMap[Name];
 if (!tempUser)
   usersMap.erase(usersMap.find(Name));
 return tempUser;
@@ -3202,51 +3207,51 @@ for (xNetwork::channelIterator ptr = Network->channels_begin();
 return;
 } //giveAllOpsPoints
 
-char chanfix::getFlagChar(const sqlUser::flagType& whichFlag)
+char chanfix::getFlagChar(const sqlcfUser::flagType& whichFlag)
 {
- if (whichFlag == sqlUser::F_SERVERADMIN)
+ if (whichFlag == sqlcfUser::F_SERVERADMIN)
    return 'a';
- else if (whichFlag == sqlUser::F_BLOCK)
+ else if (whichFlag == sqlcfUser::F_BLOCK)
    return 'b';
- else if (whichFlag == sqlUser::F_COMMENT)
+ else if (whichFlag == sqlcfUser::F_COMMENT)
    return 'c';
- else if (whichFlag == sqlUser::F_CHANFIX)
+ else if (whichFlag == sqlcfUser::F_CHANFIX)
    return 'f';
- else if (whichFlag == sqlUser::F_OWNER)
+ else if (whichFlag == sqlcfUser::F_OWNER)
    return 'o';
- else if (whichFlag == sqlUser::F_USERMANAGER)
+ else if (whichFlag == sqlcfUser::F_USERMANAGER)
    return 'u';
  else
    return ' ';
 }
 
-const std::string chanfix::getFlagsString(const sqlUser::flagType& whichFlags)
+const std::string chanfix::getFlagsString(const sqlcfUser::flagType& whichFlags)
 {
  std::string flagstr;
- if (whichFlags & sqlUser::F_SERVERADMIN)
+ if (whichFlags & sqlcfUser::F_SERVERADMIN)
    flagstr += "a";
- if (whichFlags & sqlUser::F_BLOCK)
+ if (whichFlags & sqlcfUser::F_BLOCK)
    flagstr += "b";
- if (whichFlags & sqlUser::F_COMMENT)
+ if (whichFlags & sqlcfUser::F_COMMENT)
    flagstr += "c";
- if (whichFlags & sqlUser::F_CHANFIX)
+ if (whichFlags & sqlcfUser::F_CHANFIX)
    flagstr += "f";
- if (whichFlags & sqlUser::F_OWNER)
+ if (whichFlags & sqlcfUser::F_OWNER)
    flagstr += "o";
- if (whichFlags & sqlUser::F_USERMANAGER)
+ if (whichFlags & sqlcfUser::F_USERMANAGER)
    flagstr += "u";
 return flagstr;
 }
 
-sqlUser::flagType chanfix::getFlagType(const char whichChar)
+sqlcfUser::flagType chanfix::getFlagType(const char whichChar)
 {
 switch (whichChar) {
-  case 'a': return sqlUser::F_SERVERADMIN;
-  case 'b': return sqlUser::F_BLOCK;
-  case 'c': return sqlUser::F_COMMENT;
-  case 'f': return sqlUser::F_CHANFIX;
-  case 'o': return sqlUser::F_OWNER;
-  case 'u': return sqlUser::F_USERMANAGER;
+  case 'a': return sqlcfUser::F_SERVERADMIN;
+  case 'b': return sqlcfUser::F_BLOCK;
+  case 'c': return sqlcfUser::F_COMMENT;
+  case 'f': return sqlcfUser::F_CHANFIX;
+  case 'o': return sqlcfUser::F_OWNER;
+  case 'u': return sqlcfUser::F_USERMANAGER;
 }
 return 0;
 }
@@ -3279,7 +3284,7 @@ else
   return "";
 }
 
-const std::string chanfix::getHelpMessage(sqlUser* theUser, std::string topic)
+const std::string chanfix::getHelpMessage(sqlcfUser* theUser, std::string topic)
 {
 int lang_id = 1;
 
@@ -3325,7 +3330,7 @@ theManager->removeConnection(cacheCon);
 return;
 }
 
-const std::string chanfix::getResponse( sqlUser* theUser,
+const std::string chanfix::getResponse( sqlcfUser* theUser,
 	int response_id, std::string msg )
 {
 
@@ -3440,8 +3445,8 @@ if (cacheCon->Status() == CONNECTION_BAD) { //Check if the connection has died
   MsgChanLog("Attempting to reconnect, Attempt %d out of %d\n",
 	     connectCount+1,connectRetry+1);
   std::string Query = "host=" + sqlHost + " dbname=" + sqlDB + " port=" + sqlPort;
-  if (strcasecmp(sqlUser,"''"))
-    Query += (" user=" + sqlUser);
+  if (strcasecmp(sqlcfUser,"''"))
+    Query += (" user=" + sqlcfUser);
   if (strcasecmp(sqlPass,"''"))
     Query += (" password=" + sqlPass);
   theManager = new (std::nothrow) cmDatabase(Query.c_str());
@@ -3496,7 +3501,7 @@ for(serversIterator ptr = serversMap.begin();ptr != serversMap.end();++ptr)
 
 void Command::Usage( iClient* theClient )
 {
-sqlUser* theUser = bot->isAuthed(theClient->getAccount());
+sqlcfUser* theUser = bot->isAuthed(theClient->getAccount());
 bot->SendTo(theClient,
             bot->getResponse(theUser,
                              language::syntax,

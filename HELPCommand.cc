@@ -30,7 +30,7 @@
 #include "chanfixCommands.h"
 #include "responses.h"
 #include "StringTokenizer.h"
-#include "sqlUser.h"
+#include "sqlcfUser.h"
 
 RCSTAG("$Id$");
 
@@ -39,7 +39,7 @@ namespace gnuworld
 namespace cf
 {
 
-void HELPCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void HELPCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 
@@ -55,22 +55,22 @@ if (st.size() < 2) {
 
   bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXLOGGEDIN>"));
 
-  if (theUser->getFlag(sqlUser::F_SERVERADMIN))
+  if (theUser->getFlag(sqlcfUser::F_SERVERADMIN))
     bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXSERVERADMIN>"));
 
-  if (theUser->getFlag(sqlUser::F_BLOCK))
+  if (theUser->getFlag(sqlcfUser::F_BLOCK))
     bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXBLOCK>"));
 
-  if (theUser->getFlag(sqlUser::F_COMMENT))
+  if (theUser->getFlag(sqlcfUser::F_COMMENT))
     bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXCOMMENT>"));
 
-  if (theUser->getFlag(sqlUser::F_CHANFIX))
+  if (theUser->getFlag(sqlcfUser::F_CHANFIX))
     bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXCHANFIX>"));
 
-  if (theUser->getFlag(sqlUser::F_OWNER))
+  if (theUser->getFlag(sqlcfUser::F_OWNER))
     bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXOWNER>"));
 
-  if (theUser->getFlag(sqlUser::F_USERMANAGER))
+  if (theUser->getFlag(sqlcfUser::F_USERMANAGER))
     bot->SendTo(theClient, bot->getHelpMessage(theUser, "<INDEXUSERADMIN>"));
 
 } else {
@@ -90,9 +90,9 @@ if (st.size() < 2) {
 
     if (real) {
       /* If you change this code, remember to change it in chanfix.cc */
-      sqlUser::flagType requiredFlags = commHandler->second->getRequiredFlags();
+      sqlcfUser::flagType requiredFlags = commHandler->second->getRequiredFlags();
       if (requiredFlags) {
-	if (requiredFlags == sqlUser::F_LOGGEDIN)
+	if (requiredFlags == sqlcfUser::F_LOGGEDIN)
 	  bot->SendTo(theClient, "This command requires authentication.");
 	else {
 	  if (bot->getFlagChar(requiredFlags) != ' ')

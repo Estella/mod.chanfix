@@ -30,7 +30,7 @@
 #include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlChannel.h"
-#include "sqlUser.h"
+#include "sqlcfUser.h"
 
 RCSTAG("$Id$");
 
@@ -39,7 +39,7 @@ namespace gnuworld
 namespace cf
 {
 
-void DELNOTECommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void DELNOTECommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 
@@ -115,7 +115,7 @@ if (channelID != theChan->getID()) {
   return;
 }
 
-if (string_lower(user_name) != string_lower(theUser->getUserName()) && !theUser->getFlag(sqlUser::F_USERMANAGER)) {
+if (string_lower(user_name) != string_lower(theUser->getUserName()) && !theUser->getFlag(sqlcfUser::F_USERMANAGER)) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::note_not_added_by_you,
@@ -124,7 +124,7 @@ if (string_lower(user_name) != string_lower(theUser->getUserName()) && !theUser-
   return;
 }
 
-if (eventType != sqlChannel::EV_NOTE && !theUser->getFlag(sqlUser::F_OWNER)) {
+if (eventType != sqlChannel::EV_NOTE && !theUser->getFlag(sqlcfUser::F_OWNER)) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::note_not_manually_added,

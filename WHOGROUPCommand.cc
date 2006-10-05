@@ -29,7 +29,7 @@
 #include "chanfix.h"
 #include "responses.h"
 #include "StringTokenizer.h"
-#include "sqlUser.h"
+#include "sqlcfUser.h"
 
 RCSTAG("$Id$");
 
@@ -38,7 +38,7 @@ namespace gnuworld
 namespace cf
 {
 
-void WHOGROUPCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void WHOGROUPCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 
@@ -86,8 +86,8 @@ if (st.size() == 1) {
 }
 	
 /* A serveradmin can only WHOGROUP on his/her own group. */
-if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
-    !theUser->getFlag(sqlUser::F_USERMANAGER)) {
+if (theUser->getFlag(sqlcfUser::F_SERVERADMIN) &&
+    !theUser->getFlag(sqlcfUser::F_USERMANAGER)) {
   if (string_lower(st[1]) != theUser->getGroup()) {
     bot->SendTo(theClient,
                 bot->getResponse(theUser,
@@ -107,7 +107,7 @@ std::string groupUsers;
 unsigned int numUsersInGroup = 0;
 chanfix::usersIterator ptr = bot->usersMap_begin();
 while (ptr != bot->usersMap_end()) {
-  sqlUser* tmpUser = ptr->second;
+  sqlcfUser* tmpUser = ptr->second;
   if (tmpUser->getGroup() == string_lower(st[1])) {
     if (numUsersInGroup++ && !groupUsers.empty())
       groupUsers += " ";

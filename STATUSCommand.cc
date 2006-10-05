@@ -41,7 +41,7 @@ namespace gnuworld
 namespace cf
 {
 
-void STATUSCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void STATUSCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 
 bot->SendTo(theClient, "[evilnet development's GNUWorld %s]",

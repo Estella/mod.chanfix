@@ -33,7 +33,7 @@
 #include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlChanOp.h"
-#include "sqlUser.h"
+#include "sqlcfUser.h"
 
 RCSTAG("$Id$");
 
@@ -42,7 +42,7 @@ namespace gnuworld
 namespace cf
 {
 
-void USERSCORESCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void USERSCORESCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 

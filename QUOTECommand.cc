@@ -39,7 +39,7 @@ namespace gnuworld
 namespace cf
 {
 
-void QUOTECommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void QUOTECommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 #ifndef ENABLE_QUOTE
 return;

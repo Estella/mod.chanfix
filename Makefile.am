@@ -52,7 +52,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	sqlChanOp.cc \
 	sqlChannel.cc \
 	sqlManager.cc \
-	sqlUser.cc
+	sqlcfUser.cc
 
 libchanfix_la_CXXFLAGS = -I$(PGSQL_INCLUDE) -I${top_srcdir}/include \
 	-I${top_srcdir}/libgnuworld \
@@ -71,7 +71,7 @@ EXTRA_DIST = chanfix.h \
 	sqlChanOp.h \
 	sqlChannel.h \
 	sqlManager.h \
-	sqlUser.h \
+	sqlcfUser.h \
         $(COMMAND_CONF)
 
 confdir=${prefix}/bin

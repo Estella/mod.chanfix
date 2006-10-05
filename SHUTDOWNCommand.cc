@@ -39,7 +39,7 @@ namespace gnuworld
 namespace cf
 {
 
-void SHUTDOWNCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void SHUTDOWNCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 	

@@ -29,7 +29,7 @@
 #include "chanfix.h"
 #include "responses.h"
 #include "StringTokenizer.h"
-#include "sqlUser.h"
+#include "sqlcfUser.h"
 
 RCSTAG("$Id$");
 
@@ -38,11 +38,11 @@ namespace gnuworld
 namespace cf
 {
 
-void SETGROUPCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void SETGROUPCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 
-sqlUser* targetUser = bot->isAuthed(st[1]);
+sqlcfUser* targetUser = bot->isAuthed(st[1]);
 if (!targetUser) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,

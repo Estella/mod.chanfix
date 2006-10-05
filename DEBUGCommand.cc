@@ -39,7 +39,7 @@ namespace gnuworld
 namespace cf
 {
 
-void DEBUGCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void DEBUGCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 #ifndef CHANFIX_DEBUG
 return;

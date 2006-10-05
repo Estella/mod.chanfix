@@ -29,7 +29,7 @@
 #include "chanfix.h"
 #include "responses.h"
 #include "StringTokenizer.h"
-#include "sqlUser.h"
+#include "sqlcfUser.h"
 
 RCSTAG("$Id$");
 
@@ -38,11 +38,11 @@ namespace gnuworld
 namespace cf
 {
 
-void DELUSERCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void DELUSERCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 
-sqlUser* targetUser = bot->isAuthed(st[1]);
+sqlcfUser* targetUser = bot->isAuthed(st[1]);
 if (!targetUser) {
   bot->SendTo(theClient,
 	      bot->getResponse(theUser,
@@ -52,7 +52,7 @@ if (!targetUser) {
 }
 
 /* Can't delete an owner unless you're an owner. */
-if (targetUser->getFlag(sqlUser::F_OWNER) && !theUser->getFlag(sqlUser::F_OWNER)) {
+if (targetUser->getFlag(sqlcfUser::F_OWNER) && !theUser->getFlag(sqlcfUser::F_OWNER)) {
   bot->SendTo(theClient,
 	      bot->getResponse(theUser,
 			language::cant_delete_an_owner,
@@ -61,7 +61,7 @@ if (targetUser->getFlag(sqlUser::F_OWNER) && !theUser->getFlag(sqlUser::F_OWNER)
 }
 
 /* Can only delete a user manager if you're an owner. */
-if (targetUser->getFlag(sqlUser::F_USERMANAGER) && !theUser->getFlag(sqlUser::F_OWNER)) {
+if (targetUser->getFlag(sqlcfUser::F_USERMANAGER) && !theUser->getFlag(sqlcfUser::F_OWNER)) {
   bot->SendTo(theClient,
 	      bot->getResponse(theUser,
 			language::cant_delete_manager,
@@ -70,8 +70,8 @@ if (targetUser->getFlag(sqlUser::F_USERMANAGER) && !theUser->getFlag(sqlUser::F_
 }
 
 /* A serveradmin can only delete users in his/her own group. */
-if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
-    !theUser->getFlag(sqlUser::F_USERMANAGER)) {
+if (theUser->getFlag(sqlcfUser::F_SERVERADMIN) &&
+    !theUser->getFlag(sqlcfUser::F_USERMANAGER)) {
   if (targetUser->getGroup() != theUser->getGroup()) {
     bot->SendTo(theClient,
 		bot->getResponse(theUser,

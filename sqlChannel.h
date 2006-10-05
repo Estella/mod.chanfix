@@ -33,7 +33,7 @@ namespace gnuworld
 namespace cf
 {
 
-class sqlUser;
+class sqlcfUser;
 class sqlManager;
 
 class sqlChannel

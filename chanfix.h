@@ -47,7 +47,7 @@ extern short currentDay;
 
 #include	"sqlChanOp.h"
 #include	"sqlManager.h"
-#include	"sqlUser.h"
+#include	"sqlcfUser.h"
 
 namespace gnuworld
 {
@@ -200,7 +200,7 @@ public:
 	size_t countMyOps(const std::string&);
 	size_t countMyOps(Channel*);
 
-	sqlUser* isAuthed(const std::string);
+	sqlcfUser* isAuthed(const std::string);
 
 	void precacheChanOps();
 	void precacheChannels();
@@ -237,8 +237,8 @@ public:
 	bool chanfix::findop(sqlChanOp*, sqlChannel*);
 	void chanfix::removechan(sqlChannel*);
 
-	bool simFix(sqlChannel*, bool, time_t, iClient*, sqlUser*);
-	bool simulateFix(sqlChannel*, bool, iClient*, sqlUser*);
+	bool simFix(sqlChannel*, bool, time_t, iClient*, sqlcfUser*);
+	bool simulateFix(sqlChannel*, bool, iClient*, sqlcfUser*);
 
 	bool shouldCJoin(sqlChannel*, bool);
 
@@ -287,9 +287,9 @@ public:
 	bool removeFromAutoQ(Channel*);
 	bool removeFromManQ(Channel*);
 
-	char getFlagChar(const sqlUser::flagType&);
-	const std::string getFlagsString(const sqlUser::flagType&);
-	sqlUser::flagType getFlagType(const char);
+	char getFlagChar(const sqlcfUser::flagType&);
+	const std::string getFlagsString(const sqlcfUser::flagType&);
+	sqlcfUser::flagType getFlagType(const char);
 
 	const std::string getEventName(const int);
 
@@ -297,7 +297,7 @@ public:
 
 	const std::string tsToDateTime(time_t, bool);
 
-	const std::string getHostList( sqlUser* );
+	const std::string getHostList( sqlcfUser* );
 	
 	const std::string getChanNickName(const std::string&, const std::string&);
 
@@ -381,7 +381,7 @@ public:
 	/**
 	 * The db clients map
 	 */
-	typedef std::map <std::string, sqlUser*, noCaseCompare> usersMapType;
+	typedef std::map <std::string, sqlcfUser*, noCaseCompare> usersMapType;
 
 	/**
 	 * Holds the authenticated user list
@@ -416,7 +416,7 @@ public:
 	helpTableType	helpTable;
 
 	void loadHelpTable();
-	const std::string getHelpMessage(sqlUser*, std::string);
+	const std::string getHelpMessage(sqlcfUser*, std::string);
 
 	typedef std::map < std::string, std::pair <int, std::string> > languageTableType;
 	languageTableType	languageTable;
@@ -429,7 +429,7 @@ public:
 
 	void loadTranslationTable();
 
-	const std::string getResponse(sqlUser*, int, std::string = std::string());
+	const std::string getResponse(sqlcfUser*, int, std::string = std::string());
 
 	/**
 	 * Configuration variables
@@ -466,7 +466,7 @@ public:
 	std::string	debugLogFile;
 	std::string	sqlHost;
 	std::string	sqlPort;
-	std::string	sqlUsername;
+	std::string	sqlcfUsername;
 	std::string	sqlPass;
 	std::string	sqlDB;
 

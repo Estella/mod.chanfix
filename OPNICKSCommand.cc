@@ -38,7 +38,7 @@ namespace gnuworld
 namespace cf
 {
 
-void OPNICKSCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void OPNICKSCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 

@@ -38,7 +38,7 @@ namespace gnuworld
 namespace cf
 {
 
-void REQUESTOPCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void REQUESTOPCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 

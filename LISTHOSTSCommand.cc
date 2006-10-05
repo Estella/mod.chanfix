@@ -29,7 +29,7 @@
 #include "chanfix.h"
 #include "responses.h"
 #include "StringTokenizer.h"
-#include "sqlUser.h"
+#include "sqlcfUser.h"
 
 RCSTAG("$Id$");
 
@@ -38,11 +38,11 @@ namespace gnuworld
 namespace cf
 {
 
-void LISTHOSTSCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void LISTHOSTSCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {	 
 StringTokenizer st(Message);
 
-sqlUser* targetUser;
+sqlcfUser* targetUser;
 if (st.size() == 2)
   targetUser = bot->isAuthed(st[1]);
 else
@@ -57,7 +57,7 @@ if (!targetUser) {
   return;
 }
 
-sqlUser::flagType requiredFlags = sqlUser::F_USERMANAGER | sqlUser::F_SERVERADMIN;
+sqlcfUser::flagType requiredFlags = sqlcfUser::F_USERMANAGER | sqlcfUser::F_SERVERADMIN;
 if ((targetUser != theUser) && !theUser->getFlag(requiredFlags)) {
   bot->SendTo(theClient,
 	      bot->getResponse(theUser,
@@ -68,8 +68,8 @@ if ((targetUser != theUser) && !theUser->getFlag(requiredFlags)) {
 }
 
 /* A serveradmin can only view hosts of users in his/her own group. */
-if (theUser->getFlag(sqlUser::F_SERVERADMIN) &&
-    !theUser->getFlag(sqlUser::F_USERMANAGER)) {
+if (theUser->getFlag(sqlcfUser::F_SERVERADMIN) &&
+    !theUser->getFlag(sqlcfUser::F_USERMANAGER)) {
   if (targetUser->getGroup() != theUser->getGroup()) {
     bot->SendTo(theClient,
 		bot->getResponse(theUser,
@@ -85,9 +85,9 @@ bot->SendTo(theClient,
 			std::string("Host list for %s:")).c_str(),
 			targetUser->getUserName().c_str());
 
-sqlUser::hostListType sqlHostList = targetUser->getHostList();
+sqlcfUser::hostListType sqlHostList = targetUser->getHostList();
 if (!sqlHostList.empty()) {
-  for (sqlUser::hostListType::iterator itr = sqlHostList.begin();
+  for (sqlcfUser::hostListType::iterator itr = sqlHostList.begin();
        itr != sqlHostList.end(); ++itr)
     bot->SendTo(theClient, *itr);
 } else {

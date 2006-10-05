@@ -30,7 +30,7 @@
 #include "responses.h"
 #include "StringTokenizer.h"
 #include "sqlChannel.h"
-#include "sqlUser.h"
+#include "sqlcfUser.h"
 
 RCSTAG("$Id: UNBLOCKCommand.cc 1553 2006-04-18 04:03:59Z sirvulcan $");
 
@@ -39,7 +39,7 @@ namespace gnuworld
 namespace cf
 {
 
-void UNTEMPBLOCKCommand::Exec(iClient* theClient, sqlUser* theUser, const std::string& Message)
+void UNTEMPBLOCKCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::string& Message)
 {
 StringTokenizer st(Message);
 
