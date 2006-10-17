@@ -1,5 +1,5 @@
 /**
- * sqlUser.cc
+ * sqlcfUser.cc
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
- * $Id$
+ * $Id: sqlcfUser.cc 1739 2006-08-17 12:41:32Z buzlip01 $
  */
 
 #include	<sstream>
@@ -28,7 +28,7 @@
 #include	"misc.h"
 
 #include	"chanfix.h"
-#include	"sqlUser.h"
+#include	"sqlcfUser.h"
 
 namespace gnuworld
 {
@@ -36,17 +36,17 @@ namespace gnuworld
 namespace cf
 {
 
-const sqlUser::flagType sqlUser::F_SERVERADMIN =	0x01; /* +a */
-const sqlUser::flagType sqlUser::F_BLOCK =		0x02; /* +b */
-const sqlUser::flagType sqlUser::F_COMMENT =		0x04; /* +c */
-const sqlUser::flagType sqlUser::F_CHANFIX =		0x08; /* +f */
-const sqlUser::flagType sqlUser::F_OWNER =		0x10; /* +o */
-const sqlUser::flagType sqlUser::F_USERMANAGER =	0x20; /* +u */
-const sqlUser::flagType sqlUser::F_LOGGEDIN =		0x40;
+const sqlcfUser::flagType sqlcfUser::F_SERVERADMIN =	0x01; /* +a */
+const sqlcfUser::flagType sqlcfUser::F_BLOCK =		0x02; /* +b */
+const sqlcfUser::flagType sqlcfUser::F_COMMENT =		0x04; /* +c */
+const sqlcfUser::flagType sqlcfUser::F_CHANFIX =		0x08; /* +f */
+const sqlcfUser::flagType sqlcfUser::F_OWNER =		0x10; /* +o */
+const sqlcfUser::flagType sqlcfUser::F_USERMANAGER =	0x20; /* +u */
+const sqlcfUser::flagType sqlcfUser::F_LOGGEDIN =		0x40;
 
-unsigned long int sqlUser::maxUserId = 0;
+unsigned long int sqlcfUser::maxUserId = 0;
 
-sqlUser::sqlUser(sqlManager* _myManager) :
+sqlcfUser::sqlcfUser(sqlManager* _myManager) :
   id(0),
   user_name(),
   created(0),
@@ -63,7 +63,7 @@ sqlUser::sqlUser(sqlManager* _myManager) :
   myManager = _myManager;
 }
 
-void sqlUser::setAllMembers(PgDatabase* theDB, int row)
+void sqlcfUser::setAllMembers(PgDatabase* theDB, int row)
 {
   id = atoi(theDB->GetValue(row, 0));
   user_name = theDB->GetValue(row, 1);
@@ -81,7 +81,7 @@ void sqlUser::setAllMembers(PgDatabase* theDB, int row)
   if (id > maxUserId) maxUserId = id;
 }
 
-bool sqlUser::commit()
+bool sqlcfUser::commit()
 {
 bool retval = false;
 
@@ -105,7 +105,7 @@ userCommit	<< "UPDATE users SET "
 		;
 
 if (!cacheCon->ExecCommandOk(userCommit.str().c_str())) {
-  elog	<< "sqlUser::commit> Something went wrong: "
+  elog	<< "sqlcfUser::commit> Something went wrong: "
 	<< cacheCon->ErrorMessage()
 	<< std::endl;
   retval = false;
@@ -125,7 +125,7 @@ return retval;
  * so that any new fields added will automatically be dealt with in commit()
  * instead of in 50 different functions.
  */
-bool sqlUser::Insert()
+bool sqlcfUser::Insert()
 {
 bool retval = false;
 
@@ -147,7 +147,7 @@ insertString	<< "INSERT INTO users "
 		;
 
 if (!cacheCon->ExecCommandOk(insertString.str().c_str())) {
-  elog	<< "sqlUser::Insert> Something went wrong: "
+  elog	<< "sqlcfUser::Insert> Something went wrong: "
 	<< cacheCon->ErrorMessage()
 	<< std::endl;
   retval = false;
@@ -162,9 +162,9 @@ if (retval)
   commit();
 
 return retval;
-} // sqlUser::Insert()
+} // sqlcfUser::Insert()
 
-bool sqlUser::Delete()
+bool sqlcfUser::Delete()
 {
 bool retval = false;
 
@@ -178,7 +178,7 @@ hostString	<< "DELETE FROM hosts "
 		;
 
 if (!cacheCon->ExecCommandOk(hostString.str().c_str())) {
-  elog	<< "sqlUser::Delete> Something went wrong: "
+  elog	<< "sqlcfUser::Delete> Something went wrong: "
 	<< cacheCon->ErrorMessage()
 	<< std::endl;
   retval = false;
@@ -192,7 +192,7 @@ deleteString	<< "DELETE FROM users "
 		;
 
 if (!cacheCon->ExecCommandOk(deleteString.str().c_str())) {
-  elog	<< "sqlUser::Delete> Something went wrong: "
+  elog	<< "sqlcfUser::Delete> Something went wrong: "
 	<< cacheCon->ErrorMessage()
 	<< std::endl;
   retval = false;
@@ -205,7 +205,7 @@ myManager->removeConnection(cacheCon);
 return retval;
 }
 
-void sqlUser::loadHostList()
+void sqlcfUser::loadHostList()
 {
 /* Get a connection instance to our backend */
 PgDatabase* cacheCon = myManager->getConnection();
@@ -229,7 +229,7 @@ myManager->removeConnection(cacheCon);
 return; 
 }
 
-bool sqlUser::addHost(const std::string& _theHost)
+bool sqlcfUser::addHost(const std::string& _theHost)
 {
 bool retval = false;
 
@@ -248,7 +248,7 @@ insertString    << "INSERT INTO hosts "
                 ;
 
 if (!cacheCon->ExecCommandOk(insertString.str().c_str())) {
-  elog	<< "sqlUser::addHost> Something went wrong: "
+  elog	<< "sqlcfUser::addHost> Something went wrong: "
 	<< cacheCon->ErrorMessage()
 	<< std::endl;
   retval = false;
@@ -263,7 +263,7 @@ hostList.push_back(_theHost);
 return retval;
 }
 
-bool sqlUser::delHost(const std::string& _theHost)
+bool sqlcfUser::delHost(const std::string& _theHost)
 {
 bool retval = false;
 
@@ -281,7 +281,7 @@ deleteString	<< "DELETE FROM hosts "
 		;
 
 if (!cacheCon->ExecCommandOk(deleteString.str().c_str())) {
-  elog	<< "sqlUser::delHost> Something went wrong: "
+  elog	<< "sqlcfUser::delHost> Something went wrong: "
 	<< cacheCon->ErrorMessage()
 	<< std::endl;
   retval = false;
@@ -299,7 +299,7 @@ hostList.erase(ptr);
 return retval;
 }
 
-bool sqlUser::matchHost(const std::string& _host)
+bool sqlcfUser::matchHost(const std::string& _host)
 {
   if (hostList.size() < 1) return false;
   for(hostListType::iterator itr = hostList.begin() ;
@@ -309,7 +309,7 @@ bool sqlUser::matchHost(const std::string& _host)
   return false;
 }
 
-bool sqlUser::hasHost(const std::string& _host)
+bool sqlcfUser::hasHost(const std::string& _host)
 {
   if (hostList.size() < 1) return false;
   hostListType::iterator ptr = find( hostList.begin(), hostList.end(), string_lower(_host) );
@@ -317,7 +317,7 @@ bool sqlUser::hasHost(const std::string& _host)
   return true;
 }
 
-sqlUser::~sqlUser()
+sqlcfUser::~sqlcfUser()
 {
 // No heap space allocated
 }
