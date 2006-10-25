@@ -2468,7 +2468,8 @@ if (inFix) {
 
 if ((isAutoFix) && (doAutoFixNotice()))
   Message(theChan, "Channel has been automatically fixed.");
-else if ((!isAutoFix) && (doManualFixNotice()))
+else if ((!isAutoFix) && (doManualFixNotice()) && 
+	((isBeingChanFixed(theChan)) || (isBeingAutoFixed(theChan))))
   Message(theChan, "Channel has been fixed.");
 
 if (doJoinChannels())
