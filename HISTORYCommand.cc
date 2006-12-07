@@ -64,11 +64,11 @@ chanfixQuery	<< "SELECT ts "
 		<< "FROM notes "
 		<< "WHERE channelID = "
 		<< theChan->getID()
-		<< " AND event = "
+		<< " AND (event = "
 		<< sqlChannel::EV_CHANFIX
-		<< " AND event = "
+		<< " OR event = "
 		<< sqlChannel::EV_REQUESTOP
-		<< " ORDER BY ts DESC"
+		<< ") ORDER BY ts DESC"
 		;
 
 if (!cacheCon->ExecTuplesOk(chanfixQuery.str().c_str())) {
