@@ -1295,6 +1295,10 @@ if (cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
   for (int i = 0 ; i < cacheCon->Tuples(); i++) {
      sqlChanOp* newOp = new (std::nothrow) sqlChanOp(theManager);
      assert( newOp != 0 ) ;
+     if (!newOp) {
+       elog << "[chanfix::precacheChanOps]: Error asserting new channel op." << std::endl;
+       ::exit(0);
+     }
 
      newOp->setAllMembers(cacheCon, i);
      sqlChanOpsType::iterator ptr = sqlChanOps.find(newOp->getChannel());
@@ -1344,7 +1348,10 @@ if (cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
   for (int i = 0; i < cacheCon->Tuples(); i++) {
      sqlChannel* newChan = new (std::nothrow) sqlChannel(theManager);
      assert( newChan != 0 ) ;
-
+     if (!newChan) {
+       elog << "[chanfix::precacheChanels]: Error asserting new channel." << std::endl;
+       ::exit(0);
+     }
      newChan->setAllMembers(cacheCon, i);
      sqlChanCache.insert(sqlChannelCacheType::value_type(newChan->getChannel(), newChan));
   }
@@ -1390,7 +1397,10 @@ if (cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
   for (int i = 0; i < cacheCon->Tuples(); ++i) {
     sqlcfUser *newUser = new sqlcfUser(theManager);
     assert(newUser != 0);
-
+     if (!newUser) {
+       elog << "[chanfix::precacheUsers]: Error asserting new user record." << std::endl;
+       ::exit(0);
+     }
     newUser->setAllMembers(cacheCon, i);
     usersMap.insert(usersMapType::value_type(newUser->getUserName(), newUser));
   }
@@ -1511,7 +1521,10 @@ sqlChanOp* newOp = new (std::nothrow) sqlChanOp(theManager);
 assert( newOp != 0 ) ;
 
 /* elog << "chanfix::newChanOp> DEBUG: Added new operator: " << account << " on " << channel << "!!" << std::endl; */
-
+if (!newOp) {
+  elog << "[chanfix::newChanOp]: Error asserting new channel op." << std::endl;
+  ::exit(0);
+}
 newOp->setChannel(channel);
 newOp->setAccount(account);
 newOp->setTimeFirstOpped(currentTime());
@@ -1849,6 +1862,14 @@ autoFixTimer.Start();
 /* Now walk through all channels to find the opless ones. */
 Channel* thisChan;
 ChannelUser* curUser;
+     if (!thisChan) {
+       elog << "[chanfix::autoFix]: Error asserting new channel thisChan." << std::endl;
+       ::exit(0);
+     }
+     if (!curUser) {
+       elog << "[chanfix::autoFix]: Error asserting new channel user curUser." << std::endl;
+       ::exit(0);
+     }
 int numOpLess = 0;
 tempBlockType::iterator tbPtr;
 for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->channels_end(); ptr++) {
@@ -2550,7 +2571,10 @@ sqlChannel* chanfix::newChannelRecord(const std::string& Channel)
 {
 sqlChannel* newChan = new (std::nothrow) sqlChannel(theManager);
 assert( newChan != 0 ) ;
-
+if (!newChan) {
+  elog << "[chanfix::newChannelRecord]: Error asserting new channel record." << std::endl;
+  ::exit(0);
+}
 newChan->setChannel(Channel);
 newChan->setFixStart(0);
 newChan->setLastAttempt(0);
@@ -3125,6 +3149,10 @@ else
 time_t maxFirstOppedTS = currentTime() - (POINTS_UPDATE_TIME + 10);
 time_t maxLastOppedTS = currentTime() - (DAYSAMPLES * 86400);
 sqlChanOp* curOp;
+     if (!curOp) {
+       elog << "[chanfix::rotateDB]: Error asserting curOp." << std::endl;
+       ::exit(0);
+     }
 std::string curChan;
 
 for (sqlChanOpsType::iterator ptr = sqlChanOps.begin();
@@ -3180,6 +3208,10 @@ void chanfix::giveAllOpsPoints()
 typedef std::list <std::string> ScoredOpsListType;
 
 Channel* thisChan;
+     if (!thisChan) {
+       elog << "[chanfix::giveAllOpsPoints] Error asserting thisChan." << std::endl;
+       ::exit(0);
+     }
 ScoredOpsListType scoredOpsList;
 ScoredOpsListType::iterator scOpIter;
 for (xNetwork::channelIterator ptr = Network->channels_begin();
