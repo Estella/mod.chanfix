@@ -2655,11 +2655,16 @@ if (currentState != RUN) {
 
 for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
    //elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first << " in autoFixQ ..." << std::endl;
+   elog << "SECTION 0" << std::endl;
    if (ptr->second <= currentTime()) {
      sqlChannel* sqlChan = getChannelRecord(ptr->first);
      if (!sqlChan) sqlChan = newChannelRecord(ptr->first);
+     if (!sqlChan) {
+       elog << "[chanfix::processQueue]: Error asserting sqlChan." << std::endl;
+       ::exit(0);
+     }
      bool isFixed = false;
-
+     elog << "SECTION 1" << std::endl;
      if (currentTime() - sqlChan->getLastAttempt() >= AUTOFIX_INTERVAL)
        isFixed = fixChan(sqlChan, true);
 
@@ -2669,6 +2674,11 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
       */
      if (isFixed || currentTime() - sqlChan->getFixStart() > AUTOFIX_MAXIMUM) {
        Channel* theChan = Network->findChannel(sqlChan->getChannel());
+       if (!theChan) {
+         elog << "[chanfix::processQueue]: Error asserting theChan." << std::endl;
+         ::exit(0);
+       }
+       elog << "SECTION 2" << std::endl;
        if (doAutoFixNotice())
          Message(theChan, "Channel has been automatically fixed.");
        if (doJoinChannels())
@@ -2678,6 +2688,7 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
        sqlChan->setLastAttempt(0);
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " done!" << std::endl;
      } else {
+       elog << "SECTION 3" << std::endl;
        ptr->second = currentTime() + AUTOFIX_INTERVAL;
        ptr++;
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " not done yet ..." << std::endl;
