@@ -664,8 +664,6 @@ if (currentState == BURST) {
            getResponse(theUser,
                        language::no_commands_during_burst_noper,
                        std::string("Sorry, I'm too busy at the moment. Please try again soon.")).c_str());
-  
-  delete theUser; theUser = 0;
   return;
 }
 
@@ -848,9 +846,6 @@ switch( whichEvent )
 
 xClient::OnChannelEvent( whichEvent, theChan,
 	data1, data2, data3, data4 ) ;
-	
-delete theClient; theClient = 0;
-delete theServer; theServer = 0;
 }
 
 void chanfix::OnChannelModeO( Channel* theChan, ChannelUser* theUser,
@@ -1300,9 +1295,6 @@ if (cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
   for (int i = 0 ; i < cacheCon->Tuples(); i++) {
      sqlChanOp* newOp = new (std::nothrow) sqlChanOp(theManager);
      assert( newOp != 0 ) ;
-     if (!newOp) {
-       elog << "[chanfix::precacheChanOps]: Error asserting new channel op." << std::endl;
-     }
 
      newOp->setAllMembers(cacheCon, i);
      sqlChanOpsType::iterator ptr = sqlChanOps.find(newOp->getChannel());
@@ -1352,9 +1344,7 @@ if (cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
   for (int i = 0; i < cacheCon->Tuples(); i++) {
      sqlChannel* newChan = new (std::nothrow) sqlChannel(theManager);
      assert( newChan != 0 ) ;
-     if (!newChan) {
-       elog << "[chanfix::precacheChanels]: Error asserting new channel." << std::endl;
-     }
+
      newChan->setAllMembers(cacheCon, i);
      sqlChanCache.insert(sqlChannelCacheType::value_type(newChan->getChannel(), newChan));
   }
@@ -1400,9 +1390,7 @@ if (cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
   for (int i = 0; i < cacheCon->Tuples(); ++i) {
     sqlcfUser *newUser = new sqlcfUser(theManager);
     assert(newUser != 0);
-     if (!newUser) {
-       elog << "[chanfix::precacheUsers]: Error asserting new user record." << std::endl;
-     }
+
     newUser->setAllMembers(cacheCon, i);
     usersMap.insert(usersMapType::value_type(newUser->getUserName(), newUser));
   }
@@ -1523,9 +1511,7 @@ sqlChanOp* newOp = new (std::nothrow) sqlChanOp(theManager);
 assert( newOp != 0 ) ;
 
 /* elog << "chanfix::newChanOp> DEBUG: Added new operator: " << account << " on " << channel << "!!" << std::endl; */
-if (!newOp) {
-  elog << "[chanfix::newChanOp]: Error asserting new channel op." << std::endl;
-}
+
 newOp->setChannel(channel);
 newOp->setAccount(account);
 newOp->setTimeFirstOpped(currentTime());
@@ -2564,6 +2550,7 @@ sqlChannel* chanfix::newChannelRecord(const std::string& Channel)
 {
 sqlChannel* newChan = new (std::nothrow) sqlChannel(theManager);
 assert( newChan != 0 ) ;
+
 newChan->setChannel(Channel);
 newChan->setFixStart(0);
 newChan->setLastAttempt(0);
@@ -2644,12 +2631,11 @@ if (currentState != RUN) {
 
 for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
    //elog << "chanfix::processQueue> DEBUG: Processing " << ptr->first << " in autoFixQ ..." << std::endl;
-   elog << "SECTION 0" << std::endl;
    if (ptr->second <= currentTime()) {
      sqlChannel* sqlChan = getChannelRecord(ptr->first);
      if (!sqlChan) sqlChan = newChannelRecord(ptr->first);
      bool isFixed = false;
-     elog << "SECTION 1" << std::endl;
+
      if (currentTime() - sqlChan->getLastAttempt() >= AUTOFIX_INTERVAL)
        isFixed = fixChan(sqlChan, true);
 
@@ -2659,10 +2645,13 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
       */
      if (isFixed || currentTime() - sqlChan->getFixStart() > AUTOFIX_MAXIMUM) {
        Channel* theChan = Network->findChannel(sqlChan->getChannel());
+	
        if (!theChan) {
-         elog << "[chanfix::processQueue]: Error asserting theChan." << std::endl;
+	 //Object no longer exists
+	 autoFixQ.erase(ptr++);
+	 continue;
        }
-       elog << "SECTION 2" << std::endl;
+
        if (doAutoFixNotice())
          Message(theChan, "Channel has been automatically fixed.");
        if (doJoinChannels())
@@ -2672,7 +2661,6 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
        sqlChan->setLastAttempt(0);
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " done!" << std::endl;
      } else {
-       elog << "SECTION 3" << std::endl;
        ptr->second = currentTime() + AUTOFIX_INTERVAL;
        ptr++;
        elog << "chanfix::processQueue> DEBUG: Channel " << sqlChan->getChannel() << " not done yet ..." << std::endl;
@@ -2696,6 +2684,13 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
       */
      if (isFixed || currentTime() - sqlChan->getFixStart() > CHANFIX_MAXIMUM + CHANFIX_DELAY) {
        Channel* theChan = Network->findChannel(sqlChan->getChannel());
+	     
+       if (!theChan) {
+	 //Object no longer exists
+	 manFixQ.erase(ptr++);
+	 continue;
+       }
+	     
        if (doManualFixNotice())
          Message(theChan, "Channel has been fixed.");
        if (doJoinChannels())
@@ -2925,6 +2920,7 @@ void chanfix::prepareUpdate(bool)
   if (threaded) {
     ClassUpdateDB updateDB(*this);
     boost::thread pthrd(updateDB);
+    pthrd.join();
   } else
 #endif /* CHANFIX_HAVE_BOOST_THREAD */
     updateDB();
