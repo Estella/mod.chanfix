@@ -1042,6 +1042,9 @@ switch(whichEvent)
 		  if (ptr->second.empty())
 		    authMap.erase(theClient->getAccount());
 		}
+		//Cleanup
+		theClient->removeCustomData(this);
+		delete myOps;
 		break;
 		}
 	case EVT_NICK:
@@ -1702,7 +1705,6 @@ if (myOps && !myOps->empty()) {
 
 myOps->insert(clientOpsType::value_type(thisChan->getName()));
 thisClient->setCustomData(this, static_cast< void*>(myOps));
-
 return;
 }
 
