@@ -75,7 +75,6 @@ CPP = @CPP@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
 CXXFLAGS = @CXXFLAGS@
-CYGPATH_W = @CYGPATH_W@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
 ECHO = @ECHO@
@@ -99,12 +98,8 @@ RC = @RC@
 STRIP = @STRIP@
 VERSION = @VERSION@
 am__include = @am__include@
-am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
-am__tar = @am__tar@
-am__untar = @am__untar@
 install_sh = @install_sh@
-mkdir_p = @mkdir_p@
 threadLib = @threadLib@
 
 lib_LTLIBRARIES = libchanfix.la
@@ -131,7 +126,6 @@ libchanfix_la_SOURCES = chanfix.cc \
 	LASTCOMCommand.cc \
 	LISTBLOCKEDCommand.cc \
 	LISTHOSTSCommand.cc \
-	LISTTEMPBLOCKEDCommand.cc \
 	OPLISTCommand.cc \
 	OPNICKSCommand.cc \
 	QUOTECommand.cc \
@@ -146,11 +140,9 @@ libchanfix_la_SOURCES = chanfix.cc \
 	SIMULATECommand.cc \
 	STATUSCommand.cc \
 	SUSPENDCommand.cc \
-	TEMPBLOCKCommand.cc \
 	UNALERTCommand.cc \
 	UNBLOCKCommand.cc \
 	UNSUSPENDCommand.cc \
-	UNTEMPBLOCKCommand.cc \
 	USERSCORESCommand.cc \
 	USETCommand.cc \
 	WHOFLAGCommand.cc \
@@ -210,7 +202,6 @@ am_libchanfix_la_OBJECTS = libchanfix_la-chanfix.lo \
 	libchanfix_la-LASTCOMCommand.lo \
 	libchanfix_la-LISTBLOCKEDCommand.lo \
 	libchanfix_la-LISTHOSTSCommand.lo \
-	libchanfix_la-LISTTEMPBLOCKEDCommand.lo \
 	libchanfix_la-OPLISTCommand.lo libchanfix_la-OPNICKSCommand.lo \
 	libchanfix_la-QUOTECommand.lo libchanfix_la-REHASHCommand.lo \
 	libchanfix_la-RELOADCommand.lo \
@@ -219,11 +210,9 @@ am_libchanfix_la_OBJECTS = libchanfix_la-chanfix.lo \
 	libchanfix_la-SETGROUPCommand.lo \
 	libchanfix_la-SHUTDOWNCommand.lo \
 	libchanfix_la-SIMULATECommand.lo libchanfix_la-STATUSCommand.lo \
-	libchanfix_la-SUSPENDCommand.lo \
-	libchanfix_la-TEMPBLOCKCommand.lo \
-	libchanfix_la-UNALERTCommand.lo libchanfix_la-UNBLOCKCommand.lo \
+	libchanfix_la-SUSPENDCommand.lo libchanfix_la-UNALERTCommand.lo \
+	libchanfix_la-UNBLOCKCommand.lo \
 	libchanfix_la-UNSUSPENDCommand.lo \
-	libchanfix_la-UNTEMPBLOCKCommand.lo \
 	libchanfix_la-USERSCORESCommand.lo libchanfix_la-USETCommand.lo \
 	libchanfix_la-WHOFLAGCommand.lo \
 	libchanfix_la-WHOGROUPCommand.lo libchanfix_la-WHOISCommand.lo \
@@ -259,7 +248,6 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-LASTCOMCommand.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-LISTBLOCKEDCommand.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-LISTHOSTSCommand.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-LISTTEMPBLOCKEDCommand.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-OPLISTCommand.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-OPNICKSCommand.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-QUOTECommand.Plo \
@@ -274,11 +262,9 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-SIMULATECommand.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-STATUSCommand.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-SUSPENDCommand.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-TEMPBLOCKCommand.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-UNALERTCommand.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-UNBLOCKCommand.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-UNSUSPENDCommand.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-UNTEMPBLOCKCommand.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-USERSCORESCommand.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-USETCommand.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/libchanfix_la-WHOFLAGCommand.Plo \
@@ -388,7 +374,6 @@ libchanfix_la-INVITECommand.lo: INVITECommand.cc
 libchanfix_la-LASTCOMCommand.lo: LASTCOMCommand.cc
 libchanfix_la-LISTBLOCKEDCommand.lo: LISTBLOCKEDCommand.cc
 libchanfix_la-LISTHOSTSCommand.lo: LISTHOSTSCommand.cc
-libchanfix_la-LISTTEMPBLOCKEDCommand.lo: LISTTEMPBLOCKEDCommand.cc
 libchanfix_la-OPLISTCommand.lo: OPLISTCommand.cc
 libchanfix_la-OPNICKSCommand.lo: OPNICKSCommand.cc
 libchanfix_la-QUOTECommand.lo: QUOTECommand.cc
@@ -403,11 +388,9 @@ libchanfix_la-SHUTDOWNCommand.lo: SHUTDOWNCommand.cc
 libchanfix_la-SIMULATECommand.lo: SIMULATECommand.cc
 libchanfix_la-STATUSCommand.lo: STATUSCommand.cc
 libchanfix_la-SUSPENDCommand.lo: SUSPENDCommand.cc
-libchanfix_la-TEMPBLOCKCommand.lo: TEMPBLOCKCommand.cc
 libchanfix_la-UNALERTCommand.lo: UNALERTCommand.cc
 libchanfix_la-UNBLOCKCommand.lo: UNBLOCKCommand.cc
 libchanfix_la-UNSUSPENDCommand.lo: UNSUSPENDCommand.cc
-libchanfix_la-UNTEMPBLOCKCommand.lo: UNTEMPBLOCKCommand.cc
 libchanfix_la-USERSCORESCommand.lo: USERSCORESCommand.cc
 libchanfix_la-USETCommand.lo: USETCommand.cc
 libchanfix_la-WHOFLAGCommand.lo: WHOFLAGCommand.cc
@@ -447,7 +430,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-LASTCOMCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-LISTBLOCKEDCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-LISTHOSTSCommand.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-LISTTEMPBLOCKEDCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-OPLISTCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-OPNICKSCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-QUOTECommand.Plo@am__quote@
@@ -462,11 +444,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SIMULATECommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-STATUSCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-SUSPENDCommand.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-TEMPBLOCKCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-UNALERTCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-UNBLOCKCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-UNSUSPENDCommand.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-UNTEMPBLOCKCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-USERSCORESCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-USETCommand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libchanfix_la-WHOFLAGCommand.Plo@am__quote@
@@ -895,24 +875,6 @@ libchanfix_la-LISTHOSTSCommand.lo: LISTHOSTSCommand.cc
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-LISTHOSTSCommand.lo `test -f 'LISTHOSTSCommand.cc' || echo '$(srcdir)/'`LISTHOSTSCommand.cc
 
-libchanfix_la-LISTTEMPBLOCKEDCommand.o: LISTTEMPBLOCKEDCommand.cc
-@AMDEP_TRUE@	source='LISTTEMPBLOCKEDCommand.cc' object='libchanfix_la-LISTTEMPBLOCKEDCommand.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/libchanfix_la-LISTTEMPBLOCKEDCommand.Po' tmpdepfile='$(DEPDIR)/libchanfix_la-LISTTEMPBLOCKEDCommand.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-LISTTEMPBLOCKEDCommand.o `test -f 'LISTTEMPBLOCKEDCommand.cc' || echo '$(srcdir)/'`LISTTEMPBLOCKEDCommand.cc
-
-libchanfix_la-LISTTEMPBLOCKEDCommand.obj: LISTTEMPBLOCKEDCommand.cc
-@AMDEP_TRUE@	source='LISTTEMPBLOCKEDCommand.cc' object='libchanfix_la-LISTTEMPBLOCKEDCommand.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/libchanfix_la-LISTTEMPBLOCKEDCommand.Po' tmpdepfile='$(DEPDIR)/libchanfix_la-LISTTEMPBLOCKEDCommand.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-LISTTEMPBLOCKEDCommand.obj `cygpath -w LISTTEMPBLOCKEDCommand.cc`
-
-libchanfix_la-LISTTEMPBLOCKEDCommand.lo: LISTTEMPBLOCKEDCommand.cc
-@AMDEP_TRUE@	source='LISTTEMPBLOCKEDCommand.cc' object='libchanfix_la-LISTTEMPBLOCKEDCommand.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/libchanfix_la-LISTTEMPBLOCKEDCommand.Plo' tmpdepfile='$(DEPDIR)/libchanfix_la-LISTTEMPBLOCKEDCommand.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-LISTTEMPBLOCKEDCommand.lo `test -f 'LISTTEMPBLOCKEDCommand.cc' || echo '$(srcdir)/'`LISTTEMPBLOCKEDCommand.cc
-
 libchanfix_la-OPLISTCommand.o: OPLISTCommand.cc
 @AMDEP_TRUE@	source='OPLISTCommand.cc' object='libchanfix_la-OPLISTCommand.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@	depfile='$(DEPDIR)/libchanfix_la-OPLISTCommand.Po' tmpdepfile='$(DEPDIR)/libchanfix_la-OPLISTCommand.TPo' @AMDEPBACKSLASH@
@@ -1165,24 +1127,6 @@ libchanfix_la-SUSPENDCommand.lo: SUSPENDCommand.cc
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-SUSPENDCommand.lo `test -f 'SUSPENDCommand.cc' || echo '$(srcdir)/'`SUSPENDCommand.cc
 
-libchanfix_la-TEMPBLOCKCommand.o: TEMPBLOCKCommand.cc
-@AMDEP_TRUE@	source='TEMPBLOCKCommand.cc' object='libchanfix_la-TEMPBLOCKCommand.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/libchanfix_la-TEMPBLOCKCommand.Po' tmpdepfile='$(DEPDIR)/libchanfix_la-TEMPBLOCKCommand.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-TEMPBLOCKCommand.o `test -f 'TEMPBLOCKCommand.cc' || echo '$(srcdir)/'`TEMPBLOCKCommand.cc
-
-libchanfix_la-TEMPBLOCKCommand.obj: TEMPBLOCKCommand.cc
-@AMDEP_TRUE@	source='TEMPBLOCKCommand.cc' object='libchanfix_la-TEMPBLOCKCommand.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/libchanfix_la-TEMPBLOCKCommand.Po' tmpdepfile='$(DEPDIR)/libchanfix_la-TEMPBLOCKCommand.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-TEMPBLOCKCommand.obj `cygpath -w TEMPBLOCKCommand.cc`
-
-libchanfix_la-TEMPBLOCKCommand.lo: TEMPBLOCKCommand.cc
-@AMDEP_TRUE@	source='TEMPBLOCKCommand.cc' object='libchanfix_la-TEMPBLOCKCommand.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/libchanfix_la-TEMPBLOCKCommand.Plo' tmpdepfile='$(DEPDIR)/libchanfix_la-TEMPBLOCKCommand.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-TEMPBLOCKCommand.lo `test -f 'TEMPBLOCKCommand.cc' || echo '$(srcdir)/'`TEMPBLOCKCommand.cc
-
 libchanfix_la-UNALERTCommand.o: UNALERTCommand.cc
 @AMDEP_TRUE@	source='UNALERTCommand.cc' object='libchanfix_la-UNALERTCommand.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@	depfile='$(DEPDIR)/libchanfix_la-UNALERTCommand.Po' tmpdepfile='$(DEPDIR)/libchanfix_la-UNALERTCommand.TPo' @AMDEPBACKSLASH@
@@ -1236,24 +1180,6 @@ libchanfix_la-UNSUSPENDCommand.lo: UNSUSPENDCommand.cc
 @AMDEP_TRUE@	depfile='$(DEPDIR)/libchanfix_la-UNSUSPENDCommand.Plo' tmpdepfile='$(DEPDIR)/libchanfix_la-UNSUSPENDCommand.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-UNSUSPENDCommand.lo `test -f 'UNSUSPENDCommand.cc' || echo '$(srcdir)/'`UNSUSPENDCommand.cc
-
-libchanfix_la-UNTEMPBLOCKCommand.o: UNTEMPBLOCKCommand.cc
-@AMDEP_TRUE@	source='UNTEMPBLOCKCommand.cc' object='libchanfix_la-UNTEMPBLOCKCommand.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/libchanfix_la-UNTEMPBLOCKCommand.Po' tmpdepfile='$(DEPDIR)/libchanfix_la-UNTEMPBLOCKCommand.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-UNTEMPBLOCKCommand.o `test -f 'UNTEMPBLOCKCommand.cc' || echo '$(srcdir)/'`UNTEMPBLOCKCommand.cc
-
-libchanfix_la-UNTEMPBLOCKCommand.obj: UNTEMPBLOCKCommand.cc
-@AMDEP_TRUE@	source='UNTEMPBLOCKCommand.cc' object='libchanfix_la-UNTEMPBLOCKCommand.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/libchanfix_la-UNTEMPBLOCKCommand.Po' tmpdepfile='$(DEPDIR)/libchanfix_la-UNTEMPBLOCKCommand.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-UNTEMPBLOCKCommand.obj `cygpath -w UNTEMPBLOCKCommand.cc`
-
-libchanfix_la-UNTEMPBLOCKCommand.lo: UNTEMPBLOCKCommand.cc
-@AMDEP_TRUE@	source='UNTEMPBLOCKCommand.cc' object='libchanfix_la-UNTEMPBLOCKCommand.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/libchanfix_la-UNTEMPBLOCKCommand.Plo' tmpdepfile='$(DEPDIR)/libchanfix_la-UNTEMPBLOCKCommand.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libchanfix_la_CXXFLAGS) $(CXXFLAGS) -c -o libchanfix_la-UNTEMPBLOCKCommand.lo `test -f 'UNTEMPBLOCKCommand.cc' || echo '$(srcdir)/'`UNTEMPBLOCKCommand.cc
 
 libchanfix_la-USERSCORESCommand.o: USERSCORESCommand.cc
 @AMDEP_TRUE@	source='USERSCORESCommand.cc' object='libchanfix_la-USERSCORESCommand.o' libtool=no @AMDEPBACKSLASH@

@@ -217,7 +217,7 @@ COPY "translations" FROM stdin;
 1	211	The channel %s is TEMPBLOCKED.	31337	0
 1	212	List of all temp blocked channels:	31337	0
 1	213	%d channels temp blocked.	31337	0
-1	214	%s is TEMPBLOCKED.	31337	0
+1	214	%s is TEMPBLOCKED. To fix it, please append the OVERRIDE flag.	31337	0
 1	215	The channel %s is already temp blocked.	31337	0
 1	216	The channel %s has been temp blocked.	31337	0
 1	217	WARNING: Channel %s is being manually fixed; aborting fix as per TEMPBLOCK.	31337	0

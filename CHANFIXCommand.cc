@@ -171,12 +171,12 @@ if (theChan->getFlag(sqlChannel::F_BLOCKED)) {
   return;
 }
 
-/* Don't fix a blocked channel. */
-if (bot->isTempBlocked(theChan->getChannel())) {
+/* Don't fix a blocked channel without the OVERRIDE flag. */
+if (bot->isTempBlocked(theChan->getChannel()) && !override) {
   bot->SendTo(theClient,
               bot->getResponse(theUser,
                               language::channel_temp_blocked,
-                              std::string("The channel %s is TEMPBLOCKED.")).c_str(),
+                              std::string("The channel %s is TEMPBLOCKED. To fix it, please append the OVERRIDE flag.")).c_str(),
                                           theChan->getChannel().c_str());
   return;
 }
