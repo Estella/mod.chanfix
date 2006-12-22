@@ -120,7 +120,7 @@
  * Interval between two consecutive SQL updates.
  * Default: every 12 hours
  */
-#define SQL_UPDATE_TIME		43200
+#define SQL_UPDATE_TIME		86400
 
 /**
  * Interval between two consecutive checks for opless channels.

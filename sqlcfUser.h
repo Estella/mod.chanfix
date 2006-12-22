@@ -52,6 +52,7 @@ public:
 	static const flagType F_CHANFIX; /* +f */
 	static const flagType F_OWNER; /* +o */
 	static const flagType F_USERMANAGER; /* +u */
+	static const flagType F_PERMBLOCKER; /* +p */
 	static const flagType F_LOGGEDIN;
 
 	typedef std::list< std::string >	hostListType;

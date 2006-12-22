@@ -47,6 +47,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	UNTEMPBLOCKCommand.cc \
 	USERSCORESCommand.cc \
 	USETCommand.cc \
+	WHOFLAGCommand.cc \
 	WHOGROUPCommand.cc \
 	WHOISCommand.cc \
 	sqlChanOp.cc \
