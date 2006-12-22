@@ -95,13 +95,13 @@ public:
 	inline time_t		getSimStart() const
 		{ return simstart ; }
 
-	inline unsigned int	getMaxScore() const
+	inline int	getMaxScore() const
 		{ return maxScore ; }
 
-	inline unsigned int	getAmountSimOpped() const
+	inline int	getAmountSimOpped() const
 		{ return amtopped ; }
 
-	inline unsigned int	getTMaxScore() const
+	inline int	getTMaxScore() const
 		{ return tmaxScore ; }
 
 	inline bool		getModesRemoved() const
