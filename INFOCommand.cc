@@ -53,7 +53,7 @@ if (!theChan) {
     bot->SendTo(theClient,
 		bot->getResponse(theUser,
 			    language::temporarily_blocked,
-			    std::string("%s is temporarily blocked.")).c_str(),
+			    std::string("%s is temporarily blocked. (Use OVERRIDE to bypass)")).c_str(),
 			    st[1].c_str());
     return;
   }
@@ -76,7 +76,7 @@ if (isBlocked)
   bot->SendTo(theClient,
 	    bot->getResponse(theUser,
 			    language::temporarily_blocked,
-			    std::string("%s is temporarily blocked.")).c_str(),
+			    std::string("%s is temporarily blocked. (Use OVERRIDE to bypass)")).c_str(),
 			    st[1].c_str());
 
 if (theChan->getFlag(sqlChannel::F_BLOCKED))
