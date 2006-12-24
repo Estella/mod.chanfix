@@ -31,7 +31,7 @@
 #include	"StringTokenizer.h"
 
 #include	"chanfix.h"
-#include	"chanfix_defs.h"
+#include	"defs.h"
 #include	"responses.h"
 #include	"Network.h"
 
@@ -46,7 +46,7 @@ void STATUSCommand::Exec(iClient* theClient, sqlcfUser* theUser, const std::stri
 {
 
 bot->SendTo(theClient, "[evilnet development's GNUWorld %s]",
-	    CHANFIX_PACKAGE_STRING);
+	    VERSION);
 bot->SendTo(theClient,
             bot->getResponse(theUser,
                             language::status_uptime,

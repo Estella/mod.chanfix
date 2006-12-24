@@ -25,6 +25,7 @@ libchanfix_la_SOURCES = chanfix.cc \
 	LASTCOMCommand.cc \
 	LISTBLOCKEDCommand.cc \
 	LISTHOSTSCommand.cc \
+	LISTTEMPBLOCKEDCommand.cc \
 	OPLISTCommand.cc \
 	OPNICKSCommand.cc \
 	QUOTECommand.cc \
@@ -39,9 +40,11 @@ libchanfix_la_SOURCES = chanfix.cc \
 	SIMULATECommand.cc \
 	STATUSCommand.cc \
 	SUSPENDCommand.cc \
+	TEMPBLOCKCommand.cc \
 	UNALERTCommand.cc \
 	UNBLOCKCommand.cc \
 	UNSUSPENDCommand.cc \
+	UNTEMPBLOCKCommand.cc \
 	USERSCORESCommand.cc \
 	USETCommand.cc \
 	WHOFLAGCommand.cc \
@@ -61,7 +64,6 @@ libchanfix_la_LDFLAGS = -module -export-dynamic -L@PGSQL_LIB@ -lpq++ \
 	@BOOST_THREAD_LIB@
 
 EXTRA_DIST = chanfix.h \
-	chanfix.example.conf.in \
 	chanfixCommands.h \
 	chanfix_config.h \
 	chanfix_misc.h \
@@ -73,5 +75,5 @@ EXTRA_DIST = chanfix.h \
         $(COMMAND_CONF)
 
 confdir=${prefix}/bin
-conf_DATA = chanfix.example.conf \
-        $(COMMAND_CONF)
+conf_DATA = $(COMMAND_CONF)
+

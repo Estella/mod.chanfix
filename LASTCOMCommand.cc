@@ -33,7 +33,7 @@
 
 #include	"chanfix.h"
 #include	"chanfixCommands.h"
-#include        "chanfix_defs.h"
+#include        "defs.h"
 #include        "responses.h"
 #include        "sqlChanOp.h"
 #include        "sqlChannel.h"
