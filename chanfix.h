@@ -376,7 +376,7 @@ public:
 	} snapShotStruct;
 
 	typedef std::multimap<std::string, snapShotStruct> DBMapType;
-	DBMapType		*snapShot;
+	DBMapType		snapShot;
 
 	/**
 	 * The db clients map
