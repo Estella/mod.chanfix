@@ -2464,12 +2464,6 @@ if (inFix) {
   }
 }
 
-if ((isAutoFix) && (doAutoFixNotice()))
-  Message(theChan, "Channel has been automatically fixed.");
-else if ((!isAutoFix) && (doManualFixNotice()) && 
-	((isBeingChanFixed(theChan)) || (isBeingAutoFixed(theChan))))
-  Message(theChan, "Channel has been fixed.");
-
 if (doJoinChannels())
   PartChan(theChan);
 
@@ -2650,8 +2644,6 @@ for (fixQueueType::iterator ptr = autoFixQ.begin(); ptr != autoFixQ.end(); ) {
 	 continue;
        }
 
-       if (doAutoFixNotice())
-         Message(theChan, "Channel has been automatically fixed.");
        if (doJoinChannels())
          PartChan(theChan);
        autoFixQ.erase(ptr++);
@@ -2689,8 +2681,6 @@ for (fixQueueType::iterator ptr = manFixQ.begin(); ptr != manFixQ.end(); ) {
 	 continue;
        }
 	     
-       if (doManualFixNotice())
-         Message(theChan, "Channel has been fixed.");
        if (doJoinChannels())
          PartChan(theChan);
        manFixQ.erase(ptr++);
