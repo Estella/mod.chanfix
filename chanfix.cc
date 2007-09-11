@@ -976,7 +976,14 @@ switch(whichEvent)
 	{
 	case EVT_ACCOUNT:
 		{
+#ifdef CHANFIX_EXTENDED_ACCOUNTS
+		char *ac_type = static_cast< char* >( data1 ) ;
+		if (*ac_type != 'R')
+			break;
+		iClient* tmpUser = static_cast< iClient* >( data2 ) ;
+#else
 		iClient* tmpUser = static_cast< iClient* >( data1 ) ;
+#endif
 		authMapType::iterator ptr = authMap.find(tmpUser->getAccount());
 		if (ptr != authMap.end()) {
 			/* This user is already logged in, just add the iClient
@@ -1024,16 +1031,19 @@ switch(whichEvent)
 		} else {
 		  delete myOps;
 		}
+
+		/* Sanity check */
+		if (theClient->getAccount() != "") {
+			/* Now we need to remove this iClient from the auth map */
+			authMapType::iterator ptr = authMap.find(theClient->getAccount());
 		
-		/* Now we need to remove this iClient from the auth map */
-		authMapType::iterator ptr = authMap.find(theClient->getAccount());
-		
-		if (ptr != authMap.end()) {
-		  ptr->second.erase(std::find(ptr->second.begin(), ptr->second.end(), theClient));
+			if (ptr != authMap.end()) {
+			  ptr->second.erase(std::find(ptr->second.begin(), ptr->second.end(), theClient));
 			
-		  /* If the list is empty, remove the map entry */
-		  if (ptr->second.empty())
-		    authMap.erase(theClient->getAccount());
+			  /* If the list is empty, remove the map entry */
+			  if (ptr->second.empty())
+			    authMap.erase(theClient->getAccount());
+			}
 		}
 		//Cleanup
 		theClient->removeCustomData(this);
@@ -1861,10 +1871,12 @@ for (xNetwork::channelIterator ptr = Network->channels_begin(); ptr != Network->
      /* Loop through the channel list to check users for op and umode +k */
      for (Channel::userIterator ptr = thisChan->userList_begin(); ptr != thisChan->userList_end(); ptr++) {
 	curUser = ptr->second;
+#ifndef CHANFIX_INGORE_SERVICES
 	if (curUser->getClient()->getMode(iClient::MODE_SERVICES)) {
 	  hasService = true;
 	  break;
 	}
+#endif
 	if (curUser->isModeO())
 	  opLess = false;
      }
@@ -2605,10 +2617,12 @@ return false;
 
 bool chanfix::canScoreChan(Channel* theChan)
 {
+#ifndef CHANFIX_INGORE_SERVICES
 for (Channel::const_userIterator ptr = theChan->userList_begin();
      ptr != theChan->userList_end(); ++ptr)
    if (ptr->second->getClient()->getMode(iClient::MODE_SERVICES))
      return false;
+#endif
 
 return true;
 }
