@@ -3420,8 +3420,11 @@ return std::string( "Unable to retrieve response. Please contact a chanfix "
 
 void chanfix::loadTranslationTable()
 {
-/* Get a connection instance to our backend */
-dbHandle* cacheCon = theManager->getConnection();
+dbHandle* cacheCon = localDBHandle;
+
+if (!cacheCon)
+          elog  << "*** [chanfix::loadTranslationTable]: Error getting a new SQL connection through the manager."
+                << std::endl;
 
 /* Grab the languages table */
 std::stringstream langQuery;
@@ -3467,7 +3470,7 @@ elog	<< "*** [chanfix::loadTranslationTable]: Loaded "
 	<< std::endl;
 
 /* Dispose of our connection instance */
-theManager->removeConnection(cacheCon);
+//theManager->removeConnection(cacheCon);
 
 return;
 }
