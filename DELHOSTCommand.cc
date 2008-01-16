@@ -90,7 +90,7 @@ if (!targetUser->hasHost(st[2].c_str())) {
   return;
 }
 
-if (!targetUser->delHost(st[2].c_str())) {
+if (!targetUser->delHost(bot->getLocalDBHandle(),st[2].c_str())) {
   bot->SendTo(theClient,
 	      bot->getResponse(theUser,
 			language::failed_deleting_host,
@@ -104,7 +104,7 @@ targetUser->setLastUpdatedBy( std::string( "("
 	+ theUser->getUserName()
 	+ ") "
 	+ theClient->getRealNickUserHost() ) );
-targetUser->commit();
+targetUser->commit(bot->getLocalDBHandle());
 
 bot->SendTo(theClient,
             bot->getResponse(theUser,

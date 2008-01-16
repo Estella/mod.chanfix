@@ -26,6 +26,7 @@
 #include	<vector>
 #include	<map>
 #include	<list>
+#include	<sstream>
 
 #include	"client.h"
 #include	"EConfig.h"
@@ -197,6 +198,8 @@ public:
 	sqlChanOp* findChanOp(const std::string&, const std::string&);
 	sqlChanOp* findChanOp(Channel*, iClient*);
 
+	dbHandle* getLocalDBHandle() { return localDBHandle; }
+
 	size_t countMyOps(const std::string&);
 	size_t countMyOps(Channel*);
 
@@ -231,11 +234,11 @@ public:
 	void checkNetwork();
 	void checkChannelServiceLink(iServer*, const eventType&);
 	void findChannelService();
-	const int chanfix::getLastFix(sqlChannel*);
+	const int getLastFix(sqlChannel*);
 
-	void chanfix::insertop(sqlChanOp*, sqlChannel*);
-	bool chanfix::findop(sqlChanOp*, sqlChannel*);
-	void chanfix::removechan(sqlChannel*);
+	void insertop(sqlChanOp*, sqlChannel*);
+	bool findop(sqlChanOp*, sqlChannel*);
+	void removechan(sqlChannel*);
 
 	bool simFix(sqlChannel*, bool, time_t, iClient*, sqlcfUser*);
 	bool simulateFix(sqlChannel*, bool, iClient*, sqlcfUser*);
@@ -512,6 +515,12 @@ protected:
 	 */
 	std::ofstream	adminLog;
 	std::ofstream	debugLog;
+
+	/**
+	 * DB Handle
+	 */
+	dbHandle*	localDBHandle;
+
 
 public:
 

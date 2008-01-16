@@ -67,13 +67,13 @@ if (st.size() == 4) {
       targetUser->setNeedOper(true);
       bot->SendTo(theClient, "%s is now required to be an IRC Operator", 
 		  targetUser->getUserName().c_str());
-      targetUser->commit();
+      targetUser->commit(bot->getLocalDBHandle());
       return;
     } else if (value == "OFF" || value == "NO" || value == "0") {
       targetUser->setNeedOper(false);
       bot->SendTo(theClient, "%s is now not required to be an IRC Operator", 
 		  targetUser->getUserName().c_str());
-      targetUser->commit();
+      targetUser->commit(bot->getLocalDBHandle());
       return;
     } else {
       bot->SendTo(theClient, "Please use USET <username> NEEDOPER <on/off>.");
@@ -97,7 +97,7 @@ if (option == "NOTICE") {
                 bot->getResponse(theUser,
                                 language::send_notices,
                                 std::string("I will now send you notices.")).c_str());
-    theUser->commit();
+    theUser->commit(bot->getLocalDBHandle());
     return;
   } else if (value == "OFF" || value == "NO" || value == "0") {
     theUser->setNotice(false);
@@ -105,7 +105,7 @@ if (option == "NOTICE") {
                 bot->getResponse(theUser,
                                 language::send_privmsgs,
                                 std::string("I will now send you privmsgs.")).c_str());
-    theUser->commit();
+    theUser->commit(bot->getLocalDBHandle());
     return;
   } else {
     bot->SendTo(theClient,
@@ -122,7 +122,7 @@ if (option == "LANG")
   if (ptr != bot->languageTable.end()) {
     std::string lang = ptr->second.second;
     theUser->setLanguageId(ptr->second.first);
-    theUser->commit();
+    theUser->commit(bot->getLocalDBHandle());
     bot->SendTo(theClient,
 		bot->getResponse(theUser,
 			language::lang_set_to,

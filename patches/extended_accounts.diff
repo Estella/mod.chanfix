@@ -1,0 +1,77 @@
+Index: libircu/msg_AC.cc
+===================================================================
+RCS file: /cvsroot/gnuworld/gnuworld/libircu/msg_AC.cc,v
+retrieving revision 1.9
+diff -u -r1.9 msg_AC.cc
+--- libircu/msg_AC.cc	25 Mar 2005 03:07:29 -0000	1.9
++++ libircu/msg_AC.cc	16 Jan 2008 03:29:46 -0000
+@@ -46,27 +46,49 @@
+  */
+ bool msg_AC::Execute( const xParameters& Param )
+ {
+-if( Param.size() != 3 )
++if( Param.size() < 4 )
+ 	{
+ 	elog	<< "msg_AC> Invalid number of parameters"
+ 		<< std::endl ;
+ 	return false ;
+ 	}
+ 
+-// Find the target user
+-iClient* theClient = Network->findClient( Param[ 1 ] ) ;
+-if( !theClient )
+-	{
+-	elog	<< "msg_AC> Unable to find target client: "
+-		<< Param[ 1 ]
+-		<< std::endl ;
++std::string account;
++std::string numeric;
++static char *ac_type_C = "C";
++static char *ac_type_R = "R";
++
++if (Param.size() < 4) {
++	numeric = Param[1];
++	account = Param[2];
++} else if (Param[2][0] == 'R') {
++	numeric = Param[1];
++	account = Param[3];
++} else if (Param[2][0] == 'C') {
++	const char *param_list[4];
++	param_list[0] = Param[0];
++	param_list[1] = Param[3];
++	param_list[2] = Param[4];
++	param_list[3] = Param[5];
++	theServer->PostEvent(EVT_ACCOUNT, static_cast <void *> (ac_type_C), static_cast <void *> (param_list));
+ 	return false;
+-	}
++}
+ 
+-std::string account( Param[2] );
+-time_t account_ts = 0;
++if( numeric.empty() || account.empty() )
++	return false;
++
++// Find the target user
++iClient* theClient = Network->findClient( numeric ) ;
++if( !theClient )
++        {
++        elog    << "msg_AC> Unable to find target client: "
++                << numeric
++                << std::endl ;
++        return false;
++        }
+ 
+ /* If we have an account, does it have a timestamp? */
++time_t account_ts = 0;
+ if( ! account.empty() ) {
+ 	std::string::size_type pos = account.find(':');
+ 	if( ! ( pos == std::string::npos ) ) {
+@@ -93,7 +115,7 @@
+ if( account_ts != 0 ) theClient->setAccountTS( account_ts );
+ 
+ // Post event to listening clients
+-theServer->PostEvent( EVT_ACCOUNT, static_cast< void* >( theClient ) ) ;
++theServer->PostEvent(EVT_ACCOUNT, static_cast <void *> (ac_type_R), static_cast <void *> (theClient)) ;
+ 
+ // Return success
+ return true;

@@ -65,12 +65,12 @@ if (!theChan->getFlag(sqlChannel::F_ALERT)) {
 theChan->removeFlag(sqlChannel::F_ALERT);
 
 if (!theChan->useSQL())
-  theChan->Insert();
+  theChan->Insert(bot->getLocalDBHandle());
 else
-  theChan->commit();
+  theChan->commit(bot->getLocalDBHandle());
 
 /* Add note to the channel about this command */
-theChan->addNote(sqlChannel::EV_UNALERT, theClient, "");
+theChan->addNote(bot->getLocalDBHandle(), sqlChannel::EV_UNALERT, theClient, "");
 
 bot->SendTo(theClient,
             bot->getResponse(theUser,

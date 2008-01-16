@@ -21,7 +21,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
  * USA.
  *
- * $Id: $
+ * $Id: WHOFLAGCommand.cc,v 1.1 2006/12/22 03:11:44 buzlip01 Exp $
  */
  
 #include "gnuworld_config.h"

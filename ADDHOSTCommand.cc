@@ -82,7 +82,7 @@ if (theUser->getFlag(sqlcfUser::F_SERVERADMIN) &&
   
 if (targetUser->matchHost(st[2].c_str())) {
   if ((st[2] != "*!*@*") && targetUser->hasHost("*!*@*")) {
-    targetUser->delHost("*!*@*");
+    targetUser->delHost(bot->getLocalDBHandle(),"*!*@*");
     bot->SendTo(theClient,
 		bot->getResponse(theUser,
 			language::removed_default_hostmask,
@@ -99,7 +99,7 @@ if (targetUser->matchHost(st[2].c_str())) {
   }
 }
 
-if (!targetUser->addHost(st[2].c_str())) {
+if (!targetUser->addHost(bot->getLocalDBHandle(),st[2].c_str())) {
   bot->SendTo(theClient,
 	      bot->getResponse(theUser,
 			language::failed_adding_hostmask,
@@ -113,7 +113,7 @@ targetUser->setLastUpdatedBy( std::string( "("
 	+ theUser->getUserName()
 	+ ") "
 	+ theClient->getRealNickUserHost() ) );
-targetUser->commit();
+targetUser->commit(bot->getLocalDBHandle());
 
 bot->SendTo(theClient,
             bot->getResponse(theUser,

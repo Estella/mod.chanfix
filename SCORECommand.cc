@@ -333,7 +333,7 @@ if (compact) {
 
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
 if (theChan) {
-  bot->SendTo(theClient, "Notes: %d", theChan->countNotes(0));
+  bot->SendTo(theClient, "Notes: %d", theChan->countNotes(bot->getLocalDBHandle(), 0));
 	
   if (theChan->getFlag(sqlChannel::F_BLOCKED))
     bot->SendTo(theClient,

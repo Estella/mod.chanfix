@@ -77,12 +77,12 @@ if (theChan->getFlag(sqlChannel::F_BLOCKED)) {
 theChan->setFlag(sqlChannel::F_BLOCKED);
 
 if (!theChan->useSQL())
-  theChan->Insert();
+  theChan->Insert(bot->getLocalDBHandle());
 else
-  theChan->commit();
+  theChan->commit(bot->getLocalDBHandle());
 
 /* Add note to the channel about this command */
-theChan->addNote(sqlChannel::EV_BLOCK, theClient, st.assemble(2));
+theChan->addNote(bot->getLocalDBHandle(), sqlChannel::EV_BLOCK, theClient, st.assemble(2));
 
 bot->SendTo(theClient,
             bot->getResponse(theUser,

@@ -52,7 +52,7 @@ if (!bot->doChanBlocking()) {
 }
 
 /* List blocks */
-PgDatabase* cacheCon = bot->theManager->getConnection();
+dbHandle* cacheCon = bot->getLocalDBHandle();
 
 std::stringstream theQuery;
 theQuery << "SELECT channel FROM channels WHERE (flags & "
@@ -61,7 +61,7 @@ theQuery << "SELECT channel FROM channels WHERE (flags & "
 	 << sqlChannel::F_BLOCKED
 	 << " ORDER BY channel ASC";
 
-if (!cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
+if (!cacheCon->Exec(theQuery.str(),true)) {
   elog	<< "chanfix::LISTBLOCKEDCommand> SQL Error: "
 		<< cacheCon->ErrorMessage()
 		<< std::endl;
@@ -76,7 +76,7 @@ bot->SendTo(theClient,
 		language::listblocks_blocked_chans,
 		std::string("List of all blocked channels:")).c_str());
 
-for (int i = 0 ; i < cacheCon->Tuples(); i++) {
+for (unsigned int i = 0 ; i < cacheCon->Tuples(); i++) {
   strBlocks += cacheCon->GetValue(i, 0);
   strBlocks += " ";
   if (strBlocks.size() >= 410) {
@@ -87,7 +87,7 @@ for (int i = 0 ; i < cacheCon->Tuples(); i++) {
 }
 
 /* Dispose of our connection instance */
-bot->theManager->removeConnection(cacheCon);
+//bot->theManager->removeConnection(cacheCon);
 
 if (strBlocks.size())
   bot->SendTo(theClient, strBlocks.c_str());

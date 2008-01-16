@@ -16,13 +16,13 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
  * USA.
  *
- * $Id: sqlcfUser.cc 1739 2006-08-17 12:41:32Z buzlip01 $
+ * $Id: sqlcfUser.cc,v 1.4 2008/01/16 02:03:40 buzlip01 Exp $
  */
 
 #include	<sstream>
 #include	<string>
 
-#include	"libpq++.h"
+#include	"dbHandle.h"
 
 #include	"ELog.h"
 #include	"misc.h"
@@ -30,8 +30,13 @@
 #include	"chanfix.h"
 #include	"sqlcfUser.h"
 
+using namespace std;
+
 namespace gnuworld
 {
+
+using std::stringstream;
+using std::string;
 
 namespace cf
 {
@@ -64,7 +69,7 @@ sqlcfUser::sqlcfUser(sqlManager* _myManager) :
   myManager = _myManager;
 }
 
-void sqlcfUser::setAllMembers(PgDatabase* theDB, int row)
+void sqlcfUser::setAllMembers(dbHandle* theDB, int row)
 {
   id = atoi(theDB->GetValue(row, 0));
   user_name = theDB->GetValue(row, 1);
@@ -82,12 +87,12 @@ void sqlcfUser::setAllMembers(PgDatabase* theDB, int row)
   if (id > maxUserId) maxUserId = id;
 }
 
-bool sqlcfUser::commit()
+bool sqlcfUser::commit(dbHandle* cacheCon)
 {
 bool retval = false;
 
 /* Get a connection instance to our backend */
-PgDatabase* cacheCon = myManager->getConnection();
+//dbHandle* cacheCon = myManager->getConnection();
 
 /* Create the UPDATE statement */
 std::stringstream userCommit;
@@ -105,7 +110,7 @@ userCommit	<< "UPDATE users SET "
 		<< "id = " << id
 		;
 
-if (!cacheCon->ExecCommandOk(userCommit.str().c_str())) {
+if (!cacheCon->Exec(userCommit.str())) {
   elog	<< "sqlcfUser::commit> Something went wrong: "
 	<< cacheCon->ErrorMessage()
 	<< std::endl;
@@ -114,7 +119,7 @@ if (!cacheCon->ExecCommandOk(userCommit.str().c_str())) {
   retval = true;
 
 /* Dispose of our connection instance */
-myManager->removeConnection(cacheCon);
+//myManager->removeConnection(cacheCon);
 
 return retval;
 }
@@ -126,12 +131,12 @@ return retval;
  * so that any new fields added will automatically be dealt with in commit()
  * instead of in 50 different functions.
  */
-bool sqlcfUser::Insert()
+bool sqlcfUser::Insert(dbHandle* cacheCon)
 {
 bool retval = false;
 
 /* Get a connection instance to our backend */
-PgDatabase* cacheCon = myManager->getConnection();
+//dbHandle* cacheCon = myManager->getConnection();
 
 /* Grab the next available user id */
 id = ++maxUserId;
@@ -147,7 +152,7 @@ insertString	<< "INSERT INTO users "
 		<< ")"
 		;
 
-if (!cacheCon->ExecCommandOk(insertString.str().c_str())) {
+if (!cacheCon->Exec(insertString.str())) {
   elog	<< "sqlcfUser::Insert> Something went wrong: "
 	<< cacheCon->ErrorMessage()
 	<< std::endl;
@@ -157,20 +162,20 @@ if (!cacheCon->ExecCommandOk(insertString.str().c_str())) {
   retval = true;
 
 /* Dispose of our connection instance */
-myManager->removeConnection(cacheCon);
+//myManager->removeConnection(cacheCon);
 
 if (retval)
-  commit();
+  commit(cacheCon);
 
 return retval;
 } // sqlcfUser::Insert()
 
-bool sqlcfUser::Delete()
+bool sqlcfUser::Delete(dbHandle* cacheCon)
 {
 bool retval = false;
 
 /* Get a connection instance to our backend */
-PgDatabase* cacheCon = myManager->getConnection();
+//dbHandle* cacheCon = myManager->getConnection();
 
 /* Create the DELETE statement */
 std::stringstream hostString;
@@ -178,7 +183,7 @@ hostString	<< "DELETE FROM hosts "
 		<< "WHERE user_id = " << id
 		;
 
-if (!cacheCon->ExecCommandOk(hostString.str().c_str())) {
+if (!cacheCon->Exec(hostString.str())) {
   elog	<< "sqlcfUser::Delete> Something went wrong: "
 	<< cacheCon->ErrorMessage()
 	<< std::endl;
@@ -192,7 +197,7 @@ deleteString	<< "DELETE FROM users "
 		<< "WHERE id = '" << id << "'"
 		;
 
-if (!cacheCon->ExecCommandOk(deleteString.str().c_str())) {
+if (!cacheCon->Exec(deleteString.str())) {
   elog	<< "sqlcfUser::Delete> Something went wrong: "
 	<< cacheCon->ErrorMessage()
 	<< std::endl;
@@ -201,41 +206,46 @@ if (!cacheCon->ExecCommandOk(deleteString.str().c_str())) {
   retval = true;
 
 /* Dispose of our connection instance */
-myManager->removeConnection(cacheCon);
+//myManager->removeConnection(cacheCon);
 
 return retval;
 }
 
-void sqlcfUser::loadHostList()
+void sqlcfUser::loadHostList(dbHandle* cacheCon)
 {
 /* Get a connection instance to our backend */
-PgDatabase* cacheCon = myManager->getConnection();
+
+// dbHandle* cacheCon = myManager->getConnection();
+// if (!cacheCon)
+// 	elog << "[sqlcfUser::loadHostList() Could not get a connection to the database from the manager." << std::endl;
+
 
 /* Retrieve the hosts */
 std::stringstream theQuery;
+
 theQuery	<< "SELECT host FROM hosts WHERE user_id = "
 		<< id
-		;
+		<< ends ;
 
-if (cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
+
+if (cacheCon->Exec(theQuery.str(),true)) {
   // SQL Query succeeded
-  for (int i = 0 ; i < cacheCon->Tuples(); i++) {
+  for (unsigned int i = 0 ; i < cacheCon->Tuples(); i++) {
     hostList.push_back(cacheCon->GetValue(i, 0));
   }
 }
 
 /* Dispose of our connection instance */
-myManager->removeConnection(cacheCon);
-
+// myManager->removeConnection(cacheCon);
 return; 
 }
 
-bool sqlcfUser::addHost(const std::string& _theHost)
+bool sqlcfUser::addHost(dbHandle* cacheCon, const std::string& _theHost)
 {
 bool retval = false;
 
 /* Get a connection instance to our backend */
-PgDatabase* cacheCon = myManager->getConnection();
+//dbHandle* cacheCon = myManager->getConnection();
 
 /* Create the INSERT statement */
 std::stringstream insertString;
@@ -248,7 +258,7 @@ insertString    << "INSERT INTO hosts "
                 << "')"
                 ;
 
-if (!cacheCon->ExecCommandOk(insertString.str().c_str())) {
+if (!cacheCon->Exec(insertString.str())) {
   elog	<< "sqlcfUser::addHost> Something went wrong: "
 	<< cacheCon->ErrorMessage()
 	<< std::endl;
@@ -257,19 +267,19 @@ if (!cacheCon->ExecCommandOk(insertString.str().c_str())) {
   retval = true;
 
 /* Dispose of our connection instance */
-myManager->removeConnection(cacheCon);
+//myManager->removeConnection(cacheCon);
 
 hostList.push_back(_theHost);
 
 return retval;
 }
 
-bool sqlcfUser::delHost(const std::string& _theHost)
+bool sqlcfUser::delHost(dbHandle* cacheCon, const std::string& _theHost)
 {
 bool retval = false;
 
 /* Get a connection instance to our backend */
-PgDatabase* cacheCon = myManager->getConnection();
+//dbHandle* cacheCon = myManager->getConnection();
 
 /* Create the DELETE statement */
 std::stringstream deleteString;
@@ -281,7 +291,7 @@ deleteString	<< "DELETE FROM hosts "
 		<< "'"
 		;
 
-if (!cacheCon->ExecCommandOk(deleteString.str().c_str())) {
+if (!cacheCon->Exec(deleteString.str())) {
   elog	<< "sqlcfUser::delHost> Something went wrong: "
 	<< cacheCon->ErrorMessage()
 	<< std::endl;
@@ -290,7 +300,7 @@ if (!cacheCon->ExecCommandOk(deleteString.str().c_str())) {
   retval = true;
 
 /* Dispose of our connection instance */
-myManager->removeConnection(cacheCon);
+//myManager->removeConnection(cacheCon);
 
 if (hostList.size() < 1) return false;
 hostListType::iterator ptr = find( hostList.begin(), hostList.end(), string_lower(_theHost) );

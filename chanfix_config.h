@@ -23,8 +23,8 @@
 #define __CHANFIX_CONFIG_H "$Id$"
 
 #define CHANFIX_DEBUG 1
-#undef CHANFIX_EXTENDED_ACCOUNTS
-#undef CHANFIX_INGORE_SERVICES
+#define CHANFIX_EXTENDED_ACCOUNTS 1
+#define CHANFIX_INGORE_SERVICES 1
 
 /**
  * Defines that deal with fixing channels, both manually and

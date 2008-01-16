@@ -81,7 +81,7 @@ if (theUser->getFlag(sqlcfUser::F_SERVERADMIN) &&
   }
 }
 
-if (targetUser->Delete()) {
+if (targetUser->Delete(bot->getLocalDBHandle())) {
   bot->usersMap.erase(bot->usersMap.find(targetUser->getUserName()));
   bot->SendTo(theClient,
 	      bot->getResponse(theUser,

@@ -74,7 +74,7 @@ if (myOps.empty()) {
 	
 	sqlChannel* theChan = bot->getChannelRecord(st[1]);
 	if (theChan) {
-	  bot->SendTo(theClient, "Notes: %d", theChan->countNotes(0));
+	  bot->SendTo(theClient, "Notes: %d", theChan->countNotes(bot->getLocalDBHandle(),0));
 
 	  if (bot->isTempBlocked(theChan->getChannel()))
 	    bot->SendTo(theClient,
@@ -113,7 +113,7 @@ if (oCnt == 0) {
 	
 	sqlChannel* theChan = bot->getChannelRecord(st[1]);
 	if (theChan) {
-	  bot->SendTo(theClient, "Notes: %d", theChan->countNotes(0));
+	  bot->SendTo(theClient, "Notes: %d", theChan->countNotes(bot->getLocalDBHandle(),0));
 
 	  if (bot->isTempBlocked(theChan->getChannel()))
 	    bot->SendTo(theClient,
@@ -219,7 +219,7 @@ for (chanfix::chanOpsType::iterator opPtr = myOps.begin();
 
 sqlChannel* theChan = bot->getChannelRecord(st[1]);
 if (theChan) {
-  bot->SendTo(theClient, "Notes: %d", theChan->countNotes(0));
+  bot->SendTo(theClient, "Notes: %d", theChan->countNotes(bot->getLocalDBHandle(), 0));
 
   if (bot->isTempBlocked(theChan->getChannel()))
     bot->SendTo(theClient,

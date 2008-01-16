@@ -25,7 +25,7 @@
 #define __SQLCHANOP_H "$Id$"
 
 #include	<string>
-#include	"libpq++.h"
+#include	"dbHandle.h"
 #include	"chanfix_config.h"
 
 namespace gnuworld
@@ -41,7 +41,6 @@ class sqlChanOp {
 public:
 	sqlChanOp(sqlManager*);
 	virtual ~sqlChanOp();
-
 
 	/*
 	 *  Methods to get data attributes.
@@ -96,7 +95,7 @@ public:
 	inline void	setDay(int _dayval, short _pointsval)
 		{ day[_dayval] = _pointsval ; }
 
-	void setAllMembers(PgDatabase*, int);
+	void setAllMembers(dbHandle*, int);
 	void calcTotalPoints();
 
 private:

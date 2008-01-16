@@ -193,7 +193,7 @@ if (theChan->getFlag(sqlChannel::F_ALERT) && !override) {
 
 /* Add the channel to the SQL database if it hasn't already been added */
 if (!theChan->useSQL())
-  theChan->Insert();
+  theChan->Insert(bot->getLocalDBHandle());
 
 /* Alert top ops out of the channel if wanted */
 if (alert)
@@ -203,7 +203,7 @@ if (alert)
 bot->manualFix(netChan);
 
 /* Add note to the channel about this manual fix */
-theChan->addNote(sqlChannel::EV_CHANFIX, theClient, (override) ? "[override]" : "");
+theChan->addNote(bot->getLocalDBHandle(), sqlChannel::EV_CHANFIX, theClient, (override) ? "[override]" : "");
 
 /* Log the chanfix */
 bot->SendTo(theClient,

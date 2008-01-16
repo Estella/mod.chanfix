@@ -133,7 +133,7 @@ if (!theChan->useSQL()) {
 }
 
 /* Get a connection instance to our backend */
-PgDatabase* cacheCon = bot->theManager->getConnection();
+dbHandle* cacheCon = bot->getLocalDBHandle();
 
 /*
  * Perform a query to list all notes belonging to this channel.
@@ -146,7 +146,7 @@ allNotesQuery	<< "SELECT notes.id, notes.ts, notes.user_name, notes.event, notes
 		<< " ORDER BY notes.ts DESC"
 		;
 
-if (!cacheCon->ExecTuplesOk(allNotesQuery.str().c_str())) {
+if (!cacheCon->Exec(allNotesQuery.str(),true)) {
   elog	<< "INFOCommand> SQL Error: "
 	<< cacheCon->ErrorMessage()
 	<< std::endl;
@@ -157,7 +157,7 @@ if (!cacheCon->ExecTuplesOk(allNotesQuery.str().c_str())) {
 				std::string("An unknown error occurred while reading this channel's notes.")).c_str());
 
   /* Dispose of our connection instance */
-  bot->theManager->removeConnection(cacheCon);
+  //bot->theManager->removeConnection(cacheCon);
 
   return ;
 }
@@ -194,7 +194,7 @@ bot->SendTo(theClient,
                             std::string("End of information.")).c_str());
 
 /* Dispose of our connection instance */
-bot->theManager->removeConnection(cacheCon);
+//bot->theManager->removeConnection(cacheCon);
 
 bot->logAdminMessage("%s (%s) INFO %s",
 		     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",

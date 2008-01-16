@@ -27,7 +27,7 @@
 #include <string>
 #include <vector>
 
-#include "libpq++.h"
+#include "dbHandle.h"
 
 namespace gnuworld
 {
@@ -44,10 +44,10 @@ class sqlManager {
     static sqlManager* getInstance(const std::string&);
 
     /** Allow checking out of database connections */
-    PgDatabase* getConnection();
+    dbHandle* getConnection();
 
     /** Allow checking in of database connections */
-    void removeConnection(PgDatabase*);
+    void removeConnection(dbHandle*);
 
     /** Allow removal of theManager */
     void removeManager();
@@ -70,7 +70,7 @@ class sqlManager {
     std::string dbString;
 
     /** Our PgDatabase instance */
-    PgDatabase* SQLDb;
+    dbHandle* SQLDb;
 
     /** The current instance of sqlManager */
     static sqlManager* theManager;

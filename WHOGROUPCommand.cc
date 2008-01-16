@@ -49,12 +49,12 @@ bot->logAdminMessage("%s (%s) WHOGROUP %s",
 
 if (st.size() == 1) {
   /* No parameter supplied, so list all groups */
-  PgDatabase* cacheCon = bot->theManager->getConnection();
+  dbHandle* cacheCon = bot->getLocalDBHandle();
 
   std::stringstream theQuery;
   theQuery << "SELECT DISTINCT faction FROM users ORDER BY faction ASC";
 
-  if (!cacheCon->ExecTuplesOk(theQuery.str().c_str())) {
+  if (!cacheCon->Exec(theQuery.str(),true)) {
     elog	<< "chanfix::WHOGROUPCommand> SQL Error: "
 		<< cacheCon->ErrorMessage()
 		<< std::endl;
@@ -68,13 +68,13 @@ if (st.size() == 1) {
 		language::whogroup_list_groups,
 		std::string("List of all groups:")).c_str());
 
-  for (int i = 0 ; i < cacheCon->Tuples(); i++) {
+  for (unsigned int i = 0 ; i < cacheCon->Tuples(); i++) {
     bot->SendTo(theClient, cacheCon->GetValue(i, 0));
     numGroups++;
   }
 
   /* Dispose of our connection instance */
-  bot->theManager->removeConnection(cacheCon);
+  //bot->theManager->removeConnection(cacheCon);
 
   bot->SendTo(theClient,
 	      bot->getResponse(theUser,

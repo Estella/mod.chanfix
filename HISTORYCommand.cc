@@ -54,7 +54,7 @@ if (!theChan || !theChan->useSQL()) {
 }
 
 /* Get a connection instance to our backend */
-PgDatabase* cacheCon = bot->theManager->getConnection();
+dbHandle* cacheCon = bot->getLocalDBHandle();
 
 /*
  * Perform a query to list the dates/times this channel was last chanfixed.
@@ -71,7 +71,7 @@ chanfixQuery	<< "SELECT ts "
 		<< ") ORDER BY ts DESC"
 		;
 
-if (!cacheCon->ExecTuplesOk(chanfixQuery.str().c_str())) {
+if (!cacheCon->Exec(chanfixQuery.str(),true)) {
 	elog	<< "HISTORYCommand> SQL Error: "
 		<< cacheCon->ErrorMessage()
 		<< std::endl;
@@ -93,7 +93,7 @@ if (noteCount <= 0) {
                                           theChan->getChannel().c_str());
 
   /* Dispose of our connection instance */
-  bot->theManager->removeConnection(cacheCon);
+  //bot->theManager->removeConnection(cacheCon);
 
   return;
 }
@@ -113,7 +113,7 @@ bot->SendTo(theClient,
                             std::string("End of list.")).c_str());
 
 /* Dispose of our connection instance */
-bot->theManager->removeConnection(cacheCon);
+//bot->theManager->removeConnection(cacheCon);
 
 bot->logAdminMessage("%s (%s) HISTORY %s",
 		     theUser ? theUser->getUserName().c_str() : "!NOT-LOGGED-IN!",

@@ -105,7 +105,7 @@ targetUser->setLastUpdatedBy( std::string( "("
 	+ theUser->getUserName()
 	+ ") "
 	+ theClient->getRealNickUserHost() ) );
-targetUser->commit();
+targetUser->commit(bot->getLocalDBHandle());
 
 bot->SendTo(theClient,
             bot->getResponse(theUser,

@@ -70,7 +70,7 @@ if (theUser->getFlag(sqlcfUser::F_SERVERADMIN) &&
 else
   newUser->setGroup("undernet.org");
 
-if (!newUser->Insert()) {
+if (!newUser->Insert(bot->getLocalDBHandle())) {
   bot->SendTo(theClient,
 	      bot->getResponse(theUser,
 			language::error_creating_user,
@@ -82,7 +82,7 @@ if (!newUser->Insert()) {
 bot->usersMap[newUser->getUserName()] = newUser;
 
 if (st.size() > 2) {
-  if (newUser->addHost(st[2].c_str())) {
+  if (newUser->addHost(bot->getLocalDBHandle(),st[2].c_str())) {
     bot->SendTo(theClient,
 		bot->getResponse(theUser,
 				 language::created_user_w_host,

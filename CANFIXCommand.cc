@@ -21,7 +21,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
  * USA.
  *
- * $Id: OPLISTCommand.cc 1544 2006-04-02 12:58:16Z sirvulcan $
+ * $Id: CANFIXCommand.cc,v 1.1 2006/12/09 00:29:18 buzlip01 Exp $
  */
 
 #include "gnuworld_config.h"
@@ -33,7 +33,7 @@
 #include "sqlChannel.h"
 #include "sqlChanOp.h"
 
-RCSTAG("$Id: CANFIXCommand.cc 1544 2006-04-02 12:58:16Z sirvulcan $");
+RCSTAG("$Id: CANFIXCommand.cc,v 1.1 2006/12/09 00:29:18 buzlip01 Exp $");
 
 namespace gnuworld
 {

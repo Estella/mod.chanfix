@@ -52,13 +52,12 @@ libchanfix_la_SOURCES = chanfix.cc \
 	sqlManager.cc \
 	sqlcfUser.cc
 
-libchanfix_la_CXXFLAGS = -I$(PGSQL_INCLUDE) -I${top_srcdir}/include \
+libchanfix_la_CXXFLAGS = -I$(top_srcdir)db -I${top_srcdir}/include \
 	-I${top_srcdir}/libgnuworld \
-	-DHAVE_NAMESPACE_STD -DHAVE_CXX_STRING_HEADER -DDLLIMPORT="" \
 	$(threadLib)
 
-libchanfix_la_LDFLAGS = -module -export-dynamic -L@PGSQL_LIB@ -lpq++ \
-	@BOOST_THREAD_LIB@
+libchanfix_la_LDFLAGS = -module -export-dynamic -L$(top_builddir)/db \
+	-lgnuworldDB @BOOST_THREAD_LIB@
 
 EXTRA_DIST = chanfix.h \
 	chanfixCommands.h \
@@ -70,7 +69,4 @@ EXTRA_DIST = chanfix.h \
 	sqlManager.h \
 	sqlcfUser.h \
         $(COMMAND_CONF)
-
-confdir=${prefix}/bin
-conf_DATA = $(COMMAND_CONF)
 

@@ -25,7 +25,7 @@
 #include	<string>
 #include	<ctime>
 #include	"client.h"
-#include	"libpq++.h"
+#include	"dbHandle.h"
 
 namespace gnuworld
 {
@@ -39,7 +39,6 @@ class sqlManager;
 class sqlChannel
 {
 public:
-
 	sqlChannel(sqlManager*);
 	virtual ~sqlChannel();
 
@@ -164,20 +163,20 @@ public:
 	inline void	setUseSQL(bool _inSQL)
 		{ inSQL = _inSQL; }
 
-	bool Insert();
-	bool Delete();
-	bool commit();
-	void setAllMembers(PgDatabase*, int);
+	bool Insert(dbHandle*);
+	bool Delete(dbHandle*);
+	bool commit(dbHandle*);
+	void setAllMembers(dbHandle*, int);
 
 	/** Static member for keeping track of max user id */
 	static unsigned long int maxUserId;
 
-	void addNote(unsigned short, iClient*, const std::string&);
-	bool deleteNote(unsigned int);
-	bool deleteOldestNote();
-	bool deleteAllNotes();
-	size_t countNotes(unsigned short);
-	const std::string getLastNote(unsigned short, time_t&);
+	void addNote(dbHandle*, unsigned short, iClient*, const std::string&);
+	bool deleteNote(dbHandle*, unsigned int);
+	bool deleteOldestNote(dbHandle*);
+	bool deleteAllNotes(dbHandle*);
+	size_t countNotes(dbHandle*, unsigned short);
+	const std::string getLastNote(dbHandle*, unsigned short, time_t&);
 
 protected:
 
