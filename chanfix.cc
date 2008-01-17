@@ -2631,12 +2631,16 @@ return false;
 
 bool chanfix::canScoreChan(Channel* theChan)
 {
+#ifdef CHANFIX_INGORE_SERVICES
+return true;
+#else
 for (Channel::const_userIterator ptr = theChan->userList_begin();
      ptr != theChan->userList_end(); ++ptr)
    if (ptr->second->getClient()->getMode(iClient::MODE_SERVICES))
      return false;
 
 return true;
+#endif
 }
 
 void chanfix::processQueue()
