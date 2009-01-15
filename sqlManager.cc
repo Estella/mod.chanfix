@@ -25,6 +25,7 @@
 #include <iostream>
 
 #include <cassert>
+#include <cstdlib>
 
 #include "gnuworld_config.h"
 #include "ELog.h"
